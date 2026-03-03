@@ -40,7 +40,6 @@ export default function ForgotPassword() {
                 </div>
 
                 <div className="p-6">
-                    {/* <AnimatePresence mode="wait"> */}
                     {!isSubmitted ? (
                         <div>
                             <div className="text-center mb-3">
@@ -122,7 +121,6 @@ export default function ForgotPassword() {
                             </div>
                         </div>
                     )}
-                {/* </AnimatePresence> */}
                 </div>
             </Card>
         </div>
