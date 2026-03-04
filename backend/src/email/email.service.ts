@@ -16,6 +16,7 @@ export class EmailService {
         context: ISendMailOptions['context'];
     }) {
         try {
+            console.log(params.template)
             const emailOptions: ISendMailOptions = {
                 to: params.to,
                 subject: params.subject,
@@ -24,7 +25,7 @@ export class EmailService {
             }
 
             const response = await this.mailerService.sendMail(emailOptions);
-            this.logger.debug(`Email sent to ${params.to} with subject "${params.subject}"`);
+            this.logger.log(`Email sent to ${params.to} with subject "${params.subject}"`);
         } catch (error) {
             console.error(error);
             this.logger.error(`Failed to send email to ${params.to} with subject "${params.subject}"`, error.stack);

@@ -23,10 +23,9 @@ import { EmailService } from './email.service';
         defaults: {
           from: configService.get<string>('SMTP_FROM')
         },
-        preview: true,
         // Template configuration for email templates
         template: {
-          dir: path.join(__dirname, 'templates'),
+          dir: path.join(__dirname, '/../../templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true
