@@ -3,13 +3,13 @@ import { IsMatch } from "src/lib/customValidator/isMatch";
 
 export class forgotPasswordDto {
     @IsString()
-    @IsEmail()
+    @IsEmail({}, { message: "Invalid email" })
     email: string;
 }
 
 export class resendForgotPasswordDto {
     @IsString()
-    @IsEmail()
+    @IsEmail({}, { message: "Invalid email" })
     email: string;
 }
 

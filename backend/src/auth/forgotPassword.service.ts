@@ -58,7 +58,7 @@ export class ForgotPasswordService {
         });
 
         if (!existingToken) {
-            throw new BadRequestException('Token does not exist');
+            throw new BadRequestException('Invalid Token');
         }
 
         if (existingToken.expiresAt < new Date()) {
