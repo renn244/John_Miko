@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import * as bcrypt from 'bcrypt';
 import { EmailService } from "src/email/email.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UserService } from "src/user/user.service";
 import { v4 as uuidv4 } from "uuid";
-import * as bcrypt from 'bcrypt';
 import { resetPasswordDto } from "./dto/forgotPassword.dto";
 
 @Injectable()
@@ -37,7 +37,7 @@ export class ForgotPasswordService {
             template: 'forgotPassword',
             context: {
                 email,
-                confirmationUrl: `${process.env.FRONTEND_URL}/reset-password/${rawToken}`
+                confirmationUrl: `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`
             }
         });
     }
@@ -52,7 +52,7 @@ export class ForgotPasswordService {
         return { message: 'Password reset email resent' };
     }
 
-    async resetPassword({ token, newPassword, confirmPassword }: resetPasswordDto) {
+    async resetPassword({ token, newPassword }: resetPasswordDto) {
         const existingToken = await this.prisma.passwordResetToken.findFirst({
             where: { token }
         });

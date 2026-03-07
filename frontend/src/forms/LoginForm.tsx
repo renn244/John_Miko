@@ -1,107 +1,169 @@
+import { useLoginMutation } from "@/api/auth/auth.mutation"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import LoadingSpinner from "@/components/ui/loadingSpinner"
 import PasswordInput from "@/components/ui/passwordInput"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Lock, LogIn, User } from "lucide-react"
-import { useState } from "react"
+import { Controller, useForm } from "react-hook-form"
 import { Link } from "react-router"
+import z from "zod"
+
+const LoginSchema = z.object({
+    userRole: z.enum(['guest', 'staff', 'admin']),
+    email: z.string()
+        .nonempty('Email is required'),
+    password: z.string()
+        .nonempty('Password is required'),
+    rememberMe: z.boolean().optional(),
+})
+
+type loginSchema = z.infer<typeof LoginSchema>
 
 const LoginForm = () => {
-    const [userRole, setUserRole] = useState('guest');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const {
+        handleSubmit,
+        control,
+        setError,
+    } = useForm<loginSchema>({
+        resolver: zodResolver(LoginSchema),
+        defaultValues: {
+            userRole: "guest",
+            email: "",
+            password: "",
+            rememberMe: false,
+        },
+        criteriaMode: "all"
+    })
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log('Login attempt:', { email, password, userRole });
-    };
+    const { mutateAsync, isPending } = useLoginMutation<loginSchema>(setError)
+    
+    const onSubmit = async (data: loginSchema) => {
+        await mutateAsync(data)
+    }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 
-            {/* User Role Selection */}
-            <div className='grid gap-2'>
-                <Label htmlFor="role">
-                    Login As
-                </Label>
-                <Select value={userRole} onValueChange={setUserRole}>
-                    <SelectTrigger id="role" className="w-full">
-                        <SelectValue placeholder="Select user type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="guest" className="flex items-center gap-2">
-                            <User className="w-4 h-4" style={{ color: '#1E73BE' }} />
-                            <span>Guest</span>
-                        </SelectItem>
-                        <SelectItem value="staff" className="flex items-center gap-2">
-                            <User className="w-4 h-4" style={{ color: '#1E73BE' }} />
-                            <span>Staff</span>
-                        </SelectItem>
-                        <SelectItem value="admin" className="flex items-center gap-2">
-                            <Lock className="w-4 h-4" style={{ color: '#1E73BE' }} />
-                            <span>Administrator</span>
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+            <Controller
+            name="userRole"
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                    <FieldLabel htmlFor={field.name}>Login As</FieldLabel>
 
-            {/* Email Input */}
-            <div className='grid gap-2'>
-                <Label htmlFor="email">
-                    Email
-                </Label>
-                <Input 
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                />
-            </div>
+                    <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    >
+                        <SelectTrigger id={field.name} aria-invalid={fieldState.invalid} className="w-full">
+                            <SelectValue placeholder="Select user type" />
+                        </SelectTrigger>
 
-            {/* Password Input */}
-            <div className='grid gap-2'>
-                <Label htmlFor="password">
-                Password
-                </Label>
-                <PasswordInput 
-                id='password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
+                        <SelectContent>
+                            <SelectItem value="guest">
+                                <User className="w-4 h-4" style={{ color: "#1E73BE" }} />
+                                Guest
+                            </SelectItem>
 
-            {/* Remember & Forgot */}
+                            <SelectItem value="staff">
+                                <User className="w-4 h-4" style={{ color: "#1E73BE" }} />
+                                Staff
+                            </SelectItem>
+
+                            <SelectItem value="admin">
+                                <Lock className="w-4 h-4" style={{ color: "#1E73BE" }} />
+                                Administrator
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+
+                    {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                    )}
+                </Field>
+            )}
+            />
+
+            <Controller 
+            name="email"
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+
+                    <Input
+                    id={field.name}
+                    placeholder="your@email.com"
+                    aria-invalid={fieldState.invalid}
+                    {...field}
+                    />
+
+                    {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                    )}
+                </Field>
+            )}
+            />
+
+            <Controller
+            name="password"
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+
+                    <PasswordInput
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                        />
+
+                    {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                    )}
+                </Field>
+            )}
+            />
+
             <div className="flex items-center justify-between text-sm">
-                <FieldGroup className='w-56'>
-                    <Field orientation="horizontal">
-                        <Checkbox id='remember-me' />
-                        <FieldLabel htmlFor='remember-me'>
-                        Remember me
-                        </FieldLabel>
+                <Controller
+                name="rememberMe"
+                control={control}
+                render={({ field }) => (
+                    <Field orientation="horizontal" className="max-w-62.5">
+                        <Checkbox
+                            id={field.name}
+                                checked={field.value}
+                                onCheckedChange={(v) =>
+                                field.onChange(v === "indeterminate" ? false : v)
+                            }
+                        />
+                        <FieldLabel htmlFor={field.name}>Remember me</FieldLabel>
                     </Field>
-                </FieldGroup>
+                )}
+                />
 
                 <Link
                 to="/forgot-password"
                 className="text-primary font-medium hover:underline underline-offset-2"
                 >
-                Forgot Password?
+                    Forgot Password?
                 </Link>
             </div>
 
-            {/* Login Button */}
-            <Button
-            className='w-full'
-            type="submit"
-            variant="default"
-            >
-                <LogIn className="w-5 h-5" />
-                Sign In
+            <Button className="w-full" type="submit" disabled={isPending}>
+                {isPending ? (
+                    <LoadingSpinner />
+                ) : (
+                    <>
+                        <LogIn className="w-5 h-5" />
+                        Sign In
+                    </>
+                )}
             </Button>
         </form>
     )

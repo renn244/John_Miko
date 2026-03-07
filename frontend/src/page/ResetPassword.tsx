@@ -1,10 +1,13 @@
-import ChangePasswordForm from "@/forms/ChangePasswordForm";
+import ResetPasswordForm from "@/forms/ResetPasswordForm";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
-const ChangePassword = () => {
-    const [isSubmitted, setIsSubmitted] = useState(true);
+const ResetPassword = () => {
+    const [searchParams] = useSearchParams();
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const token = searchParams.get('token');
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F1F5F9' }}>
@@ -24,9 +27,9 @@ const ChangePassword = () => {
                                 </p>
                             </div>
 
-                            <ChangePasswordForm />
+                            <ResetPasswordForm token={token || ""} />
 
-                            <div className="mt-6 text-center">
+                            <div className="mt-3 text-center">
                                 <Link to="/login" className="text-sm text-primary font-medium hover:underline inline-flex items-center gap-1">
                                     <ArrowLeft className="w-4 h-4" />
                                     Back to Login
@@ -94,4 +97,4 @@ const ChangedPasswordMessage = () => {
     );
 }
 
-export default ChangePassword
+export default ResetPassword
