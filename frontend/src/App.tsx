@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from 'react-router';
+import ForgotPassword from "./page/ForgotPassword";
 import Home from "./page/Home";
 import Login from "./page/Login";
-import ForgotPassword from "./page/ForgotPassword";
-import ChangePassword from "./page/ChangePassword";
+import ResetPassword from "./page/ResetPassword";
+import { Toaster } from "./components/ui/sonner";
 
 const router = createBrowserRouter([
   {
@@ -20,7 +21,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/reset-password',
-    element: <ChangePassword />
+    element: <ResetPassword />
   }
 ])
 
@@ -31,6 +32,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <Toaster position="top-center" />
     </QueryClientProvider>
   )
 }

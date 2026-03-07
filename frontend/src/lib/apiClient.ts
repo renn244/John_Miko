@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
+    validateStatus: () => true,
     baseURL: import.meta.env.VITE_BACKEND_URL,
     headers: {
         'Content-Type': 'application/json'
