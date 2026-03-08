@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { SignInDto, SignUpGuestDto } from './dto/auth.dto';
 import { forgotPasswordDto, resendForgotPasswordDto, resetPasswordDto } from './dto/forgotPassword.dto';
-import { SignInDto } from './dto/signIn.dto';
 import { ForgotPasswordService } from './forgotPassword.service';
 import { AuthGuard } from './guards/auth.guard';
 
@@ -13,9 +13,9 @@ export class AuthController {
     ) {}
 
     // this will be removed later for deployment we only need one admin
-    @Post('SignUp')
-    async SignUp(@Body() body: { email: string, username: string, password: string }) {
-        return this.authService.SignUp(body.email, body.username, body.password);
+    @Post('SignUpGuest')
+    async SignUpGuest(@Body() body: SignUpGuestDto) {
+        return this.authService.SignUpGuest(body);
     }
 
     @Post('login')

@@ -1,6 +1,6 @@
 import { useResendForgotPasswordMutation } from '@/api/auth/auth.mutation'
 import { Card } from '@/components/ui/card'
-import ForgotPasswordForm, { type ForgotPasswordSchemaType } from '@/forms/ForgotPasswordForm'
+import ForgotPasswordForm, { type forgotPasswordSchemaType } from '@/forms/ForgotPasswordForm'
 import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
@@ -17,7 +17,7 @@ export default function ForgotPassword() {
         isPending: isResending, 
     } = useResendForgotPasswordMutation();
 
-    const handleChangeSendEmail = (data: ForgotPasswordSchemaType) => {
+    const handleChangeSendEmail = (data: forgotPasswordSchemaType) => {
         setEmail(data.email)
         setIsSubmitted(true)
 

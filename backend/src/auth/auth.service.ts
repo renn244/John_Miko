@@ -5,6 +5,7 @@ import { User } from 'src/generated/prisma/client';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
+import { SignUpGuestDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,8 +15,8 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    async SignUp(email: string, username: string, password: string) {
-        const existingUser = await this.userService.findUserByEmail(email);
+    async SignUpGuest(body: SignUpGuestDto) {
+        const existingUser = await this.userService.findUserByEmail(body.email);
 
         if(existingUser) {
             throw new ValidationException({
@@ -24,9 +25,10 @@ export class AuthService {
             });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        return this.userService.createUser(email, username, hashedPassword);
+        const hashedPassword = await bcrypt.hash(body.password, 10);
+        const createdUser = await this.userService.createUserGuest({ ...body, password: hashedPassword });
+    
+        return this.loginJWT(createdUser)
     }
 
     // add roles validation later
@@ -49,7 +51,7 @@ export class AuthService {
             });
         }
 
-        return await this.loginJWT(user);
+        return this.loginJWT(user);
     }
 
     async loginJWT(user: User) {

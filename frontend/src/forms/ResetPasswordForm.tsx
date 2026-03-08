@@ -66,30 +66,30 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
             control={control}
             render={({ field, fieldState }) => {
                 return (
-                <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                    <FieldLabel htmlFor={field.name}>New Password</FieldLabel>
-                    
-                    <PasswordInput 
-                    id={field.name}
-                    aria-invalid={fieldState.invalid}
-                    {...field}
-                    />
+                    <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                        <FieldLabel htmlFor={field.name}>New Password</FieldLabel>
+                        
+                        <PasswordInput 
+                        id={field.name}
+                        aria-invalid={fieldState.invalid}
+                        {...field}
+                        />
 
-                    {fieldState.invalid ? (
-                        <FieldError errors={getErrorMessages(fieldState.error)} />
-                    ) : (
-                        <ul className="text-sm font-normal text-muted-foreground ml-4 flex list-disc flex-col gap-1">
-                            {passwordRules
-                            .filter((rule) => !rule.test(field.value))
-                            .map((rule) => (
-                                <li key={rule.label} className="text-muted-foreground">
-                                    {rule.label}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </Field>
-            )
+                        {fieldState.invalid ? (
+                            <FieldError errors={getErrorMessages(fieldState.error)} />
+                        ) : (
+                            <ul className="text-sm font-normal text-muted-foreground ml-4 flex list-disc flex-col gap-1">
+                                {passwordRules
+                                .filter((rule) => !rule.test(field.value))
+                                .map((rule) => (
+                                    <li key={rule.label} className="text-muted-foreground">
+                                        {rule.label}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </Field>
+                )
             }}
             />
 

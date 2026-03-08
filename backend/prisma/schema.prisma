@@ -24,8 +24,8 @@ enum Role {
 model User {
   id        String      @id @default(cuid())
   email     String   @unique
-  username  String   @unique
   name      String?
+  contactNo String    @default("09")
   password  String
   role      Role     @default(GUEST)
 

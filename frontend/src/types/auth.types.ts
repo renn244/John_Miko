@@ -8,6 +8,14 @@ export type LoginDto = {
     rememberMe?: boolean;
 }
 
+export type SignUpGuest = {
+    email: string;
+    name: string;
+    contactNo: string;
+    password: string;
+    confirmPassword: string;
+}
+
 export type ForgotPasswordDto = {
     email: string;
 }

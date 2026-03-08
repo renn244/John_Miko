@@ -5,6 +5,7 @@ import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import { Toaster } from "./components/ui/sonner";
+import SignUpGuest from "./page/SignUpGuest";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: '/reset-password',
     element: <ResetPassword />
+  },
+  {
+    path: '/signup-guest',
+    element: <SignUpGuest />
   }
 ])
 

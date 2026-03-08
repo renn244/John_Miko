@@ -13,10 +13,10 @@ const ForgotPasswordSchema = z.object({
     email: z.string().nonempty("Email is required")
 })
 
-export type ForgotPasswordSchemaType = z.infer<typeof ForgotPasswordSchema>
+export type forgotPasswordSchemaType = z.infer<typeof ForgotPasswordSchema>
 
 type ForgotPasswordFormProps = {
-    handleChangeSendEmail: (data: ForgotPasswordSchemaType) => void 
+    handleChangeSendEmail: (data: forgotPasswordSchemaType) => void 
 }
 
 const ForgotPasswordForm = ({ handleChangeSendEmail }: ForgotPasswordFormProps) => {
@@ -25,12 +25,12 @@ const ForgotPasswordForm = ({ handleChangeSendEmail }: ForgotPasswordFormProps) 
         handleSubmit,
         control,
         setError
-    } = useForm<ForgotPasswordSchemaType>({
+    } = useForm<forgotPasswordSchemaType>({
         resolver: zodResolver(ForgotPasswordSchema),
         defaultValues: { email: "" },
         criteriaMode: "all"
     })
-    const { mutateAsync, isPending } = useForgotPasswordMutation(setError)
+    const { mutateAsync, isPending } = useForgotPasswordMutation<forgotPasswordSchemaType>(setError)
 
     const onSubmit = async (data: { email: string }) => {
         await mutateAsync(data, { 
