@@ -1,6 +1,7 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from 'react-router';
-import { Toaster } from "./components/ui/sonner";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import { useAuthContext } from "./context/AuthContext";
+import USER_ROLES from './lib/constant/USER_ROLES.constant';
 import Accommodation from "./page/Admin/Accommodation/Accommodation";
 import AddAccommodation from "./page/Admin/Accommodation/AddAccommodation";
 import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
@@ -18,7 +19,8 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />
+    element: <Login />,
+
   },
   {
     path: '/forgot-password',
@@ -34,29 +36,32 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
+    element: (
+      <ProtectedRoute rolesAllowed={[USER_ROLES.ADMIN]}>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true,  }, // DASHBOARD
       { 
         path: 'accommodation', 
         children: [
-          { index: true, element: <AdminLayout><Accommodation /></AdminLayout> }, // ACCOMMODATION LIST
-          { path: 'add', element: <AdminLayout><AddAccommodation /></AdminLayout> },
-          { path: ':id/edit', element: <AdminLayout><EditAccommodation /></AdminLayout> }
+          { index: true, element: <Accommodation /> }, // ACCOMMODATION LIST
+          { path: 'add', element: <AddAccommodation /> },
+          { path: ':id/edit', element: <EditAccommodation /> }
         ]
       }, // ACCOMMODATION
     ]
   }
 ])
 
-const queryClient = new QueryClient()
-
 function App() {
+  const { isLoading } = useAuthContext();
+
+  if(isLoading) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      <Toaster position="top-center" />
-    </QueryClientProvider>
+    <RouterProvider router={router} />
   )
 }
 

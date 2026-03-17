@@ -55,7 +55,7 @@ export class AuthService {
     }
 
     async loginJWT(user: User) {
-        const payload = { email: user.email, id: user.id };
+        const payload = { email: user.email, id: user.id, role: user.role };
 
         const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
 

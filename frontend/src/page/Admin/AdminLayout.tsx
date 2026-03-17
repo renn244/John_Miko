@@ -1,10 +1,9 @@
 import { Calendar, Home, LayoutDashboard, LogOut, MessageSquare, Settings, Users } from "lucide-react";
-import { useState, type PropsWithChildren } from "react";
-import { Link, NavLink } from "react-router";
+import { useState } from "react";
+import { Link, NavLink, Outlet } from "react-router";
 
-type AdminLayoutProps = {} & PropsWithChildren
 
-const AdminLayout = ({ children }: AdminLayoutProps) => {
+const AdminLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -154,7 +153,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                     </div>
                 </header>
 
-                <main className="flex-1 p-4 lg:p-6">{children}</main>
+                <main className="flex-1 p-4 lg:p-6"><Outlet /></main>
             </div>
 
         </div>

@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpGuestDto } from './dto/auth.dto';
 import { forgotPasswordDto, resendForgotPasswordDto, resetPasswordDto } from './dto/forgotPassword.dto';
@@ -41,7 +42,7 @@ export class AuthController {
     
     @UseGuards(AuthGuard)
     @Get('profile')
-    async getProfile(@Request() req) {
-        return req.user;
+    async getProfile(@User() user: UserSession) {
+        return user;
     }
 }

@@ -8,8 +8,19 @@ import { authApi } from "./auth.api"
 export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetError<T>) => {
     return useMutation({
         mutationFn: (data: LoginDto) => authApi.login(data),
-        onSuccess: (data) => {
-            console.log(data)
+        onSuccess: (data, variable) => {
+            toast.success("Login successful");
+            localStorage.setItem("access_token", data.accessToken);
+
+            if(variable.userRole === 'admin') {
+                window.location.assign('/admin')
+            } else if (variable.userRole === 'staff') {
+                window.location.assign('/staff')
+            } else if (variable.userRole === 'guest') {
+                window.location.assign('/guest')
+            } else {
+                window.location.assign('/')
+            }
         },
         onError: (err) => {
             if(err instanceof ValidationError) {
@@ -25,7 +36,10 @@ export const useSignUpGuestMutation = <T extends  FieldValues>(setError: UseForm
     return useMutation({
         mutationFn: (data: SignUpGuest) => authApi.signUpGuest(data),
         onSuccess: (data) => {
-            console.log(data)
+            toast.success("Sign up successful.");
+            localStorage.setItem("access_token", data.accessToken);
+
+            window.location.assign('/guest')
         },
         onError: (err) => {
             if(err instanceof ValidationError) {
