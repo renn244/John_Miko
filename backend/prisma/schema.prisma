@@ -31,6 +31,8 @@ model User {
 
   forgotPasswordTokens PasswordResetToken[]
 
+  // bookings  Booking[]
+
   createdAt DateTime @default(now())
 }
 
@@ -44,3 +46,74 @@ model PasswordResetToken {
   usedAt    DateTime?
   createdAt DateTime @default(now())
 }
+
+enum AccommodationType {
+  Room
+  Cottage
+  EventHall
+}
+
+enum AccommodationAvailability {
+  Occupied
+  Available
+  OutofService
+}
+
+model Accommodation {
+  id            String  @id @default(cuid())
+  name          String
+  description   String?
+  imageUrl      String // could be virtual tour field, but for now just photos
+
+  type          AccommodationType
+  capacity      Int
+  price         Int
+
+  amenities     String[]  @default([]) 
+
+  availability  AccommodationAvailability
+  
+  // bookings      Booking[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// enum BookingStatus {
+//   Pending
+//   Confirmed
+//   Cancelled
+// }
+
+// model Booking {
+//   id              String  @id @default(cuid())
+
+//   checkInDate     DateTime
+//   checkOutDate    DateTime
+
+//   accommodation    Accommodation @relation(fields: [accommodationId], references: [id])
+//   accommodationId  String
+
+//   user            User    @relation(fields: [userId], references: [id])
+//   userId          String 
+
+//   payment         Payment?
+
+//   status          BookingStatus     
+
+//   createdAt       DateTime @default(now())
+// }
+
+// model Payment {
+//   id             String @id @default(cuid())
+
+//   booking        Booking @relation(fields: [bookingId], references: [id])
+//   bookingId      String  @unique
+
+//   amount         Int
+//   paymentStatus  String
+
+//   transactionReference String
+
+//   createdAt      DateTime @default(now())
+// }

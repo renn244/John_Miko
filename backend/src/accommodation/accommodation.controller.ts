@@ -1,0 +1,47 @@
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { Role } from 'src/generated/prisma/enums';
+import { Roles } from 'src/lib/decorators/Roles.decorator';
+import { RolesGuard } from 'src/lib/guards/Roles.guard';
+import { AccommodationService } from './accommodation.service';
+import { CreateAccommodationDto, GetAccommodationQueryDto, UpdateAccommodationDto } from './dto/accommodation.dto';
+
+@Controller('accommodation')
+// should be optional auth guard
+@UseGuards(AuthGuard, RolesGuard)
+export class AccommodationController {
+    constructor(
+        private readonly accommodationService: AccommodationService
+    ) {}
+
+    @Roles(Role.ADMIN)
+    @Post()
+    async createAccommodation(@Body() body: CreateAccommodationDto) {
+        return this.accommodationService.createAccommodation(body);
+    }
+
+    @Roles(Role.ADMIN, Role.GUEST, Role.ADMIN)
+    @Get()
+    async getAccommodations(@Query() query: GetAccommodationQueryDto) {
+        return this.accommodationService.getAccommodations(query);
+    }
+
+    @Roles(Role.ADMIN, Role.GUEST, Role.ADMIN)
+    @Get(':id')
+    async getAccommodationById(@Param('id') id: string) {
+        return this.accommodationService.getAccommodationById(id);
+    }
+
+    @Roles(Role.ADMIN)
+    @Patch(':id')
+    async updateAccommodation(@Param('id') id: string, @Body() body: UpdateAccommodationDto) {
+        return this.accommodationService.updateAccommodation(id, body);
+    }
+
+    // should be archived actually
+    @Roles(Role.ADMIN)
+    @Delete(':id')
+    async deleteAccommodation(@Param('id') id: string) {
+        return this.accommodationService.deleteAccommodation(id);
+    } 
+}
