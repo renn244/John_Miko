@@ -1,9 +1,9 @@
-import { useSignUpGuestMutation } from "@/api/auth/auth.mutation";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import PasswordInput from "@/components/ui/passwordInput";
+import { useSignUpGuestMutation } from "@/hooks/auth.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus } from "lucide-react";
@@ -37,6 +37,7 @@ const SignUpGuestForm = () => {
         defaultValues: {
             email: "",
             name: "",
+            contactNo: "",
             password: "",
             confirmPassword: ""
         },
@@ -116,7 +117,6 @@ const SignUpGuestForm = () => {
                     id={field.name}
                     aria-invalid={fieldState.invalid}
                     type="text"
-                    inputMode="numeric"
                     {...field}
                     />
 

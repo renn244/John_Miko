@@ -3,7 +3,7 @@ import type { ForgotPasswordDto, LoginDto, ResetPasswordDto, SignUpGuest } from 
 import { useMutation } from "@tanstack/react-query"
 import type { FieldValues, UseFormSetError } from "react-hook-form"
 import { toast } from "sonner"
-import { authApi } from "./auth.api"
+import { authApi } from "../api/auth/auth.api"
 
 export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetError<T>) => {
     return useMutation({

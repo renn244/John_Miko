@@ -1,6 +1,6 @@
-import { useResendForgotPasswordMutation } from '@/api/auth/auth.mutation'
 import { Card } from '@/components/ui/card'
 import ForgotPasswordForm, { type forgotPasswordSchemaType } from '@/forms/ForgotPasswordForm'
+import { useResendForgotPasswordMutation } from '@/hooks/auth.hook'
 import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
