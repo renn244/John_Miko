@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAccommodationDto, GetAccommodationQueryDto, UpdateAccommodationDto } from './dto/accommodation.dto';
-import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 
 @Injectable()
 export class AccommodationService {
@@ -11,6 +11,24 @@ export class AccommodationService {
 
     async createAccommodation(body: CreateAccommodationDto) {
         return this.prisma.accommodation.create({ data: body });
+    }
+
+    async getAccommodationStats() {
+        const [total, grouped] = await Promise.all([
+            this.prisma.accommodation.count(),
+            this.prisma.accommodation.groupBy({
+                by: ['availability'],
+                _count: { availability: true },
+            })
+        ]);
+
+        const stats: Record<string, number> = {};
+        grouped.forEach((item) => stats[item.availability] = item._count.availability);
+
+        return {
+            total,
+            ...stats,
+        };
     }
 
     async getAccommodations(query: GetAccommodationQueryDto) {

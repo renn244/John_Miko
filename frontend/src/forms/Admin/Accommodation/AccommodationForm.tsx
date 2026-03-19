@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from "@/components/ui/field"
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldSet, FieldTitle } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
@@ -19,7 +19,7 @@ import z from "zod"
 const AccommodationSchema = z.object({
     name: z.string()
         .nonempty("Name is required"),
-    type: z.enum(["room", "cottage", "event-hall"])
+    type: z.enum(["Room", "Cottage", "EventHall"])
         .nonoptional("Type is required"),
     capacity: z.number()
         .nonnegative("Capicity must be a positive number")
@@ -31,13 +31,13 @@ const AccommodationSchema = z.object({
     imageUrl: z.url()
         .nonempty("Image URL is required"),
     amenities: z.array(z.string()),
-    availability: z.enum(["available", "unavailable", "maintenance"])
+    availability: z.enum(["Available", "Unavailable", "Maintenance"])
 })
 
 type accommodationSchema = z.infer<typeof AccommodationSchema>
 
 type AccommodationFormProps = {
-    onsubmit: (data: z.infer<typeof AccommodationSchema>) => Promise<void>,
+    onsubmit: (data: any) => Promise<void>,
     oncancel: () => void,
     className?: string,
     initialData?: any,
@@ -54,13 +54,13 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
         resolver:  zodResolver(AccommodationSchema),
         defaultValues: {
             name: initialData?.name || "",
-            type: initialData?.type || "room",
+            type: initialData?.type || "Room",
             capacity: initialData?.capacity || 0,
             price: initialData?.price || 0,
             description: initialData?.description || "",
             imageUrl: initialData?.imageUrl || "",
             amenities: initialData?.amenities || [],
-            availability: initialData?.availability || "available"
+            availability: initialData?.availability || "Available"
         },
         criteriaMode: "all"
     })
@@ -136,9 +136,9 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectLabel>Accommodation Type</SelectLabel>
-                                                <SelectItem value="room">Room</SelectItem>
-                                                <SelectItem value="cottage">Cottage</SelectItem>
-                                                <SelectItem value="event-hall">Event Hall</SelectItem>
+                                                <SelectItem value="Room">Room</SelectItem>
+                                                <SelectItem value="Cottage">Cottage</SelectItem>
+                                                <SelectItem value="EventHall">Event Hall</SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
@@ -163,6 +163,7 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                                     aria-invalid={fieldState.invalid}
                                     placeholder="Enter capacity"
                                     {...field}
+                                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
                                     />
                                     
                                     {fieldState.invalid && (
@@ -187,6 +188,7 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                                 aria-invalid={fieldState.invalid}
                                 placeholder="Enter price"
                                 {...field}
+                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
                                 />
 
                                 {fieldState.invalid && (
@@ -305,41 +307,59 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                             Initial Availability Status
                         </Label>
 
-                        <RadioGroup defaultValue="available" className="grid md:grid-cols-3 gap-3">
-                            <FieldLabel htmlFor="available-status">
-                                <Field orientation="horizontal">
-                                    <FieldContent>
-                                        <FieldTitle>Available</FieldTitle>
-                                        <FieldDescription>
-                                            The Accommodation is available upon creation.
-                                        </FieldDescription>
-                                    </FieldContent>
-                                    <RadioGroupItem value="available" id="available-status" />
-                                </Field>
-                            </FieldLabel>
-                            <FieldLabel htmlFor="unavailable-status">
-                                <Field orientation="horizontal">
-                                    <FieldContent>
-                                        <FieldTitle>Unavailable</FieldTitle>
-                                        <FieldDescription>
-                                            The Accommodation is unavailable upon creation.
-                                        </FieldDescription>
-                                    </FieldContent>
-                                    <RadioGroupItem value="unavailable" id="unavailable-status" />
-                                </Field>
-                            </FieldLabel>
-                            <FieldLabel htmlFor="maintenance-status">
-                                <Field orientation="horizontal">
-                                    <FieldContent>
-                                        <FieldTitle>Maintenance</FieldTitle>
-                                        <FieldDescription>
-                                            The Accommodation is under maintenance upon creation.
-                                        </FieldDescription>
-                                    </FieldContent>
-                                    <RadioGroupItem value="maintenance" id="maintenance-status" />
-                                </Field>
-                            </FieldLabel>
-                        </RadioGroup>
+                        <Controller 
+                        name="availability"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <FieldSet data-invalid={fieldState.invalid}>
+                                <RadioGroup 
+                                name={field.name}
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                aria-invalid={fieldState.invalid} 
+                                className="grid md:grid-cols-3 gap-3"
+                                >
+                                    <FieldLabel htmlFor="available-status">
+                                        <Field data-invalid={fieldState.invalid} orientation="horizontal">
+                                            <FieldContent>
+                                                <FieldTitle>Available</FieldTitle>
+                                                <FieldDescription>
+                                                    The Accommodation is available upon creation.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem value="Available" id="available-status" />
+                                        </Field>
+                                    </FieldLabel>
+                                    <FieldLabel htmlFor="unavailable-status">
+                                        <Field  data-invalid={fieldState.invalid} orientation="horizontal">
+                                            <FieldContent>
+                                                <FieldTitle>Unavailable</FieldTitle>
+                                                <FieldDescription>
+                                                    The Accommodation is unavailable upon creation.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem value="Unavailable" id="unavailable-status" />
+                                        </Field>
+                                    </FieldLabel>
+                                    <FieldLabel htmlFor="maintenance-status">
+                                        <Field data-invalid={fieldState.invalid} orientation="horizontal">
+                                            <FieldContent>
+                                                <FieldTitle>Maintenance</FieldTitle>
+                                                <FieldDescription>
+                                                    The Accommodation is under maintenance upon creation.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem value="Maintenance" id="maintenance-status" />
+                                        </Field>
+                                    </FieldLabel>
+                                </RadioGroup>
+
+                                {fieldState.invalid && (
+                                    <FieldError errors={getErrorMessages(fieldState.error)} />
+                                )}
+                            </FieldSet>
+                        )}
+                        />
                     </div>
 
                 </div>

@@ -1,10 +1,21 @@
 import { Button } from "@/components/ui/button";
 import AccommodationForm from "@/forms/Admin/Accommodation/AccommodationForm";
+import { useGetAccommodationByIdQuery, useUpdateAccommodationMutation } from "@/hooks/admin/accommodation.hook";
 import { ArrowLeft } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 const EditAccommodation = () => {
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+
+    const { data: accommodation, isLoading, error } = useGetAccommodationByIdQuery(id);
+    const { mutateAsync: updateAccommodation } = useUpdateAccommodationMutation(id || "");
+
+    if(isLoading) return null;
+
+    if(!accommodation) return null;
+
+    if(error) return null; 
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
@@ -26,7 +37,9 @@ const EditAccommodation = () => {
             </div>
 
             <AccommodationForm 
-            onsubmit={async () => undefined}
+            isUpdate
+            initialData={accommodation}
+            onsubmit={updateAccommodation}
             oncancel={() => navigate("/admin/accommodation")}
             />
         </div>

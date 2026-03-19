@@ -20,6 +20,12 @@ export class AccommodationController {
         return this.accommodationService.createAccommodation(body);
     }
 
+    @Roles(Role.ADMIN)
+    @Get('stats')
+    async getAccommodationStats() {
+        return this.accommodationService.getAccommodationStats();
+    }
+
     @Roles(Role.ADMIN, Role.GUEST, Role.ADMIN)
     @Get()
     async getAccommodations(@Query() query: GetAccommodationQueryDto) {

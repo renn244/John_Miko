@@ -51,7 +51,7 @@ const InputTags = ({ className, value, onChange, ref, ...props }: InputTagsProps
                 {...props}
                 />
                 
-                <Button onClick={addPendingDataPoint}>
+                <Button type="button" onClick={addPendingDataPoint}>
                     Add
                     <Plus className="w-5 h-5" />
                 </Button>

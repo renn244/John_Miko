@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
 import AccommodationForm from "@/forms/Admin/Accommodation/AccommodationForm";
+import { useCreateAccommodationMutation } from "@/hooks/admin/accommodation.hook";
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 
 const AddAccommodation = () => {
     const navigate = useNavigate();
+    const { mutateAsync: createAccommodation } = useCreateAccommodationMutation();
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
@@ -26,7 +28,7 @@ const AddAccommodation = () => {
             </div>
     
             <AccommodationForm 
-            onsubmit={async () => undefined}
+            onsubmit={createAccommodation}
             oncancel={() => navigate("/admin/accommodation")}
             />
         </div>

@@ -1,37 +1,38 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import type { Accommodation } from "@/types/admin/accommodation.type"
 import { CheckCircle, Edit, Info, MoreVertical, Tag, Users, XCircle } from "lucide-react"
 import { Link } from "react-router"
 
 type AccommodationCardProps = {
-  id: string
-  imageUrl: string
-  name: string
-  description: string
-  type: 'room' | 'cottage' | 'event-hall'
-  availability: 'available' | 'unavailable' | 'maintenance'
-  capacity: number
-  price: number
-  amenities: string[]
+    id: Accommodation['id']
+    imageUrl: Accommodation['imageUrl']
+    name: Accommodation['name']
+    description: Accommodation['description']
+    type: Accommodation['type']
+    availability: Accommodation['availability']
+    capacity: Accommodation['capacity']
+    price: Accommodation['price']
+    amenities: Accommodation['amenities']
 }
 
 const AccommodationCard = (accommodation: AccommodationCardProps) => {
-  const getAvailabilityConfig = (status: 'available' | 'unavailable' | 'maintenance') => {
+  const getAvailabilityConfig = (status: Accommodation['availability']) => {
     const configs = {
-      'available': {
+      'Available': {
         label: 'Available',
         color: '#0E9F6E',
         bg: '#DEF7EC',
         icon: CheckCircle,
       },
-      'unavailable': {
+      'Unavailable': {
         label: 'Unavailable',
         color: '#DC2626',
         bg: '#FEE2E2',
         icon: XCircle,
       },
-      'maintenance': {
+      'Maintenance': {
         label: 'Maintenance',
         color: '#D97706',
         bg: '#FEF3C7',
