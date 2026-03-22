@@ -1,19 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import LoginForm from '@/forms/LoginForm';
-import { useState } from 'react';
 import { Link } from 'react-router';
 
 export default function Login() {
-  const [userRole, setUserRole] = useState('guest');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Login attempt:', { email, password, userRole });
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-4xl shadow-2xl overflow-hidden py-0">
@@ -23,7 +13,6 @@ export default function Login() {
 
             <ImageMobile />
 
-            {/* Form Content */}
             <div className="p-8 md:p-10">
 
               <div className="text-center md:text-left mb-6 md:mb-8">
@@ -47,14 +36,6 @@ export default function Login() {
                   </span>
                 </div>
               </div>
-
-              {userRole === 'guest' && (
-                <Link to="/availability">
-                  <Button variant="outline" className='w-full'>
-                    Book as Guest
-                  </Button>
-                </Link>
-              )}
 
               <Link to="/">
                 <Button className='w-full mt-3'>

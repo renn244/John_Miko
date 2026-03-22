@@ -35,9 +35,10 @@ type resetPasswordSchema = z.infer<typeof ResetPasswordSchema>
 
 type ResetPasswordFormProps = {
     token: string;
+    onSuccess?: () => void;
 }
 
-const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
+const ResetPasswordForm = ({ token, onSuccess }: ResetPasswordFormProps) => {
     const {
         handleSubmit,
         control,
@@ -56,6 +57,7 @@ const ResetPasswordForm = ({ token }: ResetPasswordFormProps) => {
 
     const onSubmit = async (data: resetPasswordSchema) => {
         await mutateAsync(data)
+        onSuccess && onSuccess()
     }
 
     return (

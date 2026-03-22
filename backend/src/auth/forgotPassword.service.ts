@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import * as bcrypt from 'bcrypt';
 import { EmailService } from "src/email/email.service";
+import { ValidationException } from "src/lib/exception/ValidationException";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UserService } from "src/user/user.service";
 import { v4 as uuidv4 } from "uuid";
@@ -18,7 +19,12 @@ export class ForgotPasswordService {
     private async generateAndSendResetToken(email: string) {
         const user = await this.userService.findUserByEmail(email);
 
-        if (!user) throw new BadRequestException('User with this email does not exist');
+        if (!user) {
+            throw new ValidationException({
+                field: 'email',
+                message: ['User with this email does not exist']
+            });
+        }
 
         await this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
 

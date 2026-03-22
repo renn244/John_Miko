@@ -1,7 +1,8 @@
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import ResetPasswordForm from "@/forms/ResetPasswordForm";
 import { ArrowLeft, CheckCircle } from "lucide-react";
-import { useState } from "react";
-import { Link, useSearchParams } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
@@ -27,7 +28,10 @@ const ResetPassword = () => {
                                 </p>
                             </div>
 
-                            <ResetPasswordForm token={token || ""} />
+                            <ResetPasswordForm 
+                            token={token || ""} 
+                            onSuccess={() => setIsSubmitted(true)}
+                            />
 
                             <div className="mt-3 text-center">
                                 <Link to="/login" className="text-sm text-primary font-medium hover:underline inline-flex items-center gap-1">
@@ -68,6 +72,23 @@ const HeaderImage = () => {
 }
 
 const ChangedPasswordMessage = () => {
+    const navigate = useNavigate();
+    const [timer, setTimer] = useState(3);
+
+    useEffect(() => {
+        const countdown = setInterval(() => {
+            setTimer(prev => prev - 1);
+        }, 1000);
+        const timer = setTimeout(() => {
+            navigate("/login");
+        }, 3000);
+
+        return () => {
+            clearInterval(countdown);
+            clearTimeout(timer);
+        };
+    }, [])
+
     return (
         <div className="text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 bg-green-100">
@@ -82,9 +103,13 @@ const ChangedPasswordMessage = () => {
             </p>
 
             <div className="space-y-3">
-                <p className="text-xs text-muted-foreground">
-                    Redirecting to login page in 3 seconds...
-                </p>
+                {timer > 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                        Redirecting to login in {timer} second{timer > 1 ? 's' : ''}...
+                    </p>
+                ) : (
+                    <LoadingSpinner className="w-5 h-5" />
+                )}
                 <Link 
                 to="/login"
                 className="text-sm text-blue-600 font-medium hover:underline inline-flex items-center gap-1"
