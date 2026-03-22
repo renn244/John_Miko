@@ -23,7 +23,7 @@ export class AccommodationService {
         ]);
 
         const stats: Record<string, number> = {};
-        grouped.forEach((item) => stats[item.availability] = item._count.availability);
+        grouped.forEach((item) => stats[item.availability.toLowerCase()] = item._count.availability);
 
         return {
             total,

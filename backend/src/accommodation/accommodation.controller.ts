@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Role } from 'src/generated/prisma/enums';
+import { Public } from 'src/lib/decorators/Public.decorator';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { AccommodationService } from './accommodation.service';
@@ -26,13 +27,13 @@ export class AccommodationController {
         return this.accommodationService.getAccommodationStats();
     }
 
-    @Roles(Role.ADMIN, Role.GUEST, Role.ADMIN)
+    @Public()
     @Get()
     async getAccommodations(@Query() query: GetAccommodationQueryDto) {
         return this.accommodationService.getAccommodations(query);
     }
 
-    @Roles(Role.ADMIN, Role.GUEST, Role.ADMIN)
+    @Public()
     @Get(':id')
     async getAccommodationById(@Param('id') id: string) {
         return this.accommodationService.getAccommodationById(id);

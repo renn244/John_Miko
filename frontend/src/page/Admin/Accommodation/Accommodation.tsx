@@ -2,20 +2,15 @@ import AccommodationCard from "@/components/pageComponents/Admin/Accommodation/A
 import AccommodationFilter from "@/components/pageComponents/Admin/Accommodation/AccommodationFilter"
 import { Button } from "@/components/ui/button"
 import StatisticCards from "@/components/ui/StatisticCards"
-import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook"
+import { useGetAccommodationsQuery, useGetAccommodationStatsQuery } from "@/hooks/admin/accommodation.hook"
 import { useAccommodationSearchParams } from "@/hooks/admin/accommodation.search"
 import { CheckCircle, Home, Info, Plus, XCircle } from "lucide-react"
 import { Link } from "react-router"
 
 const Accommodation = () => {
   const { search, type, status } = useAccommodationSearchParams();
-  const stats = {
-    total: 120,
-    available: 85,
-    unavailable: 25,
-    maintenance: 10,
-  }
 
+  const { data: stats, isLoading: statLoading } = useGetAccommodationStatsQuery();
   const { data: accommodations, isLoading } = useGetAccommodationsQuery({ search, type, availability: status });
 
   return (
@@ -43,26 +38,30 @@ const Accommodation = () => {
 
         <StatisticCards 
         title="Total"
-        stat={stats.total}
+        stat={stats?.total || 0}
         Icon={<Home className="w-5 h-5 text-blue-600" />}
+        isLoading={statLoading}
         />
         
         <StatisticCards 
         title="Available"
-        stat={stats.available}
+        stat={stats?.available || 0}
         Icon={<CheckCircle className="w-5 h-5 text-green-600" />}
+        isLoading={statLoading}
         />
         
         <StatisticCards 
         title="Unavailable"
-        stat={stats.unavailable}
+        stat={stats?.unavailable || 0}
         Icon={<XCircle className="w-5 h-5 text-red-600" />}
+        isLoading={statLoading}
         />
 
         <StatisticCards 
         title="Maintenance"
-        stat={stats.maintenance}
+        stat={stats?.maintenance || 0}
         Icon={<Info className="w-5 h-5 text-yellow-600" />}
+        isLoading={statLoading}
         />
       
       </div>

@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";
 import USER_ROLES from './lib/constant/USER_ROLES.constant';
+import AccommodationList from './page/AccommodationList';
 import Accommodation from "./page/Admin/Accommodation/Accommodation";
 import AddAccommodation from "./page/Admin/Accommodation/AddAccommodation";
 import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
@@ -11,6 +12,7 @@ import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import SignUpGuest from "./page/SignUpGuest";
+import AccommodationView from './page/AccommodationView';
 
 const router = createBrowserRouter([
   {
@@ -35,6 +37,13 @@ const router = createBrowserRouter([
     element: <SignUpGuest />
   },
   {
+    path: 'accommodation',
+    children: [
+      { index: true, element: <AccommodationList /> }, // ACCOMMODATION LIST
+      { path: ':id', element: <AccommodationView /> } // ACCOMMODATION DETAIL
+    ]
+  },
+  {
     path: '/admin',
     element: (
       <ProtectedRoute rolesAllowed={[USER_ROLES.ADMIN]}>
@@ -50,7 +59,7 @@ const router = createBrowserRouter([
           { path: 'add', element: <AddAccommodation /> },
           { path: ':id/edit', element: <EditAccommodation /> }
         ]
-      }, // ACCOMMODATION
+      },
     ]
   }
 ])

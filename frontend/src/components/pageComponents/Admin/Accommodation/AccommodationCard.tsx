@@ -60,7 +60,10 @@ const AccommodationCard = (accommodation: AccommodationCardProps) => {
                 {accommodation.type}
             </Badge>
 
-            <Badge className={`absolute top-3 right-3 z-99 bg-[${availabilityConfig.bg}] text-${availabilityConfig.color}`}>
+            <Badge 
+            className={`absolute top-3 right-3 z-99`}
+            style={{ backgroundColor: availabilityConfig.bg, color: availabilityConfig.color }}
+            >
                 <AvailabilityIcon className="w-3 h-3" />
                 {availabilityConfig.label}
             </Badge>
@@ -110,7 +113,7 @@ const AccommodationCard = (accommodation: AccommodationCardProps) => {
 
             </div>
 
-            <p className="text-sm mb-4 line-clamp-2 text-muted-foreground">
+            <p className="text-sm mb-4 line-clamp-2 h-10 text-muted-foreground">
                 {accommodation.description}
             </p>
 
