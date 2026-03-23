@@ -20,21 +20,21 @@ enum Role {
   GUEST
 }
 
-// we might want to divide this into multiple models in the future, but for now we can just have one user model with a role field
 model User {
   id        String      @id @default(cuid())
   email     String   @unique
   name      String?
-  contactNo String    @default("09")
+  contactNo String   
   password  String
   role      Role     @default(GUEST)
 
   forgotPasswordTokens PasswordResetToken[]
 
-  // bookings  Booking[]
+  bookings  Booking[]
 
   createdAt DateTime @default(now())
 }
+
 
 model PasswordResetToken {
   id        String   @id @default(cuid())
@@ -73,47 +73,63 @@ model Accommodation {
 
   availability  AccommodationAvailability
   
-  // bookings      Booking[]
+  bookings      Booking[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
-// enum BookingStatus {
-//   Pending
-//   Confirmed
-//   Cancelled
-// }
+enum BookingTimeSlot {
+  DayStay
+  OverNight
+}
 
-// model Booking {
-//   id              String  @id @default(cuid())
+enum BookingStatus {
+  Pending
+  Confirmed
+  Cancelled
+  Completed
+}
 
-//   checkInDate     DateTime
-//   checkOutDate    DateTime
+model Booking {
+  id              String @id @default(cuid())
 
-//   accommodation    Accommodation @relation(fields: [accommodationId], references: [id])
-//   accommodationId  String
+  userId          String
+  user            User  @relation(fields: [userId], references: [id])
 
-//   user            User    @relation(fields: [userId], references: [id])
-//   userId          String 
+  accommodationId String
+  accommodation   Accommodation @relation(fields: [accommodationId], references: [id])
 
-//   payment         Payment?
+  // should add a snapshot of accommodation details at the time of booking to avoid issues with price changes or availability changes
+  bookedAccommodation BookedAccommodation?
 
-//   status          BookingStatus     
+  bookingDate     DateTime
+  timeSlot        BookingTimeSlot
 
-//   createdAt       DateTime @default(now())
-// }
+  status          BookingStatus @default(Pending)
 
-// model Payment {
-//   id             String @id @default(cuid())
+  // for later
+  // paymentId       String?
+  // payment         Payment? @relation(fields: [paymentId], references: [id])
 
-//   booking        Booking @relation(fields: [bookingId], references: [id])
-//   bookingId      String  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
-//   amount         Int
-//   paymentStatus  String
+// Snapshot of accommodation details at the time of booking to avoid issues with price changes or availability changes
+model BookedAccommodation {
+  id            String   @id @default(cuid())
+  
+  bookingId     String   @unique
+  booking       Booking  @relation(fields: [bookingId], references: [id])
 
-//   transactionReference String
+  name          String
+  description   String?
+  imageUrl      String
+  type          AccommodationType
+  capacity      Int
+  price         Int
+  amenities     String[] @default([])
 
-//   createdAt      DateTime @default(now())
-// }
+  createdAt     DateTime @default(now())
+}
