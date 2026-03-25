@@ -36,3 +36,16 @@ export type GetAccommodationQuery = {
     availability?: Accommodation['availability'];
     search?: string;
 }
+
+// Response types
+export type AccommodationStats = {
+    total: number;
+    available: number;
+    unavailable: number;
+    maintenance: number;
+}
+
+export type AccommodationOption = {
+    id: string;
+    name: string;
+}

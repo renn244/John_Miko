@@ -31,6 +31,14 @@ export class AccommodationService {
         };
     }
 
+    async getAccommodationOptions() {
+        const optionsAccommodation = await this.prisma.accommodation.findMany({
+            select: { id: true, name: true }
+        })
+        
+        return optionsAccommodation;
+    }
+
     async getAccommodations(query: GetAccommodationQueryDto) {
         const { search, ...rest } = cleanPrismaWhere(query);
 

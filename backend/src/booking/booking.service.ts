@@ -84,7 +84,16 @@ export class BookingService {
 
     async getBookingsByUser(user: UserSession) {
         const bookings = await this.prisma.booking.findMany({
-            where: { userId: user.id }
+            where: { userId: user.id },
+            include: {
+                accommodation: {
+                    select: {
+                        name: true,
+                        type: true,
+                        imageUrl: true
+                    }
+                }
+            }
         })
 
         return bookings 

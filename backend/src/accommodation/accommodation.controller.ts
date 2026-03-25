@@ -28,6 +28,12 @@ export class AccommodationController {
     }
 
     @Public()
+    @Get('options')
+    async getAccommodationOptions() {
+        return this.accommodationService.getAccommodationOptions();
+    }
+
+    @Public()
     @Get()
     async getAccommodations(@Query() query: GetAccommodationQueryDto) {
         return this.accommodationService.getAccommodations(query);

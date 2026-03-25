@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Accommodation, CreateAccommodationDto, GetAccommodationQuery, UpdateAccommodationDto } from "@/types/admin/accommodation.type";
+import type { Accommodation, AccommodationOption, AccommodationStats, CreateAccommodationDto, GetAccommodationQuery, UpdateAccommodationDto } from "@/types/admin/accommodation.type";
 
 export const accommodationApi = {
     createAccommodation: async (data: CreateAccommodationDto) => {
@@ -14,7 +14,7 @@ export const accommodationApi = {
             throw new Error(response.data.message || "Unexpected error")
         }
 
-        return response.data;
+        return response.data as Accommodation;
     },
     getAccommodationStats: async () => {
         const response = await apiClient.get('/accommodation/stats');
@@ -23,7 +23,16 @@ export const accommodationApi = {
             throw new Error(response.data.message || "Unexpected error")
         }
         
-        return response.data;
+        return response.data as AccommodationStats;
+    },
+    getAccommodationOptions: async () => {
+        const response = await apiClient.get('/accommodation/options');
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || "Unexpected error")
+        }
+
+        return response.data as AccommodationOption[];
     },
     getAccommodations: async (query: GetAccommodationQuery) => {
         const response = await apiClient.get('/accommodation', { params: query });
@@ -58,7 +67,7 @@ export const accommodationApi = {
             throw new Error(response.data.message || "Unexpected error");
         }
 
-        return response.data;
+        return response.data as Accommodation;
     },
     deleteAccommodation: async (id: Accommodation['id']) => {
         const response = await apiClient.delete(`/accommodation/${id}`);
@@ -67,6 +76,6 @@ export const accommodationApi = {
             throw new Error(response.data.message || "Unexpected error");
         }
 
-        return response.data;
+        return response.data as Accommodation;
     },
 }
