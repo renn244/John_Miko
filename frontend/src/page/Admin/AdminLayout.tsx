@@ -21,7 +21,7 @@ const AdminLayout = () => {
         {
             label: 'Bookings',
             icon: Calendar,
-            path: '/admin/bookings',
+            path: '/admin/booking',
         },
         {
             label: 'Guests',

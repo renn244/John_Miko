@@ -37,7 +37,7 @@ const AccommodationSchema = z.object({
 type accommodationSchema = z.infer<typeof AccommodationSchema>
 
 type AccommodationFormProps = {
-    onsubmit: (data: any) => Promise<void>,
+    onsubmit: (data: any) => Promise<void | any>,
     oncancel: () => void,
     className?: string,
     initialData?: any,

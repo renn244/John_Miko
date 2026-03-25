@@ -24,6 +24,14 @@ export const useGetAccommodationStatsQuery = () => {
     })
 }
 
+export const useGetAccommodationOptionsQuery = () => {
+    return useQuery({
+        queryKey: ['accommodation-options'],
+        queryFn: accommodationApi.getAccommodationOptions,
+        refetchOnWindowFocus: false
+    })
+}
+
 export const useGetAccommodationsQuery = (query: GetAccommodationQuery) =>{
     
     return useQuery({

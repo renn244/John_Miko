@@ -13,6 +13,7 @@ import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import SignUpGuest from "./page/SignUpGuest";
 import AccommodationView from './page/AccommodationView';
+import Booking from './page/Admin/Booking/Booking';
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,13 @@ const router = createBrowserRouter([
           { path: ':id/edit', element: <EditAccommodation /> }
         ]
       },
+      {
+        path: 'booking',
+        children: [
+          { index: true, element: <Booking /> }
+
+        ]
+      }
     ]
   }
 ])
