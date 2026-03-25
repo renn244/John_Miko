@@ -1,3 +1,4 @@
+import AccommodationBookingModal from "@/components/pageComponents/Accommodation/AccommodationBookingModal";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
@@ -18,8 +19,12 @@ import {
     Wifi,
     Wind
 } from 'lucide-react';
+import { useState } from "react";
 
 const AccommodationView = () => {
+    const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
+    const [bookingType, setBookingType] = useState<'overnight' | 'daystay' | undefined>(undefined);
+    const [isOpen, setIsOpen] = useState(false);
 
     const accommodation = {
         id: 'ACC-001',
@@ -231,7 +236,7 @@ const AccommodationView = () => {
                                             ₱{accommodation.price.toLocaleString()}
                                         </span>
                                         <span className="text-sm text-muted-foreground">
-                                            / night
+                                            / night or day
                                         </span>
                                     </div>
                                     <p className="text-xs text-muted-foreground">
@@ -246,7 +251,7 @@ const AccommodationView = () => {
                                             Check-in & Check-out
                                         </span>
                                     </div>
-                                    <RadioGroup>
+                                    <RadioGroup value={bookingType} onValueChange={(value) => setBookingType(value as 'overnight' | 'daystay')}>
                                         <FieldLabel htmlFor="OverNight">
                                             <Field orientation="horizontal">
                                                 <FieldContent>
@@ -277,9 +282,8 @@ const AccommodationView = () => {
                                 <CalendarComponent 
                                 className="w-full sm:w-auto mb-4 border rounded-xl"
                                 mode="single"
-                                defaultMonth={new Date()}
-                                selected={new Date()}
-                                onSelect={() => undefined}
+                                selected={bookingDate}
+                                onSelect={setBookingDate}
                                 disabled={bookedDate}
                                 modifiers={{
                                     booked: bookedDate
@@ -289,7 +293,10 @@ const AccommodationView = () => {
                                 }}
                                 />
 
-                                <Button className="w-full">
+                                <Button 
+                                onClick={() => setIsOpen(true)}
+                                disabled={!bookingDate || !bookingType}
+                                className="w-full">
                                     <Calendar className="w-6 h-6" />
                                     Book Now
                                 </Button>
@@ -331,7 +338,13 @@ const AccommodationView = () => {
                     </div>
                 </div>
             </div>
-    </div>
+
+            <AccommodationBookingModal 
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            accommodation={accommodation as any}
+            />
+        </div>
     )
 }
 
