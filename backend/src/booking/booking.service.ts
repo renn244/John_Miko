@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateBookingDto } from './dto/booking.dto';
 
 @Injectable()
 export class BookingService {
@@ -8,7 +9,7 @@ export class BookingService {
         private readonly prisma: PrismaService
     ) {}
 
-    async bookAccommodation(body: any, user: UserSession) {
+    async bookAccommodation(body: CreateBookingDto, user: UserSession) {
         
         const accommodation = await this.prisma.accommodation.findUnique({ where: { id: body.accommodationId } })
 
@@ -21,13 +22,15 @@ export class BookingService {
                 data: {
                     userId: user.id,
                     accommodationId: body.accommodationId,
-                    bookingDate: new Date(body.bookingDate),
-                    timeSlot: body.timeSlot
+                    bookingDate: body.checkIn,
+                    timeSlot: body.stayType,
+                    paymentType: body.paymentType,
                 }
             })
 
             await txprisma.bookedAccommodation.create({
                 data: {
+                    bookingId: newBooking.id,
                     name: accommodation.name,
                     type: accommodation.type,
                     price: accommodation.price,

@@ -5,6 +5,14 @@ export const bookingApi = {
     bookAccommodation: async (data: any) => {
         const response = await apiClient.post('/booking', data)
 
+        if(response.status === 400) {
+            throw new Error(response.data.message || 'Failed to book accommodation');
+        }
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'Failed to book accommodation');
+        }
+
         return response.data as Booking;
     },
     getBookingsByAccommodation: async (accommodationId: string) => {

@@ -1,9 +1,9 @@
 
-export function getBookingDates(date: Date, stayType: 'overnight' | 'daystay') {
+export function getBookingDates(date: Date, stayType: 'OverNight' | 'DayStay') {
   const checkIn = new Date(date);
   const checkOut = new Date(date);
 
-  if (stayType === 'overnight') {
+  if (stayType === 'OverNight') {
     checkIn.setHours(12, 0);
     checkOut.setDate(checkOut.getDate() + 1);
     checkOut.setHours(1, 0);

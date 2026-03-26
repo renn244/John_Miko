@@ -79,6 +79,11 @@ model Accommodation {
   updatedAt     DateTime @updatedAt
 }
 
+enum PaymentType {
+  Full
+  Partial
+}
+
 enum BookingTimeSlot {
   DayStay
   OverNight
@@ -107,6 +112,8 @@ model Booking {
   timeSlot        BookingTimeSlot
 
   status          BookingStatus @default(Pending)
+
+  paymentType     PaymentType
 
   // for later
   // paymentId       String?

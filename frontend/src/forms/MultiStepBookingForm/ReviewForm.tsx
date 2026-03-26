@@ -8,7 +8,7 @@ import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 type ReviewFormProps = {
     accommodation: Accommodation,
     setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'payment'>>,
-    stayType: 'overnight' | 'daystay',
+    stayType: 'OverNight' | 'DayStay',
     checkIn: Date,
     checkOut: Date,
     price: number,
@@ -55,7 +55,7 @@ const ReviewForm = ({
                     <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">
                         <span className="text-muted-foreground text-sm">Stay Type:</span>
                         <span className="font-medium text-sm">
-                            {stayType === 'overnight' ? 'Over Night' : 'Day Stay'}
+                            {stayType === 'OverNight' ? 'Over Night' : 'Day Stay'}
                         </span>
                     </div>
                     <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">
@@ -132,7 +132,7 @@ const ReviewForm = ({
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
-                                {stayType === 'overnight' ? 'Overnight Rate' : 'Day Stay Rate'}
+                                {stayType === 'OverNight' ? 'Overnight Rate' : 'Day Stay Rate'}
                             </span>
                             <span className="font-semibold">
                                 ₱{price.toLocaleString()}

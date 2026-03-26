@@ -10,14 +10,15 @@ import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 type PaymentFormProps = {
     setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'payment'>>,
     total: number;
+    isLoading: boolean;
 }
 
-const PaymentForm = ({ setBookingStep, total }: PaymentFormProps) => {
+const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => {
     const { control, watch } = useFormContext<multiStepBookingFormSchema>();
 
     const partial = Math.round(total / 2);
 
-    const amountToPayNow = watch('paymentType') && (watch('paymentType') === 'full' ? total : partial);
+    const amountToPayNow = watch('paymentType') && (watch('paymentType') === 'Full' ? total : partial);
 
     return (
         <div className="space-y-6">
@@ -32,6 +33,7 @@ const PaymentForm = ({ setBookingStep, total }: PaymentFormProps) => {
                             Payment Type <span className="text-red-700">*</span>
                         </FieldLegend>
                         <RadioGroup
+                        disabled={isLoading}
                         name={field.name}
                         value={field.value}
                         onValueChange={field.onChange}
@@ -49,7 +51,7 @@ const PaymentForm = ({ setBookingStep, total }: PaymentFormProps) => {
                                         </FieldDescription>
                                     </FieldContent>
                                     <RadioGroupItem 
-                                    value="full" 
+                                    value="Full" 
                                     id="full-payment"
                                     aria-invalid={fieldState.invalid}
                                     />
@@ -67,7 +69,7 @@ const PaymentForm = ({ setBookingStep, total }: PaymentFormProps) => {
                                         </FieldDescription>
                                     </FieldContent>
                                     <RadioGroupItem 
-                                    value="partial" 
+                                    value="Partial" 
                                     id="partial-payment" 
                                     aria-invalid={fieldState.invalid}
                                     />
@@ -98,12 +100,13 @@ const PaymentForm = ({ setBookingStep, total }: PaymentFormProps) => {
 
             <div className="space-y-2">
                 <Button 
-                disabled={!watch('paymentType')}
+                disabled={!watch('paymentType') || isLoading}
                 type="submit" className="w-full">
                     <CheckCircle className="w-6 h-6" />
                     Confirm & Pay
                 </Button>
                 <Button
+                disabled={isLoading}
                 type="button"
                 onClick={() => setBookingStep('review')}
                 variant="outline" className="w-full"

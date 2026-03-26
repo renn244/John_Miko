@@ -1,8 +1,11 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { BookingService } from './booking.service';
+import { CreateBookingDto } from './dto/booking.dto';
 
 @Controller('booking')
+@UseGuards(AuthGuard)
 export class BookingController {
     constructor(
         private readonly bookingService: BookingService
@@ -10,7 +13,7 @@ export class BookingController {
 
     // update or invalidate the cache when a new booking is made, 
     @Post()
-    async bookAccommodation(@Body() body: any, @User() user: UserSession) {
+    async bookAccommodation(@Body() body: CreateBookingDto, @User() user: UserSession) {
         return this.bookingService.bookAccommodation(body, user)
     }
 

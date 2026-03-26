@@ -3,63 +3,42 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
 import {
-    Bed,
     Calendar,
     Car,
     CheckCircle,
-    Coffee,
     Dumbbell,
     House,
     Info,
-    Tv,
     Users,
     UtensilsCrossed,
-    Waves,
-    Wifi,
-    Wind
+    Waves
 } from 'lucide-react';
 import { useState } from "react";
+import { useParams } from "react-router";
 
 const AccommodationView = () => {
     const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
-    const [bookingType, setBookingType] = useState<'overnight' | 'daystay' | undefined>(undefined);
+    const [bookingType, setBookingType] = useState<'OverNight' | 'DayStay' | undefined>(undefined);
     const [isOpen, setIsOpen] = useState(false);
 
-    const accommodation = {
-        id: 'ACC-001',
-        name: 'Deluxe Beachfront Cottage',
-        type: 'Cottage',
-        price: 3500,
-        capacity: 4,
-        bedrooms: 2,
-        size: 45,
-        description: 'Experience ultimate coastal luxury in our Deluxe Beachfront Cottage. Wake up to stunning ocean views and enjoy direct beach access just steps from your door. This spacious cottage features modern amenities, comfortable furnishings, and a private veranda perfect for watching breathtaking sunsets. Ideal for families or small groups seeking a peaceful getaway with all the comforts of home.',
-        images: [
-            'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1200',
-            // 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200',
-            // 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=1200',
-            // 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1200',
-            // 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=1200',
-        ],
-        amenities: [
-            { icon: Wind, label: 'Air Conditioning', description: 'Climate control for your comfort' },
-            { icon: Wifi, label: 'Free WiFi', description: 'High-speed internet access' },
-            { icon: Tv, label: 'Smart TV', description: '55" with cable channels' },
-            { icon: Coffee, label: 'Coffee Maker', description: 'Fresh coffee anytime' },
-            { icon: Bed, label: 'Premium Bedding', description: 'Hotel-quality linens' },
-            { icon: Waves, label: 'Beach Access', description: 'Private beach just steps away' },
-        ],
-        resortFacilities: [
-            { icon: UtensilsCrossed, label: 'Restaurant', description: 'Filipino and international cuisine' },
-            { icon: Waves, label: 'Swimming Pool', description: 'Infinity pool with ocean view' },
-            { icon: Car, label: 'Parking', description: 'Free parking for guests' },
-            { icon: Dumbbell, label: 'Fitness Center', description: 'Modern gym equipment' },
-        ],
-        location: 'Beachfront, North Wing',
-        checkIn: '2:00 PM',
-        checkOut: '12:00 PM',
-    };
+    const { id } = useParams<{ id: string }>();
+    const { data: accommodation, isLoading, error } = useGetAccommodationByIdQuery(id)
+
+    const resortFacilities = [
+        { icon: UtensilsCrossed, label: 'Restaurant', description: 'Filipino and international cuisine' },
+        { icon: Waves, label: 'Swimming Pool', description: 'Infinity pool with ocean view' },
+        { icon: Car, label: 'Parking', description: 'Free parking for guests' },
+        { icon: Dumbbell, label: 'Fitness Center', description: 'Modern gym equipment' },
+    ]
+    
+    if(isLoading) return null;
+
+    if(!accommodation) return null; // return 404 page
+
+    if(error) return "Error Page"; // return error page
+
 
     const bookedDate = [
         new Date(2026, 2, 27),
@@ -70,19 +49,18 @@ const AccommodationView = () => {
 
     return (
         <div style={{ backgroundColor: '#F1F5F9' }}>
+
             <div className="relative bg-black">
-                {accommodation.images.map((image, index) => (
-                    <div key={index} className="relative">
-                        <div className="h-100 md:h-125 lg:h-150">
-                            <img
-                            src={image}
-                            alt={`${accommodation.name} - Image ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
-                        </div>
+                <div className="relative">
+                    <div className="h-100 md:h-125 lg:h-150">
+                        <img
+                        src={accommodation.imageUrl}
+                        alt={`${accommodation.name}`}
+                        className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
                     </div>
-                ))}
+                </div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
@@ -97,6 +75,7 @@ const AccommodationView = () => {
                             </h1>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                
                                 <div className="flex items-center gap-3">
                                     <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/20">
                                         <House className="w-6 h-6 text-primary" />
@@ -125,19 +104,6 @@ const AccommodationView = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/20">
-                                        <Bed className="w-6 h-6 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">
-                                            Bedrooms
-                                        </p>
-                                        <p className="font-bold">
-                                            {accommodation.bedrooms} Rooms
-                                        </p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -156,20 +122,13 @@ const AccommodationView = () => {
                             </h2>
                             <div className="grid md:grid-cols-2 gap-4">
                                 {accommodation.amenities.map((amenity, index) => {
-                                    const Icon = amenity.icon;
 
                                     return (
                                         <div key={index} className="flex items-start gap-4 p-4 rounded-xl border-2 hover:shadow-md transition-all">
-                                            <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 bg-primary/20">
-                                                <Icon className="w-6 h-6 text-primary" />
-                                            </div>
                                             <div>
                                                 <h3 className="font-bold mb-1">
-                                                    {amenity.label}
+                                                    {amenity}
                                                 </h3>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {amenity.description}
-                                                </p>
                                             </div>
                                         </div>
                                     );
@@ -182,7 +141,7 @@ const AccommodationView = () => {
                                 Resort Facilities
                             </h2>
                             <div className="grid md:grid-cols-2 gap-4">
-                                {accommodation.resortFacilities.map((facility, index) => {
+                                {resortFacilities.map((facility, index) => {
                                     const Icon = facility.icon;
                                     
                                     return (
@@ -251,16 +210,16 @@ const AccommodationView = () => {
                                             Check-in & Check-out
                                         </span>
                                     </div>
-                                    <RadioGroup value={bookingType} onValueChange={(value) => setBookingType(value as 'overnight' | 'daystay')}>
+                                    <RadioGroup value={bookingType} onValueChange={(value) => setBookingType(value as 'OverNight' | 'DayStay')}>
                                         <FieldLabel htmlFor="DayStay">
                                             <Field orientation="horizontal">
                                                 <FieldContent>
-                                                    <FieldTitle>DayStay</FieldTitle>
+                                                    <FieldTitle>Day Stay</FieldTitle>
                                                     <FieldDescription>
                                                         12:00 PM to 1:00 AM
                                                     </FieldDescription>
                                                 </FieldContent>
-                                                <RadioGroupItem value="daystay" id="DayStay" />
+                                                <RadioGroupItem value="DayStay" id="DayStay" />
                                             </Field>
                                         </FieldLabel>
 
@@ -272,7 +231,7 @@ const AccommodationView = () => {
                                                         1:00 AM to 11:00 PM
                                                     </FieldDescription>
                                                 </FieldContent>
-                                                <RadioGroupItem value="overnight" id="OverNight" /> 
+                                                <RadioGroupItem value="OverNight" id="OverNight" /> 
                                             </Field>
                                         </FieldLabel>
                                     </RadioGroup>

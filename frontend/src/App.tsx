@@ -3,17 +3,17 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";
 import USER_ROLES from './lib/constant/USER_ROLES.constant';
 import AccommodationList from './page/AccommodationList';
+import AccommodationView from './page/AccommodationView';
 import Accommodation from "./page/Admin/Accommodation/Accommodation";
 import AddAccommodation from "./page/Admin/Accommodation/AddAccommodation";
 import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
 import AdminLayout from "./page/Admin/AdminLayout";
+import Booking from './page/Admin/Booking/Booking';
 import ForgotPassword from "./page/ForgotPassword";
 import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import SignUpGuest from "./page/SignUpGuest";
-import AccommodationView from './page/AccommodationView';
-import Booking from './page/Admin/Booking/Booking';
 
 const router = createBrowserRouter([
   {
@@ -65,7 +65,6 @@ const router = createBrowserRouter([
         path: 'booking',
         children: [
           { index: true, element: <Booking /> }
-
         ]
       }
     ]

@@ -9,7 +9,7 @@ type AccommodationBookingModalProps = {
     accommodation: Accommodation,
     isOpen: boolean,
     setIsOpen: Dispatch<SetStateAction<boolean>>,
-    selectedStayType: 'overnight' | 'daystay',
+    selectedStayType: 'OverNight' | 'DayStay',
     selectedCheckIn: Date,
 }
 
@@ -17,6 +17,10 @@ const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen, selectedS
     const [bookingStep, setBookingStep] = useState<'form' | 'review' | 'payment'>('form');
     
     const handleClose = () => {
+        setIsOpen(false);
+    }
+
+    const onSuccess = () => {        
         setIsOpen(false);
     }
 
@@ -68,6 +72,7 @@ const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen, selectedS
                 accommodation={accommodation}
                 stayType={selectedStayType}
                 checkIn={selectedCheckIn}
+                onSuccess={onSuccess}
                 />
             </SheetContent>
         </Sheet>

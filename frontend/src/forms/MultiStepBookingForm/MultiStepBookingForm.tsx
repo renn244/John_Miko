@@ -1,8 +1,11 @@
+import { useCreateBookingMutation } from "@/hooks/booking.hook";
 import BOOKING_FEES from "@/lib/constant/BOOKING_FEES.constant";
 import { getBookingDates } from "@/lib/getBookingDates";
+import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 import GuestForm from "./GuestForm";
 import PaymentForm from "./PaymentForm";
@@ -10,10 +13,11 @@ import ReviewForm from "./ReviewForm";
 
 type MultiStepBookingFormProps = {
     accommodation: Accommodation,
-    stayType: 'overnight' | 'daystay',
+    stayType: 'OverNight' | 'DayStay',
     checkIn: Date,
     bookingStep: 'form' | 'review' | 'payment',
-    setBookingStep: React.Dispatch<React.SetStateAction<'form' | 'review' | 'payment'>>
+    setBookingStep: React.Dispatch<React.SetStateAction<'form' | 'review' | 'payment'>>,
+    onSuccess?: () => void;
 }
 
 // We are makinga multi-step form, because later on it will have more step like pre order and other things.
@@ -27,17 +31,17 @@ const MultiStepBookingFormSchema = z.object({
     specialRequest: z.string().optional(),
 
     // Step 2 - Review (No additional fields, just confirmation)
-    stayType: z.enum(['overnight', 'daystay']),
+    stayType: z.enum(['OverNight', 'DayStay']),
     checkIn: z.date("Check-in date is required"),
 
     // Step 3 - Payment
-    paymentType: z.enum(['full', 'partial']),
+    paymentType: z.enum(['Full', 'Partial']),
 })
 
 export type multiStepBookingFormSchema = z.infer<typeof MultiStepBookingFormSchema>;
 
 const MultiStepBookingForm = ({ 
-    accommodation, stayType, checkIn, bookingStep, setBookingStep
+    accommodation, stayType, checkIn, bookingStep, setBookingStep, onSuccess
 }: MultiStepBookingFormProps) => {
     const form = useForm<multiStepBookingFormSchema>({
         resolver: zodResolver(MultiStepBookingFormSchema),
@@ -55,10 +59,27 @@ const MultiStepBookingForm = ({
         criteriaMode: "all"
     })
 
-    // put hooks here later on
+    const { mutateAsync, isPending } = useCreateBookingMutation();
 
     const onSubmit = async (data: multiStepBookingFormSchema) => {
-        console.log(data);
+        try {
+            const { firstName, lastName, ...rest } = data;
+
+            await mutateAsync({
+                accommodationId: accommodation.id,
+                name: `${data.firstName} ${data.lastName}`,
+                ...rest
+            });
+
+            onSuccess?.();
+        } catch (error: any) {
+            if(error instanceof ValidationError) {
+                handleNestError(error.response, form.setError);
+                return
+            }
+
+            toast.error(error.message)
+        }
     }
 
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayType);
@@ -98,6 +119,7 @@ const MultiStepBookingForm = ({
                     <PaymentForm 
                     setBookingStep={setBookingStep}
                     total={total}
+                    isLoading={isPending}
                     />
                 )}
             </form>
