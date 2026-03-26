@@ -252,27 +252,27 @@ const AccommodationView = () => {
                                         </span>
                                     </div>
                                     <RadioGroup value={bookingType} onValueChange={(value) => setBookingType(value as 'overnight' | 'daystay')}>
+                                        <FieldLabel htmlFor="DayStay">
+                                            <Field orientation="horizontal">
+                                                <FieldContent>
+                                                    <FieldTitle>DayStay</FieldTitle>
+                                                    <FieldDescription>
+                                                        12:00 PM to 1:00 AM
+                                                    </FieldDescription>
+                                                </FieldContent>
+                                                <RadioGroupItem value="daystay" id="DayStay" />
+                                            </Field>
+                                        </FieldLabel>
+
                                         <FieldLabel htmlFor="OverNight">
                                             <Field orientation="horizontal">
                                                 <FieldContent>
                                                     <FieldTitle>Over Night</FieldTitle>
                                                     <FieldDescription>
-                                                        12:00 PM to 1:00 AM
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                                <RadioGroupItem value="overnight" id="OverNight" />
-                                            </Field>
-                                        </FieldLabel>
-
-                                        <FieldLabel htmlFor="DayStay">
-                                            <Field orientation="horizontal">
-                                                <FieldContent>
-                                                    <FieldTitle>Day Stay</FieldTitle>
-                                                    <FieldDescription>
                                                         1:00 AM to 11:00 PM
                                                     </FieldDescription>
                                                 </FieldContent>
-                                                <RadioGroupItem value="daystay" id="DayStay" /> 
+                                                <RadioGroupItem value="overnight" id="OverNight" /> 
                                             </Field>
                                         </FieldLabel>
                                     </RadioGroup>
@@ -339,11 +339,15 @@ const AccommodationView = () => {
                 </div>
             </div>
 
-            <AccommodationBookingModal 
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            accommodation={accommodation as any}
-            />
+            {bookingDate && bookingType && (
+                <AccommodationBookingModal 
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                accommodation={accommodation as any}
+                selectedStayType={bookingType}
+                selectedCheckIn={bookingDate}
+                />
+            )}
         </div>
     )
 }
