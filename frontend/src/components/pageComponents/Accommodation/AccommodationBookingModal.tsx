@@ -1,6 +1,7 @@
 import { Progress } from "@/components/ui/progress";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import MultiStepBookingForm from "@/forms/MultiStepBookingForm/MultiStepBookingForm";
+import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import { X } from "lucide-react";
 import { useState, type Dispatch, type SetStateAction } from "react";
@@ -9,18 +10,19 @@ type AccommodationBookingModalProps = {
     accommodation: Accommodation,
     isOpen: boolean,
     setIsOpen: Dispatch<SetStateAction<boolean>>,
-    selectedStayType: 'OverNight' | 'DayStay',
-    selectedCheckIn: Date,
 }
 
-const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen, selectedStayType, selectedCheckIn }: AccommodationBookingModalProps) => {
+const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen }: AccommodationBookingModalProps) => {
     const [bookingStep, setBookingStep] = useState<'form' | 'review' | 'payment'>('form');
     
+    const stayType = useBookingSelectStore((state) => state.bookingType);
+    const checkIn = useBookingSelectStore((state) => state.bookingDate);
+
     const handleClose = () => {
         setIsOpen(false);
     }
 
-    const onSuccess = () => {        
+    const onSuccess = () => {
         setIsOpen(false);
     }
 
@@ -38,7 +40,7 @@ const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen, selectedS
     };
 
     return (
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <Sheet open={isOpen && !!stayType && !!checkIn} onOpenChange={setIsOpen}>
             <SheetContent side="right" className="w-full max-w-xl sm:max-w-2xl gap-0">
                 
                 <div
@@ -70,8 +72,6 @@ const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen, selectedS
                 bookingStep={bookingStep}
                 setBookingStep={setBookingStep}
                 accommodation={accommodation}
-                stayType={selectedStayType}
-                checkIn={selectedCheckIn}
                 onSuccess={onSuccess}
                 />
             </SheetContent>

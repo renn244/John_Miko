@@ -1,13 +1,8 @@
 import AccommodationBookingModal from "@/components/pageComponents/Accommodation/AccommodationBookingModal";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import AccommodationSideBooking from "@/components/pageComponents/Accommodation/AccommodationSideBooking";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
 import {
-    Calendar,
     Car,
-    CheckCircle,
     Dumbbell,
     House,
     Info,
@@ -19,8 +14,6 @@ import { useState } from "react";
 import { useParams } from "react-router";
 
 const AccommodationView = () => {
-    const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
-    const [bookingType, setBookingType] = useState<'OverNight' | 'DayStay' | undefined>(undefined);
     const [isOpen, setIsOpen] = useState(false);
 
     const { id } = useParams<{ id: string }>();
@@ -39,13 +32,6 @@ const AccommodationView = () => {
 
     if(error) return "Error Page"; // return error page
 
-
-    const bookedDate = [
-        new Date(2026, 2, 27),
-        new Date(2026, 2, 24),
-        new Date(2026, 2, 28),
-        new Date(2026, 2, 29),
-    ]
 
     return (
         <div style={{ backgroundColor: '#F1F5F9' }}>
@@ -187,126 +173,24 @@ const AccommodationView = () => {
                     <div className="lg:col-span-1">
                         <div className="sticky top-24">
 
-                            <div className="bg-white rounded-2xl p-6 shadow-xl border-2">
+                            <AccommodationSideBooking 
+                            setIsOpen={setIsOpen}
+                            accommodation={{
+                                id: accommodation.id,
+                                price: accommodation.price
+                            }}
+                            />
 
-                                <div className="mb-6">
-                                    <div className="flex items-baseline gap-2 mb-1">
-                                        <span className="text-4xl font-bold text-primary">
-                                            ₱{accommodation.price.toLocaleString()}
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">
-                                            / night or day
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Plus applicable taxes and fees
-                                    </p>
-                                </div>
-
-                                <div className="rounded-xl mb-4">
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <Calendar className="w-5 h-5 text-primary" />
-                                        <span className="font-semibold text-sm">
-                                            Check-in & Check-out
-                                        </span>
-                                    </div>
-                                    <RadioGroup value={bookingType} onValueChange={(value) => setBookingType(value as 'OverNight' | 'DayStay')}>
-                                        <FieldLabel htmlFor="DayStay">
-                                            <Field orientation="horizontal">
-                                                <FieldContent>
-                                                    <FieldTitle>Day Stay</FieldTitle>
-                                                    <FieldDescription>
-                                                        12:00 PM to 1:00 AM
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                                <RadioGroupItem value="DayStay" id="DayStay" />
-                                            </Field>
-                                        </FieldLabel>
-
-                                        <FieldLabel htmlFor="OverNight">
-                                            <Field orientation="horizontal">
-                                                <FieldContent>
-                                                    <FieldTitle>Over Night</FieldTitle>
-                                                    <FieldDescription>
-                                                        1:00 AM to 11:00 PM
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                                <RadioGroupItem value="OverNight" id="OverNight" /> 
-                                            </Field>
-                                        </FieldLabel>
-                                    </RadioGroup>
-                                </div>
-
-                                
-                                <CalendarComponent 
-                                className="w-full sm:w-auto mb-4 border rounded-xl"
-                                mode="single"
-                                selected={bookingDate}
-                                onSelect={setBookingDate}
-                                disabled={bookedDate}
-                                modifiers={{
-                                    booked: bookedDate
-                                }}
-                                modifiersClassNames={{
-                                    booked: '[&>button]:bg-red-700 text-white pointer-events-none ',  
-                                }}
-                                />
-
-                                <Button 
-                                onClick={() => setIsOpen(true)}
-                                disabled={!bookingDate || !bookingType}
-                                className="w-full">
-                                    <Calendar className="w-6 h-6" />
-                                    Book Now
-                                </Button>
-
-                                <div className="mt-6 space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle className="w-5 h-5" style={{ color: '#059669' }} />
-                                        <span className="text-sm" style={{ color: '#4B5563' }}>
-                                            Free cancellation up to 48 hours
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle className="w-5 h-5" style={{ color: '#059669' }} />
-                                        <span className="text-sm" style={{ color: '#4B5563' }}>
-                                            Best price guarantee
-                                        </span>
-                                    </div> 
-                                    <div className="flex items-center gap-2">
-                                        <CheckCircle className="w-5 h-5" style={{ color: '#059669' }} />
-                                        <span className="text-sm" style={{ color: '#4B5563' }}>
-                                            Instant booking confirmation
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-2xl p-6 shadow-lg border-2 mt-6">
-                                <h3 className="font-bold mb-2">
-                                    Need Help?
-                                </h3>
-                                <p className="text-sm mb-2 text-muted-foreground">
-                                    Our team is here to assist you with your booking
-                                </p>
-                                <Button variant="outline" className="w-full">
-                                    Contact Us
-                                </Button>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {bookingDate && bookingType && (
-                <AccommodationBookingModal 
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
-                accommodation={accommodation as any}
-                selectedStayType={bookingType}
-                selectedCheckIn={bookingDate}
-                />
-            )}
+            <AccommodationBookingModal 
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            accommodation={accommodation as any}
+            />
         </div>
     )
 }

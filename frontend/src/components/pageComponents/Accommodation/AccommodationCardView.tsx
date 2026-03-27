@@ -58,7 +58,7 @@ const AccommodationCardView = ({
                     {name}
                 </h3>
 
-                <p className="text-sm text-muted-foreground leading-relaxed mb-2 line-clamp-2 min-h-[3rem]">
+                <p className="text-sm text-muted-foreground leading-relaxed mb-2 line-clamp-2 min-h-12">
                     {description}
                 </p>
 

@@ -1,7 +1,9 @@
 import { useCreateBookingMutation } from "@/hooks/booking.hook";
 import BOOKING_FEES from "@/lib/constant/BOOKING_FEES.constant";
+import { toDateOnly } from "@/lib/date.util";
 import { getBookingDates } from "@/lib/getBookingDates";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
+import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
@@ -13,8 +15,6 @@ import ReviewForm from "./ReviewForm";
 
 type MultiStepBookingFormProps = {
     accommodation: Accommodation,
-    stayType: 'OverNight' | 'DayStay',
-    checkIn: Date,
     bookingStep: 'form' | 'review' | 'payment',
     setBookingStep: React.Dispatch<React.SetStateAction<'form' | 'review' | 'payment'>>,
     onSuccess?: () => void;
@@ -41,8 +41,12 @@ const MultiStepBookingFormSchema = z.object({
 export type multiStepBookingFormSchema = z.infer<typeof MultiStepBookingFormSchema>;
 
 const MultiStepBookingForm = ({ 
-    accommodation, stayType, checkIn, bookingStep, setBookingStep, onSuccess
+    accommodation, bookingStep, setBookingStep, onSuccess
 }: MultiStepBookingFormProps) => {
+    const stayType = useBookingSelectStore((state) => state.bookingType!);
+    const checkIn = useBookingSelectStore((state) => state.bookingDate!);
+    const reset = useBookingSelectStore((state) => state.reset);
+    
     const form = useForm<multiStepBookingFormSchema>({
         resolver: zodResolver(MultiStepBookingFormSchema),
         defaultValues: {
@@ -62,24 +66,29 @@ const MultiStepBookingForm = ({
     const { mutateAsync, isPending } = useCreateBookingMutation();
 
     const onSubmit = async (data: multiStepBookingFormSchema) => {
-        try {
-            const { firstName, lastName, ...rest } = data;
+        const { firstName, lastName, checkIn, ...rest } = data;
 
-            await mutateAsync({
-                accommodationId: accommodation.id,
-                name: `${data.firstName} ${data.lastName}`,
-                ...rest
-            });
+        await mutateAsync({
+            accommodationId: accommodation.id,
+            name: `${data.firstName} ${data.lastName}`,
+            checkIn: toDateOnly(checkIn),
+            ...rest
+        }, {
+            onSuccess: () => {
+                onSuccess?.();
+                reset();
 
-            onSuccess?.();
-        } catch (error: any) {
-            if(error instanceof ValidationError) {
-                handleNestError(error.response, form.setError);
-                return
+                toast.success("Booking created successfully");
+            },
+            onError: (error) => {
+                if(error instanceof ValidationError) {
+                    handleNestError(error.response, form.setError);
+                    return
+                }
+                
+                toast.error(error.message)   
             }
-
-            toast.error(error.message)
-        }
+        });
     }
 
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayType);

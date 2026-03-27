@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookingDto } from './dto/booking.dto';
@@ -16,8 +17,22 @@ export class BookingService {
         if(!accommodation) {
             throw new NotFoundException('Accommodation not found')
         }
-
+        
         const booking = await this.prisma.$transaction(async (txprisma) => {
+            const existingBooking = await txprisma.booking.findFirst({
+                where: {
+                    accommodationId: body.accommodationId,
+                    bookingDate: body.checkIn,
+                    timeSlot: body.stayType,
+                    status: { not: 'Cancelled' }
+                }
+            })
+
+            if(existingBooking) {
+                throw new ConflictException('Accommodation is already booked for the selected date and time slot')
+            }
+            
+            
             const newBooking = await txprisma.booking.create({
                 data: {
                     userId: user.id,
@@ -25,8 +40,20 @@ export class BookingService {
                     bookingDate: body.checkIn,
                     timeSlot: body.stayType,
                     paymentType: body.paymentType,
+                    // numberOfGuests: body.numberOfGuests,
+                    // specialRequests: body.guestInformation.specialRequests,
                 }
             })
+
+            // update booking guest information
+            // await txprisma.bookingGuestInformation.create({
+            //     data: {
+            //         bookingId: newBooking.id,
+            //         fullName: body.guestInformation.fullName,
+            //         email: body.guestInformation.email,
+            //         phoneNumber: body.guestInformation.phoneNumber,
+            //     }
+            // })
 
             await txprisma.bookedAccommodation.create({
                 data: {
@@ -71,10 +98,35 @@ export class BookingService {
 
     async getBookingsByAccommodation(accommodationId: string) {
         const bookings = await this.prisma.booking.findMany({
-            where: { accommodationId: accommodationId }
+            where: { 
+                accommodationId: accommodationId,
+                bookingDate: { gte: new Date() },
+                status: { not: 'Cancelled' }
+            },
+            select: { bookingDate: true, timeSlot: true },
         })
 
-        return bookings
+        const groupMap = new Map<string, BookingTimeSlot[]>()
+        bookings.forEach(booking => {
+            const dateKey = booking.bookingDate.toISOString().split('T')[0]
+
+            if(!groupMap.has(dateKey)) {
+                groupMap.set(dateKey, [])
+            }
+
+            groupMap.get(dateKey)?.push(booking.timeSlot)
+        })
+
+        const result = Array.from(groupMap.entries()).map(([date, timeSlots]) => {
+            const hasDayStay = timeSlots.includes('DayStay');
+            const hasOverNight = timeSlots.includes('OverNight');
+
+            const bookingStatus = hasDayStay && hasOverNight ? 'Full' : 'Partial';
+
+            return { bookingDate: date, bookingStatus, timeSlotsOccupied: timeSlots }
+        })
+
+        return result
     }
 
     async getBookingById(bookingId: string) {

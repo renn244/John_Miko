@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { Public } from 'src/lib/decorators/Public.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/booking.dto';
@@ -22,6 +23,7 @@ export class BookingController {
         return this.bookingService.getBookings()
     }
 
+    @Public()
     @Get('byAccommodation/:accommodationId')
     async GetBookingsByAccommodation(@Param('accommodationId') accommodationId: string) {
         return this.bookingService.getBookingsByAccommodation(accommodationId)
