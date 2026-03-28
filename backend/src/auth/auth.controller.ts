@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
+import { AuthGuard } from '../lib/guards/auth.guard';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpGuestDto } from './dto/auth.dto';
 import { forgotPasswordDto, resendForgotPasswordDto, resetPasswordDto } from './dto/forgotPassword.dto';
 import { ForgotPasswordService } from './forgotPassword.service';
-import { AuthGuard } from './guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {

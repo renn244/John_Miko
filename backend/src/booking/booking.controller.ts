@@ -1,9 +1,10 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Public } from 'src/lib/decorators/Public.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
+import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dto/booking.dto';
+import { GetBookingsQuery } from './query/getBookings.query';
 
 @Controller('booking')
 @UseGuards(AuthGuard)
@@ -19,8 +20,8 @@ export class BookingController {
     }
 
     @Get()
-    async GetBookings(@Query() query: { date?: string }) {
-        return this.bookingService.getBookings()
+    async GetBookings(@Query() query: GetBookingsQuery) {
+        return this.bookingService.getBookings(query)
     }
 
     @Public()
@@ -28,7 +29,7 @@ export class BookingController {
     async GetBookingsByAccommodation(@Param('accommodationId') accommodationId: string) {
         return this.bookingService.getBookingsByAccommodation(accommodationId)
     }
-
+    
     @Get('byBookingId/:bookingId')
     async GetBookingById(@Param('bookingId') bookingId: string) {
         return this.bookingService.getBookingById(bookingId)
