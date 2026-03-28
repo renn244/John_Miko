@@ -5,7 +5,7 @@ import { useSearchParams } from "react-router";
 export const useAccommodationSearchParams = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const search: string = searchParams.get("search") || "";
+    const search = searchParams.get("search") || undefined;
     const type = searchParams.get("type");
     const status = searchParams.get("status");
 

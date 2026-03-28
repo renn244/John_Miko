@@ -108,7 +108,7 @@ model Booking {
   // should add a snapshot of accommodation details at the time of booking to avoid issues with price changes or availability changes
   bookedAccommodation BookedAccommodation?
 
-  bookingDate     DateTime
+  bookingDate     DateTime @db.Date
   timeSlot        BookingTimeSlot
 
   status          BookingStatus @default(Pending)

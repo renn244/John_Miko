@@ -1,6 +1,8 @@
-import { Type } from "class-transformer";
-import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, Min, MinDate } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, Min } from "class-validator";
 import { BookingTimeSlot, PaymentType } from "src/generated/prisma/enums";
+import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
+import { toDateOnly } from "src/lib/utils/date.util";
 
 export class CreateBookingDto {
     @IsString()
@@ -17,9 +19,7 @@ export class CreateBookingDto {
     
     @IsNumberString()
     @IsNotEmpty({ message: "Phone number is required" })
-    @Matches(/^[0-9]{10,15}$/, {
-        message: "Phone number must be between 10 and 15 digits"
-    })
+    @Matches(/^[0-9]{10,15}$/, { message: "Phone number must be between 10 and 15 digits" })
     contactNo: string;
     
     @Type(() => Number)
@@ -36,13 +36,11 @@ export class CreateBookingDto {
     @IsEnum(BookingTimeSlot, { message: "Stay type must be either 'overnight' or 'daystay'" })
     stayType: BookingTimeSlot;
     
+    @Transform(({ value }) => toDateOnly(value))
     @Type(() => Date)
     @IsDate({ message: "Check-in date must be a valid date" })
     @IsNotEmpty({ message: "Check-in date is required" })
-    @MinDate(
-        new Date(), 
-        { message: "Check-in date cannot be in the past" }
-    )
+    @isNotPastDate({ message: "Check-in date cannot be in the past" })
     checkIn: Date;
 
     // create a payment type field in the database

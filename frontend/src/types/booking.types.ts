@@ -8,7 +8,7 @@ export type Booking = {
 
     bookingDate: string;
     timeSlot: "DayStay" | "OverNight"
-
+    paymentType: 'Partial' | 'Full';
     status: "Pending" | "Confirmed" | "Cancelled" | "Completed";
 
     createdAt: string;

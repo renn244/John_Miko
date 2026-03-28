@@ -1,8 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBookingDto } from './dto/booking.dto';
+import { GetBookingsQuery } from './query/getBookings.query';
 
 @Injectable()
 export class BookingService {
@@ -76,21 +78,38 @@ export class BookingService {
         return booking
     }
 
-    async getBookings() {
-        const currentDate = new Date()
-        
+    async getBookings(query: GetBookingsQuery) {
+        const currentDate = new Date();
+
+        const { search, bookingDate, ...rest } = cleanPrismaWhere(query);
+
+        const searchFilter = search ? {
+            OR: [
+                { id: { contains: search, mode: 'insensitive' } },
+                { accommodation: { name: { contains: search, mode: 'insensitive' } } }
+            ]
+        } : {} as any;
+
+        const bookingDateFilter = bookingDate ? {
+            bookingDate: bookingDate
+        } : { bookingDate: { gte: currentDate } };
+
         const bookings = await this.prisma.booking.findMany({
-            where: { bookingDate: { gte: currentDate } },
+            where: { 
+                ...bookingDateFilter,
+                ...rest,
+                ...searchFilter 
+            },
             include: {
                 accommodation: {
                     select: {
-                        name: true,
+                        name: true, 
                         type: true,
                         imageUrl: true
                     }
                 }
             },
-            orderBy: { bookingDate: 'desc' }  
+            orderBy: { bookingDate: 'desc' }
         })
 
         return bookings

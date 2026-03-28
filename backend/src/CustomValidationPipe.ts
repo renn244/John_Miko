@@ -1,13 +1,10 @@
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
-import { plainToClass } from "class-transformer";
+import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 
 @Injectable()
 export class CustomValidationPipe implements PipeTransform {
     async transform(value: any, metadata: ArgumentMetadata) {
-        if(metadata.type !== 'body') {
-            return value
-        }
 
         if(!value) {
             throw new BadRequestException("No data submitted")
@@ -18,7 +15,9 @@ export class CustomValidationPipe implements PipeTransform {
             return value
         }
 
-        const object = plainToClass(metadata.metatype, value);
+        const object = plainToInstance(metadata.metatype, value, {
+            enableImplicitConversion: true
+        });
 
         const error = await validate(object); // would return an array of errors if there are any errors
 
@@ -37,7 +36,7 @@ export class CustomValidationPipe implements PipeTransform {
         }
 
         // if there is no errors, return the value that is originally passed
-        return value;
+        return object;
     }
 
     // would return false if the metatype is a string, boolean, number, array, or object
