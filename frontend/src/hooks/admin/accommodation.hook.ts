@@ -32,7 +32,7 @@ export const useGetAccommodationOptionsQuery = () => {
     })
 }
 
-export const useGetAccommodationsQuery = (query: GetAccommodationQuery) =>{
+export const useGetAccommodationsQuery = (query?: GetAccommodationQuery) =>{
     return useQuery({
         queryKey: ['accommodations', query],
         queryFn: () => accommodationApi.getAccommodations(query),

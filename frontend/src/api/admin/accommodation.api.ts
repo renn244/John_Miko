@@ -34,7 +34,7 @@ export const accommodationApi = {
 
         return response.data as AccommodationOption[];
     },
-    getAccommodations: async (query: GetAccommodationQuery) => {
+    getAccommodations: async (query?: GetAccommodationQuery) => {
         const response = await apiClient.get('/accommodation', { params: query });
         
         if(response.status >= 400) {

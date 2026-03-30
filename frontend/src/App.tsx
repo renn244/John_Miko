@@ -14,6 +14,7 @@ import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import SignUpGuest from "./page/SignUpGuest";
+import AddBooking from './page/Admin/Booking/AddBooking';
 
 const router = createBrowserRouter([
   {
@@ -64,7 +65,9 @@ const router = createBrowserRouter([
       {
         path: 'booking',
         children: [
-          { index: true, element: <Booking /> }
+          { index: true, element: <Booking /> },
+          { path: 'add', element: <AddBooking /> },
+          // { path: ':id/edit', element: <EditBooking /> }
         ]
       }
     ]

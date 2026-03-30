@@ -7,17 +7,16 @@ export const getErrorMessages = (error?: FieldError): { message: string }[] => {
 
   if (error.types) {
     Object.values(error.types).forEach((err) => {
-      // invalid types
+
+      // handling invalid types
       if(typeof err === 'boolean') return
       if(typeof err === 'undefined') return
 
       if(err instanceof Array) {
-        // array of string
         err.forEach((msg) => {
           value.push({ message: msg })
         })
       } else {
-        // string
         value.push({ message: err })
       }
     })
