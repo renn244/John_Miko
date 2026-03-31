@@ -52,13 +52,11 @@ const AccommodationFilter = () => {
 const SearchAccommodationFilter = () => {
     const { search, updateSearch } = useAccommodationSearchParams();
     const [searchInput, setSearchInput] = useState(search || "");
-    const debouncedSearch = useDebounce(searchInput, 250);
+    const debouncedSearch = useDebounce(searchInput, 500);
 
     useEffect(() => {
-        if(debouncedSearch !== search) {
-            updateSearch(debouncedSearch);
-        }
-    }, [debouncedSearch, search, updateSearch])
+        updateSearch(debouncedSearch);
+    }, [debouncedSearch])
 
     return (
         <div className="flex-1 relative">
