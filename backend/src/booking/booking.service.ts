@@ -34,7 +34,6 @@ export class BookingService {
                 throw new ConflictException('Accommodation is already booked for the selected date and time slot')
             }
             
-            
             const newBooking = await txprisma.booking.create({
                 data: {
                     userId: user.id,
@@ -42,20 +41,13 @@ export class BookingService {
                     bookingDate: body.checkIn,
                     timeSlot: body.stayType,
                     paymentType: body.paymentType,
-                    // numberOfGuests: body.numberOfGuests,
-                    // specialRequests: body.guestInformation.specialRequests,
+                    numberOfGuests: body.numberOfGuests,
+                    specialRequests: body.specialRequest,
+                    guestName: body.name,
+                    email: body.email,
+                    contactNo: body.contactNo,
                 }
             })
-
-            // update booking guest information
-            // await txprisma.bookingGuestInformation.create({
-            //     data: {
-            //         bookingId: newBooking.id,
-            //         fullName: body.guestInformation.fullName,
-            //         email: body.guestInformation.email,
-            //         phoneNumber: body.guestInformation.phoneNumber,
-            //     }
-            // })
 
             await txprisma.bookedAccommodation.create({
                 data: {
@@ -152,6 +144,10 @@ export class BookingService {
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId }
         })
+
+        if(!booking) {
+            throw new NotFoundException('Booking not found')
+        }
 
         return booking
     }

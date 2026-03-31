@@ -6,6 +6,12 @@ export type Booking = {
     userId: string;
     accommodationId: string;
 
+    guestName: string;
+    email: string;
+    contactNo: string;
+    numberOfGuests: number;
+    specialRequests?: string;
+
     bookingDate: string;
     timeSlot: "DayStay" | "OverNight"
     paymentType: 'Partial' | 'Full';
