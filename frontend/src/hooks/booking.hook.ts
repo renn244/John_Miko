@@ -15,7 +15,7 @@ export const useCreateBookingMutation = () => {
 
 export const useGetBookingsByAccommodationQuery = (accommodationId: string | undefined | null) => {
     return useQuery({
-        queryKey: ['booking', 'byAccommodation'],
+        queryKey: ['booking', 'byAccommodation', accommodationId],
         queryFn: () => bookingApi.getBookingsByAccommodation(accommodationId || ""),
         enabled: !!accommodationId
     })

@@ -1,14 +1,17 @@
+import AvailabilityCalendar from "@/components/common/AvailabilityCalendar";
+import AvailabilityStayType from "@/components/common/AvailabilityStayType";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
+import { isSameDateOnly } from "@/lib/date.util";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckCircle, Users } from "lucide-react";
 import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -33,7 +36,9 @@ const ManualBookingForm = () => {
     const {
         control,
         handleSubmit,
-        watch
+        watch,
+        setError,
+        resetField
     } = useForm<manualBookingSchema>({
         resolver: zodResolver(ManualBookingSchema),
         defaultValues: {
@@ -49,24 +54,35 @@ const ManualBookingForm = () => {
         criteriaMode: "all"
     })
 
-    // get accommodation hook
-    const { data: accommodations, isLoading } = useGetAccommodationsQuery();
+    const { data: accommodations } = useGetAccommodationsQuery({ availability: "Available" });
+
+    const selectedAccommodationId = watch('accommodationId');
+    const selectedCheckInDate = watch('checkIn');
+    const selectedPaymentType = watch('paymentType');
+
+    const isAccommodationSelected = !!selectedAccommodationId;
 
     const onSubmit = (data: manualBookingSchema) => {
+        if(selectedAccommodation && (data.numberOfGuests > selectedAccommodation?.capacity)) {
+            setError('numberOfGuests', {
+                type: 'manual',
+                message: `Maximum capacity for ${selectedAccommodation.name} is ${selectedAccommodation.capacity} guests`
+            })
+            return;
+        }
+
         console.log(data);
     }
 
-    const accommodationId = watch('accommodationId');
-
     const selectedAccommodation = useMemo(() => {
-        return accommodations?.find((acc) => acc.id === accommodationId);
-    }, [accommodationId, accommodations]);
+        return accommodations?.find((acc) => acc.id === selectedAccommodationId);
+    }, [selectedAccommodationId, accommodations]);
 
     const accommodationPrice = selectedAccommodation?.price || 0;
 
     const serviceFee = 500; // because in the booking form there is 500, remove later if no service fee...
     const totalAmount = accommodationPrice + serviceFee; // get base price from selected accommodation
-    const amountToPayNow = watch('paymentType') ? (watch('paymentType') === "Partial" ? totalAmount / 2 : totalAmount) : 0;
+    const amountToPayNow = selectedPaymentType ? (selectedPaymentType === "Partial" ? totalAmount / 2 : totalAmount) : 0;
 
     return (
         <form  
@@ -178,7 +194,11 @@ const ManualBookingForm = () => {
                                 <RadioGroup 
                                 name={field.name}
                                 value={field.value}
-                                onValueChange={field.onChange}
+                                onValueChange={(value) => {
+                                    resetField('checkIn')
+                                    resetField('stayType')
+                                    field.onChange(value)
+                                }}
                                 aria-invalid={fieldState.invalid}
                                 className="grid md:grid-cols-2 gap-3"
                                 >
@@ -208,7 +228,7 @@ const ManualBookingForm = () => {
                                                     Up to 10
                                                 </div>
                                                 <div className="font-bold text-primary">
-                                                    ₱2999/night
+                                                    ₱{acc.price.toLocaleString()}/(OverNight Or DayStay)
                                                 </div>
                                             </div>
                                         </FieldLabel>
@@ -222,15 +242,11 @@ const ManualBookingForm = () => {
                         )}
                         />
 
-                        {/* Selected Accommodation Summary */}
                         {selectedAccommodation && (
-                            <div
-                            className="p-3 rounded-lg border-2"
-                            style={{ backgroundColor: '#F0FDF4', borderColor: '#86EFAC' }}
-                            >
+                            <div className="p-3 rounded-lg border-2 bg-green-50 border-green-600">
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4" style={{ color: '#059669' }} />
-                                    <span className="text-sm font-semibold" style={{ color: '#059669' }}>
+                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                    <span className="text-sm font-semibold text-green-600">
                                         Selected: {selectedAccommodation.name} - ₱{selectedAccommodation.price.toLocaleString()}/(OverNight Or DayStay) (Max: {selectedAccommodation.capacity} guests)
                                     </span>
                                 </div>
@@ -260,20 +276,27 @@ const ManualBookingForm = () => {
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <Button 
-                                            variant="outline"
+                                            aria-invalid={fieldState.invalid}
+                                            variant="outline" 
                                             className="w-70 justify-start text-left data=[empty=true]:text-muted-foreground"
                                             >
                                                 <CalendarIcon />
-                                                Pick a date
+                                                {field.value ? format(new Date(field.value), "PPP") : "Pick a date"}
                                             </Button>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-auto p-0">
-                                            <Calendar 
-                                            mode="single"
+                                            <AvailabilityCalendar
+                                            accommodationId={selectedAccommodationId}
+                                            mode="single" 
                                             aria-invalid={fieldState.invalid}
                                             {...field}
                                             selected={field.value}
-                                            onSelect={(date) => field.onChange(date)}
+                                            onSelect={(date) => {
+                                                if(date && !isSameDateOnly(date, new Date(field.value))) {
+                                                    resetField('stayType')
+                                                }
+                                                field.onChange(date)
+                                            }}
                                             />
                                         </PopoverContent>
                                     </Popover>
@@ -327,48 +350,14 @@ const ManualBookingForm = () => {
                                         Stay Type <span className="text-red-700">*</span>
                                     </FieldLegend>
                                     
-                                    <RadioGroup
+                                    <AvailabilityStayType 
+                                    checkInDate={selectedCheckInDate}
+                                    accommodationId={selectedAccommodationId}
                                     name={field.name}
                                     value={field.value}
                                     onValueChange={field.onChange}
-                                    aria-invalid={fieldState.invalid}
-                                    className="grid md:grid-cols-2 gap-3"
-                                    >
-                                        <FieldLabel htmlFor="form-rhf-radiogroup-DayStay">
-                                            <Field orientation="horizontal" data-invalid={fieldState.invalid}>
-                                                <FieldContent>
-                                                    <FieldTitle>
-                                                        DayStay
-                                                    </FieldTitle>
-                                                    <FieldDescription>
-                                                        12:00 PM to 1:00 AM
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                                <RadioGroupItem
-                                                value="DayStay"
-                                                id={`form-rhf-radiogroup-DayStay`}
-                                                aria-invalid={fieldState.invalid}
-                                                />
-                                            </Field>
-                                        </FieldLabel>
-                                        <FieldLabel htmlFor="form-rhf-radiogroup-OverNight">
-                                            <Field orientation="horizontal" data-invalid={fieldState.invalid}>
-                                                <FieldContent>
-                                                    <FieldTitle>
-                                                        OverNight
-                                                    </FieldTitle>
-                                                    <FieldDescription>
-                                                        1:00 AM to 11:00 PM
-                                                    </FieldDescription>
-                                                </FieldContent>
-                                                <RadioGroupItem
-                                                value="OverNight"
-                                                id={`form-rhf-radiogroup-OverNight`}
-                                                aria-invalid={fieldState.invalid}
-                                                />
-                                            </Field>
-                                        </FieldLabel>
-                                    </RadioGroup>
+                                    invalid={fieldState.invalid}
+                                    />
 
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
@@ -447,38 +436,41 @@ const ManualBookingForm = () => {
                         )}
                         />
 
-                        {/* Amount Summary */}
-                        <div className="p-4 rounded-lg">
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground">Base Price:</span>
-                                    <span className="font-semibold" >
-                                        ₱2999/night
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center pt-2 border-t">
-                                    <span className="font-bold">Total Amount:</span>
-                                    <span className="text-lg font-bold text-primary">
-                                        ₱{totalAmount.toLocaleString()}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center pt-2 border-t">
-                                    <span className="font-bold" style={{ color: '#059669' }}>Amount to be Paid Now:</span>
-                                    <span className="text-lg font-bold" style={{ color: '#059669' }}>
-                                        ₱{amountToPayNow.toLocaleString()}
-                                    </span>
-                                </div>
-                                {watch('paymentType') === 'Partial' && (
-                                    <div className="flex justify-between items-center pt-2 border-t">
-                                        <span className="font-medium" style={{ color: '#D97706' }}>Balance Due at Check-in:</span>
-                                        <span className="font-bold" style={{ color: '#D97706' }}>
-                                            ₱{(totalAmount - amountToPayNow).toLocaleString()}
+                        {isAccommodationSelected && (
+                            <div className="p-4 rounded-lg">
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Base Price:</span>
+                                        <span className="font-semibold" >
+                                            ₱{selectedAccommodation?.price || 0}/(OverNight Or DayStay)
                                         </span>
                                     </div>
-                                )}
+
+                                    <div className="flex justify-between items-center pt-2 border-t">
+                                        <span className="font-bold">Total Amount:</span>
+                                        <span className="text-lg font-bold text-primary">
+                                            ₱{totalAmount.toLocaleString()}
+                                        </span>
+                                    </div>
+                                    {amountToPayNow ? (
+                                        <div className="flex justify-between items-center pt-2 border-t">
+                                            <span className="font-bold text-emerald-600">Amount to be Paid Now:</span>
+                                            <span className="text-lg font-bold text-emerald-600">
+                                                ₱{amountToPayNow.toLocaleString()}
+                                            </span>
+                                        </div>
+                                    ) : null}
+                                    {selectedPaymentType === 'Partial' && (
+                                        <div className="flex justify-between items-center pt-2 border-t">
+                                            <span className="font-medium text-amber-600">Balance Due at Check-in:</span>
+                                            <span className="font-bold text-amber-600">
+                                                ₱{(totalAmount - amountToPayNow).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
