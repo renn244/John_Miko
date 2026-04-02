@@ -12,7 +12,7 @@ export function isNotPastDate(validationOptions?: ValidationOptions) {
                 validate(value: Date | string, args: ValidationArguments) {
                     const currentDate = toDateOnly(new Date());
                     const bookingDate = toDateOnly(value);
-                    console.log(bookingDate, currentDate)
+
                     return bookingDate >= currentDate;
                 },
             },

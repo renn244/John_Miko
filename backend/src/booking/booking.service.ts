@@ -3,7 +3,7 @@ import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBookingDto } from './dto/booking.dto';
+import { CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsQuery } from './query/getBookings.query';
 
 @Injectable()
@@ -95,9 +95,10 @@ export class BookingService {
             include: {
                 accommodation: {
                     select: {
+                        id: true,
                         name: true, 
                         type: true,
-                        imageUrl: true
+                        imageUrl: true,
                     }
                 }
             },
@@ -142,7 +143,17 @@ export class BookingService {
 
     async getBookingById(bookingId: string) {
         const booking = await this.prisma.booking.findUnique({
-            where: { id: bookingId }
+            where: { id: bookingId },
+            include: {
+                accommodation: {
+                    select: {
+                        id: true,
+                        name: true,
+                        type: true,
+                        imageUrl: true,
+                    }
+                }
+            }
         })
 
         if(!booking) {
@@ -158,6 +169,7 @@ export class BookingService {
             include: {
                 accommodation: {
                     select: {
+                        id: true,
                         name: true,
                         type: true,
                         imageUrl: true
@@ -167,5 +179,39 @@ export class BookingService {
         })
 
         return bookings 
+    }
+
+    async rescheduleBooking(bookingId: string, body: RescheduleBookingDto) {
+        const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } })
+
+        if(!booking) {
+            throw new NotFoundException('Booking not found')
+        }
+
+        const existingBooking = await this.prisma.booking.findFirst({
+            where: {
+                accommodationId: booking.accommodationId,
+                bookingDate: body.bookingDate,
+                timeSlot: body.stayType,
+                status: { not: 'Cancelled' },
+                id: { not: bookingId } //  exclude self to avoid false conflict
+            }
+        })
+
+        if(existingBooking) {
+            throw new ConflictException('A booking already exists for the selected date and time slot')
+        }
+
+        const updatedBooking = await this.prisma.booking.update({
+            where: { id: bookingId },
+            data: {
+                bookingDate: body.bookingDate,
+                timeSlot: body.stayType
+            }
+        })
+
+        // send an email to the user about the rescheduled booking details
+
+        return updatedBooking
     }
 }

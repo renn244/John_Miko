@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Public } from 'src/lib/decorators/Public.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { BookingService } from './booking.service';
-import { CreateBookingDto } from './dto/booking.dto';
+import { CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsQuery } from './query/getBookings.query';
 
 @Controller('booking')
@@ -18,6 +18,7 @@ export class BookingController {
     async bookAccommodation(@Body() body: CreateBookingDto, @User() user: UserSession) {
         return this.bookingService.bookAccommodation(body, user)
     }
+    
 
     @Get()
     async GetBookings(@Query() query: GetBookingsQuery) {
@@ -39,7 +40,11 @@ export class BookingController {
     async GetBookingsByUser(@User() user: UserSession) {
         return this.bookingService.getBookingsByUser(user)
     }
-
+    
+    @Patch('reschedule/:bookingId')
+    async RescheduleBooking(@Param('bookingId') bookingId: string, @Body() body: RescheduleBookingDto) {
+        return this.bookingService.rescheduleBooking(bookingId, body)
+    }
 
     // ADD REQUESTS FOR UPDATING OR CANCELLING BOOKINGS LATER
     // make sure when updated, the cache if there is any should be invalidated and updated accordingly.

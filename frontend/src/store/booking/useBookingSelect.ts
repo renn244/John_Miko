@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type BookingSelectSotre = {
+type BookingSelectStore = {
     bookingDate: Date | undefined;
     bookingType: "OverNight" | "DayStay" | undefined;
     setBookingDate: (date: Date | undefined) => void;
@@ -9,7 +9,7 @@ type BookingSelectSotre = {
     reset: () => void;
 }
 
-export const useBookingSelectStore = create<BookingSelectSotre>((set) => ({
+export const useBookingSelectStore = create<BookingSelectStore>((set) => ({
     bookingDate: undefined,
     bookingType: undefined,
     setBookingDate: (date) => set({ bookingDate: date, bookingType: undefined }),

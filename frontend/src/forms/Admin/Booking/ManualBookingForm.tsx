@@ -351,8 +351,10 @@ const ManualBookingForm = () => {
                                     </FieldLegend>
                                     
                                     <AvailabilityStayType 
+                                    key={selectedCheckInDate?.toISOString()}  // ← forces remount on date change
                                     checkInDate={selectedCheckInDate}
                                     accommodationId={selectedAccommodationId}
+                                    {...field}
                                     name={field.name}
                                     value={field.value}
                                     onValueChange={field.onChange}
@@ -387,6 +389,7 @@ const ManualBookingForm = () => {
                                 </FieldLegend>
 
                                 <RadioGroup
+                                {...field}
                                 name={field.name}
                                 value={field.value}
                                 onValueChange={field.onChange}

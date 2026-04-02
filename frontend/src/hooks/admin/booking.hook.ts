@@ -26,3 +26,24 @@ export const useGetBookingsAdminQuery = (query: { search?: string; status?: stri
         refetchOnWindowFocus: false,
     })
 }
+
+export const useGetBookingById = (bookingId: string | undefined | null) => {
+    return useQuery({
+        queryKey: ['booking', 'admin', 'byId', bookingId],
+        queryFn: () => bookingApi.getBookingById(bookingId || ""),
+        enabled: !!bookingId,
+    })
+}
+
+export const useRescheduleBookingAdminMutation = (bookingId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['booking', 'admin', 'reschedule', bookingId],
+        mutationFn: (data: any) => bookingApi.rescheduleBooking(bookingId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['booking', 'admin'] })
+            queryClient.invalidateQueries({ queryKey: ['booking', 'admin', 'byId', bookingId] })
+        }
+    })
+}

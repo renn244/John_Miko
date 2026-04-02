@@ -43,12 +43,33 @@ export const bookingApi = {
     },
     getBookingById: async (bookingId: string) => {
         const response = await apiClient.get(`/booking/byBookingId/${bookingId}`)
+
+        if(response.status === 404) {
+            return null
+        }
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'Failed to fetch booking details');
+        }
         
-        return response.data as Booking;
+        return response.data as BookingWithAccommodation;
     },
     getBookingsByUser: async () => {
         const response = await apiClient.get('/booking/byUser')
 
         return response.data as BookingWithAccommodation[];
     },
+    rescheduleBooking: async (bookingId: string, data: any) => {
+        const response = await apiClient.patch(`/booking/reschedule/${bookingId}`, data);
+
+        if(response.status === 400) {
+            throw new ValidationError(response.data);
+        }
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'Failed to reschedule booking');
+        }
+
+        return response.data as BookingWithAccommodation;
+    }
 }

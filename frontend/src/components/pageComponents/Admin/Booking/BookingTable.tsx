@@ -5,10 +5,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGetBookingsAdminQuery } from "@/hooks/admin/booking.hook";
 import { useBookingSearch } from "@/hooks/admin/booking.search";
+import { useBookingAdminStore } from "@/store/admin/bookingAdmin.store";
 import { format } from "date-fns";
 import { CalendarSync, CircleCheck, CircleX, Eye, MoreHorizontal } from "lucide-react";
 
 const BookingTable = () => {
+    const setViewId = useBookingAdminStore((state) => state.setViewId);
+    const setRescheduleBookingId = useBookingAdminStore((state) => state.setRescheduleBookingId);
     const { search, status, paymentType, accommodationId, bookingDate } = useBookingSearch();
 
     const { data: bookings } = useGetBookingsAdminQuery({ search, status, paymentType, accommodationId, bookingDate });
@@ -86,7 +89,7 @@ const BookingTable = () => {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setViewId(booking.id)}>
                                             <Eye />
                                             View Details
                                         </DropdownMenuItem>
@@ -96,7 +99,7 @@ const BookingTable = () => {
                                             <CircleCheck />
                                             Mark as Completed
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setRescheduleBookingId(booking.id)}>
                                             <CalendarSync />
                                             Reschedule
                                         </DropdownMenuItem>

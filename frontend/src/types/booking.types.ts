@@ -39,6 +39,7 @@ export type BookedAccommodation = {
 // Response types
 export type BookingWithAccommodation = {
     accommodation: {
+        id: Accommodation['id'];
         name: Accommodation['name'];
         type: Accommodation['type'];
         imageUrl: Accommodation['imageUrl'];

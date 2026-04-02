@@ -48,3 +48,16 @@ export class CreateBookingDto {
     @IsEnum(PaymentType, { message: "Payment type must be either 'full' or 'partial'" })
     paymentType: PaymentType;
 }
+
+export class RescheduleBookingDto {
+    @Transform(({ value }) => toDateOnly(value))
+    @Type(() => Date)
+    @IsDate({ message: "Booking date must be a valid date" })
+    @IsNotEmpty({ message: "Booking date is required" })
+    @isNotPastDate({ message: "Booking date cannot be in the past" })
+    bookingDate: Date;
+
+    @IsNotEmpty({ message: "Stay type is required" })
+    @IsEnum(BookingTimeSlot, { message: "Stay type must be either 'overnight' or 'daystay'" })
+    stayType: BookingTimeSlot;
+}
