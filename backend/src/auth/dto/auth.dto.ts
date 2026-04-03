@@ -4,27 +4,27 @@ import { IsMatch } from "src/lib/customValidator/isMatch";
 export class SignInDto {
     @IsString()
     @IsEmail({}, { message: "Invalid email" })
-    email: string;
+    email!: string;
 
     @IsString()
-    password: string;
+    password!: string;
 }
 
 export class SignUpGuestDto {
     @IsString()
     @IsEmail({}, { message: "Invalid email" })
-    email: string;
+    email!: string;
 
     @IsString()
-    name: string;
+    name!: string;
 
     @IsNumberString({}, { message: "Invalid contact No." })
-    contactNo: string;
+    contactNo!: string;
 
     @IsString()
-    password: string;
+    password!: string;
 
     @IsString()
     @IsMatch<SignUpGuestDto>("password", { message: "Confirm password must match password" })
-    confirmPassword: string
+    confirmPassword!: string
 }

@@ -1,33 +1,33 @@
-import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUrl, Min } from "class-validator";
+import { PartialType } from "@nestjs/mapped-types/dist/partial-type.helper";
+import { IsEnum, IsNumber, IsOptional, IsString, IsUrl } from "class-validator";
 import { AccommodationAvailability, AccommodationType } from "src/generated/prisma/enums";
 
 export class CreateAccommodationDto {
     @IsString({ message: "Name must be a string" })
-    name: string;
+    name!: string;
 
     @IsString({ message: "Description must be a string" })
-    description: string;
+    description!: string;
 
     @IsUrl({}, { message: "Invalid image URL" })
-    imageUrl: string;
+    imageUrl!: string;
     
     @IsString({ message: "Type must be a string" })
     @IsEnum(AccommodationType)
-    type: AccommodationType;
+    type!: AccommodationType;
 
     @IsNumber({}, { message: "Capacity must be a number" })
-    capacity: number;
+    capacity!: number;
 
     @IsNumber({}, { message: "Price must be a number" })
-    price: number;
+    price!: number;
 
     @IsString({ each: true })
-    amenities: string[];
+    amenities!: string[];
 
     @IsString({ message: "Availability must be a string" })
     @IsEnum(AccommodationAvailability)
-    availability: AccommodationAvailability;
+    availability!: AccommodationAvailability;
 }
 
 export class GetAccommodationQueryDto {
@@ -51,5 +51,5 @@ export class GetAccommodationQueryDto {
 
 }
 
-export class UpdateAccommodationDto extends CreateAccommodationDto {
+export class UpdateAccommodationDto extends PartialType(CreateAccommodationDto) {
 }
