@@ -119,9 +119,6 @@ model Booking {
   status           BookingStatus @default(Pending)
   paymentType      PaymentType
 
-  // for later
-  // paymentId       String?
-  // payment         Payment? @relation(fields: [paymentId], references: [id])
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -141,6 +138,24 @@ model BookedAccommodation {
   capacity      Int
   price         Int
   amenities     String[] @default([])
+
+  createdAt     DateTime @default(now())
+}
+
+enum MenuItemAvailability {
+  Available
+  Unavailable
+}
+
+model MenuItem {
+  id            String   @id @default(cuid())
+  imageUrl      String
+  name          String
+  description   String
+
+  category      String
+  price         Int
+  availability  MenuItemAvailability @default(Available)
 
   createdAt     DateTime @default(now())
 }

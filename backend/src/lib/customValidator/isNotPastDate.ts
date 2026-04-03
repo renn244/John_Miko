@@ -15,6 +15,9 @@ export function isNotPastDate(validationOptions?: ValidationOptions) {
 
                     return bookingDate >= currentDate;
                 },
+                defaultMessage(args: ValidationArguments) {
+                    return `${args.property} must not be a past date`;
+                }
             },
         })
     }

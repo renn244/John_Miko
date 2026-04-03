@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
 import { AccommodationModule } from './accommodation/accommodation.module';
 import { BookingModule } from './booking/booking.module';
+import { MenuItemModule } from './menu-item/menu-item.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { BookingModule } from './booking/booking.module';
     UserModule,
     EmailModule,
     AccommodationModule,
-    BookingModule
+    BookingModule,
+    MenuItemModule
   ],
 })
 export class AppModule {}
