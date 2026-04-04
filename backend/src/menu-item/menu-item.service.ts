@@ -38,6 +38,14 @@ export class MenuItemService {
     return menuItems;
   }
 
+  async getMenuItemCategories() {
+    const categories = await this.prisma.menuItem.findMany({ 
+      distinct: ['category'], select: { category: true } 
+    });
+
+    return categories.map((c) => c.category);
+  }
+
   async getMenuItemStats() {
     const [total, grouped] = await Promise.all([
       this.prisma.menuItem.count(),
