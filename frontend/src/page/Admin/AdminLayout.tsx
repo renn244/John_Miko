@@ -1,4 +1,4 @@
-import { Calendar, Home, LayoutDashboard, LogOut, MessageSquare, Settings, Users } from "lucide-react";
+import { Calendar, Hamburger, Home, LayoutDashboard, LogOut, MessageSquare, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 
@@ -24,9 +24,9 @@ const AdminLayout = () => {
             path: '/admin/booking',
         },
         {
-            label: 'Guests',
-            icon: Users,
-            path: '/admin/guests',
+            label: 'Menu Items',
+            icon: Hamburger,
+            path: '/admin/menu-item',
         },
         {
             label: 'Feedback',
