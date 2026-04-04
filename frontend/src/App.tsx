@@ -8,13 +8,16 @@ import Accommodation from "./page/Admin/Accommodation/Accommodation";
 import AddAccommodation from "./page/Admin/Accommodation/AddAccommodation";
 import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
 import AdminLayout from "./page/Admin/AdminLayout";
+import AddBooking from './page/Admin/Booking/AddBooking';
 import Booking from './page/Admin/Booking/Booking';
+import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
+import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
+import MenuItem from './page/Admin/MenuItem/MenuItem';
 import ForgotPassword from "./page/ForgotPassword";
 import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import SignUpGuest from "./page/SignUpGuest";
-import AddBooking from './page/Admin/Booking/AddBooking';
 
 const router = createBrowserRouter([
   {
@@ -67,7 +70,14 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Booking /> },
           { path: 'add', element: <AddBooking /> },
-          // { path: ':id/edit', element: <EditBooking /> }
+        ]
+      },
+      {
+        path: 'menu-item',
+        children: [
+          { index: true, element: <MenuItem /> },
+          { path: 'add', element: <AddMenuItem /> },
+          { path: ':id/edit', element: <EditMenuItem /> }
         ]
       }
     ]
