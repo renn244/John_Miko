@@ -18,7 +18,7 @@ const AddBooking = () => {
                         Add New Booking
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        Fill in the details below to creae a new booking
+                        Fill in the details below to create a new booking
                     </p>
                 </div>
             </div>
