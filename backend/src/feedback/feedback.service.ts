@@ -50,6 +50,7 @@ export class FeedbackService {
                     }
                 }
             },
+            orderBy: { createdAt: 'desc' },
             skip: skip, take: limit
         })
 
@@ -59,14 +60,14 @@ export class FeedbackService {
     async getFeedbackStats() {
         const totalFeedbacks = await this.prisma.feedback.aggregate({
             _count: true,
-            _avg: { rating: true },
+            _avg: { rating: true,  },
             _min: { rating: true },
             _max: { rating: true },
         });
 
         return {
             total: totalFeedbacks._count,
-            averageRating: totalFeedbacks._avg.rating,
+            averageRating: totalFeedbacks._avg.rating?.toFixed(2),
             minRating: totalFeedbacks._min.rating,
             maxRating: totalFeedbacks._max.rating,
         }
@@ -74,6 +75,7 @@ export class FeedbackService {
 
     async getFeedbackById(id: string) {
         const feedback = await this.prisma.feedback.findUnique({
+            where: { id },
             include: {
                 user: {
                     select: {
@@ -82,8 +84,7 @@ export class FeedbackService {
                         email: true,
                     }
                 },
-            },
-            where: { id },
+            }
         })
 
         if(!feedback) {

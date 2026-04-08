@@ -34,19 +34,19 @@ export class FeedbackController {
 
     @Roles(Role.GUEST, Role.ADMIN)
     @Get(':id')
-    async getFeedbackById(@Param() id: string) {
+    async getFeedbackById(@Param('id') id: string) {
         return this.feedbackService.getFeedbackById(id);
     }
 
     @Roles(Role.GUEST)
     @Patch(':id')
-    async updateFeedback(@Param() id: string, @User() user: UserSession, @Body() body: UpdateFeedbackDto) {
+    async updateFeedback(@Param('id') id: string, @User() user: UserSession, @Body() body: UpdateFeedbackDto) {
         return this.feedbackService.updateFeedback(id, user, body);
     }
 
-    @Roles(Role.GUEST)
-    @Patch(':id/delete')
-    async deleteFeedback(@Param() id: string, @User() user: UserSession) {
+    @Roles(Role.GUEST)  
+    @Patch(':id')
+    async deleteFeedback(@Param('id') id: string, @User() user: UserSession) {
         return this.feedbackService.deleteFeedback(id, user);
     }
 }
