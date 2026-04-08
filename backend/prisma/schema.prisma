@@ -31,6 +31,7 @@ model User {
   forgotPasswordTokens PasswordResetToken[]
 
   bookings  Booking[]
+  guestFeedbacks Feedback[]
 
   createdAt DateTime @default(now())
 }
@@ -106,6 +107,7 @@ model Booking {
   accommodation   Accommodation @relation(fields: [accommodationId], references: [id])
 
   bookedAccommodation BookedAccommodation?
+  feedback          Feedback?
 
   guestName       String
   email           String
@@ -156,6 +158,20 @@ model MenuItem {
   category      String
   price         Int
   availability  MenuItemAvailability @default(Available)
+
+  createdAt     DateTime @default(now())
+}
+
+model Feedback {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  
+  bookingId     String  @unique
+  booking       Booking @relation(fields: [bookingId], references: [id])
+
+  rating        Int     
+  comment       String?
 
   createdAt     DateTime @default(now())
 }

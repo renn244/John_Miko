@@ -10,6 +10,7 @@ import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
 import AdminLayout from "./page/Admin/AdminLayout";
 import AddBooking from './page/Admin/Booking/AddBooking';
 import Booking from './page/Admin/Booking/Booking';
+import Feedback from './page/Admin/Feedback/Feedback';
 import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
 import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
@@ -78,6 +79,12 @@ const router = createBrowserRouter([
           { index: true, element: <MenuItem /> },
           { path: 'add', element: <AddMenuItem /> },
           { path: ':id/edit', element: <EditMenuItem /> }
+        ]
+      },
+      {
+        path: 'feedback',
+        children: [
+          { index: true, element: <Feedback /> }
         ]
       }
     ]

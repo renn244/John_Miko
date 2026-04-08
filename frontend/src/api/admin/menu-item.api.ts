@@ -47,6 +47,10 @@ export const menuItemApi = {
     getMenuItemById: async (id: string) => {
         const response = await apiClient.get(`/menu-item/${id}`);
 
+        if(response.status === 404) {
+            return null;
+        }
+
         if(response.status >= 400) {
             throw new Error(response.data.message || 'An error occurred while fetching the menu item.');
         }
