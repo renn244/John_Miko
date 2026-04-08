@@ -10,10 +10,10 @@ const Feedback = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold">
-                        Booking Management
+                        Guest Feedback
                     </h1>
                     <p className="text-sm mt-1 text-muted-foreground">
-                        Manage and monitor all confirmed reservations
+                        View and manage guest reviews and ratings
                     </p>
                 </div>
             </div>

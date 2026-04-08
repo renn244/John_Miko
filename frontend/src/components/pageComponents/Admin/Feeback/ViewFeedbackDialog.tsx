@@ -1,5 +1,6 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ const ViewFeedbackDialog = () => {
     const isViewOpen = useFeedbackAdminStore((state) => state.isViewOpen);
     const viewFeedbackId = useFeedbackAdminStore((state) => state.viewId);
     const setIsViewOpen = useFeedbackAdminStore((state) => state.setIsViewOpen);
-
+    
     const { data, isLoading, error, refetch, isRefetching } = useGetFeedbackByIdQuery(viewFeedbackId);
 
     return (
@@ -58,7 +59,7 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                     Reference: {feedback.id}
                 </DialogDescription>
             </DialogHeader>
-
+            
             <div className="space-y-6">    
 
                 <div>
@@ -68,9 +69,11 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
 
                     <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-lg">
-                                {feedback.user.name.charAt(0)}
-                            </div>
+                            <Avatar size="lg">
+                                <AvatarFallback className="bg-primary text-white">
+                                    {feedback.user.name.charAt(0)}
+                                </AvatarFallback>
+                            </Avatar>
                             <div>
                                 <p className="font-semibold">
                                     {feedback.user.name}
@@ -102,7 +105,7 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                     <div className="space-y-4">
 
                         <div className="grid gap-2">
-                            <Label>
+                            <Label className="text-muted-foreground">
                                 Rating
                             </Label>
                             <div className="flex items-center gap-1">
@@ -115,13 +118,13 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                                     />
                                 ))}
                                 <span className="ml-2 font-bold text-lg">
-                                    {feedback.rating}
+                                    {feedback.rating} / 5
                                 </span>
                             </div>
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>
+                            <Label className="text-muted-foreground">
                                 Full Comment
                             </Label>
                             <div className="p-4 rounded-lg border bg-muted">
@@ -132,20 +135,20 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label>
+                            <Label className="text-muted-foreground">
                                 Submitted On
                             </Label>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="w-4 h-4" />
-                                <span>{format(feedback.createdAt, 'EEEE, MMMM d, yyyy at h:mm a')}</span>
+                                <span>{format(feedback.createdAt, "EEEE, MMMM d, yyyy 'at' h:mm a")}</span>
                             </div>
                         </div>
 
                     </div>
                 </div>
 
-                <div className="border-t px-6 py-4 flex items-center justify-end gap-3">
-                    <Button onClick={() => setIsViewOpen(false)}>
+                <div className="flex items-center justify-end gap-3">
+                    <Button variant="outline" onClick={() => setIsViewOpen(false)}>
                         Close
                     </Button>
                 </div>
