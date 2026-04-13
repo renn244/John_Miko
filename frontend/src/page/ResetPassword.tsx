@@ -64,7 +64,7 @@ const HeaderImage = () => {
                     <h1 className="text-2xl font-bold text-white mb-1">
                         John Miko's Place
                     </h1>   
-                    <p className="text-sm text-white/90">Beach Resort</p>
+                    <p className="text-sm text-white/90">Private Resort</p>
                 </div>
             </div>
         </div>

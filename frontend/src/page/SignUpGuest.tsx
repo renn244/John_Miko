@@ -26,7 +26,7 @@ export default function SignUpGuest() {
                   Join Our Resort Community
                 </h2>
                 <p className="text-lg mb-6 text-white/90">
-                  Create your account and start booking your dream vacation at John Miko's Place Beach Resort
+                  Create your account and start booking your dream vacation at John Miko's Place Private Resort
                 </p>
                 <div className="space-y-4 text-left">
                   <div className="flex items-start gap-3">
@@ -67,7 +67,7 @@ export default function SignUpGuest() {
               <h1 className="text-2xl font-bold mb-1 text-primary">
                 John Miko's Place
               </h1>
-              <p className="text-sm text-muted-foreground">Beach Resort</p>
+              <p className="text-sm text-muted-foreground">Private Resort</p>
             </div>
 
             <div className="text-center md:text-left mb-6">

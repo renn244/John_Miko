@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";
 import USER_ROLES from './lib/constant/USER_ROLES.constant';
+import About from './page/About';
 import AccommodationList from './page/AccommodationList';
 import AccommodationView from './page/AccommodationView';
 import Accommodation from "./page/Admin/Accommodation/Accommodation";
@@ -14,6 +15,8 @@ import Feedback from './page/Admin/Feedback/Feedback';
 import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
 import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
+import Amenities from './page/Amenities';
+import Contact from './page/Contact';
 import ForgotPassword from "./page/ForgotPassword";
 import Home from "./page/Home";
 import Login from "./page/Login";
@@ -24,6 +27,18 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />
+  },
+  {
+    path: '/amenities',
+    element: <Amenities />
+  },
+  {
+    path: '/about',
+    element: <About />
+  },
+  {
+    path: '/contact',
+    element: <Contact />
   },
   {
     path: "/login",
@@ -45,8 +60,8 @@ const router = createBrowserRouter([
   {
     path: 'accommodation',
     children: [
-      { index: true, element: <AccommodationList /> }, // ACCOMMODATION LIST
-      { path: ':id', element: <AccommodationView /> } // ACCOMMODATION DETAIL
+      { index: true, element: <AccommodationList /> },
+      { path: ':id', element: <AccommodationView /> }
     ]
   },
   {
@@ -57,11 +72,11 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true,  }, // DASHBOARD
+      { index: true,  },
       { 
         path: 'accommodation', 
         children: [
-          { index: true, element: <Accommodation /> }, // ACCOMMODATION LIST
+          { index: true, element: <Accommodation /> },
           { path: 'add', element: <AddAccommodation /> },
           { path: ':id/edit', element: <EditAccommodation /> }
         ]

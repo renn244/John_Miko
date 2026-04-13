@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/generated/prisma/client';
+import { UserSession } from 'src/lib/decorators/User.decorator';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
@@ -60,5 +61,19 @@ export class AuthService {
         const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
 
         return { accessToken };
+    }
+
+    async getProfile(user: UserSession) {
+        const userProfile = await this.prisma.user.findUnique({
+            where: { id: user.id },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+            }
+        });
+
+        return userProfile;
     }
 }

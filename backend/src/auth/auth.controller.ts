@@ -43,6 +43,6 @@ export class AuthController {
     @UseGuards(AuthGuard)
     @Get('profile')
     async getProfile(@User() user: UserSession) {
-        return user;
+        return this.authService.getProfile(user);
     }
 }

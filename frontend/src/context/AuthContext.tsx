@@ -4,20 +4,23 @@ import { createContext, useContext, type PropsWithChildren } from "react";
 
 type userProfile = {
     id: string;
+    name: string | null | undefined;
     email: string;
     role: string;
 }
 
 type AuthContextType = {
-    user: userProfile | undefined,
+    user: userProfile | null | undefined,
     isLoading: boolean;
     isLoggedIn: boolean;    
+    handleLogout: () => void;
 }
 
 const initialAuthContext: AuthContextType = {
-    user: undefined,
+    user: null,
     isLoading: true,
-    isLoggedIn: false
+    isLoggedIn: false,
+    handleLogout: () => {}
 }
 
 const AuthContext = createContext<AuthContextType>(initialAuthContext);
@@ -27,26 +30,28 @@ export const useAuthContext = () => {
 }
 
 const AuthProvider = ({ children }: PropsWithChildren ) => {
-    
-    const { data: user, isLoading } = useQuery({
+    const { data: user, isLoading, refetch } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
-            
-            if(!localStorage.getItem('access_token')) return undefined
+            const response = await apiClient.get('/auth/profile').catch(() => null)
 
-            const response = await apiClient.get('/auth/profile').catch(() => undefined)
-
-            if(!response) return undefined
+            if(response?.status === 401) return null
             
             return response?.data as userProfile
         },
         refetchOnWindowFocus: false,
     })
 
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        refetch();
+    }
+
     const value = {
         user,
         isLoading,
-        isLoggedIn: !!user
+        isLoggedIn: !!user,
+        handleLogout
     } satisfies AuthContextType;
     
     return (

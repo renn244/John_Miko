@@ -71,7 +71,7 @@ export default function ForgotPassword() {
                     <div className="absolute inset-0 flex items-center justify-center text-white text-center">
                         <div>
                             <h1 className="text-2xl font-bold">John Miko's Place</h1>
-                            <p className="text-sm">Beach Resort</p>
+                            <p className="text-sm">Private Resort</p>
                         </div>
                     </div>
                 </div>

@@ -1,3 +1,4 @@
+import NavBar from "@/components/common/NavBar"
 import AccommodationCardView from "@/components/pageComponents/Accommodation/AccommodationCardView"
 import { Button } from "@/components/ui/button"
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook"
@@ -16,8 +17,9 @@ const AccommodationList = () => {
 
     return (
         <div className="min-h-screen">
+            <NavBar />
 
-            <div className="relative pt-16 md:pt-24">
+            <div className="relative pt-4 md:pt-8">
                 <div className="max-w-7xl mx-auto px-4">
                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2">
                         Our Accommodations
@@ -29,10 +31,10 @@ const AccommodationList = () => {
             </div>
 
 
-            <div className="max-w-7xl mx-auto px-4 pt-4">
+            <div className="max-w-7xl mx-auto px-4 pt-2">
 
-                <div className="max-w-7xl mx-auto py-4">
-                    <div className="bg-white rounded-2xl p-2 md:p-4 shadow-sm border">
+                <div className="max-w-7xl mx-auto py-2">
+                    <div className="bg-white rounded-xl p-2 md:p-4 border">
                         <div className="flex flex-col md:flex-row md:items-center gap-4">
                             <div className="flex items-center gap-2">
                                 <span className="font-semibold text-sm md:text-base">
@@ -58,7 +60,7 @@ const AccommodationList = () => {
                     </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 pt-2">
                     {accommodations?.map((accommodation) => (
                         <AccommodationCardView
                         key={accommodation.id}

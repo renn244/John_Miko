@@ -1,9 +1,13 @@
-import { Calendar, Hamburger, Home, LayoutDashboard, LogOut, MessageSquare, Settings } from "lucide-react";
+import ProfileMenu from "@/components/common/ProfileMenu";
+import { useAuthContext } from "@/context/AuthContext";
+import { Calendar, ChevronLeft, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, Settings, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 
 
 const AdminLayout = () => {
+    const { user } = useAuthContext();
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -40,8 +44,6 @@ const AdminLayout = () => {
         },
     ];
 
-    //  we still need to add the animation through motion, for mobile.
-
     return (
         <div className="min-h-screen flex">
 
@@ -66,22 +68,13 @@ const AdminLayout = () => {
                             </Link>
                         )}
 
-                        {/* For Side Bar Later */}
-                        {/* <button
-                        onClick={() => setIsSidebarOpen(false)}
-                        className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
-                        >
+                        <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
                             <X className="w-5 h-5" />
                         </button>
 
-                        <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="hidden lg:block p-2 rounded-lg hover:bg-gray-100"
-                        >
-                            <ChevronLeft
-                            className={`w-5 h-5 transition-transform text-foreground ${isCollapsed ? 'rotate-180' : ''}`}
-                            />
-                        </button> */}
+                        <button onClick={() => setIsCollapsed(!isCollapsed)} className="hidden lg:block p-2 rounded-lg hover:bg-gray-100">
+                            <ChevronLeft className={`w-5 h-5 transition-transform text-foreground ${isCollapsed ? 'rotate-180' : ''}`}/>
+                        </button>
 
                     </div>
 
@@ -122,12 +115,9 @@ const AdminLayout = () => {
             <div className="flex-1 flex flex-col min-h-screen">
 
                 <header className="h-16.25 bg-white border-b flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
-                    {/* <button
-                    onClick={() => setIsSidebarOpen(true)}
-                    className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
-                    >
+                    <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
                         <Menu className="w-6 h-6"/>
-                    </button> */}
+                    </button>
 
                     <div className="flex-1 lg:flex-none">
                         <h2 className="text-lg font-bold ml-2 lg:ml-0">
@@ -142,18 +132,18 @@ const AdminLayout = () => {
                                 Administrator
                             </p>
                             <p className="text-xs text-muted-foreground">
-                                admin@johnmikosplace.com
+                                {user!.email}
                             </p>
                         </div>
 
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-white bg-primary">
-                            A
-                        </div>
+                        <ProfileMenu />
 
                     </div>
                 </header>
 
-                <main className="flex-1 p-4 lg:p-6"><Outlet /></main>
+                <main className="flex-1 p-4 lg:p-6">
+                    <Outlet />
+                </main>
             </div>
 
         </div>
