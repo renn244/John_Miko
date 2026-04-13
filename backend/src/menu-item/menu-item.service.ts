@@ -75,6 +75,12 @@ export class MenuItemService {
   }
 
   async updateMenuItem(id: string, updateMenuItemDto: UpdateMenuItemDto) {
+    const existingMenuItem = await this.getMenuItemById(id);
+
+    if(!existingMenuItem) {
+      throw new NotFoundException('Menu item not found');
+    }
+
     const menuItem = await this.prisma.menuItem.update({
       where: { id },
       data: updateMenuItemDto
@@ -84,6 +90,12 @@ export class MenuItemService {
   }
 
   async deleteMenuItem(id: string) {
+    const existingMenuItem = await this.getMenuItemById(id);
+
+    if(!existingMenuItem) {
+      throw new NotFoundException('Menu item not found');
+    }
+
     const menuItem = await this.prisma.menuItem.delete({ where: { id } })
 
     return menuItem;

@@ -175,3 +175,42 @@ model Feedback {
 
   createdAt     DateTime @default(now())
 }
+
+// CHATBOT
+
+model Rules {
+  id              String   @id @default(cuid())
+  
+  name            String
+  keywords        String[]
+  response        String
+  quickReplies    String[] @default([])
+  isActive        Boolean @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// model Conversation {
+//     id              String   @id @default(cuid())
+
+//     messages        Message[]
+// }
+
+// enum MessageSender {
+//     User
+//     Bot
+// }
+
+// model Message {
+//     id              String   @id @default(cuid())
+
+//     conversationId  String
+//     conversation    Conversation @relation(fields: [conversationId], references: [id])
+
+//     sender          MessageSender
+//     text            String
+//     quickReplies    String[] @default([])
+
+//     createdAt       DateTime @default(now())
+// }

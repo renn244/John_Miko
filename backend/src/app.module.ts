@@ -8,6 +8,7 @@ import { AccommodationModule } from './accommodation/accommodation.module';
 import { BookingModule } from './booking/booking.module';
 import { MenuItemModule } from './menu-item/menu-item.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { RulesModule } from './rules/rules.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { FeedbackModule } from './feedback/feedback.module';
     AccommodationModule,
     BookingModule,
     MenuItemModule,
-    FeedbackModule
+    FeedbackModule,
+    RulesModule
   ],
 })
 export class AppModule {}
