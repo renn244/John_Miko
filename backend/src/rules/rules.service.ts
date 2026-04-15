@@ -23,6 +23,24 @@ export class RulesService {
         return rules;
     }
 
+    async getStatisticsRule() {
+        const [total, grouped] = await Promise.all([
+            this.prisma.rules.count(),
+            this.prisma.rules.groupBy({
+                by: ['isActive'],
+                _count: { isActive: true },
+            })
+        ])
+
+        const stats: Record<string, number> = {};
+        grouped.forEach((item) => stats[item.isActive ? 'active' : 'inactive'] = item._count.isActive);
+        
+        return { 
+            total, 
+            ...stats 
+        };
+    }
+
     async getActiveRules() {
         const rules = await this.prisma.rules.findMany({
             where: { isActive: true }

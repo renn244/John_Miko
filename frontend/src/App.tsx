@@ -22,6 +22,9 @@ import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import SignUpGuest from "./page/SignUpGuest";
+import ChatbotRule from './page/Admin/ChatbotRule/ChatbotRule';
+import AddChatbotRule from './page/Admin/ChatbotRule/AddChatbotRule';
+import EditChatbotRule from './page/Admin/ChatbotRule/EditChatbotRule';
 
 const router = createBrowserRouter([
   {
@@ -100,6 +103,14 @@ const router = createBrowserRouter([
         path: 'feedback',
         children: [
           { index: true, element: <Feedback /> }
+        ]
+      },
+      {
+        path: 'chatbot-rule',
+        children: [
+          { index: true, element: <ChatbotRule /> },
+          { path: 'add', element: <AddChatbotRule /> },
+          { path: ':id/edit', element: <EditChatbotRule /> }
         ]
       }
     ]

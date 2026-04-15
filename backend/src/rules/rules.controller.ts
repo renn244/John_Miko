@@ -18,6 +18,11 @@ export class RulesController {
         return this.rulesService.getAllRules();
     }
 
+    @Get('statistics')
+    async getStatisticsRule() {
+        return this.rulesService.getStatisticsRule();
+    }
+
     @Get('active')
     async getActiveRules() {
         return this.rulesService.getActiveRules();

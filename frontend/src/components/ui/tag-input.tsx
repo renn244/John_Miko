@@ -6,9 +6,11 @@ import { Input } from "./input";
 type InputTagsProps = ComponentProps<"input"> & {
     value: string[];
     onChange: (value: string[]) => void;
-};
+    fieldDescription?: string;
+    invalid? : boolean;
+} & ComponentProps<"input">;
 
-const InputTags = ({ className, value, onChange, ref, ...props }: InputTagsProps) => {
+const InputTags = ({ className, value, onChange, fieldDescription, ref, invalid = false, ...props }: InputTagsProps) => {
     const [pendingDataPoint, setPendingDataPoint] = useState("");
 
     useEffect(() => {
@@ -47,6 +49,7 @@ const InputTags = ({ className, value, onChange, ref, ...props }: InputTagsProps
                         addPendingDataPoint()
                     }
                 }}
+                aria-invalid={invalid}
                 ref={ref}
                 {...props}
                 />
@@ -83,7 +86,7 @@ const InputTags = ({ className, value, onChange, ref, ...props }: InputTagsProps
             ) : (
                 <div className="text-center py-8 border-2 border-dashed rounded-lg">
                     <p className="text-sm text-muted-foreground">
-                        No amenities added yet. Start adding some!
+                        {fieldDescription ? fieldDescription : "No data added yet. Start by typing a value and clicking 'Add'."}
                     </p>
                 </div>
             )}
