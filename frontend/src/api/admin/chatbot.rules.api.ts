@@ -16,6 +16,15 @@ export const chatbotRulesApi = {
 
         return response.data as ChatbotRule;
     },
+    interactWithChatbot: async (data: any) => {
+        const response = await apiClient.post('/rules/chatbot', data);
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while interacting with the chatbot.');
+        }
+
+        return response.data as ChatbotRule;
+    },
     getRules: async () => {
         const response = await apiClient.get('/rules');
 

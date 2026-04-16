@@ -11,6 +11,11 @@ export class RulesController {
     @Post()
     async createRule(@Body() createRuleDto: createRuleDto) {
         return this.rulesService.createRule(createRuleDto);
+    } 
+
+    @Post('chatbot')
+    async interactWithChatbot(@Body() messageDto: any) {
+        return this.rulesService.interactWithChatbot(messageDto);
     }
 
     @Get()

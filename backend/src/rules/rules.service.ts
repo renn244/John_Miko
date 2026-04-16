@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Rules } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createRuleDto, updateRuleDto } from './dto/rules.dto';
 
@@ -14,6 +15,37 @@ export class RulesService {
         })
 
         return newRule;
+    }
+
+    // async relevanceScoring()
+
+    async interactWithChatbot(messageDto: { message: string }): Promise<Rules> {
+        const rules = await this.prisma.rules.findMany({ where: { isActive: true }});
+
+        const quickReplyMatched = rules.find(rule => rule.name.toLowerCase() === messageDto.message.toLowerCase());
+
+        if(quickReplyMatched) {
+            return quickReplyMatched;
+        }
+
+        // make this relevance score later
+        const words = messageDto.message.toLowerCase().split(/\s+/);
+        const matched = rules.find(rule => rule.keywords.some(kw => words.includes(kw.toLowerCase())));
+
+        if(!matched) {
+            return { 
+                id: new Date().getTime().toString(),
+                keywords: [],
+                name: "I Don't Understand",
+                response: "I'm sorry, I don't understand that.", 
+                quickReplies: ["Main Menu"],
+                isActive: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+        }
+
+        return matched;
     }
 
     async getAllRules() {

@@ -13,6 +13,13 @@ export const useCreateChatbotRuleAdminMutation = () => {
     })
 }
 
+export const useInteractWithChatbotMutation = () => {
+    return useMutation({
+        mutationKey: ['chatbot', 'interact'],
+        mutationFn: chatbotRulesApi.interactWithChatbot,
+    })
+}
+
 export const useGetAllChatbotRulesAdminQuery = () => {
     return useQuery({
         queryKey: ['chatbot', 'rules', 'admin'],

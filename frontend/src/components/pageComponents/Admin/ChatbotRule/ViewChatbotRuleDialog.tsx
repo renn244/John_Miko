@@ -92,19 +92,19 @@ const ChatbotRuleDetails = ({ selectedRule } : { selectedRule: ChatbotRule }) =>
                         Quick Replies ({selectedRule.quickReplies.length})
                     </Label>
 
-                    {selectedRule.quickReplies.length > 0 ? (
-                        <div className="flex gap-2">
-                            {selectedRule.quickReplies.map((qr) => (
+                    <div className="flex flex-wrap gap-2">
+                        {selectedRule.quickReplies.length > 0 ? (
+                            selectedRule.quickReplies.map((qr) => (
                                 <Badge className="rounded-sm px-3 py-1 text-sm" key={qr}>
                                     {qr}
                                 </Badge>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="p-4 rounded-xl text-center bg-muted text-muted-foreground" style={{ backgroundColor: '#F9FAFB', color: '#9CA3AF' }}>
-                            No quick replies configured
-                        </div>
-                    )}                    
+                            ))
+                        ) : (
+                            <div className="p-4 rounded-xl text-center bg-muted text-muted-foreground" style={{ backgroundColor: '#F9FAFB', color: '#9CA3AF' }}>
+                                No quick replies configured
+                            </div>
+                        )}      
+                    </div>              
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
