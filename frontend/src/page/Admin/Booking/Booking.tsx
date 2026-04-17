@@ -1,5 +1,7 @@
 import BookingFilter from "@/components/pageComponents/Admin/Booking/BookingFilter";
 import BookingTable from "@/components/pageComponents/Admin/Booking/BookingTable";
+import MarkCancelDialog from "@/components/pageComponents/Admin/Booking/MarkCancelDialog";
+import MarkCompletedDialog from "@/components/pageComponents/Admin/Booking/MarkCompletedDialog";
 import ReschedulingDialog from "@/components/pageComponents/Admin/Booking/ReschedulingDialog";
 import ViewBookingDialog from "@/components/pageComponents/Admin/Booking/ViewBookingDialog";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,10 @@ const Booking = () => {
             <ViewBookingDialog />
 
             <ReschedulingDialog />
+
+            <MarkCompletedDialog />
+
+            <MarkCancelDialog />
         </div>
     )
 }

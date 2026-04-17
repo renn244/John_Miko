@@ -123,12 +123,12 @@ const About = () => {
                         </div>
 
                         <div className="relative overflow-hidden rounded-2xl border-2">
-                            <div className="relative p-6 md:p-8 lg:p-10">
+                            <div className="relative p-4 md:p-6 lg:p-8">
                                 <div className="flex gap-4 items-center">
-                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6 bg-primary">
+                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-4 bg-primary">
                                         <Eye className="w-6 h-6 md:w-8 md:h-8 text-white" />
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
+                                    <h3 className="text-2xl md:text-3xl font-bold mb-2 md:mb-3">
                                         Our Vision
                                     </h3>
                                 </div>

@@ -6,7 +6,7 @@ import { Link, NavLink, Outlet } from "react-router";
 
 
 const AdminLayout = () => {
-    const { user } = useAuthContext();
+    const { user, handleLogout } = useAuthContext();
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -15,7 +15,7 @@ const AdminLayout = () => {
         {
             label: 'Overview',
             icon: LayoutDashboard,
-            path: '/admin/dashboard',
+            path: '/admin/',
         },
         {
             label: 'Accommodations',
@@ -52,7 +52,7 @@ const AdminLayout = () => {
     return (
         <div className="min-h-screen flex">
 
-            <aside className="border">
+            <aside className="border fixed lg:sticky top-0 h-screen">
                 <div className="flex flex-col h-full">
 
                     <div className="h-16 flex items-center justify-between px-4 border-b">
@@ -93,6 +93,7 @@ const AdminLayout = () => {
                             className={({ isActive }) =>
                                 `flex items-center gap-3 px-3 h-11 rounded-lg transition-all ${isActive ? 'shadow-sm bg-primary text-white' : 'hover:bg-gray-50 bg-transparent text-muted-foreground'}`
                             }
+                            end
                             >
                                 <Icon className="w-5 h-5 shrink-0" />
                                 {!isCollapsed && (
@@ -105,6 +106,7 @@ const AdminLayout = () => {
 
                     <div className="p-4 border-t">
                         <button
+                        onClick={handleLogout}
                         className="flex items-center gap-3 px-3 h-11 w-full rounded-lg hover:bg-gray-50 transition-all"
                         title={isCollapsed ? 'Logout' : undefined}
                         >

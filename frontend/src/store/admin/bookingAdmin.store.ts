@@ -10,6 +10,16 @@ type bookingAdminStore = {
     setIsRescheduleOpen: (open: boolean) => void;
     rescheduleBookingId: string | undefined;
     setRescheduleBookingId: (id: string | undefined) => void;
+
+    isMarkCompletedOpen: boolean;
+    setIsMarkCompletedOpen: (open: boolean) => void;
+    markCompletedBookingId: string | undefined;
+    setMarkCompletedBookingId: (id: string | undefined) => void;
+
+    isMarkCancelOpen: boolean;
+    setIsMarkCancelOpen: (open: boolean) => void;
+    markCancelBookingId: string | undefined;
+    setMarkCancelBookingId: (id: string | undefined) => void;
 }
 
 export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
@@ -54,6 +64,50 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
         set({
             rescheduleBookingId: id,
             isRescheduleOpen: id === undefined ? false : true,
+        });
+    },
+
+    isMarkCompletedOpen: false,
+    setIsMarkCompletedOpen: (open) => {
+        set((state) => {
+            if (open && state.markCompletedBookingId === undefined) {
+                console.warn("Cannot open without markCompletedBookingId");
+                return state;
+            }
+            
+            return {
+                isMarkCompletedOpen: open,
+                markCompletedBookingId: open ? state.markCompletedBookingId : undefined,
+            };
+        });
+    },
+    markCompletedBookingId: undefined,
+    setMarkCompletedBookingId: (id) => {
+        set({
+            markCompletedBookingId: id,
+            isMarkCompletedOpen: id === undefined ? false : true,
+        });
+    },
+
+    isMarkCancelOpen: false,
+    setIsMarkCancelOpen: (open) => {
+        set((state) => {
+            if (open && state.markCancelBookingId === undefined) {
+                console.warn("Cannot open without markCancelBookingId");
+                return state;
+            }
+
+            return {
+                isMarkCancelOpen: open,
+                markCancelBookingId: open ? state.markCancelBookingId : undefined,
+            };
+        });
+    },
+    markCancelBookingId: undefined,
+    setMarkCancelBookingId: (id) => {
+        set({
+            markCancelBookingId: id,
+            isMarkCancelOpen: id === undefined ? false : true,
         });
     },
 }))

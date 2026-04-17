@@ -11,10 +11,14 @@ import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
 import AdminLayout from "./page/Admin/AdminLayout";
 import AddBooking from './page/Admin/Booking/AddBooking';
 import Booking from './page/Admin/Booking/Booking';
+import AddChatbotRule from './page/Admin/ChatbotRule/AddChatbotRule';
+import ChatbotRule from './page/Admin/ChatbotRule/ChatbotRule';
+import EditChatbotRule from './page/Admin/ChatbotRule/EditChatbotRule';
 import Feedback from './page/Admin/Feedback/Feedback';
 import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
 import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
+import Overview from './page/Admin/Overview';
 import Amenities from './page/Amenities';
 import Contact from './page/Contact';
 import ForgotPassword from "./page/ForgotPassword";
@@ -22,9 +26,6 @@ import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
 import SignUpGuest from "./page/SignUpGuest";
-import ChatbotRule from './page/Admin/ChatbotRule/ChatbotRule';
-import AddChatbotRule from './page/Admin/ChatbotRule/AddChatbotRule';
-import EditChatbotRule from './page/Admin/ChatbotRule/EditChatbotRule';
 
 const router = createBrowserRouter([
   {
@@ -75,7 +76,7 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true,  },
+      { index: true, element: <Overview />  },
       { 
         path: 'accommodation', 
         children: [

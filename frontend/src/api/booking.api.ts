@@ -71,5 +71,14 @@ export const bookingApi = {
         }
 
         return response.data as BookingWithAccommodation;
+    },
+    changeStatus: async (bookingId: string, status: string) => {
+        const response = await apiClient.patch(`/booking/changestatus/${bookingId}`, { status });
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'Failed to change booking status');
+        }
+
+        return response.data as Booking;
     }
 }

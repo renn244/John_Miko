@@ -53,7 +53,7 @@ const GuestMenu = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>
                 <LogOutIcon />
-                Sign Out
+                Log Out
             </DropdownMenuItem>
         </>
     )

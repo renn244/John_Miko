@@ -1,6 +1,6 @@
 import { Transform, Type } from "class-transformer";
 import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, Min } from "class-validator";
-import { BookingTimeSlot, PaymentType } from "src/generated/prisma/enums";
+import { BookingStatus, BookingTimeSlot, PaymentType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
 
@@ -60,4 +60,13 @@ export class RescheduleBookingDto {
     @IsNotEmpty({ message: "Stay type is required" })
     @IsEnum(BookingTimeSlot, { message: "Stay type must be either 'overnight' or 'daystay'" })
     stayType!: BookingTimeSlot;
+}
+
+export class ChangeStatusDto {
+    @IsNotEmpty({ message: "Status is required" })
+    @IsEnum(
+        [BookingStatus.Confirmed, BookingStatus.Cancelled, BookingStatus.Completed], 
+        { message: "Status must be either 'Confirmed', 'Cancelled', or 'Completed'" }
+    )
+    status!: BookingStatus;
 }

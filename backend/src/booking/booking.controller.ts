@@ -3,7 +3,7 @@ import { Public } from 'src/lib/decorators/Public.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { BookingService } from './booking.service';
-import { CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
+import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsQuery } from './query/getBookings.query';
 
 @Controller('booking')
@@ -44,6 +44,11 @@ export class BookingController {
     @Patch('reschedule/:bookingId')
     async RescheduleBooking(@Param('bookingId') bookingId: string, @Body() body: RescheduleBookingDto) {
         return this.bookingService.rescheduleBooking(bookingId, body)
+    }
+
+    @Patch('changeStatus/:bookingId')
+    async changeStatus(@Param('bookingId') bookingId: string, @Body() body: ChangeStatusDto) {
+        return this.bookingService.changeStatus(bookingId, body)
     }
 
     // ADD REQUESTS FOR UPDATING OR CANCELLING BOOKINGS LATER

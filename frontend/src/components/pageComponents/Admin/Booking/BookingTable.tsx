@@ -12,6 +12,9 @@ import { CalendarSync, CircleCheck, CircleX, Eye, MoreHorizontal } from "lucide-
 const BookingTable = () => {
     const setViewId = useBookingAdminStore((state) => state.setViewId);
     const setRescheduleBookingId = useBookingAdminStore((state) => state.setRescheduleBookingId);
+    const setMarkCompletedBookingId = useBookingAdminStore((state) => state.setMarkCompletedBookingId);
+    const setMarkCancelBookingId = useBookingAdminStore((state) => state.setMarkCancelBookingId);
+
     const { search, status, paymentType, accommodationId, bookingDate } = useBookingSearch();
 
     const { data: bookings } = useGetBookingsAdminQuery({ search, status, paymentType, accommodationId, bookingDate });
@@ -95,18 +98,22 @@ const BookingTable = () => {
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuLabel>Action</DropdownMenuLabel>
-                                        <DropdownMenuItem>
-                                            <CircleCheck />
-                                            Mark as Completed
-                                        </DropdownMenuItem>
+                                        {booking.status === "Confirmed" && (
+                                            <DropdownMenuItem onClick={() => setMarkCompletedBookingId(booking.id)}>
+                                                <CircleCheck />
+                                                Mark as Completed
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuItem onClick={() => setRescheduleBookingId(booking.id)}>
                                             <CalendarSync />
                                             Reschedule
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem>
-                                            <CircleX />
-                                            Mark as Cancelled
-                                        </DropdownMenuItem>
+                                        {booking.status === "Confirmed" && (
+                                            <DropdownMenuItem onClick={() => setMarkCancelBookingId(booking.id)}>
+                                                <CircleX />
+                                                Mark as Cancelled
+                                            </DropdownMenuItem>
+                                        )}
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>

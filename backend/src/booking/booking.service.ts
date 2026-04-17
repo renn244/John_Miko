@@ -3,7 +3,7 @@ import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
+import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsQuery } from './query/getBookings.query';
 
 @Injectable()
@@ -78,7 +78,7 @@ export class BookingService {
         const searchFilter = search ? {
             OR: [
                 { id: { contains: search, mode: 'insensitive' } },
-                { accommodation: { name: { contains: search, mode: 'insensitive' } } }
+                { guestName: { contains: search, mode: 'insensitive' } },
             ]
         } : {} as any;
 
@@ -211,6 +211,23 @@ export class BookingService {
         })
 
         // send an email to the user about the rescheduled booking details
+
+        return updatedBooking
+    }
+
+    async changeStatus(bookingId: string, body: ChangeStatusDto) {
+        const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } })
+
+        if(!booking) {
+            throw new NotFoundException('Booking not found');
+        }
+
+        const updatedBooking = await this.prisma.booking.update({
+            where: { id: bookingId },
+            data: { status: body.status }
+        })
+
+        // send an email to the user about the booking status change
 
         return updatedBooking
     }

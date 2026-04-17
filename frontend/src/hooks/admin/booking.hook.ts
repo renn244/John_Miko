@@ -47,3 +47,16 @@ export const useRescheduleBookingAdminMutation = (bookingId: string) => {
         }
     })
 }
+
+export const useChangeBookingStatusAdminMutation = (bookingId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['booking', 'admin', 'changeStatus', bookingId],
+        mutationFn: (data: "Completed" | "Cancelled") => bookingApi.changeStatus(bookingId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['booking', 'admin'] })
+            queryClient.invalidateQueries({ queryKey: ['booking', 'admin', 'byId', bookingId] })
+        }
+    })
+}
