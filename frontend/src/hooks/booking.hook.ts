@@ -20,3 +20,10 @@ export const useGetBookingsByAccommodationQuery = (accommodationId: string | und
         enabled: !!accommodationId
     })
 }
+
+export const useGetBookingsByUserQuery = (query?: { status: string }) => {
+    return useQuery({
+        queryKey: ['booking', 'byUser', query],
+        queryFn: () => bookingApi.getBookingsByUser(query),
+    })
+}

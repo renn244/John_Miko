@@ -4,7 +4,7 @@ import { UserSession } from 'src/lib/decorators/User.decorator';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
-import { GetBookingsQuery } from './query/getBookings.query';
+import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
 
 @Injectable()
 export class BookingService {
@@ -163,9 +163,11 @@ export class BookingService {
         return booking
     }
 
-    async getBookingsByUser(user: UserSession) {
+    async getBookingsByUser(user: UserSession, query: GetBookingsByUserQuery) {
+        const { status } = cleanPrismaWhere(query);
+
         const bookings = await this.prisma.booking.findMany({
-            where: { userId: user.id },
+            where: { userId: user.id, status },
             include: {
                 accommodation: {
                     select: {
@@ -174,7 +176,8 @@ export class BookingService {
                         type: true,
                         imageUrl: true
                     }
-                }
+                },
+                feedback: true
             }
         })
 

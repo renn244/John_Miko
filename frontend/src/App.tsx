@@ -22,6 +22,9 @@ import Overview from './page/Admin/Overview';
 import Amenities from './page/Amenities';
 import Contact from './page/Contact';
 import ForgotPassword from "./page/ForgotPassword";
+import CreateFeedback from './page/Guest/CreateFeedback';
+import EditFeedback from './page/Guest/EditFeedback';
+import MyBookings from './page/Guest/MyBookings';
 import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
@@ -62,11 +65,31 @@ const router = createBrowserRouter([
     element: <SignUpGuest />
   },
   {
-    path: 'accommodation',
+    path: '/accommodation',
     children: [
       { index: true, element: <AccommodationList /> },
       { path: ':id', element: <AccommodationView /> }
     ]
+  },
+  {
+    path: '/my-bookings',
+    element: (
+      <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+        <MyBookings />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/feedback/:bookingId',
+    element: (
+      <CreateFeedback />
+    )
+  },
+  {
+    path: '/feedback/edit/:feedbackId',
+    element: (
+      <EditFeedback />
+    )
   },
   {
     path: '/admin',

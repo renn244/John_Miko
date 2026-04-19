@@ -26,3 +26,9 @@ export class GetBookingsQuery {
     @IsDate()
     bookingDate?: Date;
 }
+
+export class GetBookingsByUserQuery {
+    @IsOptional()
+    @IsEnum([BookingStatus.Completed, BookingStatus.Confirmed, BookingStatus.Cancelled], { message: `Status must be one of: ${Object.values(BookingStatus).join(", ")}` })
+    status?: string;
+}

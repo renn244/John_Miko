@@ -4,7 +4,7 @@ import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { BookingService } from './booking.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
-import { GetBookingsQuery } from './query/getBookings.query';
+import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
 
 @Controller('booking')
 @UseGuards(AuthGuard)
@@ -37,8 +37,8 @@ export class BookingController {
     }
 
     @Get('byUser')
-    async GetBookingsByUser(@User() user: UserSession) {
-        return this.bookingService.getBookingsByUser(user)
+    async GetBookingsByUser(@User() user: UserSession, @Query() query: GetBookingsByUserQuery) {
+        return this.bookingService.getBookingsByUser(user, query)
     }
     
     @Patch('reschedule/:bookingId')

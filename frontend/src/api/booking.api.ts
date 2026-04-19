@@ -54,8 +54,8 @@ export const bookingApi = {
         
         return response.data as BookingWithAccommodation;
     },
-    getBookingsByUser: async () => {
-        const response = await apiClient.get('/booking/byUser')
+    getBookingsByUser: async (query?:  { status: string }) => {
+        const response = await apiClient.get('/booking/byUser', { params: query })
 
         return response.data as BookingWithAccommodation[];
     },

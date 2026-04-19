@@ -1,3 +1,4 @@
+import type statusOptions from "@/lib/constant/MY_BOOKING_STATUS.constants";
 import type { Accommodation } from "./admin/accommodation.type";
 
 export type Booking = {
@@ -46,3 +47,8 @@ export type BookingWithAccommodation = {
     }
 } & Booking
 
+
+// My Booking Types
+export type StatusOption = typeof statusOptions[number];
+export type StateSelectedLabel = StatusOption["label"];
+export type StateSelectedStatus = StatusOption["value"];

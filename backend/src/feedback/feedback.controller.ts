@@ -3,12 +3,13 @@ import { Role } from 'src/generated/prisma/enums';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
+import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { FeedbackService } from './feedback.service';
 import { GetFeedbackQuery } from './query/getFeedback.query';
 
 @Controller('feedback')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class FeedbackController {
     constructor(
         private readonly feedbackService: FeedbackService
@@ -38,7 +39,7 @@ export class FeedbackController {
         return this.feedbackService.getFeedbackById(id);
     }
 
-    @Roles(Role.GUEST)
+    @Roles(Role.GUEST, Role.ADMIN)
     @Patch(':id')
     async updateFeedback(@Param('id') id: string, @User() user: UserSession, @Body() body: UpdateFeedbackDto) {
         return this.feedbackService.updateFeedback(id, user, body);
