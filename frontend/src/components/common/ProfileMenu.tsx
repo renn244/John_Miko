@@ -1,5 +1,5 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { BadgeCheckIcon, CreditCardIcon, FolderKanban, LogOutIcon } from "lucide-react";
+import { BadgeCheckIcon, CreditCardIcon, FolderKanban, History, LogOutIcon } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -19,7 +19,7 @@ const ProfileMenu = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         {user.role === "ADMIN" && <AdminMenu />}
-                        {user.role !== "ADMIN" && <GuestMenu />}
+                        {user.role === "GUEST" && <GuestMenu />}
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
@@ -44,6 +44,12 @@ const GuestMenu = () => {
                     <BadgeCheckIcon />
                     Account
                 </DropdownMenuItem>
+                <Link to="/my-bookings">
+                    <DropdownMenuItem>
+                        <History />
+                        My Bookings
+                    </DropdownMenuItem>
+                </Link>
                 <DropdownMenuItem>
                     {/* For the Settings and Privacy */}
                     <CreditCardIcon />
@@ -70,17 +76,17 @@ const AdminMenu = () => {
                     <BadgeCheckIcon />
                     Account
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                    {/* For the Settings and Privacy */}
-                    <CreditCardIcon />
-                    Settings
-                </DropdownMenuItem>
                 <Link to="/admin">
                     <DropdownMenuItem>
                         <FolderKanban />
                         Admin Dashboard
                     </DropdownMenuItem>
                 </Link>
+                <DropdownMenuItem>
+                    {/* For the Settings and Privacy */}
+                    <CreditCardIcon />
+                    Settings
+                </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>

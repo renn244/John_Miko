@@ -1,8 +1,8 @@
 
-const EditAccommodation = () => {
+const EditBooking = () => {
     return (
-        <div>EditAccommodation</div>
+        <div>EditBooking</div>
     )
 }
 
-export default EditAccommodation
+export default EditBooking

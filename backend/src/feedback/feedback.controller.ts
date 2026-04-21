@@ -39,7 +39,7 @@ export class FeedbackController {
         return this.feedbackService.getFeedbackById(id);
     }
 
-    @Roles(Role.GUEST, Role.ADMIN)
+    @Roles(Role.GUEST)
     @Patch(':id')
     async updateFeedback(@Param('id') id: string, @User() user: UserSession, @Body() body: UpdateFeedbackDto) {
         return this.feedbackService.updateFeedback(id, user, body);

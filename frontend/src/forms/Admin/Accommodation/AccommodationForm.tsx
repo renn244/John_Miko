@@ -39,10 +39,10 @@ const AccommodationSchema = z.object({
 type accommodationSchema = z.infer<typeof AccommodationSchema>
 
 type AccommodationFormProps = {
-    onsubmit: (data: any) => Promise<void | any>,
+    onsubmit: (data: accommodationSchema) => Promise<void | any>,
     oncancel: () => void,
     className?: string,
-    initialData?: any,
+    initialData?: accommodationSchema,
     isUpdate?: boolean,
 }
 
@@ -86,7 +86,10 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className={cn("bg-white rounded-xl shadow-sm border overflow-hidden", className)}>
+        <form 
+        className={cn("bg-white rounded-xl shadow-sm border overflow-hidden", className)}
+        onSubmit={handleSubmit(onSubmit)}
+        >
             <div className="p-6 md:p-8 space-y-6">
 
                 <div>

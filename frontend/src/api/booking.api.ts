@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Booking, BookingWithAccommodation } from "@/types/booking.types";
+import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback } from "@/types/booking.types";
 
 export const bookingApi = {
     bookAccommodation: async (data: any) => {
@@ -57,7 +57,7 @@ export const bookingApi = {
     getBookingsByUser: async (query?:  { status: string }) => {
         const response = await apiClient.get('/booking/byUser', { params: query })
 
-        return response.data as BookingWithAccommodation[];
+        return response.data as BookingWithAccommodationAndFeedback[];
     },
     rescheduleBooking: async (bookingId: string, data: any) => {
         const response = await apiClient.patch(`/booking/reschedule/${bookingId}`, data);

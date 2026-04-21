@@ -42,11 +42,11 @@ const AdminLayout = () => {
             icon: Bot,
             path: '/admin/chatbot-rule',
         },
-        {
-            label: 'Settings',
-            icon: Settings,
-            path: '/admin/settings',
-        },
+        // {
+        //     label: 'Settings',
+        //     icon: Settings,
+        //     path: '/admin/settings',
+        // },
     ];
 
     return (

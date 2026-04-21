@@ -1,15 +1,18 @@
+import { Button } from "@/components/ui/button";
 import getCheckInOut from "@/lib/getCheckInOut";
 import { cn } from "@/lib/utils";
-import type { BookingWithAccommodation } from "@/types/booking.types";
+import type { BookingWithAccommodationAndFeedback } from "@/types/booking.types";
 import { Calendar, CheckCircle, Clock, Users, XCircle } from "lucide-react";
 import type { ComponentProps } from "react";
+import { Link } from "react-router";
 
 type BookingCardProps = {
-    booking: BookingWithAccommodation;
+    variant?: "default" | "compact";
+    booking: BookingWithAccommodationAndFeedback;
     className?: string;
 } & ComponentProps<"div">;
 
-const BookingCard = ({ booking, className, ...props }: BookingCardProps) => {
+const BookingCard = ({ booking, className,  variant="default", ...props }: BookingCardProps) => {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'Confirmed':
@@ -47,15 +50,26 @@ const BookingCard = ({ booking, className, ...props }: BookingCardProps) => {
                             <h3 className="text-xl font-bold">
                                 {booking.accommodation.name}
                             </h3>
-                            <div
-                            className="px-3 py-1.5 rounded-sm flex items-center gap-2"
-                            style={{ backgroundColor: statusColor.bg }}
-                            >
-                                <StatusIcon className="w-4 h-4" style={{ color: statusColor.text }} />
-                                <span className="font-semibold text-sm" style={{ color: statusColor.text }}>
-                                    {booking.status}
-                                </span>
+                            <div className="flex gap-2">
+                                <div
+                                className="px-3 py-1.5 rounded-sm flex items-center gap-2"
+                                style={{ backgroundColor: statusColor.bg }}
+                                >
+                                    <StatusIcon className="w-4 h-4" style={{ color: statusColor.text }} />
+                                    <span className="font-semibold text-sm" style={{ color: statusColor.text }}>
+                                        {booking.status}
+                                    </span>
+                                </div>
+
+                                {variant === "default"  && (
+                                    <Link to={booking.feedback ? `/feedback/edit/${booking.feedback.id}` : `/feedback/${booking.id}`}>
+                                        <Button>
+                                        {booking.feedback ? "Edit Feedback" : "Submit Feedback"}
+                                        </Button>
+                                    </Link>
+                                )}
                             </div>
+                            
                         </div>
                         <p className="text-sm mb-4 text-muted-foreground">
                             Booking ID: {booking.id}

@@ -1,5 +1,6 @@
 import type statusOptions from "@/lib/constant/MY_BOOKING_STATUS.constants";
 import type { Accommodation } from "./admin/accommodation.type";
+import type { Feedback } from "./feedback.types";
 
 export type Booking = {
     id: string;
@@ -47,6 +48,9 @@ export type BookingWithAccommodation = {
     }
 } & Booking
 
+export type BookingWithAccommodationAndFeedback =  {
+    feedback?: Feedback
+} & BookingWithAccommodation
 
 // My Booking Types
 export type StatusOption = typeof statusOptions[number];
