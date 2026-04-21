@@ -6,9 +6,10 @@ import { CheckCircle } from "lucide-react";
 import { type Dispatch, type SetStateAction } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 
 type PaymentFormProps = {
-    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'payment'>>,
+    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'pre-order' | 'payment'>>,
     total: number;
     isLoading: boolean;
 }
@@ -102,8 +103,14 @@ const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => 
                 <Button 
                 disabled={!watch('paymentType') || isLoading}
                 type="submit" className="w-full">
-                    <CheckCircle className="w-6 h-6" />
-                    Confirm & Pay
+                    {isLoading ? (
+                        <LoadingSpinner />
+                    ) : (
+                        <>
+                            <CheckCircle className="w-6 h-6" />
+                        Confirm & Pay
+                        </>
+                    )}
                 </Button>
                 <Button
                 disabled={isLoading}

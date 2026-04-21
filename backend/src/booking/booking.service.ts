@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
+import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
@@ -9,7 +10,8 @@ import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.qu
 @Injectable()
 export class BookingService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly preOrderService: PreOrderService
     ) {}
 
     async bookAccommodation(body: CreateBookingDto, user: UserSession) {
@@ -48,6 +50,8 @@ export class BookingService {
                     contactNo: body.contactNo,
                 }
             })
+            
+            await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma)
 
             await txprisma.bookedAccommodation.create({
                 data: {

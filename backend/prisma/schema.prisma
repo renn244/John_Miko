@@ -107,6 +107,7 @@ model Booking {
   accommodation   Accommodation @relation(fields: [accommodationId], references: [id])
 
   bookedAccommodation BookedAccommodation?
+  preOrders         PreOrderMenuItem[]
   feedback          Feedback?
 
   guestName       String
@@ -120,7 +121,6 @@ model Booking {
   timeSlot         BookingTimeSlot
   status           BookingStatus @default(Pending)
   paymentType      PaymentType
-
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -140,6 +140,22 @@ model BookedAccommodation {
   capacity      Int
   price         Int
   amenities     String[] @default([])
+
+  createdAt     DateTime @default(now())
+}
+
+model PreOrderMenuItem {
+  id            String   @id @default(cuid())
+  
+  bookingId     String
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  name          String
+  description   String
+  category      String
+  price         Int
+  
+  quantity      Int
 
   createdAt     DateTime @default(now())
 }
@@ -190,27 +206,3 @@ model Rules {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
-
-// model Conversation {
-//     id              String   @id @default(cuid())
-
-//     messages        Message[]
-// }
-
-// enum MessageSender {
-//     User
-//     Bot
-// }
-
-// model Message {
-//     id              String   @id @default(cuid())
-
-//     conversationId  String
-//     conversation    Conversation @relation(fields: [conversationId], references: [id])
-
-//     sender          MessageSender
-//     text            String
-//     quickReplies    String[] @default([])
-
-//     createdAt       DateTime @default(now())
-// }

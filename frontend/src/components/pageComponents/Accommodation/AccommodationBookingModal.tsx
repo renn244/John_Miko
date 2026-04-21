@@ -13,12 +13,13 @@ type AccommodationBookingModalProps = {
 }
 
 const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen }: AccommodationBookingModalProps) => {
-    const [bookingStep, setBookingStep] = useState<'form' | 'review' | 'payment'>('form');
+    const [bookingStep, setBookingStep] = useState<'form' | 'review' | 'pre-order' | 'payment'>('form');
     
     const stayType = useBookingSelectStore((state) => state.bookingType);
     const checkIn = useBookingSelectStore((state) => state.bookingDate);
 
     const handleClose = () => {
+        setBookingStep('form');
         setIsOpen(false);
     }
 
@@ -29,9 +30,11 @@ const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen }: Accommo
     const getProgressValue = () => {
         switch (bookingStep) {
             case 'form':
-                return 33;
+                return 25;
+            case 'pre-order':
+                return 50;
             case 'review':
-                return 66;
+                return 75;
             case 'payment':
                 return 100;
             default:
@@ -40,23 +43,31 @@ const AccommodationBookingModal = ({ accommodation, isOpen, setIsOpen }: Accommo
     };
 
     return (
-        <Sheet open={isOpen && !!stayType && !!checkIn} onOpenChange={setIsOpen}>
+        <Sheet 
+        open={isOpen && !!stayType && !!checkIn} 
+        onOpenChange={(open)  =>  {
+            if(!open) {
+                setBookingStep('form');
+            }
+
+            setIsOpen(open);
+        }}
+        >
             <SheetContent side="right" className="w-full max-w-xl sm:max-w-2xl gap-0">
                 
-                <div
-                className="sticky top-0 bg-white z-10 p-6 border-b flex items-center justify-between"
-                style={{ borderColor: '#E5E7EB' }}
-                >
+                <div className="sticky top-0 bg-white z-10 p-6 border-b flex items-center justify-between">
                     <div className="flex-1">
                         <h2 className="text-2xl font-bold" style={{ color: '#1F2937' }}>
                             {bookingStep === 'form' && 'Guest Information'}
+                            {bookingStep === 'pre-order' && 'Pre-order Items (Optional)'}
                             {bookingStep === 'review' && 'Review Booking'}
                             {bookingStep === 'payment' && 'Payment'}
                         </h2>
                         <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
-                            {bookingStep === 'form' && 'Step 1 of 3'}
-                            {bookingStep === 'review' && 'Step 2 of 3'}
-                            {bookingStep === 'payment' && 'Step 3 of 3'}
+                            {bookingStep === 'form' && 'Step 1 of 4'}
+                            {bookingStep === 'pre-order' && 'Step 2 of 4'}
+                            {bookingStep === 'review' && 'Step 3 of 4'}
+                            {bookingStep === 'payment' && 'Step 4 of 4'}
                         </p>
                         <Progress className="w-full mt-1" value={getProgressValue()} />
                     </div>

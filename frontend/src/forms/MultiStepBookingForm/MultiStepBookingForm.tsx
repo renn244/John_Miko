@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import z from "zod";
 import GuestForm from "./GuestForm";
 import PaymentForm from "./PaymentForm";
+import PreOrderForm from "./PreOrderForm";
 import ReviewForm from "./ReviewForm";
+import { useState } from "react";
 
 type MultiStepBookingFormProps = {
     accommodation: Accommodation,
-    bookingStep: 'form' | 'review' | 'payment',
-    setBookingStep: React.Dispatch<React.SetStateAction<'form' | 'review' | 'payment'>>,
+    bookingStep: 'form' | 'review' | 'pre-order' | 'payment',
+    setBookingStep: React.Dispatch<React.SetStateAction<'form' | 'review' | 'pre-order' | 'payment'>>,
     onSuccess?: () => void;
 }
 
@@ -34,7 +36,15 @@ const MultiStepBookingFormSchema = z.object({
     stayType: z.enum(['OverNight', 'DayStay']),
     checkIn: z.date("Check-in date is required"),
 
-    // Step 3 - Payment
+    // Step 3 - Pre-order (No additional fields, just confirmation)
+    preOrderItems: z.array(
+        z.object({
+            menuItemId: z.string(),
+            quantity: z.number().min(1, "Quantity must be at least 1"),
+        })
+    ),
+
+    // Step 4 - Payment
     paymentType: z.enum(['Full', 'Partial']),
 })
 
@@ -43,6 +53,8 @@ export type multiStepBookingFormSchema = z.infer<typeof MultiStepBookingFormSche
 const MultiStepBookingForm = ({ 
     accommodation, bookingStep, setBookingStep, onSuccess
 }: MultiStepBookingFormProps) => {
+    const [preOrderTotal, setPreOrderTotal] = useState(0);
+
     const stayType = useBookingSelectStore((state) => state.bookingType!);
     const checkIn = useBookingSelectStore((state) => state.bookingDate!);
     const reset = useBookingSelectStore((state) => state.reset);
@@ -58,6 +70,7 @@ const MultiStepBookingForm = ({
             specialRequest: '',
             stayType: stayType,
             checkIn: checkIn,
+            preOrderItems: [],
             paymentType: undefined,
         },
         criteriaMode: "all"
@@ -94,9 +107,9 @@ const MultiStepBookingForm = ({
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayType);
 
     const rate = accommodation.price;
+    const preOrderSubTotal = preOrderTotal;
     const serviceFee = BOOKING_FEES.SERVICE_FEE;
-    // const guestFee = 50 * (form.watch('numberOfGuests') - 1); // assuming the rate is for 1 guest, and additional guests will be charged
-    const total = rate + (serviceFee ?? 0);
+    const total = rate  + preOrderSubTotal + (serviceFee ?? 0);
 
     return (  
         <FormProvider {...form}>
@@ -111,11 +124,19 @@ const MultiStepBookingForm = ({
                     />
                 )}
 
+                {bookingStep === 'pre-order' && (
+                    <PreOrderForm 
+                    setBookingStep={setBookingStep}
+                    changePreOrderTotal={(total) => setPreOrderTotal(total)}
+                    />
+                )}
+
                 {bookingStep === 'review' && (
                     <ReviewForm 
                     accommodation={accommodation}
                     stayType={stayType}
                     price={rate}
+                    preOrderSubTotal={preOrderSubTotal}
                     serviceFee={serviceFee}
                     total={total}
                     setBookingStep={setBookingStep}

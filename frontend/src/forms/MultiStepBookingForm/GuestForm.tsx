@@ -14,7 +14,7 @@ type GuestFormProps = {
     selectedStayType: 'OverNight' | 'DayStay',
     selectedCheckIn: Date,
     selectedCheckOut: Date,
-    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'payment'>>,
+    setBookingStep: Dispatch<SetStateAction<'form' | 'review'  | 'pre-order' | 'payment'>>,
 }
 
 const GuestForm =  ({ accommodation, selectedStayType, selectedCheckIn, selectedCheckOut, setBookingStep }: GuestFormProps) => {
@@ -34,7 +34,7 @@ const GuestForm =  ({ accommodation, selectedStayType, selectedCheckIn, selected
         if(!isValid) return;
 
         reset({ ...getValues() }, { keepValues: true });
-        setBookingStep('review')
+        setBookingStep('pre-order')
     }
     
     return (

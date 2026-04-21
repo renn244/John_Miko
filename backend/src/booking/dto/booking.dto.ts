@@ -1,8 +1,16 @@
 import { Transform, Type } from "class-transformer";
-import { IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, Min } from "class-validator";
+import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, Min, ValidateNested } from "class-validator";
 import { BookingStatus, BookingTimeSlot, PaymentType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
+
+export class PreOrderItemDto {
+    @IsString()
+    menuItemId!: string;
+
+    @IsNumber()
+    quantity!: number;
+}
 
 export class CreateBookingDto {
     @IsString()
@@ -42,6 +50,12 @@ export class CreateBookingDto {
     @IsNotEmpty({ message: "Check-in date is required" })
     @isNotPastDate({ message: "Check-in date cannot be in the past" })
     checkIn!: Date;
+
+    @IsArray()
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => PreOrderItemDto)
+    preOrderItems?: PreOrderItemDto[];
 
     // create a payment type field in the database
     @IsNotEmpty({ message: "Payment type is required" })

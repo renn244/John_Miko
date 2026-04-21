@@ -7,17 +7,18 @@ import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type ReviewFormProps = {
     accommodation: Accommodation,
-    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'payment'>>,
+    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'pre-order' | 'payment'>>,
     stayType: 'OverNight' | 'DayStay',
     checkIn: Date,
     checkOut: Date,
     price: number,
+    preOrderSubTotal: number,
     serviceFee?: number,
     total: number,
 }
 
 const ReviewForm = ({ 
-    accommodation, stayType, checkIn, checkOut, price, serviceFee, total, setBookingStep 
+    accommodation, stayType, checkIn, checkOut, price, preOrderSubTotal, serviceFee, total, setBookingStep 
 }: ReviewFormProps) => {
     const { watch } = useFormContext<multiStepBookingFormSchema>();
 
@@ -146,6 +147,14 @@ const ReviewForm = ({
                                 </span>
                             </div>
                         )}
+                        {preOrderSubTotal > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Pre-Order Subtotal</span>
+                                <span className="font-semibold">
+                                    ₱{preOrderSubTotal.toLocaleString()}
+                                </span>
+                            </div>
+                        )}
                         <div className="pt-2 border-t flex justify-between">
                             <span className="font-bold text-lg">
                                 Total
@@ -168,9 +177,9 @@ const ReviewForm = ({
                     <ArrowRight className="w-6 h-6" />
                 </Button>
                 <Button type="button" variant="outline" className="w-full"
-                onClick={() => setBookingStep('form')}
+                onClick={() => setBookingStep('pre-order')}
                 >
-                    Back to Edit
+                    Back to Pre-order
                 </Button>
             </div>
         </div>

@@ -1,5 +1,5 @@
-import { Transform } from "class-transformer";
-import { IsBooleanString, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
+import { MenuItemAvailability } from "src/generated/prisma/enums";
 import { isCapitalized } from "src/lib/customValidator/isCapitalized";
 
 export class GetMenuItemsQuery {
@@ -13,7 +13,8 @@ export class GetMenuItemsQuery {
     category?: string;
 
     @IsOptional()
-    @IsBooleanString()
-    @Transform(({ value }) => value === 'true')
-    isActive?: boolean;
+    @IsEnum([MenuItemAvailability.Unavailable, MenuItemAvailability.Available], {
+        message: "Availability must be either 'Unavailable' or 'Available'"
+    })
+    availability?: MenuItemAvailability;
 }
