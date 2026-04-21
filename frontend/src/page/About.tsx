@@ -1,6 +1,7 @@
+import Footer from "@/components/common/Footer";
 import NavBar from "@/components/common/NavBar";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Eye, Handshake, Heart, Leaf, Shield, Target, TrendingUp } from "lucide-react";
+import { CheckCircle, Clock, Eye, Handshake, Heart, Leaf, Mail, MapPin, Phone, Shield, Target, TrendingUp } from "lucide-react";
 import { Link } from "react-router";
 
 const coreValues = [
@@ -253,33 +254,106 @@ const About = () => {
                 </div>
             </section>
 
-            <section className="py-16 md:py-20 relative overflow-hidden">
-                <img
-                src="https://images.unsplash.com/photo-1673138703974-41568ad10596?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjByZXNvcnQlMjBzdW5zZXR8ZW58MXx8fHwxNzc1ODE1MzI5fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Resort at sunset"
-                className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-primary/80" />
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center text-white">
-                    <div>
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
-                            Experience the Difference
-                        </h2>
-                        <p className="text-lg md:text-xl mb-8 md:mb-10 text-white/95">
-                            Join thousands of satisfied guests who have made John Miko's Place their coastal home away from home.
-                        </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4">
+            <section className="py-12 md:py-16 lg:py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-10 md:mb-12">
+                        <div>
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">
+                                Visit Us
+                            </h2>
+                            <p className="text-base md:text-lg text-muted-foreground">
+                                Find us at our beautiful coastal location
+                            </p>
+                        </div>
+                    </div>
 
-                            <Link to="/accommodations">
-                                <Button size="lg">
-                                    Explore Accommodations
-                                    <TrendingUp className="w-5 h-5 md:w-6 md:h-6" />
-                                </Button>
-                            </Link>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                        <div className="rounded-xl overflow-hidden border-2">
+                            <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2173.7788647223433!2d121.01468827929318!3d14.905257715337752!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397a9bfaeb13b33%3A0x46457edc695c2db1!2sJohn%20Miko&#39;s%20Place%20Resort!5e1!3m2!1sen!2sph!4v1776763760595!5m2!1sen!2sph" 
+                            className="w-full h-87.5 md:h-146"
+                            loading="lazy" >
+
+                            </iframe>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-2xl md:text-3xl font-bold mb-2">
+                                    Get In Touch
+                                </h3>
+                                <p className="text-base md:text-lg mb-8 text-muted-foreground">
+                                    We're here to help with your booking and answer any questions about our resort.
+                                </p>
+                            </div>
+
+                            <div className="space-y-5">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                        <MapPin className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
+                                            Location
+                                        </h4>
+                                        <p className="text-sm md:text-base text-muted-foreground">
+                                            Pulong Yantok Norzagaray<br />
+                                            Bulacan Philippines
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                        <Phone className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
+                                            Phone
+                                        </h4>
+                                        <p className="text-sm md:text-base text-muted-foreground">
+                                            +63 123 456 7890<br />
+                                            +63 987 654 3210
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                        <Mail className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
+                                            Email
+                                        </h4>
+                                        <p className="text-sm md:text-base text-muted-foreground">
+                                            info@johnmikosplace.com<br />
+                                            reservations@johnmikosplace.com
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                        <Clock className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
+                                            Hours
+                                        </h4>
+                                        <p className="text-sm md:text-base text-muted-foreground">
+                                            24/7 Guest Support<br />
+                                            Open Daily
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
+
+            <Footer />
         </div>
     );
 }

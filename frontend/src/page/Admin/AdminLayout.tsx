@@ -52,7 +52,7 @@ const AdminLayout = () => {
     return (
         <div className="min-h-screen flex">
 
-            <aside className="border fixed lg:sticky top-0 h-screen">
+            <aside className={`bg-white border fixed lg:sticky top-0 h-screen transition-transform z-40 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
                 <div className="flex flex-col h-full">
 
                     <div className="h-16 flex items-center justify-between px-4 border-b">

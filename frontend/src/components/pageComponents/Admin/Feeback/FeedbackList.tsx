@@ -26,7 +26,7 @@ const FeedbackList = () => {
                 const ratingColors = getRatingColor(feedback.rating);
                 
                 return (
-                    <div key={feedback.id} className="bg-white rounded-xl p-5 shadow-sm border hover:shadow-md transition-shadow">
+                    <div key={feedback.id} className="bg-white rounded-md md:rounded-xl p-3 md:p-5 shadow-sm border hover:shadow-md transition-shadow">
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
 
@@ -61,7 +61,7 @@ const FeedbackList = () => {
                                     </div>
 
                                     <div className="flex flex-col items-end gap-2 ml-4">
-                                        <div className="flex items-center gap-1">
+                                        <div className="items-center gap-1 hidden md:flex">
                                             {[...Array(5)].map((_, i) => (
                                                 <Star
                                                 key={i}
@@ -71,7 +71,7 @@ const FeedbackList = () => {
                                             ))}
                                         </div>
 
-                                        <Button onClick={() => setViewId(feedback.id)} variant="outline">
+                                        <Button className="hidden md:block" onClick={() => setViewId(feedback.id)} variant="outline">
                                             View Details
                                         </Button>
                                     </div>
@@ -80,6 +80,10 @@ const FeedbackList = () => {
                                 <p className="text-sm leading-relaxed text-muted-foreground">
                                     {feedback.comment}
                                 </p>
+
+                                <Button className="visible md:hidden mt-2 w-full" onClick={() => setViewId(feedback.id)} variant="outline">
+                                    View Details
+                                </Button>    
                             </div>
                         </div>
                     </div>

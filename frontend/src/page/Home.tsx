@@ -1,3 +1,4 @@
+import Footer from "@/components/common/Footer"
 import NavBar from "@/components/common/NavBar"
 import Chatbot from "@/components/pageComponents/Chatbot"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -328,6 +329,8 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
+            <Footer />
 
             {/* Chatbot */}
             <Chatbot />

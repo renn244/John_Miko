@@ -20,7 +20,6 @@ import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
 import Overview from './page/Admin/Overview';
 import Amenities from './page/Amenities';
-import Contact from './page/Contact';
 import ForgotPassword from "./page/ForgotPassword";
 import CreateFeedback from './page/Guest/CreateFeedback';
 import EditFeedback from './page/Guest/EditFeedback';
@@ -42,10 +41,6 @@ const router = createBrowserRouter([
   {
     path: '/about',
     element: <About />
-  },
-  {
-    path: '/contact',
-    element: <Contact />
   },
   {
     path: "/login",

@@ -67,7 +67,7 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                         Guest Information
                     </h3>
 
-                    <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                    <div className="bg-gray-50 rounded-xl p-2 md:p-4 space-y-3">
                         <div className="flex items-center gap-3">
                             <Avatar size="lg">
                                 <AvatarFallback className="bg-primary text-white">

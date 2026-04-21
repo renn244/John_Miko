@@ -15,9 +15,9 @@ const FeedbackStatistics = () => {
             />
 
             <StatisticCards 
-            title="Minimum Rating"
-            Icon={<TrendingDown className="w-5 h-5 text-red-500" />}
-            stat={stats?.minRating || 0}
+            title="Avg Rating"
+            Icon={<Star className="w-5 h-5 text-amber-500" />}
+            stat={stats?.averageRating || 0}
             isLoading={isLoading}
             />
 
@@ -29,9 +29,9 @@ const FeedbackStatistics = () => {
             />
 
             <StatisticCards 
-            title="Avg Rating"
-            Icon={<Star className="w-5 h-5 text-amber-500" />}
-            stat={stats?.averageRating || 0}
+            title="Minimum Rating"
+            Icon={<TrendingDown className="w-5 h-5 text-red-500" />}
+            stat={stats?.minRating || 0}
             isLoading={isLoading}
             />
         </div>

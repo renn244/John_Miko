@@ -6,8 +6,9 @@ const ChatbotRuleStatistics = () => {
     const { data: statistics, isLoading } = useGetChatbotRuleStatisticsAdminQuery();
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <StatisticCards 
+            className="col-span-2 md:col-span-1"
             title="Total Rules"
             Icon={<MessageCircle className="w-5 h-5 text-primary" />}
             stat={statistics?.total || 0}

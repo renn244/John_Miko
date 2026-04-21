@@ -31,9 +31,6 @@ const NavBar = () => {
                         <NavLink to={'/about'} className={({ isActive }) => `font-medium text-sm border-b-2 pb-1 ${isActive ? 'border-primary text-primary' : 'border-transparent'}`}>
                             About
                         </NavLink>
-                        <NavLink to={'/contact'} className={({ isActive }) => `font-medium text-sm border-b-2 pb-1 ${isActive ? 'border-primary text-primary' : 'border-transparent'}`}>
-                            Contact
-                        </NavLink>
                     </div>
 
                     <div>

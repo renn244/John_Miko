@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import LoadingSpinner from "./loadingSpinner";
 
 type StatisticCardsProps = {
@@ -5,11 +6,12 @@ type StatisticCardsProps = {
     stat: number;
     Icon: React.ReactNode;
     isLoading: boolean;
+    className?: string
 }
 
-const StatisticCards = ({ title, stat, Icon, isLoading }: StatisticCardsProps) => {
+const StatisticCards = ({ title, stat, Icon, isLoading, className }: StatisticCardsProps) => {
     return (
-        <div className="bg-white p-4 rounded-xl shadow-sm border-2">
+        <div className={cn("bg-white p-4 rounded-xl shadow-sm border-2", className)}>
             <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {title}

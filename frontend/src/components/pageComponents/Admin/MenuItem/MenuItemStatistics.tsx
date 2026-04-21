@@ -7,8 +7,9 @@ const MenuItemStatistics = () => {
     const { data: stats, isLoading } = useGetMenuItemStatsQuery();
 
     return (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <StatisticCards 
+            className="col-span-2 md:col-span-1"
             title="Total Items"
             Icon={<UtensilsCrossed className="w-5 h-5 text-muted-foreground" />}
             stat={stats?.total || 0}
