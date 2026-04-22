@@ -156,7 +156,8 @@ export class BookingService {
                         type: true,
                         imageUrl: true,
                     }
-                }
+                },
+                preOrders: true
             }
         })
 

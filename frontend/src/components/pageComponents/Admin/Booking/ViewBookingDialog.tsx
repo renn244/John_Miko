@@ -6,8 +6,8 @@ import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
 import getCheckInOut from "@/lib/getCheckInOut";
 import { useBookingAdminStore } from "@/store/admin/bookingAdmin.store";
-import type { BookingWithAccommodation } from "@/types/booking.types";
-import { Calendar, CreditCard, FileText, MapPin, Users } from "lucide-react";
+import type { BookingWithAccommodationAndPreOrder } from "@/types/booking.types";
+import { Calendar, CreditCard, FileText, MapPin, Pizza, Users } from "lucide-react";
 
 const ViewBookingDialog = () => {
     const isViewOpen = useBookingAdminStore((state) => state.isViewOpen);
@@ -43,7 +43,7 @@ const ViewBookingDialog = () => {
     )
 }
 
-const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAccommodation }) => {
+const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAccommodationAndPreOrder }) => {
     
     const { 
         checkIn, checkInDayOfTheWeek,
@@ -58,6 +58,7 @@ const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAcco
                     {selectedBooking.id} <Badge>{selectedBooking.status}</Badge> <Badge variant="outline">{selectedBooking.paymentType} Payment</Badge>
                 </DialogDescription>
             </DialogHeader>
+            
             <div className="grid lg:grid-cols-2 gap-6">
 
                 <div className="space-y-4">
@@ -234,6 +235,28 @@ const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAcco
                         </div> */}
                     </div>
 
+                </div>
+
+                <div className="col-span-2">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Pizza className="w-5 h-5 text-primary" />
+                        <h3 className="text-lg font-bold">
+                            Pre Order
+                        </h3>
+                    </div>
+
+                    <div className="space-y-3">
+                        {selectedBooking.preOrders?.map((preorder) =>  (
+                            <div key={preorder.id} className="flex items-center justify-between p-3 rounded-lg border bg-green-50 border-green-200">
+                                <span className="font-medium">
+                                    {preorder.name}
+                                </span>
+                                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-100">
+                                    Qty: {preorder.quantity}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </>

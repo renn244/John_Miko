@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback } from "@/types/booking.types";
+import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrder } from "@/types/booking.types";
 
 export const bookingApi = {
     bookAccommodation: async (data: any) => {
@@ -52,7 +52,7 @@ export const bookingApi = {
             throw new Error(response.data.message || 'Failed to fetch booking details');
         }
         
-        return response.data as BookingWithAccommodation;
+        return response.data as BookingWithAccommodationAndPreOrder;
     },
     getBookingsByUser: async (query?:  { status: string }) => {
         const response = await apiClient.get('/booking/byUser', { params: query })

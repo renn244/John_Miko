@@ -52,6 +52,19 @@ export type BookingWithAccommodationAndFeedback =  {
     feedback?: Feedback
 } & BookingWithAccommodation
 
+export type BookingWithAccommodationAndPreOrder = {
+    preOrders?: {
+        id: string;
+        bookingId: string;
+        name: string;
+        description: string;
+        category: string;
+        price: number;
+        quantity: number;
+        createdAt: string;
+    }[]
+} & BookingWithAccommodation
+
 // My Booking Types
 export type StatusOption = typeof statusOptions[number];
 export type StateSelectedLabel = StatusOption["label"];
