@@ -26,6 +26,15 @@ export const useGetMenuItemsQuery = (query: any) => {
     })
 }
 
+export const useGetMenuItemsBulkQuery = (ids: string[] | undefined) => {
+    return useQuery({
+        queryKey: ['menu-item', 'bulk', ids],
+        queryFn: () => menuItemApi.getMenuItemsBulk(ids || []),
+        enabled: !!ids && ids.length > 0,
+        refetchOnWindowFocus: false,
+    })
+}
+
 export const useGetMenuItemCategoriesQuery = () => {
     return useQuery({
         queryKey: ['menu-item', 'categories'],

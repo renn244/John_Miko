@@ -26,6 +26,15 @@ export const menuItemApi = {
 
         return response.data as MenuItem[];
     },
+    getMenuItemsBulk: async (ids: string[]) => {
+        const response = await apiClient.get('/menu-item/bulk', { params: { ids: ids.join(',') } });
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while fetching menu items.');
+        }
+
+        return response.data as MenuItem[];
+    },
     getMenuItemCategories: async () => {
         const response = await apiClient.get('/menu-item/categories');
 

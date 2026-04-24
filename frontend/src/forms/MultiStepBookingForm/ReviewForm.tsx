@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
+import { useGetMenuItemsBulkQuery } from "@/hooks/admin/menu-item.hook";
 import type { Accommodation } from "@/types/admin/accommodation.type";
+import type { MenuItem } from "@/types/admin/menu-item.type";
 import { ArrowRight } from "lucide-react";
-import { type Dispatch, type SetStateAction } from "react";
+import { useMemo, type Dispatch, type SetStateAction } from "react";
 import { useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
@@ -21,6 +23,26 @@ const ReviewForm = ({
     accommodation, stayType, checkIn, checkOut, price, preOrderSubTotal, serviceFee, total, setBookingStep 
 }: ReviewFormProps) => {
     const { watch } = useFormContext<multiStepBookingFormSchema>();
+
+    const preOrderItems = watch('preOrderItems') || [];
+    const { data: menuItems } = useGetMenuItemsBulkQuery(preOrderItems.map((item) => item.menuItemId));
+
+    const preOrders = useMemo(() => {
+        if(!menuItems) return [];
+        const preOrderData: (MenuItem & { quantity: number })[] = [];
+
+        preOrderItems.forEach((item) => {
+            const menuItem = menuItems.find((menu) => menu.id === item.menuItemId);
+            if(!menuItem) return undefined;
+
+            preOrderData.push({
+                ...menuItem,
+                quantity: item.quantity,
+            });
+        });
+
+        return preOrderData;
+    }, [preOrderItems, menuItems])
 
     return (
         <div className="space-y-6">
@@ -129,6 +151,40 @@ const ReviewForm = ({
                     </div>
                 </div>
 
+                <div>
+                    <h4 className="font-bold mb-2">
+                        Pre Order Items 
+                        ({preOrders.length} {preOrders.length === 1 ? 'Item' : 'Items'})
+                    </h4>
+                    <div className="space-y-3">
+                        {preOrders.map((item) => (
+                            <div
+                            key={item.id}
+                            className="flex items-center gap-4 p-4 rounded-lg bg-muted"
+                            >
+                                <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="w-16 h-16 rounded-lg object-cover"
+                                />
+                                <div className="flex-1">
+                                    <p className="font-bold mb-1">
+                                        {item.name}
+                                    </p>
+                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        ₱{item.price.toLocaleString()} × {item.quantity}
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-primary">
+                                        ₱{(item.price * item.quantity).toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="p-4 rounded-xl border-2 border-primary/75 bg-primary/5">
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
@@ -139,19 +195,19 @@ const ReviewForm = ({
                                 ₱{price.toLocaleString()}
                             </span>
                         </div>
-                        {serviceFee && (
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Service Fee</span>
-                                <span className="font-semibold">
-                                    ₱{serviceFee.toLocaleString()}
-                                </span>
-                            </div>
-                        )}
                         {preOrderSubTotal > 0 && (
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Pre-Order Subtotal</span>
                                 <span className="font-semibold">
                                     ₱{preOrderSubTotal.toLocaleString()}
+                                </span>
+                            </div>
+                        )}
+                        {serviceFee && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Service Fee</span>
+                                <span className="font-semibold">
+                                    ₱{serviceFee.toLocaleString()}
                                 </span>
                             </div>
                         )}

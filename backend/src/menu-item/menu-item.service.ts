@@ -38,6 +38,16 @@ export class MenuItemService {
     return menuItems;
   }
 
+  async getMenuItemsBulk(ids: string[]) {
+    const menuItems = await this.prisma.menuItem.findMany({
+      where: {
+        id: { in: ids }
+      }
+    })
+    
+    return menuItems;
+  }
+
   async getMenuItemCategories() {
     const categories = await this.prisma.menuItem.findMany({ 
       distinct: ['category'], select: { category: true } 

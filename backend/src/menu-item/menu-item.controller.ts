@@ -24,6 +24,11 @@ export class MenuItemController {
     return this.menuItemService.getMenuItems(query);
   }
 
+  @Get('bulk')
+  async getMenuItemsBulk(@Query('ids') ids: string) {
+    return this.menuItemService.getMenuItemsBulk(ids.split(','));
+  }
+
   @Get('categories')
   async getMenuItemCategories() {
     return this.menuItemService.getMenuItemCategories();
