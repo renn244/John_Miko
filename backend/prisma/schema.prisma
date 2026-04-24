@@ -30,12 +30,15 @@ model User {
 
   forgotPasswordTokens PasswordResetToken[]
 
+  // for guests, this will be their bookings and feedbacks.
   bookings  Booking[]
   guestFeedbacks Feedback[]
 
+  // for staff, this will be the reports they made
+  reports   Report[]
+
   createdAt DateTime @default(now())
 }
-
 
 model PasswordResetToken {
   id        String   @id @default(cuid())
@@ -109,6 +112,7 @@ model Booking {
   bookedAccommodation BookedAccommodation?
   preOrders         PreOrderMenuItem[]
   feedback          Feedback?
+  reports           Report[]
 
   guestName       String
   email           String
@@ -160,6 +164,50 @@ model PreOrderMenuItem {
   createdAt     DateTime @default(now())
 }
 
+model Report {
+  id            String   @id @default(cuid())
+
+  bookingId     String
+  booking       Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  userId        String // for staff, to identify who made the report. for accountability purposes
+  user          User   @relation(fields: [userId], references: [id])
+
+  title         String
+  proofImages   String[]
+  description   String
+
+  createdAt     DateTime @default(now())
+} 
+
+enum MaintenanceStatus {
+  Pending
+  InProgress
+  Completed
+  Closed
+}
+
+enum MaintenancePriority {
+  Low
+  Medium
+  High
+}
+
+model Maintenance {
+  id            String   @id @default(cuid())
+
+  title         String
+  imagesUrl     String[]
+  description   String
+
+  status        MaintenanceStatus @default(Pending)
+  priority      MaintenancePriority
+
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 enum MenuItemAvailability {
   Available
   Unavailable
@@ -193,7 +241,6 @@ model Feedback {
 }
 
 // CHATBOT
-
 model Rules {
   id              String   @id @default(cuid())
   

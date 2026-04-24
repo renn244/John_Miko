@@ -1,6 +1,6 @@
 import ProfileMenu from "@/components/common/ProfileMenu";
 import { useAuthContext } from "@/context/AuthContext";
-import { Bot, Calendar, ChevronLeft, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, Settings, X } from "lucide-react";
+import { Bot, Calendar, ChevronLeft, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, Wrench, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 
@@ -42,6 +42,11 @@ const AdminLayout = () => {
             icon: Bot,
             path: '/admin/chatbot-rule',
         },
+        {
+            label: 'Maintenance',
+            icon: Wrench,
+            path: '/admin/maintenance',
+        }
         // {
         //     label: 'Settings',
         //     icon: Settings,

@@ -15,6 +15,9 @@ import AddChatbotRule from './page/Admin/ChatbotRule/AddChatbotRule';
 import ChatbotRule from './page/Admin/ChatbotRule/ChatbotRule';
 import EditChatbotRule from './page/Admin/ChatbotRule/EditChatbotRule';
 import Feedback from './page/Admin/Feedback/Feedback';
+import AddMaintenance from './page/Admin/Maintenance/AddMaintenance';
+import EditMaintenance from './page/Admin/Maintenance/EditMaintenance';
+import Maintenance from './page/Admin/Maintenance/Maintenance';
 import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
 import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
@@ -116,6 +119,14 @@ const router = createBrowserRouter([
           { index: true, element: <MenuItem /> },
           { path: 'add', element: <AddMenuItem /> },
           { path: ':id/edit', element: <EditMenuItem /> }
+        ]
+      },
+      {
+        path: 'maintenance',
+        children: [
+          { index: true, element: <Maintenance /> },
+          { path: 'add', element: <AddMaintenance /> },
+          { path: ':id/edit', element: <EditMaintenance /> }
         ]
       },
       {

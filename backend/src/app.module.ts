@@ -10,6 +10,8 @@ import { MenuItemModule } from './menu-item/menu-item.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { RulesModule } from './rules/rules.module';
 import { PreOrderModule } from './pre-order/pre-order.module';
+import { StaffReportsModule } from './staff-reports/staff-reports.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { PreOrderModule } from './pre-order/pre-order.module';
     MenuItemModule,
     FeedbackModule,
     RulesModule,
-    PreOrderModule
+    PreOrderModule,
+    StaffReportsModule,
+    MaintenanceModule
   ],
 })
 export class AppModule {}

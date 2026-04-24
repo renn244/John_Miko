@@ -1,8 +1,8 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { SetURLSearchParams } from "react-router";
 
 export const updateSearchParam = (
   searchParams: URLSearchParams,
-  setSearchParams: Dispatch<SetStateAction<URLSearchParams>>,
+  setSearchParams: SetURLSearchParams,
   key: string,
   value: string | undefined
 ) => {
@@ -12,5 +12,5 @@ export const updateSearchParam = (
   } else {
     newSearchParams.delete(key);
   }
-  setSearchParams(newSearchParams);
+  setSearchParams(newSearchParams, { replace: true });
 };

@@ -1,0 +1,60 @@
+import { maintenanceApi } from "@/api/admin/maintenane.api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
+
+export const useCreateMaintenanceMutation = () => {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['maintenance', 'create'],
+        mutationFn: maintenanceApi.createMaintenance,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'stats'] });
+            navigate('/admin/maintenance');
+        }
+    })
+}
+
+export const useGetMaintenancesQuery = (query: any) => {
+    return useQuery({
+        queryKey: ['maintenance', 'list', query],
+        queryFn: () => maintenanceApi.getMaintenances(query),
+        refetchOnWindowFocus: false,
+    })
+}
+
+export const useGetMaintenanceStatsQuery = () => {
+    return useQuery({
+        queryKey: ['maintenance', 'stats'],
+        queryFn: maintenanceApi.getMaintenanceStats,
+        refetchOnWindowFocus: false,
+    })
+}
+
+export const useGetMaintenancebyId = (id: string | undefined | null) => {
+    return useQuery({
+        queryKey: ['maintenance', 'byId', id],
+        queryFn: () => maintenanceApi.getMaintenanceById(id || ""),
+        enabled: !!id,
+        refetchOnWindowFocus: false,
+        retry: false,
+    })
+}
+
+export const useUpdateMaintenanceMutation = (id: string | undefined | null) => {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['maintenance', 'update', id],
+        mutationFn: (data: any) => maintenanceApi.updateMaintenance(id || "", data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'byId', id] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'stats'] });
+            navigate('/admin/maintenance');
+        }
+    })
+}
