@@ -1,3 +1,4 @@
+import type { PaginationParams } from "../pagination.type";
 
 export type Accommodation = {
     id: string;
@@ -35,7 +36,7 @@ export type GetAccommodationQuery = {
     type?: Accommodation['type'];
     availability?: Accommodation['availability'];
     search?: string;
-}
+} & PaginationParams
 
 // Response types
 export type AccommodationStats = {

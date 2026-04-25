@@ -19,7 +19,10 @@ export class CustomValidationPipe implements PipeTransform {
             enableImplicitConversion: true
         });
 
-        const error = await validate(object); // would return an array of errors if there are any errors
+        // would return an array of errors if there are any errors        
+        const error = await validate(object, {
+            whitelist: true, // would remove any properties that are not defined in the DTO
+        });
 
         if(error.length > 0) {
             const errors = error.map(err => {

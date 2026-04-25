@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateAccommodationDto, GetAccommodationQueryDto, UpdateAccommodationDto } from './dto/accommodation.dto';
+import { CreateAccommodationDto, UpdateAccommodationDto } from './dto/accommodation.dto';
+import { GetAccommodationQueryDto } from './query/get-accommodations-query.dto';
 
 @Injectable()
 export class AccommodationService {
@@ -40,11 +42,23 @@ export class AccommodationService {
     }
 
     async getAccommodations(query: GetAccommodationQueryDto) {
-        const { search, ...rest } = cleanPrismaWhere(query);
+        const { search, page, limit, ...rest } = cleanPrismaWhere(query);
 
-        return this.prisma.accommodation.findMany({ where: {
-            ...rest, name: { contains: search, mode: 'insensitive' }
-        } });
+        const [data, total] = await Promise.all([
+            await this.prisma.accommodation.findMany({ 
+                where: {
+                    ...rest, name: { contains: search, mode: 'insensitive' },
+                },
+                ...getPaginationArgs(page, limit),
+                orderBy: { createdAt: 'desc' },
+            }),
+            await this.prisma.accommodation.count({ where: { ...rest, name: { contains: search, mode: 'insensitive' } } })
+        ])
+
+        return { 
+            data,
+            meta: getPaginationMeta(total, page, limit)
+        }
     }
 
     async getAccommodationById(id: string) {

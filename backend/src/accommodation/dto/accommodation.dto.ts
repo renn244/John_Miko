@@ -30,26 +30,5 @@ export class CreateAccommodationDto {
     availability!: AccommodationAvailability;
 }
 
-export class GetAccommodationQueryDto {
-    @IsOptional()
-    @IsString({ message: 'Search must be a text string' })
-    search?: string;
-
-    @IsOptional()
-    @IsEnum(AccommodationType, { message: `Type must be one of: ${Object.values(AccommodationType).join(', ')}` })
-    type?: AccommodationType;
-
-    @IsOptional()
-    @IsEnum(AccommodationAvailability, { message: `Availability must be one of: ${Object.values(AccommodationAvailability).join(', ')}` })
-    availability?: AccommodationAvailability;
-
-    // @IsOptional()
-    // @Type(() => Number)
-    // @IsInt({ message: 'Page must be an integer number' })
-    // @Min(1, { message: 'Page must be at least 1' })
-    // page?: number = 1;
-
-}
-
 export class UpdateAccommodationDto extends PartialType(CreateAccommodationDto) {
 }

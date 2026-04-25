@@ -5,7 +5,8 @@ import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { AccommodationService } from './accommodation.service';
-import { CreateAccommodationDto, GetAccommodationQueryDto, UpdateAccommodationDto } from './dto/accommodation.dto';
+import { CreateAccommodationDto, UpdateAccommodationDto } from './dto/accommodation.dto';
+import { GetAccommodationQueryDto } from './query/get-accommodations-query.dto';
 
 @Controller('accommodation')
 // should be optional auth guard

@@ -36,7 +36,8 @@ export const useGetAccommodationsQuery = (query?: GetAccommodationQuery) =>{
     return useQuery({
         queryKey: ['accommodations', query],
         queryFn: () => accommodationApi.getAccommodations(query),
-        refetchOnWindowFocus: false
+        refetchOnWindowFocus: false,
+        placeholderData: (prev) => prev
     })
 }
 

@@ -1,6 +1,7 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
 import type { Accommodation, AccommodationOption, AccommodationStats, CreateAccommodationDto, GetAccommodationQuery, UpdateAccommodationDto } from "@/types/admin/accommodation.type";
+import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const accommodationApi = {
     createAccommodation: async (data: CreateAccommodationDto) => {
@@ -41,7 +42,7 @@ export const accommodationApi = {
             throw new Error(response.data.message || "Validation error");
         }
 
-        return (response.data || []) as Accommodation[];
+        return (response.data || []) as PaginatedResponse<Accommodation>;
     },
     getAccommodationById: async (id: Accommodation['id']) => {
         const response = await apiClient.get(`/accommodation/${id}`);
