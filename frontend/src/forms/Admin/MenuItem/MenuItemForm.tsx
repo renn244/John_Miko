@@ -1,3 +1,5 @@
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview"
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload"
 import { Button } from "@/components/ui/button"
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -15,11 +17,11 @@ import { toast } from "sonner"
 import z from "zod"
 
 const MenuItemSchema = z.object({
-    imageUrl: z.url(),
-    name: z.string(),
-    description: z.string(),
-    price: z.number(),
-    category: z.string(),
+    imageUrl: z.url().nonempty({ message: "Image is required" }),
+    name: z.string().nonempty({ message: "Name is required" }),
+    description: z.string().nonempty({ message: "Description is required" }),
+    price: z.number().min(0, { message: "Price must be a positive number" }),
+    category: z.string().nonempty({ message: "Category is required" }),
     availability: z.enum(['Available', 'Unavailable'])
 })
 
@@ -197,22 +199,28 @@ const MenuItemForm = ({ onsubmit, oncancel, className, initialDate, isUpdate }: 
                     <h2 className="text-lg font-bold mb-4 pb-2 border-b" style={{ color: '#1F2937', borderColor: '#E5E7EB' }}>
                         Media
                     </h2>
-                    <Controller 
+                    <Controller
                     name="imageUrl"
                     control={control}
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel htmlFor={field.name} className="gap-1">
-                                Image URL <span className="text-red-700">*</span>
+                            <FieldLabel className="gap-1">
+                                Image <span className="text-red-700">*</span>
                             </FieldLabel>
 
-                            <Input
-                            id={field.name}
-                            aria-invalid={fieldState.invalid}
-                            {...field}
-                            />
+                            {!field.value && (
+                                <CloudinaryUpload
+                                onSuccess={(url) => field.onChange(url)}
+                                onError={(err) => setError('imageUrl', { type: 'manual', message: err.message })}
+                                />
+                            )}
 
-                            {/* Image Preview */}
+                            {field.value && (
+                                <CloudinaryPreview 
+                                images={[{ url: field.value }]}
+                                onRemove={() => field.onChange("")}
+                                />
+                            )}
 
                             {fieldState.invalid && (
                                 <FieldError errors={getErrorMessages(fieldState.error)} />

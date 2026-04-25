@@ -1,3 +1,5 @@
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview"
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload"
 import { Button } from "@/components/ui/button"
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -43,7 +45,7 @@ const MaintenanceForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
         defaultValues: {
             title: initialData?.title || "",
             description: initialData?.description || "",
-            imagesUrl: initialData?.imagesUrl || ["https://example.com"],
+            imagesUrl: initialData?.imagesUrl || [],
             status: initialData?.status || "Pending",
             priority: initialData?.priority || "Low"
         },
@@ -199,6 +201,41 @@ const MaintenanceForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
                         )}
                         />
 
+                    </div>
+                </div>
+
+                <div>
+                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
+                        Media
+                    </h2>  
+                    <div className="space-y-5">
+                        <Controller 
+                        name="imagesUrl"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                                <FieldLabel className="gap-1">
+                                Image <span className="text-red-700">*</span>
+                                </FieldLabel>
+                    
+                                <CloudinaryUpload
+                                onSuccess={(url) => field.onChange([...field.value, url])}
+                                onError={(err) => toast.error(err.message || "Image upload failed. Please try again.")}
+                                />
+                    
+                                {field.value.length > 0 && (
+                                    <CloudinaryPreview 
+                                    images={field.value.map((url) => ({ url }))}
+                                    onRemove={(index) => field.onChange(field.value.filter((_, i) => i !== index))}
+                                    />
+                                )}
+                    
+                                {fieldState.invalid && (
+                                    <FieldError errors={getErrorMessages(fieldState.error)} />
+                                )}
+                        </Field>
+                        )}
+                        />
                     </div>
                 </div>
 

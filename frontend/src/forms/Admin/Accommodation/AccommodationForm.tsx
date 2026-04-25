@@ -1,3 +1,5 @@
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview"
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload"
 import { Button } from "@/components/ui/button"
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldSet, FieldTitle } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -251,16 +253,19 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                         <Field data-invalid={fieldState.invalid} className="grid gaps-2">
                             <FieldLabel htmlFor={field.name}>Image URL</FieldLabel>
                             
-                            {/* Should be images later not url */}
-                            <Input 
-                            id={field.name}
-                            aria-invalid={fieldState.invalid}
-                            type="text"
-                            placeholder="Enter Image URL"
-                            {...field}
-                            />
+                            {!field.value && (
+                                <CloudinaryUpload 
+                                onSuccess={(url) => field.onChange(url)}
+                                onError={(err) => setError('imageUrl', { type: 'manual', message: err.message })}
+                                />
+                            )}
 
-                            {/* ADD IMAGE PREVIEW LATER! */}
+                            {field.value && (
+                                <CloudinaryPreview 
+                                images={[{ url: field.value }]}
+                                onRemove={() => field.onChange("")}
+                                />
+                            )}
 
                             {fieldState.invalid && (
                                 <FieldError errors={getErrorMessages(fieldState.error)} />
