@@ -37,5 +37,18 @@ export class MaintenanceController {
         return this.maintenanceService.updateMaintenance(id, body);
     }
 
-    //  NO DELETION OF TICKETS, ONLY CLOSING, RESOLVED, PENDING PROCESSES
+    @Patch(':id/start')
+    async startMaintenance(@Param('id') id: string) {
+        return this.maintenanceService.startMaintenance(id);
+    }
+
+    @Patch(':id/complete')
+    async completeMaintenance(@Param('id') id: string, @Body('resolutionNotes') resolutionNotes: string) {
+        return this.maintenanceService.completeMaintenance(id, resolutionNotes);
+    }
+
+    @Patch(':id/close')
+    async closeMaintenance(@Param('id') id: string) {
+        return this.maintenanceService.closeMaintenance(id);
+    }
 }

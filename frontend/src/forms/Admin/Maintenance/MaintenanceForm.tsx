@@ -20,7 +20,6 @@ const MaintenanceSchema = z.object({
     title: z.string().nonempty("Title is required"),
     description: z.string().nonempty("Description is required"),
     imagesUrl: z.array(z.string().url("Invalid URL format")).nonempty("At least one image URL is required"),
-    status: z.enum(["Pending", "InProgress", "Completed", "Closed"], { message: "Status must be one of: Pending, InProgress, Completed, Closed" }),
     priority: z.enum(["Low", "Medium", "High"], { message: "Priority must be one of: Low, Medium, High" })
 })
 
@@ -46,7 +45,6 @@ const MaintenanceForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
             title: initialData?.title || "",
             description: initialData?.description || "",
             imagesUrl: initialData?.imagesUrl || [],
-            status: initialData?.status || "Pending",
             priority: initialData?.priority || "Low"
         },
         criteriaMode: "all",
@@ -234,99 +232,6 @@ const MaintenanceForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
                                     <FieldError errors={getErrorMessages(fieldState.error)} />
                                 )}
                         </Field>
-                        )}
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Tracking
-                    </h2>
-                    <div className="space-y-5">
-                        <Controller 
-                        name="status"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <FieldSet>
-                                <FieldLegend data-invalid={fieldState.invalid} className="gap-1 data-[invalid=true]:text-destructive" variant="label">
-                                    Status <span className="text-red-700">*</span>
-                                </FieldLegend>
-
-                                <RadioGroup
-                                {...field}
-                                name={field.name}
-                                value={field.value}
-                                onValueChange={field.onChange}
-                                aria-invalid={fieldState.invalid}
-                                className="grid md:grid-cols-2 gap-3"
-                                >
-                                    <FieldLabel htmlFor="form-rhf-radiogroup-Pending">
-                                        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
-                                            <FieldContent>
-                                                <FieldTitle>Pending</FieldTitle>
-                                                <FieldDescription>
-                                                    This issue is pending further investigation or action.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem 
-                                            value="Pending"
-                                            id="form-rhf-radiogroup-Pending"
-                                            aria-invalid={fieldState.invalid}
-                                            />
-                                        </Field>
-                                    </FieldLabel>
-                                    <FieldLabel htmlFor="form-rhf-radiogroup-InProgress">
-                                        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
-                                            <FieldContent>
-                                                <FieldTitle>In Progress</FieldTitle>
-                                                <FieldDescription>
-                                                    This issue should be addressed within a reasonable timeframe to prevent further inconvenience.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem 
-                                            value="InProgress"
-                                            id="form-rhf-radiogroup-InProgress"
-                                            aria-invalid={fieldState.invalid}
-                                            />
-                                        </Field>
-                                    </FieldLabel>
-                                    <FieldLabel htmlFor="form-rhf-radiogroup-Completed">
-                                        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
-                                            <FieldContent>
-                                                <FieldTitle>Completed</FieldTitle>
-                                                <FieldDescription>
-                                                    This issue has been resolved and no further action is required.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem 
-                                            value="Completed"
-                                            id="form-rhf-radiogroup-Completed"
-                                            aria-invalid={fieldState.invalid}
-                                            />
-                                        </Field>
-                                    </FieldLabel>
-                                    <FieldLabel htmlFor="form-rhf-radiogroup-Closed">
-                                        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
-                                            <FieldContent>
-                                                <FieldTitle>Closed</FieldTitle>
-                                                <FieldDescription>
-                                                    This issue has been closed and is no longer active.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem
-                                            value="Closed"
-                                            id="form-rhf-radiogroup-Closed"
-                                            aria-invalid={fieldState.invalid}
-                                            />
-                                        </Field>
-                                    </FieldLabel>
-                                </RadioGroup>
-                                
-                                {fieldState.error && (
-                                    <FieldError errors={getErrorMessages(fieldState.error)} />
-                                )}
-                            </FieldSet>
                         )}
                         />
                     </div>

@@ -58,3 +58,46 @@ export const useUpdateMaintenanceMutation = (id: string | undefined | null) => {
         }
     })
 }
+
+export const useStartMaintnenanceMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['maintenance', 'start'],
+        mutationFn: (id: string) => maintenanceApi.startMaintenance(id),
+
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'byId', id] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'stats'] });
+        }
+    });
+};
+
+export const useCompleteMaintenanceMutation = (id: string | undefined | null) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['maintenance', 'complete', id],
+        mutationFn: (resolutionNotes: string) => maintenanceApi.completeMaintenance(id || "", resolutionNotes),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'byId', id] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'stats'] });
+        }
+    })
+}
+
+export const useClosedMaintenanceMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['maintenance', 'close'],
+        mutationFn: (id: string) => maintenanceApi.closeMaintenance(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'byId', id] });
+            queryClient.invalidateQueries({ queryKey: ['maintenance', 'stats'] });
+        }
+    });
+};

@@ -1,6 +1,7 @@
 import MaintenanceFilter from "@/components/pageComponents/Admin/Maintenance/MaintenanceFilter"
 import MaintenanceStatistics from "@/components/pageComponents/Admin/Maintenance/MaintenanceStatistics"
 import MaintenanceTable from "@/components/pageComponents/Admin/Maintenance/MaintenanceTable"
+import MarkCompleteDialog from "@/components/pageComponents/Admin/Maintenance/MarkCompleteDialog"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { Link } from "react-router"
@@ -32,6 +33,8 @@ const Maintenance = () => {
       <MaintenanceFilter />
 
       <MaintenanceTable  />
+    
+      <MarkCompleteDialog />
     </div>
   )
 }

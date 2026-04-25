@@ -1,6 +1,6 @@
-import StatisticCards from "@/components/ui/StatisticCards"
-import { useGetMaintenanceStatsQuery } from "@/hooks/admin/maintenance.hook"
-import { AlertCircle, CheckCircle, Clock, Wrench } from "lucide-react"
+import StatisticCards from "@/components/ui/StatisticCards";
+import { useGetMaintenanceStatsQuery } from "@/hooks/admin/maintenance.hook";
+import { AlertCircle, CheckCircle, Clock, Wrench } from "lucide-react";
 
 const MaintenanceStatistics = () => {
     const { data: stats, isLoading } = useGetMaintenanceStatsQuery();
@@ -30,16 +30,16 @@ const MaintenanceStatistics = () => {
             />
 
             <StatisticCards 
-            title="Resolved"
+            title="Completed"
             Icon={<CheckCircle className="w-5 h-5 text-emerald-700" />}
-            stat={stats?.resolved || 0}
+            stat={stats?.Completed || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="Closed"
             Icon={<CheckCircle className="w-5 h-5 text-red-700" />}
-            stat={stats?.closed || 0}
+            stat={stats?.Closed || 0}
             isLoading={isLoading}
             />
         </div>

@@ -58,5 +58,32 @@ export const maintenanceApi = {
         }
 
         return response.data as any;
-    }   
+    },
+    startMaintenance: async (id: string) => {
+        const response = await apiClient.patch(`/maintenance/${id}/start`);
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while starting the maintenance ticket.');
+        }
+
+        return response.data as any;
+    },
+    completeMaintenance: async (id: string, resolutionNotes: string) => {
+        const response = await apiClient.patch(`/maintenance/${id}/complete`, { resolutionNotes: resolutionNotes });
+        
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while resolving the maintenance ticket.');
+        }
+
+        return response.data as any;
+    },
+    closeMaintenance: async (id: string) => {
+        const response = await apiClient.patch(`/maintenance/${id}/close`);
+        
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occured while closing the maintenance ticket.');
+        }
+
+        return response.data as any
+    }
 }

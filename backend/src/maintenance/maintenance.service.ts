@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -18,7 +18,6 @@ export class MaintenanceService {
                 description: body.description,
                 imagesUrl:  body.imagesUrl,
                 priority: body.priority,
-                status: body.status,
             }
         })
 
@@ -37,7 +36,18 @@ export class MaintenanceService {
                         { id: { contains: search, mode: 'insensitive' } },
                     ]
                 } : {})
-            }
+            },
+            orderBy: [
+                {
+                    status: "asc" // Pending -> In Progress -> Resolved -> Closed
+                },
+                {
+                    priority: 'desc' // high -> medium -> low
+                },
+                {
+                    createdAt: 'desc' // recent tickets
+                }
+            ]
         })
 
         return maintenances;
@@ -85,5 +95,66 @@ export class MaintenanceService {
         })
 
         return updatedMaintenance;
+    }
+
+    async startMaintenance(id: string) {
+        const maintenance = await this.findOrThrow(id)
+
+        if(maintenance.status !== 'Pending') {
+            throw new BadRequestException("Only pending maintenance tickets can be started");
+        }
+
+        const updatedMaintenance = await this.prisma.maintenance.update({
+            where: { id },
+            data: {
+                status: 'InProgress',
+                startedAt: new Date()
+            }
+        })
+
+        return updatedMaintenance;
+    }
+
+    async completeMaintenance(id: string, resolutionNotes: string) {
+        const maintenance = await this.findOrThrow(id);
+
+        if(maintenance.status !== 'InProgress') {
+            throw new BadRequestException("Only in-progress maintenance tickets can be resolved");
+        }
+
+        const updatedMaintenance = await this.prisma.maintenance.update({
+            where: { id },
+            data: {
+                status: 'Completed',
+                resolutionNotes,
+                resolvedAt: new Date()
+            }
+        })
+
+        return updatedMaintenance;
+    }
+
+    async closeMaintenance(id: string) {
+        const maintenance = await this.findOrThrow(id);
+
+        if(maintenance.status !== 'Completed') {
+            throw new BadRequestException("Only completed maintenance tickets can be closed");
+        }
+
+        const updatedMaintenance = await this.prisma.maintenance.update({
+            where: { id },
+            data: {
+                status: 'Closed',
+            }
+        })
+
+        return updatedMaintenance;
+    }
+
+    private async findOrThrow(id: string) {
+       const maintenance = await this.prisma.maintenance.findUnique({ where: { id } });
+        if (!maintenance) throw new NotFoundException("Maintenance ticket not found");
+
+        return maintenance;
     }
 }
