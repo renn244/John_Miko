@@ -1,6 +1,7 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrder } from "@/types/booking.types";
+import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrder, GetBookingsQuery } from "@/types/booking.types";
+import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const bookingApi = {
     bookAccommodation: async (data: any) => {
@@ -23,14 +24,14 @@ export const bookingApi = {
 
         return response.data as Booking;
     },
-    getBookings: async (query: { search?: string; status?: string; paymentType?: string; accommodationId?: string; bookingDate?: string }) => {
+    getBookings: async (query?: GetBookingsQuery) => {
         const response = await apiClient.get('/booking', { params: query });
 
         if(response.status >= 400) {
             throw new Error(response.data.message || 'Failed to fetch bookings');
         }
 
-        return response.data as BookingWithAccommodation[]
+        return response.data as PaginatedResponse<BookingWithAccommodation>;
     },
     getBookingsByAccommodation: async (accommodationId: string) => {
         const response = await apiClient.get(`/booking/byAccommodation/${accommodationId}`)

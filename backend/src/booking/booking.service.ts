@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -76,40 +77,48 @@ export class BookingService {
 
     async getBookings(query: GetBookingsQuery) {
         const currentDate = new Date();
-
-        const { search, bookingDate, ...rest } = cleanPrismaWhere(query);
+        const { search, page, limit, bookingDate, ...rest } = cleanPrismaWhere(query)
 
         const searchFilter = search ? {
             OR: [
-                { id: { contains: search, mode: 'insensitive' } },
-                { guestName: { contains: search, mode: 'insensitive' } },
+                { id: { contains: search, mode: 'insensitive' as const } },
+                { guestName: { contains: search, mode: 'insensitive' as const } },
             ]
-        } : {} as any;
+        } : {}
 
-        const bookingDateFilter = bookingDate ? {
-            bookingDate: bookingDate
-        } : { bookingDate: { gte: currentDate } };
+        const bookingDateFilter = bookingDate
+            ? { bookingDate }
+            : { bookingDate: { gte: currentDate } }
 
-        const bookings = await this.prisma.booking.findMany({
-            where: { 
-                ...bookingDateFilter,
-                ...rest,
-                ...searchFilter 
-            },
-            include: {
-                accommodation: {
-                    select: {
-                        id: true,
-                        name: true, 
-                        type: true,
-                        imageUrl: true,
+        const where = {
+            ...bookingDateFilter,
+            ...rest,
+            ...searchFilter,
+        }
+
+        const [data, total] = await Promise.all([
+            this.prisma.booking.findMany({
+                where,
+                include: {
+                    accommodation: {
+                        select: {
+                            id: true,
+                            name: true,
+                            type: true,
+                            imageUrl: true,
+                        }
                     }
-                }
-            },
-            orderBy: { bookingDate: 'desc' }
-        })
+                },
+                ...getPaginationArgs(page, limit),
+                orderBy: { bookingDate: 'desc' }
+            }),
+            this.prisma.booking.count({ where })
+        ])
 
-        return bookings
+        return {
+            data,
+            meta: getPaginationMeta(total, page, limit)
+        }
     }
 
     async getBookingsByAccommodation(accommodationId: string) {

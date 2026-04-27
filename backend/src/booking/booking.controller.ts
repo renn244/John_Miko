@@ -25,6 +25,9 @@ export class BookingController {
         return this.bookingService.getBookings(query)
     }
 
+
+    // make a query where pagination base on date? just to  optimize the query 
+    // and avoid fetching too many data at once
     @Public()
     @Get('byAccommodation/:accommodationId')
     async GetBookingsByAccommodation(@Param('accommodationId') accommodationId: string) {

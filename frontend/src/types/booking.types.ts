@@ -1,6 +1,7 @@
 import type statusOptions from "@/lib/constant/MY_BOOKING_STATUS.constants";
 import type { Accommodation } from "./admin/accommodation.type";
 import type { Feedback } from "./feedback.types";
+import type { PaginationParams } from "./pagination.type";
 
 export type Booking = {
     id: string;
@@ -37,6 +38,15 @@ export type BookedAccommodation = {
 
     createdAt: string;
 }
+
+// Query
+export type GetBookingsQuery = {
+    search?: string;
+    status?: Booking['status'];
+    paymentType?: Booking['paymentType'];
+    accommodationId?: string;
+    bookingDate?: Booking['bookingDate'];
+}  & PaginationParams
 
 // Response types
 export type BookingWithAccommodation = {

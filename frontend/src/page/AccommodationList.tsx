@@ -10,10 +10,13 @@ const AccommodationList = () => {
     const [selectedType, setSelectedType] = useState<Accommodation['type'] | "All">("All")
 
     const navigate = useNavigate()
-    const { data: accommodations } = useGetAccommodationsQuery({
+    const { data } = useGetAccommodationsQuery({
         type: selectedType === "All" ? undefined : selectedType,
-        availability: "Available"
+        availability: "Available",
+        page: 1, limit: 100
     })
+
+    const accommodations = data?.data
 
     return (
         <div className="min-h-screen">

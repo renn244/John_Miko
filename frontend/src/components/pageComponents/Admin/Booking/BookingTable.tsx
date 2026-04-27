@@ -1,3 +1,4 @@
+import DataPagination from "@/components/common/DataPagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,37 +10,49 @@ import { useBookingAdminStore } from "@/store/admin/bookingAdmin.store";
 import { format } from "date-fns";
 import { CalendarSync, CircleCheck, CircleX, Eye, MoreHorizontal } from "lucide-react";
 
+   
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'Confirmed':
+            return { bg: '#DBEAFE', text: '#1E73BE', border: '#1E73BE' };
+        case 'Completed':
+            return { bg: '#D1FAE5', text: '#059669', border: '#059669' };
+        case 'Cancelled':
+            return { bg: '#FEE2E2', text: '#DC2626', border: '#DC2626' };
+        default:
+            return { bg: '#F3F4F6', text: '#6B7280', border: '#6B7280' };
+    }
+};
+
+const getPaymentTypeColor = (paymentType: string) => {
+    switch (paymentType) {
+        case 'Full':
+            return { bg: '#D1FAE5', text: '#059669'};
+        case 'Partial':
+            return { bg: '#FEF3C7', text: '#D97706' };
+    }
+}
+
 const BookingTable = () => {
     const setViewId = useBookingAdminStore((state) => state.setViewId);
     const setRescheduleBookingId = useBookingAdminStore((state) => state.setRescheduleBookingId);
     const setMarkCompletedBookingId = useBookingAdminStore((state) => state.setMarkCompletedBookingId);
     const setMarkCancelBookingId = useBookingAdminStore((state) => state.setMarkCancelBookingId);
 
-    const { search, status, paymentType, accommodationId, bookingDate } = useBookingSearch();
+    const { 
+        search, status, paymentType, accommodationId, bookingDate, page, limit,
+        updatePage
+    } = useBookingSearch();
 
-    const { data: bookings } = useGetBookingsAdminQuery({ search, status, paymentType, accommodationId, bookingDate });
-    
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'Confirmed':
-                return { bg: '#DBEAFE', text: '#1E73BE', border: '#1E73BE' };
-            case 'Completed':
-                return { bg: '#D1FAE5', text: '#059669', border: '#059669' };
-            case 'Cancelled':
-                return { bg: '#FEE2E2', text: '#DC2626', border: '#DC2626' };
-            default:
-                return { bg: '#F3F4F6', text: '#6B7280', border: '#6B7280' };
-        }
-    };
+    const { data, isLoading } = useGetBookingsAdminQuery({ 
+        search, accommodationId, bookingDate, page, limit,
+        status: status as any, paymentType: paymentType as any, 
+    });
 
-    const getPaymentTypeColor = (paymentType: string) => {
-        switch (paymentType) {
-            case 'Full':
-                return { bg: '#D1FAE5', text: '#059669'};
-            case 'Partial':
-                return { bg: '#FEF3C7', text: '#D97706' };
-        }
-    }
+    if(isLoading) return
+
+    const bookings = data?.data;
+    const meta = data?.meta;
 
     return (
         <Card className="px-4 min-h-147.5">
@@ -121,6 +134,14 @@ const BookingTable = () => {
                     ))}
                 </TableBody>
             </Table>
+            
+            {meta && (
+                <DataPagination 
+                meta={meta}
+                page={page}
+                onPageChange={updatePage}
+                />
+            )}
         </Card>
     )
 }
