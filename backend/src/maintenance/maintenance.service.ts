@@ -38,15 +38,9 @@ export class MaintenanceService {
                 } : {})
             },
             orderBy: [
-                {
-                    status: "asc" // Pending -> In Progress -> Resolved -> Closed
-                },
-                {
-                    priority: 'desc' // high -> medium -> low
-                },
-                {
-                    createdAt: 'desc' // recent tickets
-                }
+                { status: "asc" }, // Pending -> In Progress -> Resolved -> Closed
+                { priority: 'desc' }, // high -> medium -> low
+                { createdAt: 'desc' }, // recent tickets
             ]
         })
 

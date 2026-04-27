@@ -1,4 +1,5 @@
 import { menuItemApi } from "@/api/admin/menu-item.api";
+import type { getMenuItemsQuery, MenuItem } from "@/types/admin/menu-item.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
@@ -18,11 +19,12 @@ export const useCreateMenuItemMutation = () => {
     })
 }
 
-export const useGetMenuItemsQuery = (query: any) => {
+export const useGetMenuItemsQuery = (query: getMenuItemsQuery) => {
     return useQuery({
         queryKey: ['menu-item', 'list', query],
         queryFn: () => menuItemApi.getMenuItems(query),
         refetchOnWindowFocus: false,
+        placeholderData: (prev) => prev
     })
 }
 
@@ -83,7 +85,7 @@ export const useUpdateMenuItemAvailabilityMutation = (id: string) => {
 
     return useMutation({
         mutationKey: ['menu-item', 'update', 'availability', id],
-        mutationFn: (availability: string) => menuItemApi.updateMenuItem(id, { availability }),
+        mutationFn: (availability: MenuItem['availability']) => menuItemApi.updateMenuItem(id, { availability }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['menu-item', 'list'] });
             queryClient.invalidateQueries({ queryKey: ['menu-item', 'byId', id] });

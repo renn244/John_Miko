@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMenuItemDto, UpdateMenuItemDto } from './dto/menu-item.dto';
@@ -26,16 +27,27 @@ export class MenuItemService {
   }
 
   async getMenuItems(query: GetMenuItemsQuery) {
-    const { search, ...rest } = cleanPrismaWhere(query);
+    const { search, page, limit, ...rest } = cleanPrismaWhere(query);
 
-    const menuItems = await this.prisma.menuItem.findMany({
-      where: {
-        ...rest, 
-        name: { contains: search, mode: 'insensitive' }
-      }
-    })
+    const [data, total] = await Promise.all([
+      await this.prisma.menuItem.findMany({
+        where: {
+          ...rest, 
+          name: { contains: search, mode: 'insensitive' }
+        },
+        ...getPaginationArgs(page, limit),
+        orderBy: [
+          { availability: 'asc' }, // Available -> Unavailable
+          { createdAt: 'desc' } // Newest first
+        ]
+      }),
+      await this.prisma.menuItem.count({ where: { ...rest, name: { contains: search, mode: 'insensitive' } } })
+    ])
 
-    return menuItems;
+    return {
+      data,
+      meta: getPaginationMeta(total, page, limit)
+    };
   }
 
   async getMenuItemsBulk(ids: string[]) {

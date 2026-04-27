@@ -42,7 +42,7 @@ export const accommodationApi = {
             throw new Error(response.data.message || "Validation error");
         }
 
-        return (response.data || []) as PaginatedResponse<Accommodation>;
+        return response.data as PaginatedResponse<Accommodation>;
     },
     getAccommodationById: async (id: Accommodation['id']) => {
         const response = await apiClient.get(`/accommodation/${id}`);

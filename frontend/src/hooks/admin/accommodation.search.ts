@@ -16,8 +16,10 @@ export const useAccommodationSearchParams = () => {
         updatePage(1); // Reset to first page on new search
     }
 
-    const updateType = (value: Accommodation['type'] | "all") => 
+    const updateType = (value: Accommodation['type'] | "all") => {
         updateSearchParam(searchParams, setSearchParams, "type", value === "all" ? undefined : value);
+        updatePage(1);
+    }
 
     const updateStatus = (value: Accommodation['availability'] | "all") => {
         updateSearchParam(searchParams, setSearchParams, "status", value === "all" ? undefined : value);

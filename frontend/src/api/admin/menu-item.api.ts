@@ -1,10 +1,11 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { MenuItem } from "@/types/admin/menu-item.type";
+import type { CreateMenuItemDto, getMenuItemsQuery, MenuItem, MenuItemStats, UpdateMenuItemDto } from "@/types/admin/menu-item.type";
+import type { PaginatedResponse } from "@/types/pagination.type";
 
 
 export const menuItemApi = {
-    createMenuItem: async (data: any) => {
+    createMenuItem: async (data: CreateMenuItemDto) => {
         const response = await apiClient.post('/menu-item', data);
 
         if(response.status === 400) {
@@ -17,14 +18,14 @@ export const menuItemApi = {
 
         return response.data as MenuItem;
     },
-    getMenuItems: async (query: any) => {
+    getMenuItems: async (query: getMenuItemsQuery) => {
         const response = await apiClient.get('/menu-item', { params: query });
 
         if(response.status >= 400) {
             throw new Error(response.data.message || 'An error occurred while fetching menu items.');
         }
 
-        return response.data as MenuItem[];
+        return response.data as PaginatedResponse<MenuItem>;
     },
     getMenuItemsBulk: async (ids: string[]) => {
         const response = await apiClient.get('/menu-item/bulk', { params: { ids: ids.join(',') } });
@@ -51,7 +52,7 @@ export const menuItemApi = {
             throw new Error(response.data.message || 'An error occurred while fetching menu item stats.');
         }
 
-        return response.data as  { total: number; available: number; unavailable: number };
+        return response.data as MenuItemStats;
     },
     getMenuItemById: async (id: string) => {
         const response = await apiClient.get(`/menu-item/${id}`);
@@ -66,7 +67,7 @@ export const menuItemApi = {
 
         return response.data as MenuItem;
     },
-    updateMenuItem: async (id: string, data: any) => {
+    updateMenuItem: async (id: string, data: UpdateMenuItemDto) => {
         const response = await apiClient.patch(`/menu-item/${id}`, data);
 
         if(response.status === 400) {
