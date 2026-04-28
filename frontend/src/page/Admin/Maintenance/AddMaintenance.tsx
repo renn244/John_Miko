@@ -27,7 +27,9 @@ const AddMaintenance = () => {
       </div>
 
       <MaintenanceForm 
-      onsubmit={createMaintenance}
+      onsubmit={async (data) => {
+        createMaintenance(data)
+      }}
       oncancel={() => navigate('/admin/maintenance')}
       />
     </div>

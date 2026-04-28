@@ -38,7 +38,9 @@ const EditMaintenance = () => {
             <MaintenanceForm 
             isUpdate
             initialData={maintenance}
-            onsubmit={updateMaintenance}
+            onsubmit={async (data) => {
+                updateMaintenance(data)
+            }}
             oncancel={() => navigate('/admin/maintenance')}
             />
         </div>

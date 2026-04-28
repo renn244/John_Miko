@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMaintenanceDto, UpdateMaintenanceDto } from './dto/maintenance.dto';
@@ -25,26 +27,35 @@ export class MaintenanceService {
     }
 
     async getMaintenances(query: GetMaintenanceDto) {
-        const { search, ...rest } = cleanPrismaWhere(query);
+        const { search, page, limit, ...rest } = cleanPrismaWhere(query);
 
-        const maintenances = await this.prisma.maintenance.findMany({
-            where: {
-                ...rest,
-                ...(search ? {
-                    OR: [
-                        { title: { contains: search, mode: 'insensitive' } },
-                        { id: { contains: search, mode: 'insensitive' } },
-                    ]
-                } : {})
-            },
-            orderBy: [
-                { status: "asc" }, // Pending -> In Progress -> Resolved -> Closed
-                { priority: 'desc' }, // high -> medium -> low
-                { createdAt: 'desc' }, // recent tickets
-            ]
-        })
+        const where: Prisma.MaintenanceWhereInput = {
+            ...rest,
+            ...(search ? {
+                OR: [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { id: { contains: search, mode: 'insensitive' } },
+                ]
+            } : {})
+        };
 
-        return maintenances;
+        const [data, total] = await Promise.all([
+            this.prisma.maintenance.findMany({
+                where,
+                ...getPaginationArgs(page, limit),
+                orderBy: [
+                    { status: "asc" }, // Pending -> In Progress -> Resolved -> Closed
+                    { priority: 'desc' }, // high -> medium -> low
+                    { createdAt: 'desc' }, // recent tickets
+                ]
+            }),
+            this.prisma.maintenance.count({ where })
+        ])
+
+        return {
+            data,
+            meta: getPaginationMeta(total, page, limit)
+        };
     }
 
     async getMaintenanceStats() {

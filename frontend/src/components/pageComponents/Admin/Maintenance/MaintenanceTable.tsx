@@ -1,3 +1,4 @@
+import DataPagination from "@/components/common/DataPagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -6,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useClosedMaintenanceMutation, useGetMaintenancesQuery, useStartMaintnenanceMutation } from "@/hooks/admin/maintenance.hook";
 import { useMaintenanceSearch } from "@/hooks/admin/maintenance.search";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
+import type { Maintenance } from "@/types/admin/maintenance.type";
 import { format } from "date-fns";
 import { Check, Edit, Lock, MoreHorizontal, Play } from "lucide-react";
 import { Link } from "react-router";
@@ -41,12 +43,17 @@ const MaintenanceTable = () => {
     const startMutation = useStartMaintnenanceMutation();
     const closeMutation = useClosedMaintenanceMutation();
 
-    const {  search, status, priority } = useMaintenanceSearch();
-    const { data: maintenance, isLoading } = useGetMaintenancesQuery({ search, status, priority });
-
-    
+    const { search, status, priority, page, limit, updatePage } = useMaintenanceSearch();
+    const { data, isLoading } = useGetMaintenancesQuery({ 
+        search, page, limit,
+        status: status as Maintenance['status'], 
+        priority: priority as Maintenance['priority'] 
+    });
 
     if(isLoading) return null;
+
+    const maintenance = data?.data;
+    const meta = data?.meta
 
     return (
         <Card className="px-4 min-h-147.5">
@@ -75,7 +82,6 @@ const MaintenanceTable = () => {
                 </TableHeader>
                 <TableBody>
                     {maintenance?.map((ticket: any) => {
-                        
                         return (
                             <TableRow key={ticket.id}>
                                 <TableCell>
@@ -150,8 +156,16 @@ const MaintenanceTable = () => {
                     })}
                 </TableBody>
             </Table>
+
+            {meta && (
+                <DataPagination 
+                meta={meta}
+                page={page}
+                onPageChange={updatePage}
+                />
+            )}
         </Card>
-    )
-}
+    );
+};
 
 export default MaintenanceTable

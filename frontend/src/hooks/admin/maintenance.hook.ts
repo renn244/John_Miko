@@ -1,4 +1,5 @@
 import { maintenanceApi } from "@/api/admin/maintenane.api";
+import type { GetMaintenancesQuery } from "@/types/admin/maintenance.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
@@ -17,12 +18,13 @@ export const useCreateMaintenanceMutation = () => {
     })
 }
 
-export const useGetMaintenancesQuery = (query: any) => {
+export const useGetMaintenancesQuery = (query: GetMaintenancesQuery) => {
     return useQuery({
         queryKey: ['maintenance', 'list', query],
         queryFn: () => maintenanceApi.getMaintenances(query),
         refetchOnWindowFocus: false,
-    })
+        placeholderData: (prev) => prev 
+    });
 }
 
 export const useGetMaintenanceStatsQuery = () => {
