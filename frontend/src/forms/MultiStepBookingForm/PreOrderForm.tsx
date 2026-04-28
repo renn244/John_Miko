@@ -23,10 +23,12 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
     });
 
     const { data: categories } = useGetMenuItemCategoriesQuery();
-    const { data: menuItems } = useGetMenuItemsQuery({ 
+    const { data } = useGetMenuItemsQuery({ 
         category: selectedCategory || undefined, 
         availability: 'Available'
     });
+
+    const menuItems = data?.data || []
 
     useEffect(() => {
         if (menuItems) {

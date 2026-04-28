@@ -49,6 +49,7 @@ export class BookingService {
                     guestName: body.name,
                     email: body.email,
                     contactNo: body.contactNo,
+                    status: 'Confirmed' // to simulate payment sucess, but later removed!
                 }
             })
             
@@ -126,7 +127,9 @@ export class BookingService {
             where: { 
                 accommodationId: accommodationId,
                 bookingDate: { gte: new Date() },
-                status: { not: 'Cancelled' }
+                status: { 
+                    notIn: ['Cancelled', 'Pending']
+                }
             },
             select: { bookingDate: true, timeSlot: true },
         })
