@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { GetFeedbackQuery } from './query/getFeedback.query';
@@ -37,30 +38,36 @@ export class FeedbackService {
 
     async getFeedbacks(query: GetFeedbackQuery) {
         const page = query.page || 1;
-        const limit = 10;
+        const limit = query.limit || 10;
         const skip = (page - 1) * limit;
-        
-        const feedbacks = await this.prisma.feedback.findMany({
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' },
-            skip: skip, take: limit
-        })
 
-        return feedbacks;
+        const [data, total] = await Promise.all([
+            this.prisma.feedback.findMany({
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                        }
+                    }
+                },
+                orderBy: { createdAt: 'desc' },
+                skip: skip, take: limit
+            }),
+            this.prisma.feedback.count()
+        ]);
+
+        return {
+            data,
+            meta: getPaginationMeta(total, page, limit)
+        };
     }
 
     async getFeedbackStats() {
         const totalFeedbacks = await this.prisma.feedback.aggregate({
             _count: true,
-            _avg: { rating: true,  },
+            _avg: { rating: true },
             _min: { rating: true },
             _max: { rating: true },
         });

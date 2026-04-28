@@ -1,13 +1,12 @@
 import { feedbackApi } from "@/api/admin/feedback.api";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetFeedbacksQuery = (
-    query: { page: number } = { page: 1 }
-) => {
+export const useGetFeedbacksQuery = (query: { page: number, limit: number }) => {
     return useQuery({
         queryKey: ['feedbacks', 'list', query],
         queryFn: () => feedbackApi.getFeedbacks(query),
-        refetchOnWindowFocus: false        
+        refetchOnWindowFocus: false,
+        placeholderData: (prev) => prev
     })
 }
 

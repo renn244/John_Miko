@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { useMenuItemSearch } from "@/hooks/admin/menu-item.search";
+import { useFeedbackSearch } from "@/hooks/admin/feedback.search";
 import useDebounce from "@/lib/useDebounce";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -15,7 +15,7 @@ const FeedbackFilter = () => {
 }
 
 const FeedbackSearchFilter = () => {
-    const { search, updateSearch } = useMenuItemSearch();
+    const { search, updateSearch } = useFeedbackSearch();
     const [searchInput, setSearchInput] = useState(search || "");
     const debounceValue = useDebounce(searchInput, 500);
 

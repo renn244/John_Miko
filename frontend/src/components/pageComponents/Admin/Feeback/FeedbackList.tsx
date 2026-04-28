@@ -1,12 +1,18 @@
+import DataPagination from "@/components/common/DataPagination";
 import { Button } from "@/components/ui/button";
 import { useGetFeedbacksQuery } from "@/hooks/admin/feedback.hook";
+import { useFeedbackSearch } from "@/hooks/admin/feedback.search";
 import { formatToSmartDate } from "@/lib/date.util";
 import { useFeedbackAdminStore } from "@/store/admin/feedbackAdmin.store";
 import { Calendar, Mail, MessageSquare, Star } from "lucide-react";
 
 const FeedbackList = () => {
     const setViewId = useFeedbackAdminStore((state) => state.setViewId);
-    const { data, isLoading, isError } = useGetFeedbacksQuery();
+    const { search, page, limit, updatePage } = useFeedbackSearch();
+
+    const { data, isLoading, isError } = useGetFeedbacksQuery({
+        page, limit
+    });
 
     const getRatingColor = (rating: number) => {
         if (rating >= 4) {
@@ -20,9 +26,12 @@ const FeedbackList = () => {
 
     if(isError) return null
 
+    const feedbacks = data?.data;
+    const meta = data?.meta;
+
     return (
         <div className="space-y-4">
-            {data?.map((feedback) => {
+            {feedbacks?.map((feedback) => {
                 const ratingColors = getRatingColor(feedback.rating);
                 
                 return (
@@ -90,7 +99,7 @@ const FeedbackList = () => {
                 );
             })}
 
-            {(data && data.length === 0) && (
+            {(feedbacks && feedbacks.length === 0) && (
                 <div className="rounded-xl p-12 text-center col-span-1 sm:col-span-2 md:col-span-3 xl:col-span-4">
                     <MessageSquare className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
                     <h3 className="text-xl font-bold mb-2">
@@ -100,6 +109,14 @@ const FeedbackList = () => {
                         Try adjusting your search or filter criteria
                     </p>
                 </div>
+            )}
+
+            {meta && (
+                <DataPagination 
+                meta={meta}
+                page={page}
+                onPageChange={updatePage}
+                />
             )}
         </div>
     )
