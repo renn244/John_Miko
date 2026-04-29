@@ -1,4 +1,4 @@
-import { updateSearchParam } from "@/lib/updateSearchParams";
+import { updateSearchParams } from "@/lib/updateSearchParams";
 import { useSearchParams } from "react-router";
 
 export const useFeedbackSearch = () => {
@@ -8,13 +8,11 @@ export const useFeedbackSearch = () => {
     const page = Number(searchParams.get('page') || 1);
     const limit = 10;
 
-    const updateSearch = (newSearch: string) => { 
-        updateSearchParam(searchParams, setSearchParams, 'search', newSearch);
-        updatePage(1);
-    }
+    const updateSearch = (newSearch: string) => 
+        updateSearchParams(setSearchParams, { search: newSearch, page: undefined });
 
     const updatePage = (newPage: number) => 
-        updateSearchParam(searchParams, setSearchParams, 'page', newPage.toString());
+        updateSearchParams(setSearchParams, { page: newPage.toString() });
 
     const clearFilters = () => setSearchParams({})
 

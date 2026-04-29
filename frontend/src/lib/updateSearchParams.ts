@@ -1,34 +1,18 @@
 import type { SetURLSearchParams } from "react-router";
 
-export const updateSearchParam = (
-  searchParams: URLSearchParams,
+export const updateSearchParams = (
   setSearchParams: SetURLSearchParams,
-  key: string,
-  value: string | undefined
+  updates: Record<string, string | undefined>
 ) => {
-  const newSearchParams = new URLSearchParams(searchParams.toString());
-  if (value && value !== '') {
-    newSearchParams.set(key, value);
-  } else {
-    newSearchParams.delete(key);
-  }
-  setSearchParams(newSearchParams, { replace: true });
+  setSearchParams((prev) => {
+    const next = new URLSearchParams(prev);
+    for (const [key, value] of Object.entries(updates)) {
+      if (value && value !== '') {
+        next.set(key, value);
+      } else {
+        next.delete(key);
+      }
+    }
+    return next;
+  }, { replace: true });
 };
-
-// import type { SetURLSearchParams } from "react-router";
-
-// export const updateSearchParam = (
-//   setSearchParams: SetURLSearchParams,
-//   key: string,
-//   value: string | undefined
-// ) => {
-//   setSearchParams((prev) => {
-//     const next = new URLSearchParams(prev)
-//     if (value && value !== '') {
-//       next.set(key, value)
-//     } else {
-//       next.delete(key)
-//     }
-//     return next
-//   }, { replace: true })
-// }

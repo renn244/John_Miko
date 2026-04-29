@@ -1,4 +1,4 @@
-import { updateSearchParam } from "@/lib/updateSearchParams";
+import { updateSearchParams } from "@/lib/updateSearchParams";
 import type { MenuItem } from "@/types/admin/menu-item.type";
 import { useSearchParams } from "react-router";
 
@@ -11,23 +11,17 @@ export const useMenuItemSearch = () => {
     const page = Number(searchParams.get('page') || 1);
     const limit = 8;
 
-    const updateSearch = (newSearch: string) => {
-        updateSearchParam(searchParams, setSearchParams, 'search', newSearch);
-        updatePage(1);
-    }
+    const updateSearch = (newSearch: string) => 
+        updateSearchParams(setSearchParams, { search: newSearch, page: undefined });
 
-    const updateCategory = (newCategory: string | "all") => {
-        updateSearchParam(searchParams, setSearchParams, 'category', newCategory === "all" ? undefined : newCategory);
-        updatePage(1);
-    } 
+    const updateCategory = (newCategory: string | "all") => 
+        updateSearchParams(setSearchParams, { category: newCategory === "all" ? undefined : newCategory, page: undefined });
 
-    const updateAvailability = (newAvailability: string | "all") => {
-        updateSearchParam(searchParams, setSearchParams, 'availability', newAvailability === "all" ? undefined : newAvailability);
-        updatePage(1);
-    }
+    const updateAvailability = (newAvailability: string | "all") => 
+        updateSearchParams(setSearchParams, { availability: newAvailability === "all" ? undefined : newAvailability, page: undefined });
 
     const updatePage = (newPage: number) => 
-        updateSearchParam(searchParams, setSearchParams, 'page', newPage === 1 ? undefined : newPage.toString());
+        updateSearchParams(setSearchParams, { page: newPage === 1 ? undefined : newPage.toString() });
 
     const clearFilters = () => setSearchParams({})
 

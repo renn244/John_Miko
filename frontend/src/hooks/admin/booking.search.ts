@@ -1,4 +1,4 @@
-import { updateSearchParam } from "@/lib/updateSearchParams";
+import { updateSearchParams } from "@/lib/updateSearchParams";
 import { useSearchParams } from "react-router";
 
 export const useBookingSearch = () => {
@@ -12,33 +12,24 @@ export const useBookingSearch = () => {
     const page = Number(searchParams.get('page') || 1);
     const limit = 10;
 
-    const updateSearch = (newSearch: string) => {
-        updateSearchParam(searchParams, setSearchParams, 'search', newSearch);
-        updatePage(1);
-    }
+    const updateSearch = (newSearch: string) => 
+        updateSearchParams(setSearchParams, { search: newSearch, page: undefined });
 
-    const updateStatus = (newStatus: string | "all") => {
-        updateSearchParam(searchParams, setSearchParams, 'status', newStatus === "all" ? undefined : newStatus);
-        updatePage(1);
-    } 
+    const updateStatus = (newStatus: string | "all") => 
+        updateSearchParams(setSearchParams, { status: newStatus === "all" ? undefined : newStatus, page: undefined });
 
-    const updatePaymentType = (newPaymentType: string | "all") => {
-        updateSearchParam(searchParams, setSearchParams, 'paymentType', newPaymentType === "all" ? undefined : newPaymentType);
-        updatePage(1);
-    } 
+    const updatePaymentType = (newPaymentType: string | "all") => 
+        updateSearchParams(setSearchParams, { paymentType: newPaymentType === "all" ? undefined : newPaymentType, page: undefined });
 
-    const updateAccommodationId = (newAccommodationId: string | "all") => {
-        updateSearchParam(searchParams, setSearchParams, 'accommodationId', newAccommodationId === "all" ? undefined : newAccommodationId);
-        updatePage(1);
-    }
+    const updateAccommodationId = (newAccommodationId: string | "all") => 
+        updateSearchParams(setSearchParams, { accommodationId: newAccommodationId === "all" ? undefined : newAccommodationId, page: undefined });
+    
 
-    const updateBookingDate = (newBookingDate: Date | undefined) => {
-        updateSearchParam(searchParams, setSearchParams, 'bookingDate', newBookingDate?.toString());
-        updatePage(1);
-    }
+    const updateBookingDate = (newBookingDate: Date | undefined) => 
+        updateSearchParams(setSearchParams, { bookingDate: newBookingDate?.toString(), page: undefined });
 
     const updatePage = (newPage: number) =>
-        updateSearchParam(searchParams, setSearchParams, 'page', newPage === 1 ? undefined : newPage.toString());
+        updateSearchParams(setSearchParams, { page: newPage === 1 ? undefined : newPage.toString() });
 
     const clearFilters = () => setSearchParams({})
 

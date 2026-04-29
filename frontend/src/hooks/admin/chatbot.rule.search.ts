@@ -1,4 +1,4 @@
-import { updateSearchParam } from "@/lib/updateSearchParams";
+import { updateSearchParams } from "@/lib/updateSearchParams";
 import { useSearchParams } from "react-router";
 
 export const useChatbotRuleSearch = () => {
@@ -9,12 +9,11 @@ export const useChatbotRuleSearch = () => {
     const limit = 10;
 
     const updateSearch = (newSearch: string) => {
-        updateSearchParam(searchParams, setSearchParams, 'search', newSearch);
-        updatePage(1);
+        updateSearchParams(setSearchParams, { search: newSearch, page: undefined });
     }
 
     const updatePage = (newPage: number) => 
-        updateSearchParam(searchParams, setSearchParams, 'page', newPage.toString());
+        updateSearchParams(setSearchParams, { page: newPage.toString() });
 
     const clearFilters = () => setSearchParams({});
     

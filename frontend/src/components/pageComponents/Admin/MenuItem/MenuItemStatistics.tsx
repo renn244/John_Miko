@@ -11,7 +11,7 @@ const MenuItemStatistics = () => {
             <StatisticCards 
             className="col-span-2 md:col-span-1"
             title="Total Items"
-            Icon={<UtensilsCrossed className="w-5 h-5 text-muted-foreground" />}
+            Icon={<UtensilsCrossed className="w-5 h-5 text-primary" />}
             stat={stats?.total || 0}
             isLoading={isLoading}
             />
