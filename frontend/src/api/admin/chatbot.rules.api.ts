@@ -1,6 +1,7 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { ChatbotRule, ChatbotRuleStatistics } from "@/types/chatbot-rule.types";
+import type { ChatbotRule, ChatbotRuleStatistics, GetChatbotRuleQuery } from "@/types/chatbot-rule.types";
+import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const chatbotRulesApi = {
     createRule: async (data: any) => {
@@ -25,14 +26,14 @@ export const chatbotRulesApi = {
 
         return response.data as ChatbotRule;
     },
-    getRules: async () => {
-        const response = await apiClient.get('/rules');
+    getRules: async (query: GetChatbotRuleQuery) => {
+        const response = await apiClient.get('/rules', { params: query });
 
         if(response.status >= 400) {
             throw new Error(response.data.message || 'An error occurred while fetching rules.');
         }
 
-        return response.data as ChatbotRule[];
+        return response.data as PaginatedResponse<ChatbotRule>;
     },
     getStatisticsRules: async () => {
         const response = await apiClient.get('/rules/statistics');

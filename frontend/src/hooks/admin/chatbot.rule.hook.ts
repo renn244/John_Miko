@@ -1,4 +1,5 @@
 import { chatbotRulesApi } from "@/api/admin/chatbot.rules.api";
+import type { GetChatbotRuleQuery } from "@/types/chatbot-rule.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useCreateChatbotRuleAdminMutation = () => {
@@ -20,11 +21,12 @@ export const useInteractWithChatbotMutation = () => {
     })
 }
 
-export const useGetAllChatbotRulesAdminQuery = () => {
+export const useGetAllChatbotRulesAdminQuery = (query: GetChatbotRuleQuery) => {
     return useQuery({
-        queryKey: ['chatbot', 'rules', 'admin'],
-        queryFn: chatbotRulesApi.getRules,
+        queryKey: ['chatbot', 'rules', 'admin', query],
+        queryFn: () => chatbotRulesApi.getRules(query),
         refetchOnWindowFocus: false,
+        placeholderData: (prev) => prev
     })
 }
 

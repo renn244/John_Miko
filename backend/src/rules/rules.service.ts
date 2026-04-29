@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Rules } from 'src/generated/prisma/client';
+import { Prisma, Rules } from 'src/generated/prisma/client';
+import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createRuleDto, updateRuleDto } from './dto/rules.dto';
+import { GetAllRulesQuery } from './query/getAllRules.query';
 
 @Injectable()
 export class RulesService {
@@ -20,7 +22,7 @@ export class RulesService {
     // async relevanceScoring()
 
     async interactWithChatbot(messageDto: { message: string }): Promise<Rules> {
-        const rules = await this.prisma.rules.findMany({ where: { isActive: true }});
+        const rules = await this.getActiveRules();
 
         const quickReplyMatched = rules.find(rule => rule.name.toLowerCase() === messageDto.message.toLowerCase());
 
@@ -48,11 +50,23 @@ export class RulesService {
         return matched;
     }
 
-    async getAllRules() {
-        // add filter and pagination later
-        const rules = await this.prisma.rules.findMany();
+    async getAllRules(query: GetAllRulesQuery) {
+        const where: Prisma.RulesWhereInput = {
+            name: { contains: query.search, mode: 'insensitive' }
+        }
 
-        return rules;
+        const [rules, total] = await Promise.all([
+            await this.prisma.rules.findMany({
+                where: where,
+                ...((query.page && query.limit) && getPaginationArgs(query.page, query.limit))        
+            }),
+            await this.prisma.rules.count({ where: where })
+        ])
+
+        return {
+            data: rules,
+            meta: getPaginationMeta(total, query.page, query.limit)
+        };
     }
 
     async getStatisticsRule() {

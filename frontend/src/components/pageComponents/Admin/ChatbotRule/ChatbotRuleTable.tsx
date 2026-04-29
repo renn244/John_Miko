@@ -1,22 +1,29 @@
+import DataPagination from "@/components/common/DataPagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGetAllChatbotRulesAdminQuery } from "@/hooks/admin/chatbot.rule.hook";
+import { useChatbotRuleSearch } from "@/hooks/admin/chatbot.rule.search";
 import { useChatbotAdminStore } from "@/store/admin/chatbotAdmin.store";
 import { Edit, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import { Link } from "react-router";
 
 const ChatbotRuleTable = () => {
-    const { data: chatbotRules, isLoading } = useGetAllChatbotRulesAdminQuery();
+    const { search, page, limit, updatePage } = useChatbotRuleSearch();
+
+    const { data, isLoading } = useGetAllChatbotRulesAdminQuery({ search, page, limit });
     const setViewId = useChatbotAdminStore((state) => state.setViewId);
     const setDeleteId = useChatbotAdminStore((state) => state.setDeleteId);
-
+    console.log(data)
     if(isLoading) return null;
 
+    const chatbotRules = data?.data || [];
+    const meta = data?.meta;
+
     return (
-        <Card className="px-4 min-h-147.5">
+        <Card className="px-4 min-h-187 flex flex-col justify-between">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -99,6 +106,14 @@ const ChatbotRuleTable = () => {
                     ))}
                 </TableBody>
             </Table>
+
+            {meta && (
+                <DataPagination 
+                meta={meta}
+                page={page}
+                onPageChange={updatePage}
+                />
+            )}
         </Card>
     )
 }

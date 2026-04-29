@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { availabilityRuleDto, createRuleDto, updateRuleDto } from './dto/rules.dto';
+import { GetAllRulesQuery } from './query/getAllRules.query';
 import { RulesService } from './rules.service';
 
 @Controller('rules')
@@ -19,8 +20,8 @@ export class RulesController {
     }
 
     @Get()
-    async getAllRules() {
-        return this.rulesService.getAllRules();
+    async getAllRules(@Query() query: GetAllRulesQuery) {
+        return this.rulesService.getAllRules(query);
     }
 
     @Get('statistics')

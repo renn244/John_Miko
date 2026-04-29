@@ -31,11 +31,11 @@ type MenuItemFormProps = {
     onsubmit: (data: any) => Promise<void | any>,
     oncancel: () => void,
     className?: string,
-    initialDate?: menuItemSchema,
+    initialData?: menuItemSchema,
     isUpdate?: boolean
 }
 
-const MenuItemForm = ({ onsubmit, oncancel, className, initialDate, isUpdate }: MenuItemFormProps) => {
+const MenuItemForm = ({ onsubmit, oncancel, className, initialData, isUpdate }: MenuItemFormProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const {
         control,
@@ -44,12 +44,12 @@ const MenuItemForm = ({ onsubmit, oncancel, className, initialDate, isUpdate }: 
     } = useForm<menuItemSchema>({
         resolver: zodResolver(MenuItemSchema),
         defaultValues: {
-            imageUrl: initialDate?.imageUrl || '',
-            name: initialDate?.name || '',
-            description: initialDate?.description || '',
-            price: initialDate?.price || 0,
-            category: initialDate?.category || '',
-            availability: initialDate?.availability || 'Available'
+            imageUrl: initialData?.imageUrl || '',
+            name: initialData?.name || '',
+            description: initialData?.description || '',
+            price: initialData?.price || 0,
+            category: initialData?.category || '',
+            availability: initialData?.availability || 'Available'
         },
         criteriaMode: "all"
     })

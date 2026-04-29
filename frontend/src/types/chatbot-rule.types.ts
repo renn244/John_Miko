@@ -1,3 +1,4 @@
+import type { PaginationParams } from "./pagination.type";
 
 export type ChatbotRule = {
     id: string;
@@ -11,6 +12,20 @@ export type ChatbotRule = {
     createdAt: string;
     updatedAt: string;
 }
+
+export type CreateChatbotRule = {
+    name: string;
+    keywords: string[];
+    response: string;
+    quickReplies: string[];
+    isActive: boolean;
+}
+
+export type UpdateChatbotRule = CreateChatbotRule;
+
+export type GetChatbotRuleQuery = {
+    search?: string;
+} & PaginationParams
 
 export type ChatbotRuleStatistics = {
     total: number;
