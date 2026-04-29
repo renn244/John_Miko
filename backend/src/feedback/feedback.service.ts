@@ -1,6 +1,8 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
-import { getPaginationMeta } from 'src/lib/utils/paginate';
+import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
+import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { GetFeedbackQuery } from './query/getFeedback.query';
@@ -37,12 +39,19 @@ export class FeedbackService {
     }
 
     async getFeedbacks(query: GetFeedbackQuery) {
-        const page = query.page || 1;
-        const limit = query.limit || 10;
-        const skip = (page - 1) * limit;
+        const { search, page, limit } = cleanPrismaWhere(query);
+
+        const where: Prisma.FeedbackWhereInput = {
+            OR: [
+                { id: { contains: search, mode: 'insensitive' } },
+                { comment: { contains: search, mode: 'insensitive' } },
+                { user: { name: { contains: search, mode: 'insensitive' } } },
+            ]
+        } 
 
         const [data, total] = await Promise.all([
             this.prisma.feedback.findMany({
+                where: where,
                 include: {
                     user: {
                         select: {
@@ -53,9 +62,9 @@ export class FeedbackService {
                     }
                 },
                 orderBy: { createdAt: 'desc' },
-                skip: skip, take: limit
+                ...getPaginationArgs(page, limit)
             }),
-            this.prisma.feedback.count()
+            this.prisma.feedback.count({ where: where })
         ]);
 
         return {

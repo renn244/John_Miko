@@ -3,7 +3,7 @@ import type { FeedbackStats, FeedbackWithUser } from "@/types/feedback.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const feedbackApi = {
-    getFeedbacks: async (query: { page: number }) => {
+    getFeedbacks: async (query: { page: number, limit: number, search?: string }) => {
         const response = await apiClient.get('/feedback', { params: query })
         
         if(response.status >= 400) {

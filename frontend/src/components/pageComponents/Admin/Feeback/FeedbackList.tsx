@@ -11,7 +11,7 @@ const FeedbackList = () => {
     const { search, page, limit, updatePage } = useFeedbackSearch();
 
     const { data, isLoading, isError } = useGetFeedbacksQuery({
-        page, limit
+        page, limit, search
     });
 
     const getRatingColor = (rating: number) => {
@@ -64,7 +64,7 @@ const FeedbackList = () => {
                                                 {formatToSmartDate(feedback.createdAt)}
                                             </span>
                                             <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">
-                                                {feedback.bookingId}
+                                                {feedback.id}
                                             </span>
                                         </div>
                                     </div>
