@@ -69,11 +69,6 @@ const LoginForm = () => {
                                 Guest
                             </SelectItem>
 
-                            <SelectItem value="staff">
-                                <User className="w-4 h-4" style={{ color: "#1E73BE" }} />
-                                Staff
-                            </SelectItem>
-
                             <SelectItem value="admin">
                                 <Lock className="w-4 h-4" style={{ color: "#1E73BE" }} />
                                 Administrator

@@ -14,10 +14,6 @@ export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetErro
 
             if(variable.userRole === 'admin') {
                 window.location.assign('/admin')
-            } else if (variable.userRole === 'staff') {
-                window.location.assign('/staff')
-            } else if (variable.userRole === 'guest') {
-                window.location.assign('/guest')
             } else {
                 window.location.assign('/')
             }
