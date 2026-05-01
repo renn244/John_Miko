@@ -1,11 +1,13 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { getDateRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { GetFeedbackQuery } from './query/getFeedback.query';
+import { GetFeedbackAnalyticsQuery } from './query/getFeedbackAnalytics.query';
 
 @Injectable()
 export class FeedbackService {
@@ -71,6 +73,41 @@ export class FeedbackService {
             data,
             meta: getPaginationMeta(total, page, limit)
         };
+    }
+
+    async getAnalytics(query: GetFeedbackAnalyticsQuery) {
+        const { gte, lte } = getDateRange(query.interval);
+
+        const analyticsOvertime = await this.prisma.feedback.groupBy({
+            where: {
+                createdAt: { gte, lte }
+            },
+            by: ['createdAt'],
+            _avg: { rating: true },
+        })
+
+        const data = analyticsOvertime.map(item => ({
+            date: item.createdAt.toISOString(),
+            averageRating: item._avg.rating?.toFixed(2) || '0.00',
+        }))
+
+        return data;
+    }
+
+    async getCountPerRating(query: GetFeedbackAnalyticsQuery) {
+        const { gte, lte } = getDateRange(query.interval);
+
+        const countPerRating = await this.prisma.feedback.groupBy({
+            where: {
+                createdAt: { gte, lte }
+            },
+            by: ['rating'],
+            _count: true,
+        })
+
+        const data = countPerRating.map(item => ({ rating: item.rating, count: item._count, }))
+
+        return data;
     }
 
     async getFeedbackStats() {

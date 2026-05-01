@@ -19,6 +19,20 @@ export type FeedbackWithUser = {
     }
 } & Feedback
 
+export type GetFeedbackAnalyticsQuery = {
+    interval: 'day' | 'week' | 'month' | 'year';
+}
+
+export type FeedbackAnalytics = {
+    date: string;
+    averageRating: string;
+}
+
+export type FeedbackCountPerRating = {
+    rating: number;
+    count: number;
+}
+
 export type FeedbackStats = {
     total: number;
     averageRating: number;

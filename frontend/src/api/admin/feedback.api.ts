@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import type { FeedbackStats, FeedbackWithUser } from "@/types/feedback.types";
+import type { FeedbackAnalytics, FeedbackCountPerRating, FeedbackStats, FeedbackWithUser, GetFeedbackAnalyticsQuery } from "@/types/feedback.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const feedbackApi = {
@@ -20,6 +20,24 @@ export const feedbackApi = {
         }
 
         return response.data as FeedbackStats;
+    },
+    getFeedbackAnalytics: async (query: GetFeedbackAnalyticsQuery) => {
+        const response = await apiClient.get('/feedback/analytics', { params: query });
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while fetching feedback analytics.');
+        }
+
+        return response.data as FeedbackAnalytics[];
+    },
+    getFeedbackCountPerRating: async (query: GetFeedbackAnalyticsQuery) => {
+        const response = await apiClient.get('/feedback/count-per-rating', { params: query });
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while fetching feedback count per rating.');
+        }
+
+        return response.data as FeedbackCountPerRating[];
     },
     getFeedbackById: async (id: string) => {
         const response = await apiClient.get(`/feedback/${id}`);

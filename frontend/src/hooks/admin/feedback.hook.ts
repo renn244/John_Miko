@@ -1,4 +1,5 @@
 import { feedbackApi } from "@/api/admin/feedback.api";
+import type { GetFeedbackAnalyticsQuery } from "@/types/feedback.types";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetFeedbacksQuery = (query: { page: number, limit: number, search?: string }) => {
@@ -7,6 +8,22 @@ export const useGetFeedbacksQuery = (query: { page: number, limit: number, searc
         queryFn: () => feedbackApi.getFeedbacks(query),
         refetchOnWindowFocus: false,
         placeholderData: (prev) => prev
+    })
+}
+
+export const useGetFeedbackAnalyticsQuery = (query: GetFeedbackAnalyticsQuery) => {
+    return useQuery({
+        queryKey: ['feedbacks', 'analytics', query],
+        queryFn: () => feedbackApi.getFeedbackAnalytics(query),
+        refetchOnWindowFocus: false,
+    })
+}
+
+export const useGetFeedbackCountPerRatingQuery = (query: GetFeedbackAnalyticsQuery) => {
+    return useQuery({
+        queryKey: ['feedbacks', 'countPerRating', query],
+        queryFn: () => feedbackApi.getFeedbackCountPerRating(query),
+        refetchOnWindowFocus: false,
     })
 }
 
