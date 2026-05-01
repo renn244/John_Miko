@@ -37,7 +37,7 @@ const EditMenuItem = () => {
 
             <MenuItemForm 
             isUpdate
-            initialDate={menuItem}
+            initialData={menuItem}
             onsubmit={updateMenuItem}
             oncancel={() => navigate('/admin/menu-item')}
             />
