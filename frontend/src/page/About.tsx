@@ -1,73 +1,107 @@
 import Footer from "@/components/common/Footer";
 import NavBar from "@/components/common/NavBar";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, Eye, Handshake, Heart, Leaf, Mail, MapPin, Phone, Shield, Target, TrendingUp } from "lucide-react";
+import {
+    CheckCircle,
+    ChevronRight,
+    Clock,
+    Eye,
+    Handshake,
+    Heart,
+    Leaf,
+    Mail,
+    MapPin,
+    Phone,
+    Shield,
+    Target,
+} from "lucide-react";
 import { Link } from "react-router";
 
 const coreValues = [
     {
         icon: Heart,
         title: 'Hospitality First',
-        description: 'We treat every guest like family...',
-        iconColor: 'text-orange-500',
-        bgColor: 'bg-orange-500/15',
+        description: "Warm, thoughtful service from check-in to check-out—so your stay feels easy and welcoming.",
     },
     {
         icon: Shield,
         title: 'Quality & Safety',
-        description: 'Maintaining the highest standards...',
-        iconColor: 'text-blue-600',
-        bgColor: 'bg-blue-600/15',
+        description: "We keep facilities clean, maintained, and guest-ready, with safety and comfort as our priority.",
     },
     {
         icon: Leaf,
         title: 'Sustainability',
-        description: 'Committed to eco-friendly practices...',
-        iconColor: 'text-emerald-600',
-        bgColor: 'bg-emerald-600/15',
+        description: "Simple eco-friendly habits that help protect the place we all enjoy—today and for the future.",
     },
     {
         icon: Handshake,
         title: 'Integrity',
-        description: 'Honest, transparent service...',
-        iconColor: 'text-purple-600',
-        bgColor: 'bg-purple-600/15',
+        description: "Clear policies and honest communication—so you can book and plan with confidence.",
     },
 ];
 
 const About = () => {
-
     return (
-        <div className="min-h-screen">
-            
+        <div className="min-h-screen relative bg-background text-foreground">
             <NavBar />
 
-            <section className="relative h-100 md:h-125 overflow-hidden">
+            <section className="relative h-175 overflow-hidden">
                 <img
-                src="https://images.unsplash.com/photo-1641150557653-e4c409426e59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiZWFjaCUyMHJlc29ydCUyMGFlcmlhbCUyMHZpZXd8ZW58MXx8fHwxNzc1ODE1MzI4fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="John Miko's Place Resort Aerial View"
-                className="w-full h-full object-cover"
+                    src="https://images.unsplash.com/photo-1641150557653-e4c409426e59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiZWFjaCUyMHJlc29ydCUyMGFlcmlhbCUyMHZpZXd8ZW58MXx8fHwxNzc1ODE1MzI4fDA&ixlib=rb-4.1.0&q=80&w=1080"
+                    alt="John Miko's Place Resort Aerial View"
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
                 />
-                <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/50 to-black/70">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col items-center justify-center text-center">
-                        <div className="text-white max-w-4xl">
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-6">About Us</h1>
-                            <p className="text-lg md:text-xl lg:text-2xl text-white/95">
-                                Creating unforgettable coastal memories since 2014
-                            </p>
+                <div className="absolute inset-0 bg-linear-to-b from-black/55 via-black/45 to-black/75" />
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-background to-transparent" />
+
+                <div className="absolute inset-0">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
+                        <div className="w-full text-white">
+                            <div className="max-w-3xl">
+                                <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05]">
+                                    About John Miko&apos;s Place
+                                </h1>
+                                <p className="mt-5 text-lg sm:text-xl md:text-2xl text-white/90 font-light">
+                                    Creating unforgettable coastal memories since 2014
+                                </p>
+
+                                <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                    <Link to="/accommodation" className="w-full sm:w-auto">
+                                        <Button size="lg" className="w-full sm:w-auto">
+                                            Browse Accommodations
+                                            <ChevronRight className="w-6 h-6" />
+                                        </Button>
+                                    </Link>
+                                    <Link to="/amenities" className="w-full sm:w-auto">
+                                        <Button
+                                            size="lg"
+                                            variant="outline"
+                                            className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10"
+                                        >
+                                            View Amenities
+                                            <ChevronRight className="w-6 h-6" />
+                                        </Button>
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section className="py-12 md:py-16 lg:py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                        <div>
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
-                                Our Story
-                            </h2>
-                            <div className="space-y-3 md:space-y-4 text-base md:text-lg text-muted-foreground">
+            <section className="py-20 relative overflow-hidden">
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute -top-28 -right-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+                    <div className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+                </div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                        <div className="lg:col-span-7">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">About</p>
+                            <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Our Story</h2>
+                            <div className="mt-5 space-y-4 text-lg text-muted-foreground leading-relaxed max-w-2xl">
                                 <p>
                                     Founded in 2014, John Miko's Place Resort began as a dream to create a coastal sanctuary
                                     where families and friends could escape the hustle of city life and reconnect with nature
@@ -87,95 +121,108 @@ const About = () => {
                             </div>
                         </div>
 
-                        <div className="relative">
-                            <div className="rounded-2xl overflow-hidden shadow-2xl h-75 md:h-100">
-                                <img
-                                src="https://images.unsplash.com/photo-1716301149701-b1b0389b466f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGZpbGlwaW5vJTIwZmFtaWx5JTIwYmVhY2h8ZW58MXx8fHwxNzc1ODE1MzI4fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                                alt="Happy families at the resort"
-                                className="w-full h-full object-cover"
-                                />
+                        <div className="lg:col-span-5">
+                            <div className="rounded-3xl border bg-muted/20 p-5 md:p-6">
+                                <div className="rounded-2xl overflow-hidden border bg-card shadow-md h-75 md:h-100">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1716301149701-b1b0389b466f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGZpbGlwaW5vJTIwZmFtaWx5JTIwYmVhY2h8ZW58MXx8fHwxNzc1ODE1MzI4fDA&ixlib=rb-4.1.0&q=80&w=1080"
+                                        alt="Happy families at the resort"
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section className="py-12 md:py-16 lg:py-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+            <section className="py-20 bg-muted/20 relative overflow-hidden">
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute inset-0 bg-linear-to-b from-transparent via-primary/5 to-transparent" />
+                </div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-3xl">
+                        <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">About</p>
+                        <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Mission & Vision</h2>
+                    </div>
 
-                        <div className="relative overflow-hidden rounded-2xl border-2">
-                            <div className="relative p-4 md:p-6 lg:p-8">
-                                <div className="flex gap-4 items-center">
-                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-4 bg-primary">
-                                        <Target className="w-6 h-6 md:w-8 md:h-8 text-white" />
-                                    </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold mb-2 md:mb-3">
-                                        Our Mission
-                                    </h3>
+                    <div className="mt-10 rounded-3xl flex border bg-card overflow-hidden">
+                        <div className="p-6 md:p-8 transition-colors hover:bg-muted/30">
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
+                                    <Target className="w-6 h-6 text-primary" />
                                 </div>
-                                <p className="text-base md:text-lg leading-relaxed text-justify text-muted-foreground">
-                                    To provide exceptional coastal hospitality that creates lasting memories for our guests
-                                    through world-class facilities, genuine Filipino warmth, and a commitment to excellence in
-                                    every detail. We strive to be the premier destination where families, friends, and
-                                    celebrations come together.
-                                </p>
+                                <div>
+                                    <h3 className="font-bold text-lg">Our Mission</h3>
+                                    <p className="mt-2 text-sm md:text-base text-muted-foreground leading-relaxed">
+                                        To provide exceptional coastal hospitality that creates lasting memories for our guests
+                                        through world-class facilities, genuine Filipino warmth, and a commitment to excellence in
+                                        every detail. We strive to be the premier destination where families, friends, and
+                                        celebrations come together.
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="relative overflow-hidden rounded-2xl border-2">
-                            <div className="relative p-4 md:p-6 lg:p-8">
-                                <div className="flex gap-4 items-center">
-                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-2 md:mb-4 bg-primary">
-                                        <Eye className="w-6 h-6 md:w-8 md:h-8 text-white" />
-                                    </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold mb-2 md:mb-3">
-                                        Our Vision
-                                    </h3>
+                        <div className="border-l" />
+
+                        <div className="p-6 md:p-8 transition-colors hover:bg-muted/30">
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
+                                    <Eye className="w-6 h-6 text-primary" />
                                 </div>
-                                <p className="text-base md:text-lg leading-relaxed text-justify text-muted-foreground">
-                                    To be recognized as the Philippines' most beloved coastal resort, setting the standard for
-                                    sustainable tourism, innovative hospitality, and community engagement. We envision a future
-                                    where every guest leaves not just satisfied, but transformed by the experience of Filipino
-                                    coastal culture.
-                                </p>
+                                <div>
+                                    <h3 className="font-bold text-lg">Our Vision</h3>
+                                    <p className="mt-2 text-sm md:text-base text-muted-foreground leading-relaxed">
+                                        To be recognized as the Philippines' most beloved coastal resort, setting the standard for
+                                        sustainable tourism, innovative hospitality, and community engagement. We envision a future
+                                        where every guest leaves not just satisfied, but transformed by the experience of Filipino
+                                        coastal culture.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             </section>
 
-            <section className="py-12 md:py-16 lg:py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-10 md:mb-12 lg:mb-16">
-                        <div>
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">
-                                Our Core Values
-                            </h2>
-                            <p className="text-base md:text-lg text-muted-foreground">
-                                The principles that guide everything we do
-                            </p>
-                        </div>
+            <section className="py-20 bg-background relative overflow-hidden">
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute -top-28 -right-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+                </div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-3xl">
+                        <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Values</p>
+                        <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Our Core Values</h2>
+                        <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
+                            The principles that guide everything we do
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                        {coreValues.map((value) => {
+                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5 md:auto-rows-fr">
+                        {coreValues.map((value, index) => {
                             const Icon = value.icon;
+                            const isWideCard = index === 0 || index === coreValues.length - 1;
 
                             return (
-                                <div key={value.title} className="text-center">
-                                    <div
-                                    className={`w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl mx-auto mb-4 md:mb-6 flex items-center justify-center transform hover:scale-110 transition-transform ${value.bgColor}`}
-                                    >
-                                        <Icon className={`w-8 h-8 md:w-10 md:h-10 ${value.iconColor}`} />
+                                <div
+                                    key={value.title}
+                                    className={
+                                        `rounded-3xl p-6 md:p-7 border bg-card transition-colors hover:bg-muted/30 ${isWideCard ? "md:col-span-2" : ""}`
+                                    }
+                                >
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
+                                            <Icon className="w-6 h-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg">{value.title}</h3>
+                                            <p className="mt-2 text-sm md:text-base text-muted-foreground leading-relaxed">
+                                                {value.description}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <h3 className="text-lg md:text-xl font-bold mb-2 md:mb-3">
-                                        {value.title}
-                                    </h3>
-                                    <p className="text-sm md:text-base leading-relaxed text-muted-foreground">
-                                        {value.description}
-                                    </p>
                                 </div>
                             );
                         })}
@@ -183,26 +230,18 @@ const About = () => {
                 </div>
             </section>
 
-            <section className="py-12 md:py-16 lg:py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                        <div className="order-2 lg:order-1">
-                            <div className="rounded-2xl overflow-hidden shadow-2xl h-75 md:h-100">
-                                <img
-                                src="https://images.unsplash.com/photo-1718152220071-dc4396f654fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXNvcnQlMjBzdGFmZiUyMHRlYW18ZW58MXx8fHwxNzc1ODE1MzI5fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                                alt="Our dedicated team"
-                                className="w-full h-full object-cover"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="order-1 lg:order-2">
-                            <h2 className="text-3xl md:text-4xl font-bold mb-4 md:mb-6">
-                                Our Commitment to You
-                            </h2>
-                            <div className="space-y-4 md:space-y-5">
+            <section className="py-20 bg-muted/20 relative overflow-hidden">
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute -top-28 -left-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+                </div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                        <div className="lg:col-span-7">
+                            <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Commitment</p>
+                            <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Our Commitment to You</h2>
+                            <div className="mt-6 space-y-4 md:space-y-5 rounded-3xl border bg-card p-6 md:p-7">
                                 <div className="flex items-start gap-3 md:gap-4">
-                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-emerald-600" />
+                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-primary" />
                                     <div>
                                         <h4 className="font-semibold mb-1 text-base md:text-lg">
                                             Trained & Professional Staff
@@ -214,19 +253,19 @@ const About = () => {
                                 </div>
                                 
                                 <div className="flex items-start gap-3 md:gap-4">
-                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-emerald-600" />
+                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-primary" />
                                     <div>
                                         <h4 className="font-semibold mb-1 text-base md:text-lg">
                                             24/7 Chatbot Support
                                         </h4>
                                         <p className="text-sm md:text-base text-muted-foreground">
-                                            Round-the-clock assistance to address inquiries and ensure transparenancy at all times.
+                                            Round-the-clock assistance to address inquiries and ensure transparency at all times.
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-3 md:gap-4">
-                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-emerald-600" />
+                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-primary" />
                                     <div>
                                         <h4 className="font-semibold mb-1 text-base md:text-lg">
                                             Continuous Improvement
@@ -238,7 +277,7 @@ const About = () => {
                                 </div>
                                 
                                 <div className="flex items-start gap-3 md:gap-4">
-                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-emerald-600" />
+                                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5 md:mt-1 text-primary" />
                                     <div>
                                         <h4 className="font-semibold mb-1 text-base md:text-lg">
                                             Sustainable Practices
@@ -250,99 +289,127 @@ const About = () => {
                                 </div>
                             </div>
                         </div>
+
+                        <div className="lg:col-span-5">
+                            <div className="rounded-3xl border bg-muted/20 p-5 md:p-6">
+                                <div className="rounded-2xl overflow-hidden border bg-card shadow-md h-75 md:h-100">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1718152220071-dc4396f654fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXNvcnQlMjBzdGFmZiUyMHRlYW18ZW58MXx8fHwxNzc1ODE1MzI5fDA&ixlib=rb-4.1.0&q=80&w=1080"
+                                        alt="Our dedicated team"
+                                        className="w-full h-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <section className="py-12 md:py-16 lg:py-20 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-10 md:mb-12">
-                        <div>
-                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">
-                                Visit Us
-                            </h2>
-                            <p className="text-base md:text-lg text-muted-foreground">
-                                Find us at our beautiful coastal location
-                            </p>
-                        </div>
+            <section className="py-20 bg-background relative overflow-hidden">
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute -top-28 -right-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+                </div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-3xl">
+                        <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Support</p>
+                        <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight">Visit Us</h2>
+                        <p className="mt-4 text-muted-foreground">
+                            Find us at our beautiful coastal location
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-                        <div className="rounded-xl overflow-hidden border-2">
-                            <iframe 
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2173.7788647223433!2d121.01468827929318!3d14.905257715337752!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397a9bfaeb13b33%3A0x46457edc695c2db1!2sJohn%20Miko&#39;s%20Place%20Resort!5e1!3m2!1sen!2sph!4v1776763760595!5m2!1sen!2sph" 
-                            className="w-full h-87.5 md:h-146"
-                            loading="lazy" >
-
-                            </iframe>
+                    <div className="mt-10 space-y-5">
+                        <div className="rounded-3xl overflow-hidden border bg-card">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2173.7788647223433!2d121.01468827929318!3d14.905257715337752!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397a9bfaeb13b33%3A0x46457edc695c2db1!2sJohn%20Miko&#39;s%20Place%20Resort!5e1!3m2!1sen!2sph!4v1776763760595!5m2!1sen!2sph"
+                                className="w-full h-87.5 md:h-146"
+                                loading="lazy"
+                                title="John Miko's Place Resort map"
+                                referrerPolicy="no-referrer-when-downgrade"
+                            />
                         </div>
 
-                        <div className="space-y-6">
-                            <div>
-                                <h3 className="text-2xl md:text-3xl font-bold mb-2">
-                                    Get In Touch
-                                </h3>
-                                <p className="text-base md:text-lg mb-8 text-muted-foreground">
-                                    We're here to help with your booking and answer any questions about our resort.
-                                </p>
+                        <div className="rounded-3xl border bg-card p-6 md:p-7 transition-colors hover:bg-muted/30">
+                            <h3 className="font-bold text-lg">Get In Touch</h3>
+                            <p className="mt-2 text-sm md:text-base text-muted-foreground">
+                                We're here to help with your booking and answer any questions about our resort.
+                            </p>
+                            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                                <Link to="/accommodation">
+                                    <Button>
+                                        Browse Accommodations
+                                        <ChevronRight className="w-5 h-5" />
+                                    </Button>
+                                </Link>
+                                <Link to="/amenities">
+                                    <Button variant="outline">
+                                        See Amenities
+                                        <ChevronRight className="w-5 h-5" />
+                                    </Button>
+                                </Link>
                             </div>
+                        </div>
 
-                            <div className="space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <div className="rounded-3xl border bg-card p-6 transition-colors hover:bg-muted/30">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/15 shrink-0">
                                         <MapPin className="w-6 h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
-                                            Location
-                                        </h4>
-                                        <p className="text-sm md:text-base text-muted-foreground">
-                                            Pulong Yantok Norzagaray<br />
+                                        <h3 className="font-bold">Location</h3>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            Pulong Yantok Norzagaray
+                                            <br />
                                             Bulacan Philippines
                                         </p>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div className="rounded-3xl border bg-card p-6 transition-colors hover:bg-muted/30">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/15 shrink-0">
                                         <Phone className="w-6 h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
-                                            Phone
-                                        </h4>
-                                        <p className="text-sm md:text-base text-muted-foreground">
-                                            +63 123 456 7890<br />
+                                        <h3 className="font-bold">Phone</h3>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            +63 123 456 7890
+                                            <br />
                                             +63 987 654 3210
                                         </p>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div className="rounded-3xl border bg-card p-6 transition-colors hover:bg-muted/30">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/15 shrink-0">
                                         <Mail className="w-6 h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
-                                            Email
-                                        </h4>
-                                        <p className="text-sm md:text-base text-muted-foreground">
-                                            info@johnmikosplace.com<br />
+                                        <h3 className="font-bold">Email</h3>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            info@johnmikosplace.com
+                                            <br />
                                             reservations@johnmikosplace.com
                                         </p>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div className="rounded-3xl border bg-card p-6 transition-colors hover:bg-muted/30">
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-primary/15">
+                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/15 shrink-0">
                                         <Clock className="w-6 h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold mb-1 text-base md:text-lg">
-                                            Hours
-                                        </h4>
-                                        <p className="text-sm md:text-base text-muted-foreground">
-                                            24/7 Guest Support<br />
+                                        <h3 className="font-bold">Hours</h3>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            24/7 Guest Support
+                                            <br />
                                             Open Daily
                                         </p>
                                     </div>

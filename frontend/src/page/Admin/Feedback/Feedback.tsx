@@ -1,7 +1,9 @@
+import FeedbackAnalytics from "@/components/pageComponents/Admin/Feeback/FeedbackAnalytics.tsx";
 import FeedbackFilter from "@/components/pageComponents/Admin/Feeback/FeedbackFilter";
 import FeedbackList from "@/components/pageComponents/Admin/Feeback/FeedbackList";
 import FeedbackStatistics from "@/components/pageComponents/Admin/Feeback/FeedbackStatistics";
 import ViewFeedbackDialog from "@/components/pageComponents/Admin/Feeback/ViewFeedbackDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Feedback = () => {
     return (
@@ -18,11 +20,22 @@ const Feedback = () => {
                 </div>
             </div>
 
-            <FeedbackStatistics />
+            <Tabs defaultValue="feedback">
+                <TabsList>
+                    <TabsTrigger value="feedback">Feedback</TabsTrigger>
+                    <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                </TabsList>
 
-            <FeedbackFilter />
+                <TabsContent value="feedback" className="space-y-6">
+                    <FeedbackStatistics />
+                    <FeedbackFilter />
+                    <FeedbackList />
+                </TabsContent>
 
-            <FeedbackList />
+                <TabsContent value="analytics" className="space-y-6">
+                    <FeedbackAnalytics />
+                </TabsContent>
+            </Tabs>
 
             <ViewFeedbackDialog />
         </div>
