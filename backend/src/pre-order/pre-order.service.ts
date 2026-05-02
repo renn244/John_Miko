@@ -17,13 +17,30 @@ export class PreOrderService {
         const menuItemIds = menuItems.map(item => item.menuItemId);
         const menuItemsInfo = await tx.menuItem.findMany({ where: { id: { in: menuItemIds } } })
         
+        // asserts everything exists before creating any pre-order, to avoid partial creation if some menu item is not found
         this.assertAllMenuItemsExist(menuItemsInfo, menuItemIds);
+        
+        // calculate total and saved
+        const total = this.calculatePreOrderTotal(menuItems, menuItemsInfo);
 
-        const preOrders = await tx.preOrderMenuItem.createMany({
-            data: this.transformPreOrderData(bookingId, menuItems, menuItemsInfo)
-        })
+        const preOrders = await tx.preOrderMenuItem.createMany({ data: this.transformPreOrderData(bookingId, menuItems, menuItemsInfo) })
 
-        return preOrders;
+        return {
+            total
+        };
+    }
+
+    private calculatePreOrderTotal(menuItems: { menuItemId: string, quantity: number }[], menuItemsInfo: MenuItem[]) {
+        const menuItemsMap = new Map(menuItemsInfo.map(item => [item.id, item]));    
+    
+        const total = menuItems.reduce((sum, item) => {
+            const menuItemInfo = menuItemsMap.get(item.menuItemId);
+            const menuItemPrice = menuItemInfo?.price ?? 0;
+            
+            return sum + (menuItemPrice * item.quantity);
+        }, 0)
+
+        return total;
     }
 
     private assertAllMenuItemsExist(menuItemsInfo: MenuItem[], menuItemIds: string[]) {

@@ -125,9 +125,36 @@ model Booking {
   timeSlot         BookingTimeSlot
   status           BookingStatus @default(Pending)
   paymentType      PaymentType
+  payment          Payment?
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+enum PaymentStatus {
+  Pending
+  Completed
+  Failed
+}
+
+model Payment {
+  id                  String   @id @default(cuid())
+  
+  bookingId           String   @unique
+  booking             Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  amount              Int
+  paymentStatus       PaymentStatus @default(Pending)
+
+  accommodationAmount Int
+  preOrderAmount      Int
+  guestFeeAmount      Int
+
+  paymentId           String   @unique // from payment gateway
+  paymongoStatus      PaymentStatus @default(Pending)
+
+  paidAt              DateTime?
+  createdAt           DateTime @default(now())
 }
 
 // Snapshot of accommodation details at the time of booking to avoid issues with price changes or availability changes

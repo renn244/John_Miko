@@ -7,12 +7,15 @@ import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
+import { PaymentService } from 'src/payment/payment.service';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class BookingService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly preOrderService: PreOrderService
+        private readonly preOrderService: PreOrderService,
+        private readonly paymentService: PaymentService
     ) {}
 
     async bookAccommodation(body: CreateBookingDto, user: UserSession) {
@@ -29,7 +32,7 @@ export class BookingService {
                     accommodationId: body.accommodationId,
                     bookingDate: body.checkIn,
                     timeSlot: body.stayType,
-                    status: { not: 'Cancelled' }
+                    status: { notIn: ['Cancelled', 'Pending'] }
                 }
             })
 
@@ -37,23 +40,9 @@ export class BookingService {
                 throw new ConflictException('Accommodation is already booked for the selected date and time slot')
             }
             
-            const newBooking = await txprisma.booking.create({
-                data: {
-                    userId: user.id,
-                    accommodationId: body.accommodationId,
-                    bookingDate: body.checkIn,
-                    timeSlot: body.stayType,
-                    paymentType: body.paymentType,
-                    numberOfGuests: body.numberOfGuests,
-                    specialRequests: body.specialRequest,
-                    guestName: body.name,
-                    email: body.email,
-                    contactNo: body.contactNo,
-                    status: 'Confirmed' // to simulate payment sucess, but later removed!
-                }
-            })
-            
-            await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma)
+            const newBooking = await this.createBooking(body, user, txprisma);
+
+            const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
 
             await txprisma.bookedAccommodation.create({
                 data: {
@@ -68,12 +57,45 @@ export class BookingService {
                 }
             })
 
-            return newBooking
+            const { paymentId, checkoutUrl } = await this.paymentService.createPayment({
+                bookingId: newBooking.id,
+                accommodationFee: accommodation.price,
+                guestFee: 0,
+                preOrderFee: preOrderTotal,
+                amount: accommodation.price + preOrderTotal
+            }, txprisma)
+
+            return {
+                ...newBooking,
+                paymentId,
+                checkoutUrl
+            }
         })
 
         // send a receipt email to the user with the booking details and the accommodation details
+        
 
         return booking
+    }
+
+    async createBooking(body: CreateBookingDto, user: UserSession, tx: Prisma.TransactionClient) {
+        const newBooking = await tx.booking.create({
+            data: {
+                userId: user.id,
+                accommodationId: body.accommodationId,
+                bookingDate: body.checkIn,
+                timeSlot: body.stayType,
+                paymentType: body.paymentType,
+                numberOfGuests: body.numberOfGuests,
+                specialRequests: body.specialRequest,
+                guestName: body.name,
+                email: body.email,
+                contactNo: body.contactNo,
+                status: 'Confirmed'
+            }
+        })
+          
+        return newBooking;
     }
 
     async getBookings(query: GetBookingsQuery) {
