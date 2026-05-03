@@ -66,7 +66,7 @@ const ImageMobile = () => (
         <h1 className="text-2xl font-bold text-white mb-1">
           John Miko's Place
         </h1>
-        <p className="text-sm text-white/90">Private Resort</p>
+        <p className="text-sm text-white/90">Public Resort</p>
       </div>
     </div>
   </div>
@@ -87,7 +87,7 @@ const ImageDesktop = () => (
           John Miko's Place
         </h1>
         <p className="text-lg text-white/90 mb-2">
-          Private Resort
+          Public Resort
         </p>
         <p className="text-sm text-white/80 mb-8">
           Experience paradise with modern comfort

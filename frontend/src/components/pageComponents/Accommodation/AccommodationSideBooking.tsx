@@ -3,6 +3,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useGetBookingsByAccommodationQuery } from "@/hooks/booking.hook";
+import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant";
 import { isSameDateOnly } from "@/lib/date.util";
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import {
@@ -87,7 +88,7 @@ const AccommodationSideBooking = ({
                                         <FieldContent>
                                             <FieldTitle>Day Stay</FieldTitle>
                                             <FieldDescription>
-                                                12:00 PM to 1:00 AM
+                                                {TIME_SLOT.DAY_STAY.CHECK_IN} to {TIME_SLOT.DAY_STAY.CHECK_OUT}
                                             </FieldDescription>
                                         </FieldContent>
                                         <RadioGroupItem 
@@ -102,16 +103,16 @@ const AccommodationSideBooking = ({
                                         <FieldContent>
                                             <FieldTitle>Over Night</FieldTitle>
                                             <FieldDescription>
-                                                1:00 AM to 11:00 PM
-                                        </FieldDescription>
-                                    </FieldContent>
-                                    <RadioGroupItem 
-                                    value="OverNight" id="OverNight" 
-                                    /> 
-                                </Field>
-                            </FieldLabel>
-                            )}
-                        </RadioGroup>
+                                                {TIME_SLOT.OVERNIGHT.CHECK_IN} to {TIME_SLOT.OVERNIGHT.CHECK_OUT}
+                                            </FieldDescription>
+                                        </FieldContent>
+                                        <RadioGroupItem 
+                                        value="OverNight" id="OverNight" 
+                                        /> 
+                                    </Field>
+                                </FieldLabel>
+                                )}
+                            </RadioGroup>
                 </div>
             )}
 

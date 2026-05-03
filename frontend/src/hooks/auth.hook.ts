@@ -35,7 +35,7 @@ export const useSignUpGuestMutation = <T extends  FieldValues>(setError: UseForm
             toast.success("Sign up successful.");
             localStorage.setItem("access_token", data.accessToken);
 
-            window.location.assign('/guest')
+            window.location.assign('/')
         },
         onError: (err) => {
             if(err instanceof ValidationError) {

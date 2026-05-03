@@ -15,12 +15,11 @@ type ReviewFormProps = {
     checkOut: Date,
     price: number,
     preOrderSubTotal: number,
-    serviceFee?: number,
     total: number,
 }
 
 const ReviewForm = ({ 
-    accommodation, stayType, checkIn, checkOut, price, preOrderSubTotal, serviceFee, total, setBookingStep 
+    accommodation, stayType, checkIn, checkOut, price, preOrderSubTotal, total, setBookingStep 
 }: ReviewFormProps) => {
     const { watch } = useFormContext<multiStepBookingFormSchema>();
 
@@ -200,14 +199,6 @@ const ReviewForm = ({
                                 <span className="text-muted-foreground">Pre-Order Subtotal</span>
                                 <span className="font-semibold">
                                     ₱{preOrderSubTotal.toLocaleString()}
-                                </span>
-                            </div>
-                        )}
-                        {serviceFee && (
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Service Fee</span>
-                                <span className="font-semibold">
-                                    ₱{serviceFee.toLocaleString()}
                                 </span>
                             </div>
                         )}

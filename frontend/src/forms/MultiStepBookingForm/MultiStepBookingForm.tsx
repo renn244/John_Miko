@@ -1,11 +1,11 @@
 import { useCreateBookingMutation } from "@/hooks/booking.hook";
-import BOOKING_FEES from "@/lib/constant/BOOKING_FEES.constant";
 import { toDateOnly } from "@/lib/date.util";
 import { getBookingDates } from "@/lib/getBookingDates";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -13,7 +13,6 @@ import GuestForm from "./GuestForm";
 import PaymentForm from "./PaymentForm";
 import PreOrderForm from "./PreOrderForm";
 import ReviewForm from "./ReviewForm";
-import { useState } from "react";
 
 type MultiStepBookingFormProps = {
     accommodation: Accommodation,
@@ -87,11 +86,20 @@ const MultiStepBookingForm = ({
             checkIn: toDateOnly(checkIn),
             ...rest
         }, {
-            onSuccess: () => {
+            onSuccess: (data) => {
                 onSuccess?.();
                 reset();
-
-                toast.success("Booking created successfully");
+                
+                toast.promise<void>(
+                    () => new Promise((resolve) => setTimeout(() => resolve(), 1500)),
+                    {
+                        loading: "Redirecting...",
+                        success: () => {
+                            window.location.href = data.checkoutUrl;
+                            return "Redirecting to payment gateway!";
+                        }
+                    }
+                )
             },
             onError: (error) => {
                 if(error instanceof ValidationError) {
@@ -108,8 +116,7 @@ const MultiStepBookingForm = ({
 
     const rate = accommodation.price;
     const preOrderSubTotal = preOrderTotal;
-    const serviceFee = BOOKING_FEES.SERVICE_FEE;
-    const total = rate  + preOrderSubTotal + (serviceFee ?? 0);
+    const total = rate  + preOrderSubTotal
 
     return (  
         <FormProvider {...form}>
@@ -137,7 +144,6 @@ const MultiStepBookingForm = ({
                     stayType={stayType}
                     price={rate}
                     preOrderSubTotal={preOrderSubTotal}
-                    serviceFee={serviceFee}
                     total={total}
                     setBookingStep={setBookingStep}
                     checkIn={bookingCheckIn}
