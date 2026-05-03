@@ -13,6 +13,7 @@ import {
     MapPin,
     Phone,
     Shield,
+    Sparkles,
     Target,
 } from "lucide-react";
 import { Link } from "react-router";
@@ -76,12 +77,11 @@ const About = () => {
                                     </Link>
                                     <Link to="/amenities" className="w-full sm:w-auto">
                                         <Button
-                                            size="lg"
-                                            variant="outline"
-                                            className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10"
+                                        size="lg"
+                                        variant="secondary"
                                         >
                                             View Amenities
-                                            <ChevronRight className="w-6 h-6" />
+                                            <Sparkles className="w-6 h-6" />
                                         </Button>
                                     </Link>
                                 </div>

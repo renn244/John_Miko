@@ -176,7 +176,7 @@ const SignUpGuestForm = () => {
             )}
             />
 
-            <Button type="submit" className="w-full">
+            <Button disabled={isPending} type="submit" className="w-full">
                 {isPending ? (
                     <LoadingSpinner />
                 ) : (

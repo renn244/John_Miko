@@ -2,7 +2,7 @@ import Footer from "@/components/common/Footer"
 import NavBar from "@/components/common/NavBar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BadgeCheck, Calendar, Car, ChevronRight, Coffee, ConciergeBell, Droplets, Fence, MapPin, ShieldCheck, Users } from "lucide-react"
+import { BadgeCheck, Calendar, Car, ChevronRight, Coffee, ConciergeBell, Droplets, Fence, Info, MapPin, ShieldCheck, Users } from "lucide-react"
 import { Link } from "react-router"
 
 const Amenities = () => {
@@ -35,11 +35,10 @@ const Amenities = () => {
                                 </Link>
                                 <Link to="/about">
                                     <Button
-                                        size="lg"
-                                        variant="outline"
-                                        className="border-white text-white hover:bg-white/10"
+                                    size="lg"
+                                    variant="secondary"
                                     >
-                                        Learn About Us
+                                        Learn About Us <Info className="h-6 w-6" />
                                     </Button>
                                 </Link>
                             </div>

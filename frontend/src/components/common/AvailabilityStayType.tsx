@@ -1,4 +1,5 @@
 import { useGetBookingsByAccommodationQuery } from "@/hooks/booking.hook";
+import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant";
 import { isSameDateOnly } from "@/lib/date.util";
 import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
@@ -34,7 +35,7 @@ const AvailabilityStayType = ({ checkInDate, accommodationId, className, invalid
                                 DayStay
                             </FieldTitle>
                             <FieldDescription>
-                                12:00 PM to 1:00 AM
+                                {TIME_SLOT.DAY_STAY.CHECK_IN} to {TIME_SLOT.DAY_STAY.CHECK_OUT}
                             </FieldDescription>
                         </FieldContent>
                         <RadioGroupItem
@@ -53,7 +54,7 @@ const AvailabilityStayType = ({ checkInDate, accommodationId, className, invalid
                                 OverNight
                             </FieldTitle>
                             <FieldDescription>
-                                1:00 AM to 11:00 PM
+                                {TIME_SLOT.OVERNIGHT.CHECK_IN} to {TIME_SLOT.OVERNIGHT.CHECK_OUT}
                             </FieldDescription>
                         </FieldContent>
                         <RadioGroupItem

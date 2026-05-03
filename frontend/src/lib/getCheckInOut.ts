@@ -1,4 +1,5 @@
 import { addDays, format } from "date-fns";
+import { TIME_SLOT } from "./constant/TIME_SLOT.constant";
 
 const getCheckInOut = (bookingDate: string, timeSlot: "DayStay" | "OverNight") => {
     const date = new Date(bookingDate);
@@ -6,16 +7,16 @@ const getCheckInOut = (bookingDate: string, timeSlot: "DayStay" | "OverNight") =
 
     if (timeSlot === "DayStay") {
         return {
-            checkIn: format(date, 'PPP') + " · 12:00 PM",
+            checkIn: format(date, 'PPP') + " " + TIME_SLOT.DAY_STAY.CHECK_IN,
             checkInDayOfTheWeek: format(date, 'EEEE'),
-            checkOut: format(nextDay, 'PPP') + " · 1:00 AM",
+            checkOut: format(nextDay, 'PPP') + " " + TIME_SLOT.DAY_STAY.CHECK_OUT,
             checkOutDayOfTheWeek: format(nextDay, 'EEEE'),
         };
     } else {
         return {
-            checkIn: format(date, 'PPP') + " · 1:00 AM",
+            checkIn: format(date, 'PPP') + " " + TIME_SLOT.OVERNIGHT.CHECK_IN,
             checkInDayOfTheWeek: format(date, 'EEEE'),
-            checkOut: format(date, 'PPP') + " · 11:00 PM",
+            checkOut: format(date, 'PPP') + " " + TIME_SLOT.OVERNIGHT.CHECK_OUT,
             checkOutDayOfTheWeek: format(date, 'EEEE'),
         }
     }

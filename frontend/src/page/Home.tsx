@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useGetAccommodationByIdQuery, useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook"
+import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant"
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect"
 import { format } from "date-fns"
 import {
@@ -85,11 +86,11 @@ const Home = () => {
 
             <section className="relative h-175 overflow-hidden">
                 <img
-                    src="https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="John Miko's Place Resort"
-                    className="w-full h-full object-cover"
-                    loading="eager"
-                    fetchPriority="high"
+                src="https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1080"
+                alt="John Miko's Place Resort"
+                className="w-full h-full object-cover"
+                loading="eager"
+                fetchPriority="high"
                 />
                 <div className="absolute inset-0 bg-linear-to-b from-black/55 via-black/45 to-black/75" />
                 <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-background to-transparent" />
@@ -98,10 +99,6 @@ const Home = () => {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
                         <div className="w-full text-white">
                             <div className="max-w-3xl">
-                                <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/20 px-4 py-1 text-xs sm:text-sm text-white/90">
-                                    <Sparkles className="h-4 w-4" />
-                                    Private resort for groups & celebrations
-                                </div>
 
                                 <h1 className="mt-5 text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05]">
                                     John Miko&apos;s Place Resort
@@ -123,8 +120,7 @@ const Home = () => {
                                     <Link to="/amenities" className="w-full sm:w-auto">
                                         <Button
                                         size="lg"
-                                        variant="outline"
-                                        className="w-full sm:w-auto border-white/40 text-white hover:bg-white/10"
+                                        variant="secondary"
                                         >
                                             View Amenities
                                             <Sparkles className="w-6 h-6" />
@@ -140,7 +136,7 @@ const Home = () => {
                                             </div>
                                             <div>
                                                 <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold">DayStay hours</p>
-                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in 8:00AM • Check-out 6:00 PM</p>
+                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {TIME_SLOT.DAY_STAY.CHECK_IN} • Check-out {TIME_SLOT.DAY_STAY.CHECK_OUT}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -152,7 +148,7 @@ const Home = () => {
                                             </div>
                                             <div>
                                                 <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold">Overnight</p>
-                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in 2PM • Check-out 12PM</p>
+                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {TIME_SLOT.OVERNIGHT.CHECK_IN} • Check-out {TIME_SLOT.OVERNIGHT.CHECK_OUT}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -311,7 +307,7 @@ const Home = () => {
                                         </div>
 
                                         <p className="mt-3 text-xs text-muted-foreground">
-                                            DayStay: 8:00 AM – 6:00 PM. Overnight: Check-in 2:00 PM, Check-out 12:00 PM.
+                                            DayStay: {TIME_SLOT.DAY_STAY.CHECK_IN} – {TIME_SLOT.DAY_STAY.CHECK_OUT}. Overnight: Check-in {TIME_SLOT.OVERNIGHT.CHECK_IN}, Check-out {TIME_SLOT.OVERNIGHT.CHECK_OUT}.
                                         </p>
                                     </div>
                                 </div>
@@ -371,7 +367,10 @@ const Home = () => {
                                     <div>
                                         <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Time Slots</p>
                                         <p className="mt-1 font-semibold leading-snug">DayStay or Overnight</p>
-                                        <p className="mt-1 text-sm text-muted-foreground">DayStay 8AM–6PM • Overnight 2PM–12PM</p>
+                                        <p className="mt-1 text-sm text-muted-foreground">
+                                            DayStay {TIME_SLOT.DAY_STAY.CHECK_IN} – {TIME_SLOT.DAY_STAY.CHECK_OUT} <br/> 
+                                            Overnight {TIME_SLOT.OVERNIGHT.CHECK_IN} – {TIME_SLOT.OVERNIGHT.CHECK_OUT}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -417,7 +416,7 @@ const Home = () => {
                             <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Experience</p>
                             <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Your Coastal Getaway Awaits</h2>
                             <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                                John Miko's Place Resort is a private space made for staycations, family bonding, and small celebrations.
+                                John Miko's Place Resort is a public space made for staycations, family bonding, and small celebrations.
                                 With comfortable accommodations and guest-friendly policies, planning your visit is simple and stress-free.
                             </p>
 
@@ -523,8 +522,14 @@ const Home = () => {
                                         <div>
                                             <h3 className="font-bold text-lg">Check-in & Check-out</h3>
                                             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                                                <li>• Overnight: Check-in 2:00 PM, Check-out 12:00 PM</li>
-                                                <li>• Day Use: 8:00 AM - 6:00 PM (cottages only)</li>
+                                                <li>• Day Use: <br />
+                                                    Check-in {TIME_SLOT.DAY_STAY.CHECK_IN} - 
+                                                    Check-out {TIME_SLOT.DAY_STAY.CHECK_OUT}
+                                                </li>
+                                                <li>• Overnight: <br />
+                                                    Check-in {TIME_SLOT.OVERNIGHT.CHECK_IN} - 
+                                                    Check-out {TIME_SLOT.OVERNIGHT.CHECK_OUT}
+                                                </li>
                                                 <li>• Early check-in subject to availability</li>
                                             </ul>
                                         </div>
@@ -616,118 +621,6 @@ const Home = () => {
                                         </AccordionItem>
                                     ))}
                                 </Accordion>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-24 relative overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1758117638619-42ab7021183b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXNvcnQlMjBjb3R0YWdlJTIwcG9vbCUyMHZpZXd8ZW58MXx8fHwxNzcyMTAwMTAxfDA&ixlib=rb-4.1.0&q=80&w=1080"
-                    alt="Resort View"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                />
-                <div className="absolute inset-0 bg-linear-to-b from-primary/75 via-primary/65 to-primary/80" />
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="rounded-3xl border border-white/15 bg-black/15 backdrop-blur-sm p-7 sm:p-10 text-white">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-7">
-                            <div className="max-w-3xl">
-                                <p className="text-xs font-semibold tracking-wide uppercase text-white/80">Ready when you are</p>
-                                <h2 className="mt-2 text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Ready to Book Your Escape?</h2>
-                                <p className="mt-4 text-base sm:text-lg md:text-xl text-white/95">
-                                    Start planning your perfect coastal getaway today. Check availability and secure your reservation now.
-                                </p>
-
-                                <div className="mt-6 flex flex-wrap items-center gap-2 text-sm text-white/90">
-                                    <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/10 px-3 py-1.5">
-                                        <Clock className="w-4 h-4" />
-                                        DayStay / Overnight
-                                    </span>
-                                    <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/10 px-3 py-1.5">
-                                        <CreditCard className="w-4 h-4" />
-                                        50% down to confirm
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-                                <Link to="/accommodation" className="w-full sm:w-auto">
-                                    <Button size="lg" className="w-full">
-                                        Check Availability
-                                        <CalendarIcon className="w-6 h-6" />
-                                    </Button>
-                                </Link>
-                                <Link to="/about" className="w-full sm:w-auto">
-                                    <Button
-                                        size="lg"
-                                        variant="outline"
-                                        className="w-full border-white/40 text-white hover:bg-white/10"
-                                    >
-                                        Learn More
-                                        <ChevronRight className="w-6 h-6" />
-                                    </Button>
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-20 bg-background relative overflow-hidden">
-                <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute -top-28 -right-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-                </div>
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                        <div className="lg:col-span-4">
-                            <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Support</p>
-                            <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight">Get in touch</h2>
-                            <p className="mt-4 text-muted-foreground">
-                                Questions before booking? We&apos;re happy to help.
-                            </p>
-                        </div>
-
-                        <div className="lg:col-span-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="rounded-3xl border bg-card p-6 md:col-span-2">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/15 shrink-0">
-                                            <MapPin className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold">Location</h3>
-                                            <p className="mt-2 text-sm text-muted-foreground">
-                                                Purok 6, Sentinela Rd., Pulong Yantok, Angat, Bulacan, Philippines
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-3xl border bg-card p-6">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/15 shrink-0">
-                                            <Phone className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold">Phone</h3>
-                                            <p className="mt-2 text-sm text-muted-foreground">+63 123 456 7890</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-3xl border bg-card p-6">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-primary/15 shrink-0">
-                                            <Mail className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold">Email</h3>
-                                            <p className="mt-2 text-sm text-muted-foreground">info@johnmikosplace.com</p>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

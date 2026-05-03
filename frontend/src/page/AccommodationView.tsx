@@ -1,15 +1,7 @@
+import NavBar from "@/components/common/NavBar";
 import AccommodationBookingModal from "@/components/pageComponents/Accommodation/AccommodationBookingModal";
 import AccommodationSideBooking from "@/components/pageComponents/Accommodation/AccommodationSideBooking";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
-import {
-    Car,
-    Dumbbell,
-    House,
-    Info,
-    Users,
-    UtensilsCrossed,
-    Waves
-} from 'lucide-react';
 import { useState } from "react";
 import { useParams } from "react-router";
 
@@ -20,10 +12,9 @@ const AccommodationView = () => {
     const { data: accommodation, isLoading, error } = useGetAccommodationByIdQuery(id)
 
     const resortFacilities = [
-        { icon: UtensilsCrossed, label: 'Restaurant', description: 'Filipino and international cuisine' },
-        { icon: Waves, label: 'Swimming Pool', description: 'Infinity pool with ocean view' },
-        { icon: Car, label: 'Parking', description: 'Free parking for guests' },
-        { icon: Dumbbell, label: 'Fitness Center', description: 'Modern gym equipment' },
+        { emoji: "🍽️", label: 'Restaurant', description: 'Filipino and international cuisine' },
+        { emoji: "🏊", label: 'Swimming Pool', description: 'Infinity pool with ocean view' },
+        { emoji: "🚗", label: 'Parking', description: 'Free parking for guests' },
     ]
     
     if(isLoading) return null;
@@ -34,162 +25,113 @@ const AccommodationView = () => {
 
 
     return (
-        <div style={{ backgroundColor: '#F1F5F9' }}>
+        <div className="bg-muted/30">
+            <NavBar />
 
-            <div className="relative bg-black">
-                <div className="relative">
-                    <div className="h-100 md:h-125 lg:h-150">
-                        <img
-                        src={accommodation.imageUrl}
-                        alt={`${accommodation.name}`}
-                        className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
-                    </div>
-                </div>
-            </div>
+            <main className="max-w-7xl mx-auto px-4 py-8 md:py-12">
 
-            <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-                <div className="grid lg:grid-cols-3 gap-8">
-
-                    <div className="lg:col-span-2 space-y-6">
-
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border-2">
-
-                            <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                                {accommodation.name}
-                            </h1>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/20">
-                                        <House className="w-6 h-6 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">
-                                            Type
-                                        </p>
-                                        <p className="font-bold">
-                                            {accommodation.type}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-primary/20">
-                                        <Users className="w-6 h-6 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-muted-foreground">
-                                            Capacity
-                                        </p>
-                                        <p className="font-bold">
-                                            {accommodation.capacity} Guests
-                                        </p>
-                                    </div>
-                                </div>
-
+                <div className="grid lg:grid-cols-3 gap-8 items-start">
+                    <div className="lg:col-span-2">
+                        <div className="bg-background rounded-2xl shadow-sm overflow-hidden">
+                            <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl rounded-b-none">
+                                <img
+                                src={accommodation.imageUrl}
+                                alt={accommodation.name}
+                                className="w-full h-full object-cover"
+                                />
                             </div>
-                        </div>
 
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border-2">
-                            <h2 className="text-2xl font-bold mb-4">
-                                About This Accommodation
-                            </h2>
-                            <p className="text-base leading-relaxed text-muted-foreground">
-                                {accommodation.description}
-                            </p>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border-2">
-                            <h2 className="text-2xl font-bold mb-6">
-                                Amenities & Features
-                            </h2>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                {accommodation.amenities.map((amenity, index) => {
-
-                                    return (
-                                        <div key={index} className="flex items-start gap-4 p-4 rounded-xl border-2 hover:shadow-md transition-all">
-                                            <div>
-                                                <h3 className="font-bold mb-1">
-                                                    {amenity}
-                                                </h3>
-                                            </div>
+                            <div className="px-4 md:px-6 pt-5">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <h1 className="text-2xl font-semibold tracking-tight">{accommodation.name}</h1>
+                                        <div className="mt-2 flex items-center gap-2 flex-wrap">
+                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/50 px-3 py-1 text-xs text-muted-foreground">
+                                                🏠 {accommodation.type}
+                                            </span>
+                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 border border-border/50 px-3 py-1 text-xs text-muted-foreground">
+                                                👥 {accommodation.capacity} Guests
+                                            </span>
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border-2">
-                            <h2 className="text-2xl font-bold mb-6">
-                                Resort Facilities
-                            </h2>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                {resortFacilities.map((facility, index) => {
-                                    const Icon = facility.icon;
-                                    
-                                    return (
-                                        <div key={index} className="flex items-start gap-4 p-4 rounded-xl border-2 hover:shadow-md transition-all">
-                                            <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0 bg-primary/20">
-                                                <Icon className="w-6 h-6 text-primary" />
+                            <section className="p-4 md:p-6">
+                                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">
+                                    About This Accommodation
+                                </p>
+                                <div className="rounded-xl bg-background">
+                                    <p className="text-sm leading-relaxed text-muted-foreground">
+                                    {accommodation.description}
+                                    </p>
+                                </div>
+                            </section>
+
+                            <div className="h-px bg-border" />
+
+                            <section className="p-4 md:p-6">
+                                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">
+                                    Amenities & Features
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {accommodation.amenities.map((amenity, index) => (
+                                        <span
+                                        key={index}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-muted/40 border border-border/50 px-4 py-1.5 text-sm font-normal transition-colors hover:bg-muted/60"
+                                        >
+                                            {amenity}
+                                        </span>
+                                    ))}
+                                </div>
+                            </section>
+
+                            <div className="h-px bg-border" />
+
+                            <section className="p-4 md:p-6">
+                                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">
+                                    Resort Facilities
+                                </p>
+                                <div className="grid sm:grid-cols-2 gap-3">
+                                    {resortFacilities.map((facility, index) => (
+                                        <div
+                                        key={index}
+                                        className="flex items-start gap-3.5 rounded-xl border border-border/50 bg-background p-4 transition-colors hover:bg-muted/30"
+                                        >
+                                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-muted/50 border border-border/40 text-lg leading-none">
+                                                {facility.emoji}
                                             </div>
                                             <div>
-                                                <h3 className="font-bold mb-1">
-                                                    {facility.label}
-                                                </h3>
-                                                <p className="text-sm text-muted-foreground">
+                                                <h3 className="text-sm font-medium leading-tight">{facility.label}</h3>
+                                                <p className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
                                                     {facility.description}
                                                 </p>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg border-2">
-                            <h2 className="text-2xl font-bold mb-6">
-                                Virtual Tour
-                            </h2>
-                            <div className="relative h-64 md:h-96 rounded-xl overflow-hidden flex items-center justify-center bg-muted">
-                                <div className="text-center">
-                                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 bg-primary/20">
-                                        <Info className="w-10 h-10 text-primary" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2">
-                                        360° Virtual Tour
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Interactive virtual tour coming soon
-                                    </p>
+                                    ))}
                                 </div>
-                            </div>
+                            </section>
                         </div>
-
                     </div>
 
-                    <div className="lg:col-span-1">
+                    <aside className="lg:col-span-1">
                         <div className="sticky top-24">
-
-                            <AccommodationSideBooking 
+                            <AccommodationSideBooking
                             setIsOpen={setIsOpen}
                             accommodation={{
                                 id: accommodation.id,
                                 price: accommodation.price
                             }}
                             />
-
                         </div>
-                    </div>
+                    </aside>
                 </div>
-            </div>
+            </main>
 
-            <AccommodationBookingModal 
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            accommodation={accommodation as any}
+            <AccommodationBookingModal
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                accommodation={accommodation as any}
             />
         </div>
     )

@@ -54,7 +54,7 @@ const ManualBookingForm = () => {
         criteriaMode: "all"
     })
 
-    const { data: accommodations } = useGetAccommodationsQuery({ availability: "Available" });
+    const { data: accommodations } = useGetAccommodationsQuery({ availability: "Available", page: 1, limit: 100 });
 
     const selectedAccommodationId = watch('accommodationId');
     const selectedCheckInDate = watch('checkIn');
@@ -75,7 +75,7 @@ const ManualBookingForm = () => {
     }
 
     const selectedAccommodation = useMemo(() => {
-        return accommodations?.find((acc) => acc.id === selectedAccommodationId);
+        return accommodations?.data.find((acc) => acc.id === selectedAccommodationId);
     }, [selectedAccommodationId, accommodations]);
 
     const accommodationPrice = selectedAccommodation?.price || 0;
@@ -202,7 +202,7 @@ const ManualBookingForm = () => {
                                 aria-invalid={fieldState.invalid}
                                 className="grid md:grid-cols-2 gap-3"
                                 >
-                                    {accommodations?.map((acc) => (
+                                    {accommodations?.data.map((acc) => (
                                         <FieldLabel key={acc.id} className="gap-0 has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:pb-2">
                                             <Field orientation="horizontal">
                                                 <FieldContent>

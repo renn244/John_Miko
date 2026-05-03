@@ -4,12 +4,12 @@ export function getBookingDates(date: Date, stayType: 'OverNight' | 'DayStay') {
   const checkOut = new Date(date);
 
   if (stayType === 'OverNight') {
-    checkIn.setHours(12, 0);
+    checkIn.setHours(19, 0);
     checkOut.setDate(checkOut.getDate() + 1);
-    checkOut.setHours(1, 0);
+    checkOut.setHours(5, 0); // 5 AM the next day
   } else {
-    checkIn.setHours(1, 0);
-    checkOut.setHours(11, 0);
+    checkIn.setHours(8, 0); // 8 AM
+    checkOut.setHours(17, 0); // 5 PM
   }
 
   return { checkIn, checkOut };
