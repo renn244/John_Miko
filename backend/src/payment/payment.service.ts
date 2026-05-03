@@ -1,9 +1,9 @@
-import { Injectable, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { PaymentType, Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePaymentDto } from './dto/payment.dto';
-import { PaymongoService } from './paymongo.service';
 import { CheckoutLineItem } from './interface/paymongo.types';
-import { Prisma } from 'src/generated/prisma/client';
+import { PaymongoService } from './paymongo.service';
 
 @Injectable()
 export class PaymentService {
@@ -18,30 +18,9 @@ export class PaymentService {
     ) {
         const { bookingId, accommodationFee, preOrderFee, guestFee, amount } = body;
 
-        const lineItems: CheckoutLineItem[] = [
-            {
-                amount: accommodationFee * 100,
-                currency: 'PHP' as CheckoutLineItem['currency'],
-                name: 'Accommodation Fee',
-                description: `This is the fee for the accommodations like room, cottage, etc.`,
-                images: [''], // TODO add accommodation image here
-                quantity: 1,
-            },
-            ...(preOrderFee > 0 ? [{
-                amount: preOrderFee * 100,
-                currency: 'PHP' as CheckoutLineItem['currency'],
-                name: 'Pre-order Fee',
-                description: `This is the fee for you're pre ordered food during your stay.`,
-                quantity: 1,
-            }] : []),
-            ...(guestFee > 0 ? [{
-                amount: guestFee * 100,
-                currency: 'PHP' as CheckoutLineItem['currency'],
-                name: 'Guest Fee',
-                description: `This is the fee for the guests fee that comes during your stay.`,
-                quantity: 1,
-            }] : []),
-        ];
+        const lineItems = this.processLineItems(accommodationFee, preOrderFee, guestFee, body.paymentType);
+        const totalAmount = accommodationFee + preOrderFee + guestFee;
+        const { amountToPay, amountPaid } = this.calculateAmounts(totalAmount, body.paymentType);
 
         // create paymongo link here
         const checkoutSession = await this.paymongoService.createCheckoutSession({
@@ -52,7 +31,7 @@ export class PaymentService {
                     success_url: `${process.env.FRONTEND_URL}/payment/success`,
                     cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
                     reference_number: bookingId,
-                    // show_line_items: true,
+                    show_line_items: true,
                     send_email_receipt: true,
                 },
             },
@@ -64,7 +43,6 @@ export class PaymentService {
 
         // if prisma fails after session is created, expire the session
         // to avoid orphaned checkout sessions on paymongo
-        const totalAmount = accommodationFee + preOrderFee + guestFee;
         const payment = await tx.payment.create({
             data: {
                 bookingId,
@@ -73,14 +51,15 @@ export class PaymentService {
                 accommodationAmount: accommodationFee,
                 preOrderAmount: preOrderFee,
                 guestFeeAmount: guestFee,
-                amount: totalAmount,
+                amountPaid: amountPaid,
+                amountToPaid: amountToPay,
+                totalAmount: totalAmount,
             }
         }).catch(async () => {
             await this.paymongoService.expireCheckoutSession(checkoutSession.data.id);
             throw new InternalServerErrorException('Failed to save payment record');
         });
 
-        // return paymongo link here
         return {
             paymentId: payment.id,
             checkoutUrl: checkoutSession.data.attributes.checkout_url
@@ -88,7 +67,6 @@ export class PaymentService {
     }
 
     async getPayments() {
-
     }
 
     async getPaymentById(id: string) {
@@ -96,5 +74,50 @@ export class PaymentService {
 
     async addExtraFees() {
         
+    }
+
+    private calculateAmounts(totalAmount: number, paymentType: PaymentType) {
+        let amountToPay = 0;
+        let amountPaid = 0;
+
+        if(paymentType === 'Full') {
+            amountPaid = totalAmount;
+        } else {
+            // since partial is 50%
+            amountPaid = Math.round(totalAmount / 2); 
+            amountToPay = totalAmount - amountPaid;
+        }
+
+        return { amountToPay, amountPaid };
+    }
+
+    private processLineItems(accommodationFee: number, preOrderFee: number, guestFee: number, paymentType: PaymentType): CheckoutLineItem[] {
+        const isPartial = paymentType === 'Partial';
+        const multiplier = isPartial ? 0.5 : 1;
+        const label = isPartial ? ' (50% Downpayment)' : '';
+
+         return [
+            {
+                amount: Math.round(accommodationFee * multiplier) * 100,
+                currency: 'PHP' as CheckoutLineItem['currency'],
+                name: `Accommodation Fee${label}`,
+                description: 'This is the fee for the accommodations like room, cottage, etc.',
+                quantity: 1,
+            },
+            ...(preOrderFee > 0 ? [{
+                amount: Math.round(preOrderFee * multiplier) * 100,
+                currency: 'PHP' as CheckoutLineItem['currency'],
+                name: `Pre-order Fee${label}`,
+                description: 'This is the fee for your pre-ordered food during your stay.',
+                quantity: 1,
+            }] : []),
+            ...(guestFee > 0 ? [{
+                amount: Math.round(guestFee * multiplier) * 100,
+                currency: 'PHP' as CheckoutLineItem['currency'],
+                name: `Guest Fee${label}`,
+                description: 'This is the fee for the guests during your stay.',
+                quantity: 1,
+            }] : []),
+        ];
     }
 }

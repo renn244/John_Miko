@@ -6,8 +6,8 @@ import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
 import getCheckInOut from "@/lib/getCheckInOut";
 import { useBookingAdminStore } from "@/store/admin/bookingAdmin.store";
-import type { BookingWithAccommodationAndPreOrder } from "@/types/booking.types";
-import { Calendar, CreditCard, FileText, MapPin, Pizza, Users } from "lucide-react";
+import type { BookingWithAccommodationAndPreOrderAndPayment } from "@/types/booking.types";
+import { Calendar, CheckCircle, CreditCard, FileText, MapPin, Pizza, Users } from "lucide-react";
 
 const ViewBookingDialog = () => {
     const isViewOpen = useBookingAdminStore((state) => state.isViewOpen);
@@ -18,7 +18,7 @@ const ViewBookingDialog = () => {
 
     return (
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-3xl max-h-screen overflow-y-auto">
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />
@@ -43,7 +43,7 @@ const ViewBookingDialog = () => {
     )
 }
 
-const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAccommodationAndPreOrder }) => {
+const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAccommodationAndPreOrderAndPayment }) => {
     
     const { 
         checkIn, checkInDayOfTheWeek,
@@ -197,21 +197,21 @@ const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAcco
                                 Payment Information
                             </h3>
                         </div>
-                        {/* <div className="p-5 rounded-lg border-2" style={{ backgroundColor: '#FAFAFA', borderColor: '#E5E7EB' }}>
-                            <div className="flex justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: '#E5E7EB' }}>
+                        <div className="p-3 rounded-lg border-2" style={{ backgroundColor: '#FAFAFA', borderColor: '#E5E7EB' }}>
+                            <div className="flex justify-between items-center mb-1.5 pb-1.5 border-b" style={{ borderColor: '#E5E7EB' }}>
                                 <span className="text-sm font-medium" style={{ color: '#6B7280' }}>
                                     Total Amount:
                                 </span>
                                 <span className="font-bold text-xl" style={{ color: '#1F2937' }}>
-                                    ₱{selectedBooking.totalAmount.toLocaleString()}
+                                    ₱{selectedBooking.payment.totalAmount.toLocaleString()}
                                 </span>
                             </div>
-                            <div className="flex justify-between items-center mb-3 pb-3 border-b" style={{ borderColor: '#E5E7EB' }}>
+                            <div className="flex justify-between items-center mb-1.5 pb-1.5 border-b" style={{ borderColor: '#E5E7EB' }}>
                                 <span className="text-sm font-medium" style={{ color: '#6B7280' }}>
                                     Amount Paid:
                                 </span>
                                 <span className="font-bold text-lg" style={{ color: '#059669' }}>
-                                    ₱{selectedBooking.amountPaid.toLocaleString()}
+                                    ₱{selectedBooking.payment.amountPaid.toLocaleString()}
                                 </span>
                             </div>
                             {selectedBooking.paymentType === 'Partial' && (
@@ -220,7 +220,7 @@ const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAcco
                                         Balance Due:
                                     </span>
                                     <span className="font-bold text-lg" style={{ color: '#F97316' }}>
-                                        ₱{(selectedBooking.totalAmount - selectedBooking.amountPaid).toLocaleString()}
+                                        ₱{(selectedBooking.payment.amountToPaid).toLocaleString()}
                                     </span>
                                 </div>
                             )}
@@ -232,7 +232,7 @@ const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAcco
                                     </span>
                                 </div>
                             )}
-                        </div> */}
+                        </div>
                     </div>
 
                 </div>
@@ -251,7 +251,7 @@ const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAcco
                                 <span className="font-medium">
                                     {preorder.name}
                                 </span>
-                                <span className="px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-100">
+                                <span className="px-3 py-1 rounded-full text-sm font-semibold">
                                     Qty: {preorder.quantity}
                                 </span>
                             </div>

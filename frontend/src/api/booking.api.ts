@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrder, GetBookingsQuery } from "@/types/booking.types";
+import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrderAndPayment, BookingWithPaymentInfo, GetBookingsQuery } from "@/types/booking.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const bookingApi = {
@@ -22,7 +22,7 @@ export const bookingApi = {
             throw new Error(response.data.message || 'Failed to book accommodation');
         }
 
-        return response.data as Booking;
+        return response.data as BookingWithPaymentInfo;
     },
     getBookings: async (query?: GetBookingsQuery) => {
         const response = await apiClient.get('/booking', { params: query });
@@ -53,7 +53,7 @@ export const bookingApi = {
             throw new Error(response.data.message || 'Failed to fetch booking details');
         }
         
-        return response.data as BookingWithAccommodationAndPreOrder;
+        return response.data as BookingWithAccommodationAndPreOrderAndPayment;
     },
     getBookingsByUser: async (query?:  { status: string }) => {
         const response = await apiClient.get('/booking/byUser', { params: query })

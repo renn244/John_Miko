@@ -1,14 +1,14 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
+import { PaymentService } from 'src/payment/payment.service';
 import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
-import { PaymentService } from 'src/payment/payment.service';
-import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class BookingService {
@@ -62,7 +62,8 @@ export class BookingService {
                 accommodationFee: accommodation.price,
                 guestFee: 0,
                 preOrderFee: preOrderTotal,
-                amount: accommodation.price + preOrderTotal
+                amount: accommodation.price + preOrderTotal,
+                paymentType: body.paymentType,
             }, txprisma)
 
             return {
@@ -190,6 +191,18 @@ export class BookingService {
                         type: true,
                         imageUrl: true,
                     }
+                },
+                payment: {
+                    select: {
+                        id: true,
+                        paymentStatus: true,
+                        accommodationAmount: true,
+                        preOrderAmount: true,
+                        guestFeeAmount: true,
+                        amountPaid: true,
+                        amountToPaid: true,
+                        totalAmount: true,
+                    },
                 },
                 preOrders: true
             }

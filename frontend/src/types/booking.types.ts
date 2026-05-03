@@ -24,6 +24,11 @@ export type Booking = {
     updatedAt: string;
 }
 
+export type BookingWithPaymentInfo = {
+    paymentId: string;
+    checkoutUrl: string;
+} & Booking
+
 export type BookedAccommodation = {
     id: string;
 
@@ -75,6 +80,18 @@ export type BookingWithAccommodationAndPreOrder = {
     }[]
 } & BookingWithAccommodation
 
+export type BookingWithAccommodationAndPreOrderAndPayment = {
+    payment: {
+        id: string,
+        paymentStatus: 'Pending' | 'Paid' | 'Failed',
+        accommodationAmount: number,
+        preOrderAmount: number,
+        guestFeeAmount: number,
+        amountPaid: number,
+        amountToPaid: number,
+        totalAmount: number,
+    }
+} & BookingWithAccommodationAndPreOrder
 // My Booking Types
 export type StatusOption = typeof statusOptions[number];
 export type StateSelectedLabel = StatusOption["label"];

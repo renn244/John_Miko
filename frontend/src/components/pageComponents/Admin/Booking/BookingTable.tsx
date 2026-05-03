@@ -117,10 +117,12 @@ const BookingTable = () => {
                                                 Mark as Completed
                                             </DropdownMenuItem>
                                         )}
-                                        <DropdownMenuItem onClick={() => setRescheduleBookingId(booking.id)}>
-                                            <CalendarSync />
-                                            Reschedule
-                                        </DropdownMenuItem>
+                                        {booking.status === "Confirmed" && (
+                                            <DropdownMenuItem onClick={() => setRescheduleBookingId(booking.id)}>
+                                                <CalendarSync />
+                                                Reschedule
+                                            </DropdownMenuItem>
+                                        )}
                                         {booking.status === "Confirmed" && (
                                             <DropdownMenuItem onClick={() => setMarkCancelBookingId(booking.id)}>
                                                 <CircleX />

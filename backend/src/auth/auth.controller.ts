@@ -13,14 +13,12 @@ export class AuthController {
         private readonly forgotPasswordService: ForgotPasswordService,
     ) {}
 
-    // this will be removed later for deployment we only need one admin
     @Post('SignUpGuest')
     async SignUpGuest(@Body() body: SignUpGuestDto) {
         return this.authService.SignUpGuest(body);
     }
 
     @Post('login')
-    // put class validator later
     async Login(@Body() body: SignInDto) {
         return this.authService.SignIn(body.email, body.password);
     }

@@ -143,15 +143,17 @@ model Payment {
   bookingId           String   @unique
   booking             Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  amount              Int
-  paymentStatus       PaymentStatus @default(Pending)
 
   accommodationAmount Int
   preOrderAmount      Int
   guestFeeAmount      Int
 
+  amountPaid          Int
+  amountToPaid        Int
+  totalAmount         Int
+
+  paymentStatus       PaymentStatus @default(Pending)
   paymentId           String   @unique // from payment gateway
-  paymongoStatus      PaymentStatus @default(Pending)
 
   paidAt              DateTime?
   createdAt           DateTime @default(now())
@@ -261,10 +263,10 @@ model MenuItem {
 model Feedback {
   id            String   @id @default(cuid())
   userId        String
-  user          User     @relation(fields: [userId], references: [id])
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   bookingId     String  @unique
-  booking       Booking @relation(fields: [bookingId], references: [id])
+  booking       Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   rating        Int     
   comment       String?
