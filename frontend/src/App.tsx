@@ -22,6 +22,7 @@ import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
 import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
 import Overview from './page/Admin/Overview';
+import Report from './page/Admin/Reports/Report';
 import Amenities from './page/Amenities';
 import ForgotPassword from "./page/ForgotPassword";
 import CreateFeedback from './page/Guest/CreateFeedback';
@@ -98,6 +99,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Overview />  },
+      { path: 'report', element: <Report /> },
       { 
         path: 'accommodation', 
         children: [

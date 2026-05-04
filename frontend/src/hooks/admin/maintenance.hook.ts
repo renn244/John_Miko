@@ -27,6 +27,15 @@ export const useGetMaintenancesQuery = (query: GetMaintenancesQuery) => {
     });
 }
 
+export const useGetMaintenanceReportQuery = () => {
+    return useQuery({
+        queryKey: ['maintenance', 'report'],
+        queryFn: maintenanceApi.getMaintenanceReport,
+        refetchOnWindowFocus: false,
+        placeholderData: (prev) => prev
+    })
+}
+
 export const useGetMaintenanceStatsQuery = () => {
     return useQuery({
         queryKey: ['maintenance', 'stats'],

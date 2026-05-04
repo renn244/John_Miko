@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PaymentType, Prisma } from 'src/generated/prisma/client';
+import { getDateRange, toDateOnly } from 'src/lib/utils/date.util';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePaymentDto } from './dto/payment.dto';
 import { CheckoutLineItem } from './interface/paymongo.types';
@@ -67,6 +68,30 @@ export class PaymentService {
     }
 
     async getPayments() {
+    }
+
+    async getPaymentReportBreakdown() {
+        const { lte, gte } = getDateRange('day')
+        const today = toDateOnly(new Date());
+
+        const payments = await this.prisma.payment.findMany({
+            where: {
+                booking: {
+                    bookingDate: today
+                },
+                paymentStatus: 'Completed',
+            }
+        })   
+        
+        const reportData: Record<string, number> = payments.reduce((acc, payment) => ({
+            accommodationFee: acc.accommodationFee + payment.accommodationAmount,
+            preOrderFee: acc.preOrderFee + payment.preOrderAmount,
+            guestFee: acc.guestFee + payment.guestFeeAmount,
+            paidOnBooking: acc.paidOnBooking + payment.amountPaid,
+            paidOnCash: acc.paidOnCash + payment.amountToPaid,
+        }), { accommodationFee: 0, preOrderFee: 0, guestFee: 0, paidOnBooking: 0, paidOnCash: 0 })
+    
+        return reportData;
     }
 
     async getPaymentById(id: string) {

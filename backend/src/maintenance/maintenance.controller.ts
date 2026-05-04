@@ -22,6 +22,11 @@ export class MaintenanceController {
         return this.maintenanceService.getMaintenances(query);
     }
 
+    @Get('report')
+    async getMaintenanceReport() {
+        return this.maintenanceService.getMaintenanceReport();
+    }
+
     @Get('stats')
     async getMaintenanceStats() {
         return this.maintenanceService.getMaintenanceStats();

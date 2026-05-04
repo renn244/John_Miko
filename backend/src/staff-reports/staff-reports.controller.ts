@@ -20,6 +20,11 @@ export class StaffReportsController {
         return this.staffReportsService.viewReports(query);
     }
 
+    @Get('report')
+    async getReportsReport() {
+        return this.staffReportsService.ReportsReport();
+    }
+
     @Get('byUser')
     async viewReportByUserId(@User() user: UserSession, @Query() query: any) {
         return this.staffReportsService.viewReportsByUserId(user, query);

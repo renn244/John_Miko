@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { getDateRange } from 'src/lib/utils/date.util';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateReportDto } from './dto/report.dto';
 
 @Injectable()
 export class StaffReportsService {
@@ -9,7 +11,7 @@ export class StaffReportsService {
         // inject booking
     ) {}
 
-    async createReports(user: UserSession, body: { bookingId: string, title: string, description: string, proofImages: string[] }) {
+    async createReports(user: UserSession, body: CreateReportDto) {
         const report = await this.prisma.report.create({
             data: {
                 bookingId: body.bookingId,
@@ -17,6 +19,7 @@ export class StaffReportsService {
                 title: body.title,
                 description: body.description,
                 proofImages: body.proofImages,
+                type: body.type
             }
         })
 
@@ -35,6 +38,25 @@ export class StaffReportsService {
         return reports;
     }
 
+    // Reports of Staff Reports (LOL)
+    async ReportsReport() {
+        try {
+            const { gte, lte } = getDateRange('day');
+        
+            const [totalToday, checkInReportToday, checkOutReportToday] = await Promise.all([
+                await this.prisma.report.count({ where: { createdAt: { gte, lte } } }),
+                await this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkIn' } }),
+                await this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkOut' } })
+            ])
+
+            return {
+                totalToday, checkInReportToday, checkOutReportToday
+            }
+        } catch (error) {
+            console.log(error)   
+        }
+    }
+ 
     async viewReportsByUserId(user: UserSession, query: { page?: number }) {
         // only allow if the user is viewing their own reports, or if they are an admin
         const page = query.page || 1;

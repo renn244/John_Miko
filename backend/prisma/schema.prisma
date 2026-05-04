@@ -193,6 +193,11 @@ model PreOrderMenuItem {
   createdAt     DateTime @default(now())
 }
 
+enum ReportType  {
+  checkIn
+  checkOut
+}
+
 model Report {
   id            String   @id @default(cuid())
 
@@ -205,6 +210,8 @@ model Report {
   title         String
   proofImages   String[]
   description   String
+
+  type    ReportType
 
   createdAt     DateTime @default(now())
 } 

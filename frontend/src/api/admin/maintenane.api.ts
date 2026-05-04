@@ -17,6 +17,15 @@ export const maintenanceApi = {
 
         return response.data as Maintenance;
     },
+    getMaintenanceReport: async () => {
+        const response = await apiClient.get('/maintenance/report')
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while fetching the maintenance report')
+        }
+
+        return response.data as any;
+    }, 
     getMaintenances: async (query: GetMaintenancesQuery) => {
         const response = await apiClient.get('/maintenance', { params: query });
 

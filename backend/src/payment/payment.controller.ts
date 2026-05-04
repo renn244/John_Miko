@@ -14,6 +14,11 @@ export class PaymentController {
         return this.paymentService.getPayments();
     }
 
+    @Get('report')
+    async getPaymentReport() {
+        return this.paymentService.getPaymentReportBreakdown();
+    }
+
     @Get(':id')
     async getPaymentById(@Param('id') id: string) {
         return this.paymentService.getPaymentById(id);

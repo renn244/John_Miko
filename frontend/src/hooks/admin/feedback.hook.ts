@@ -11,6 +11,14 @@ export const useGetFeedbacksQuery = (query: { page: number, limit: number, searc
     })
 }
 
+export const useGetFeedbackReportQuery = () => {
+    return useQuery({
+        queryKey:  ['feedback', 'report'],
+        queryFn: feedbackApi.getFeedbackReport,
+        refetchOnWindowFocus: false
+    })
+}
+
 export const useGetFeedbackAnalyticsQuery = (query: GetFeedbackAnalyticsQuery) => {
     return useQuery({
         queryKey: ['feedbacks', 'analytics', query],

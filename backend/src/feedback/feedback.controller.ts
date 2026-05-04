@@ -41,6 +41,12 @@ export class FeedbackController {
     }
 
     @Roles(Role.ADMIN)
+    @Get('report')
+    async getFeedbackReport() {
+        return this.feedbackService.getFeedbackReport();
+    }
+
+    @Roles(Role.ADMIN)
     @Get('stats')
     async getFeedbackStats() {
         return this.feedbackService.getFeedbackStats();

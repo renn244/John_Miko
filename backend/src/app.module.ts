@@ -29,7 +29,7 @@ import { PaymentModule } from './payment/payment.module';
     PreOrderModule,
     StaffReportsModule,
     MaintenanceModule,
-    PaymentModule
+    PaymentModule,
   ],
 })
 export class AppModule {}

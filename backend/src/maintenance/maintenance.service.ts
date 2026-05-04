@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { getDateRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -56,6 +57,24 @@ export class MaintenanceService {
             data,
             meta: getPaginationMeta(total, page, limit)
         };
+    }
+
+    async getMaintenanceReport() {
+        const { gte, lte } = getDateRange('day')
+
+        const [newToday, resolvedToday, highPriority, stillPending] = await Promise.all([
+            await this.prisma.maintenance.count({ where: { createdAt: { gte, lte } } }),
+            await this.prisma.maintenance.count({ where: { resolvedAt: { gte, lte } } }),
+            await this.prisma.maintenance.count({ where: { priority: 'High' } }),
+            await this.prisma.maintenance.count({ where: { status: 'Pending' } }),
+        ])
+
+        return {
+            newToday,
+            resolvedToday,
+            highPriority,
+            stillPending
+        }
     }
 
     async getMaintenanceStats() {

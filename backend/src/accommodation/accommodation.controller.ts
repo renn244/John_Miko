@@ -29,15 +29,21 @@ export class AccommodationController {
     }
 
     @Public()
+    @Get()
+    async getAccommodations(@Query() query: GetAccommodationQueryDto) {
+        return this.accommodationService.getAccommodations(query);
+    }
+
+    @Public()
     @Get('options')
     async getAccommodationOptions() {
         return this.accommodationService.getAccommodationOptions();
     }
 
-    @Public()
-    @Get()
-    async getAccommodations(@Query() query: GetAccommodationQueryDto) {
-        return this.accommodationService.getAccommodations(query);
+    @Roles(Role.ADMIN)
+    @Get('report')
+    async getAccommodationReport() {
+        return this.accommodationService.getAccommodationReports();
     }
 
     @Public()

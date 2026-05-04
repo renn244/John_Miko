@@ -12,6 +12,15 @@ export const feedbackApi = {
     
         return response.data as PaginatedResponse<FeedbackWithUser>;
     },
+    getFeedbackReport: async () => {
+        const response = await apiClient.get('/feedback/report');
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occured while fetching feedbacks.')
+        }
+        
+        return response.data as any;
+    },
     getFeedbackStats: async () => {
         const response = await apiClient.get('/feedback/stats');
 

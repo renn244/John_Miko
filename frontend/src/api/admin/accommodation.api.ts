@@ -17,6 +17,15 @@ export const accommodationApi = {
 
         return response.data as Accommodation;
     },
+    getAccommodationReports: async () => {
+        const response = await apiClient.get('/accommodation/report');
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'Unexpected Error')
+        }
+
+        return response.data as any;
+    },
     getAccommodationStats: async () => {
         const response = await apiClient.get('/accommodation/stats');
 
