@@ -9,15 +9,15 @@ const getCheckInOut = (bookingDate: string, timeSlot: "DayStay" | "OverNight") =
         return {
             checkIn: format(date, 'PPP') + " " + TIME_SLOT.DAY_STAY.CHECK_IN,
             checkInDayOfTheWeek: format(date, 'EEEE'),
-            checkOut: format(nextDay, 'PPP') + " " + TIME_SLOT.DAY_STAY.CHECK_OUT,
-            checkOutDayOfTheWeek: format(nextDay, 'EEEE'),
+            checkOut: format(date, 'PPP') + " " + TIME_SLOT.DAY_STAY.CHECK_OUT,
+            checkOutDayOfTheWeek: format(date, 'EEEE'),
         };
     } else {
         return {
             checkIn: format(date, 'PPP') + " " + TIME_SLOT.OVERNIGHT.CHECK_IN,
             checkInDayOfTheWeek: format(date, 'EEEE'),
-            checkOut: format(date, 'PPP') + " " + TIME_SLOT.OVERNIGHT.CHECK_OUT,
-            checkOutDayOfTheWeek: format(date, 'EEEE'),
+            checkOut: format(nextDay, 'PPP') + " " + TIME_SLOT.OVERNIGHT.CHECK_OUT,
+            checkOutDayOfTheWeek: format(nextDay, 'EEEE'),
         }
     }
 };

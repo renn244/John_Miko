@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useAuthContext } from "@/context/AuthContext";
 import { useGetBookingsByAccommodationQuery } from "@/hooks/booking.hook";
 import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant";
 import { isSameDateOnly } from "@/lib/date.util";
@@ -10,6 +11,7 @@ import {
     Calendar,
     CheckCircle
 } from 'lucide-react';
+import { Link } from "react-router";
 
 type AccommodationSideBookingProps = {
     accommodation: {
@@ -24,6 +26,7 @@ const AccommodationSideBooking = ({
     setIsOpen
 }: AccommodationSideBookingProps) => {
     const { bookingDate, setBookingDate, bookingType, setBookingType } = useBookingSelectStore();
+    const { user } = useAuthContext();
 
     const { data: bookedDates } = useGetBookingsByAccommodationQuery(accommodation.id);
     
@@ -116,34 +119,21 @@ const AccommodationSideBooking = ({
                 </div>
             )}
 
-            <Button 
-            onClick={() => setIsOpen(true)}
-            disabled={!bookingDate || !bookingType}
-            className="w-full">
-                <Calendar className="w-6 h-6" />
-                Book Now
-            </Button>
-
-            <div className="mt-6 space-y-3">
-                <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-700" />
-                    <span className="text-sm text-muted-foreground">
-                        Free cancellation up to 48 hours
-                    </span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-700" />
-                    <span className="text-sm text-muted-foreground">
-                        Best price guarantee
-                    </span>
-                </div> 
-                <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-700" />
-                    <span className="text-sm text-muted-foreground">
-                        Instant booking confirmation
-                    </span>
-                </div>
-            </div>
+            {user ? (
+                <Button 
+                onClick={() => setIsOpen(true)}
+                disabled={!bookingDate || !bookingType}
+                className="w-full">
+                    <Calendar className="w-6 h-6" />
+                    Book Now
+                </Button>
+            ) : (
+                <Link to={'/login'}>
+                    <Button className="w-full">
+                        Login
+                    </Button>
+                </Link>
+            )}
         </div>
     )
 }

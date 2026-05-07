@@ -129,9 +129,9 @@ const AccommodationView = () => {
             </main>
 
             <AccommodationBookingModal
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
-                accommodation={accommodation as any}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            accommodation={accommodation as any}
             />
         </div>
     )

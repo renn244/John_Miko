@@ -147,7 +147,7 @@ const About = () => {
                         <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Mission & Vision</h2>
                     </div>
 
-                    <div className="mt-10 rounded-3xl flex border bg-card overflow-hidden">
+                    <div className="mt-10 rounded-3xl flex flex-col md:flex-row border bg-card overflow-hidden">
                         <div className="p-6 md:p-8 transition-colors hover:bg-muted/30">
                             <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
@@ -165,7 +165,7 @@ const About = () => {
                             </div>
                         </div>
 
-                        <div className="border-l" />
+                        <div className="border-t md:border-l" />
 
                         <div className="p-6 md:p-8 transition-colors hover:bg-muted/30">
                             <div className="flex items-start gap-4">
@@ -328,27 +328,6 @@ const About = () => {
                                 title="John Miko's Place Resort map"
                                 referrerPolicy="no-referrer-when-downgrade"
                             />
-                        </div>
-
-                        <div className="rounded-3xl border bg-card p-6 md:p-7 transition-colors hover:bg-muted/30">
-                            <h3 className="font-bold text-lg">Get In Touch</h3>
-                            <p className="mt-2 text-sm md:text-base text-muted-foreground">
-                                We're here to help with your booking and answer any questions about our resort.
-                            </p>
-                            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                                <Link to="/accommodation">
-                                    <Button>
-                                        Browse Accommodations
-                                        <ChevronRight className="w-5 h-5" />
-                                    </Button>
-                                </Link>
-                                <Link to="/amenities">
-                                    <Button variant="outline">
-                                        See Amenities
-                                        <ChevronRight className="w-5 h-5" />
-                                    </Button>
-                                </Link>
-                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">

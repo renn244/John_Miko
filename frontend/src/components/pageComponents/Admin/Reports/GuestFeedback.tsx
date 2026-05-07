@@ -127,22 +127,6 @@ const GuestFeedback = () => {
                     </Pie>
                 </PieChart>
             </ChartContainer>
-
-            <div className="flex items-center justify-between pt-3 border-t border-border">
-                <div className="flex items-center gap-2">
-                    <ThumbsUp className="w-4 h-4 text-green-600 fill-green-600" />
-                    <span className="text-sm font-semibold text-green-600">
-                        {data.positive} positive
-                    </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <ThumbsDown className="w-4 h-4 text-red-600 fill-red-600" />
-                    <span className="text-sm font-semibold text-red-600">
-                        {data.complaints} complaints
-                    </span>
-                </div>
-            </div>
         </div>
     )
 }
