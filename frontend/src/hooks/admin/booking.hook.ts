@@ -1,7 +1,7 @@
 import { bookingApi } from "@/api/booking.api";
 import { toDateOnly } from "@/lib/date.util";
-import type { GetBookingsQuery } from "@/types/booking.types";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { BookingWithAccommodationAndPreOrderAndPayment, GetBookingsQuery } from "@/types/booking.types";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useCreateBookingAdminMutation = () => {
     const queryClient = useQueryClient();
@@ -63,4 +63,34 @@ export const useChangeBookingStatusAdminMutation = (bookingId: string) => {
             queryClient.invalidateQueries({ queryKey: ['booking', 'admin', 'byId', bookingId] })
         }
     })
+}
+
+export const useGetOverviewBookingsQuery = (limit = 20) => {
+    return useQuery({
+        queryKey: ['booking', 'admin', 'overview', limit],
+        queryFn: () => bookingApi.getBookings({ page: 1, limit }),
+        refetchOnWindowFocus: false,
+    })
+}
+
+export const useGetBookingDetailsBulkQuery = (bookingIds: string[]) => {
+    const queries = useQueries({
+        queries: bookingIds.map((bookingId) => ({
+            queryKey: ['booking', 'admin', 'byId', bookingId],
+            queryFn: () => bookingApi.getBookingById(bookingId),
+            enabled: !!bookingId,
+            refetchOnWindowFocus: false,
+        }))
+    })
+
+    const isLoading = queries.some((q) => q.isLoading);
+    const data = queries
+        .map((q) => q.data)
+        .filter((item): item is BookingWithAccommodationAndPreOrderAndPayment => !!item);
+
+    return {
+        queries,
+        isLoading,
+        data,
+    }
 }

@@ -4,12 +4,13 @@ import LoadingSpinner from "./loadingSpinner";
 type StatisticCardsProps = {
     title: string;
     stat: number;
+    format?: (value: number) => string;
     Icon: React.ReactNode;
     isLoading: boolean;
     className?: string
 }
 
-const StatisticCards = ({ title, stat, Icon, isLoading, className }: StatisticCardsProps) => {
+const StatisticCards = ({ title, stat, format, Icon, isLoading, className }: StatisticCardsProps) => {
     return (
         <div className={cn("bg-white p-4 rounded-xl shadow-sm border-2", className)}>
             <div className="flex items-center justify-between mb-2">
@@ -18,7 +19,11 @@ const StatisticCards = ({ title, stat, Icon, isLoading, className }: StatisticCa
                 </span>
                 {Icon}
             </div>
-            {isLoading ? <LoadingSpinner className="w-5 h-5" containerClassName="justify-baseline" /> : <p className="text-3xl font-bold">{stat}</p>}
+            {isLoading ? (
+                <LoadingSpinner className="w-5 h-5" containerClassName="justify-baseline" />
+            ) : (
+                <p className="text-3xl font-bold">{format ? format(stat) : stat}</p>
+            )}
         </div>
     )
 }

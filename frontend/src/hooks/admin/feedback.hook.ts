@@ -52,3 +52,11 @@ export const useGetFeedbackByIdQuery = (id: string | undefined | null) => {
         retry: false,
     })
 }
+
+export const useGetRecentFeedbacksQuery = (limit = 5) => {
+    return useQuery({
+        queryKey: ['feedbacks', 'recent', limit],
+        queryFn: () => feedbackApi.getFeedbacks({ page: 1, limit }),
+        refetchOnWindowFocus: false,
+    })
+}
