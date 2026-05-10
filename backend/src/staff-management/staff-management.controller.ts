@@ -44,7 +44,7 @@ export class StaffManagementController {
     }
 
     @Roles('ADMIN')
-    @Patch(':id/')
+    @Patch(':id/reactivate')
     async reactivtedStaff(@Param('id') id: string) {
         return this.staffManagementService.reactivateStaff(id);
     }

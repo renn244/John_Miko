@@ -62,7 +62,7 @@ export const staffManagementApi = {
         return response.data as StaffUser;
     },
     reactivateStaff: async (id: string) => {
-        const response = await apiClient.patch(`/staff-management/${id}/`);
+        const response = await apiClient.patch(`/staff-management/${id}/reactivate`);
 
         if(response.status >= 400) {
             throw new Error(response.data.message || 'An error occurred while reactivating the staff user.');

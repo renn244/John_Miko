@@ -15,6 +15,7 @@ import AddChatbotRule from './page/Admin/ChatbotRule/AddChatbotRule';
 import ChatbotRule from './page/Admin/ChatbotRule/ChatbotRule';
 import EditChatbotRule from './page/Admin/ChatbotRule/EditChatbotRule';
 import Feedback from './page/Admin/Feedback/Feedback';
+import GuestManagement from './page/Admin/Guest-Management/GuestManagement';
 import AddMaintenance from './page/Admin/Maintenance/AddMaintenance';
 import EditMaintenance from './page/Admin/Maintenance/EditMaintenance';
 import Maintenance from './page/Admin/Maintenance/Maintenance';
@@ -138,6 +139,12 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <StaffManagement /> },
           { path: 'add', element: <AddStaff /> }
+        ]
+      },
+      {
+        path: 'user-management',
+        children: [
+          { index: true, element: <GuestManagement /> }
         ]
       },
       {

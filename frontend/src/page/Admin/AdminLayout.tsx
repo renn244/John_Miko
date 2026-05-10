@@ -56,6 +56,11 @@ const AdminLayout = () => {
             label: 'Staff Management',
             icon: Users,
             path: '/admin/staff-management',
+        },
+        {
+            label: 'User Management',
+            icon: Users,
+            path: '/admin/user-management',
         }
         // {
         //     label: 'Settings',
