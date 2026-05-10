@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/generated/prisma/client';
@@ -41,6 +41,10 @@ export class AuthService {
                 field: "email",
                 message: ["User with this email does not exist"]
             });
+        }
+
+        if(user.status === "INACTIVE") {
+            throw new ForbiddenException("Your account is deactivated!")
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);

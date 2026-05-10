@@ -16,8 +16,14 @@ datasource db {
 
 enum Role {
   ADMIN
-  STAFF
+  KITCHEN_STAFF
+  RESORT_STAFF
   GUEST
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
 }
 
 model User {
@@ -27,6 +33,7 @@ model User {
   contactNo String   
   password  String
   role      Role     @default(GUEST)
+  status    UserStatus @default(ACTIVE)
 
   forgotPasswordTokens PasswordResetToken[]
 

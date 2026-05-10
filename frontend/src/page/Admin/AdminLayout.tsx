@@ -1,6 +1,6 @@
 import ProfileMenu from "@/components/common/ProfileMenu";
 import { useAuthContext } from "@/context/AuthContext";
-import { BarChart3, Bot, Calendar, ChevronLeft, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, Wrench, X } from "lucide-react";
+import { BarChart3, Bot, Calendar, ChevronLeft, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, Users, Wrench, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 
@@ -51,6 +51,11 @@ const AdminLayout = () => {
             label: 'Maintenance',
             icon: Wrench,
             path: '/admin/maintenance',
+        },
+        {
+            label: 'Staff Management',
+            icon: Users,
+            path: '/admin/staff-management',
         }
         // {
         //     label: 'Settings',

@@ -23,6 +23,8 @@ import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
 import Overview from './page/Admin/Overview';
 import Report from './page/Admin/Reports/Report';
+import AddStaff from './page/Admin/Staff-Management/AddStaff';
+import StaffManagement from './page/Admin/Staff-Management/StaffManagement';
 import Amenities from './page/Amenities';
 import ForgotPassword from "./page/ForgotPassword";
 import CreateFeedback from './page/Guest/CreateFeedback';
@@ -129,6 +131,13 @@ const router = createBrowserRouter([
           { index: true, element: <Maintenance /> },
           { path: 'add', element: <AddMaintenance /> },
           { path: ':id/edit', element: <EditMaintenance /> }
+        ]
+      },
+      {
+        path: 'staff-management',
+        children: [
+          { index: true, element: <StaffManagement /> },
+          { path: 'add', element: <AddStaff /> }
         ]
       },
       {
