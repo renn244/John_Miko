@@ -14,6 +14,11 @@ export class PaymentController {
         return this.paymentService.getPayments();
     }
 
+    @Get('revenue-analytics')
+    async getRevenueAnalytics() {
+        return this.paymentService.getRevenueAnalytics();
+    }
+
     @Get('report')
     async getPaymentReport() {
         return this.paymentService.getPaymentReportBreakdown();

@@ -1,15 +1,19 @@
 
-import StatisticCards from "@/components/ui/StatisticCards";
+import RevenueBreakdownCard from "@/components/pageComponents/Admin/Revenue/RevenueBreakdownCard";
+import RevenueLineChart, { type RevenueLineChartPoint } from "@/components/pageComponents/Admin/Revenue/RevenueLineChart";
 import { Badge } from "@/components/ui/badge";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
+import StatisticCards from "@/components/ui/StatisticCards";
 import { useGetAccommodationStatsQuery } from "@/hooks/admin/accommodation.hook";
 import { useGetBookingDetailsBulkQuery, useGetOverviewBookingsQuery } from "@/hooks/admin/booking.hook";
 import { useGetFeedbackStatsQuery, useGetRecentFeedbacksQuery } from "@/hooks/admin/feedback.hook";
-import { useGetPaymentReports } from "@/hooks/admin/payment.hook";
+import { useGetPaymentReports, useGetRevenueAnalyticsQuery } from "@/hooks/admin/payment.hook";
 import { useGetStaffReportReportsQuery } from "@/hooks/admin/staff-report.hook";
 import { formatToSmartDate } from "@/lib/date.util";
+import type { RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
 import { format } from "date-fns";
 import { BookMarked, CalendarCheck, ClipboardList, DollarSign, Home, Mails, MessageSquare, MessageSquareWarning, ShoppingBag, Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 const getStatusColor = (status: string) => {
@@ -25,10 +29,66 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const normalizeRevenueRow = (row: RevenueAnalyticsApiItem): RevenueLineChartPoint => ({
+  month: row.month,
+  count: Number(row.count) || 0,
+  totalAmount: Number(row.totalamount) || 0,
+  accommodationAmount: Number(row.accommodationamount) || 0,
+  preOrderAmount: Number(row.preorderamount) || 0,
+  guestFeeAmount: Number(row.guestfeeamount) || 0,
+});
+
+const toMonthKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+};
+
+const monthKeyToDate = (monthKey: string) => {
+  const [y, m] = monthKey.split("-");
+  const year = Number(y);
+  const monthIndex = Number(m) - 1;
+  return new Date(year, monthIndex, 1);
+};
+
+const addMonths = (date: Date, delta: number) =>
+  new Date(date.getFullYear(), date.getMonth() + delta, 1);
+
+const buildLastMonthsSeries = (
+  rows: RevenueLineChartPoint[],
+  months: number,
+  endMonthKey: string
+): RevenueLineChartPoint[] => {
+  const existingByMonth = new Map<string, RevenueLineChartPoint>();
+  rows.forEach((r) => existingByMonth.set(r.month, r));
+
+  const endDate = monthKeyToDate(endMonthKey);
+  const series: RevenueLineChartPoint[] = [];
+
+  for (let i = months - 1; i >= 0; i -= 1) {
+    const key = toMonthKey(addMonths(endDate, -i));
+    const existing = existingByMonth.get(key);
+    series.push(
+      existing ?? {
+        month: key,
+        count: 0,
+        totalAmount: 0,
+        accommodationAmount: 0,
+        preOrderAmount: 0,
+        guestFeeAmount: 0,
+      }
+    );
+  }
+
+  return series;
+};
+
 const Overview = () => {
   const { data: accommodationStats, isLoading: accommodationLoading } = useGetAccommodationStatsQuery();
   const { data: feedbackStats, isLoading: feedbackStatsLoading } = useGetFeedbackStatsQuery();
   const { data: paymentReport, isLoading: paymentLoading } = useGetPaymentReports();
+  const revenueQuery = useGetRevenueAnalyticsQuery();
+  const [selectedRevenueMonth, setSelectedRevenueMonth] = useState<string | null>(null);
   const { data: bookingSummary, isLoading: bookingsLoading } = useGetOverviewBookingsQuery(20);
   const { data: recentFeedbacks, isLoading: recentFeedbackLoading } = useGetRecentFeedbacksQuery(5);
   const { data: staffReport, isLoading: staffReportLoading } = useGetStaffReportReportsQuery();
@@ -37,6 +97,23 @@ const Overview = () => {
   const totalBookings = bookingSummary?.meta.total || 0;
   const bookings = bookingSummary?.data || [];
   const feedbacks = recentFeedbacks?.data || [];
+
+  const revenueData = useMemo(() => {
+    if (revenueQuery.isError) return [];
+    const rows = (revenueQuery.data ?? []).map(normalizeRevenueRow);
+    return buildLastMonthsSeries(rows, 12, toMonthKey(new Date()));
+  }, [revenueQuery.data, revenueQuery.isError]);
+
+  useEffect(() => {
+    if (!selectedRevenueMonth) return;
+    if (revenueData.some((d) => d.month === selectedRevenueMonth)) return;
+    setSelectedRevenueMonth(null);
+  }, [revenueData, selectedRevenueMonth]);
+
+  const selectedRevenue = useMemo(
+    () => revenueData.find((d) => d.month === selectedRevenueMonth) ?? null,
+    [revenueData, selectedRevenueMonth]
+  );
 
   const today = new Date();
   const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -123,6 +200,28 @@ const Overview = () => {
           format={(value) => `₱${value.toLocaleString()}`}
           isLoading={paymentLoading}
         />
+      </div>
+
+      {revenueQuery.isError ? (
+        <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
+          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-destructive">
+            Failed to load revenue analytics.
+          </div>
+        </div>
+      ) : null}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <RevenueLineChart
+            data={revenueData}
+            isLoading={revenueQuery.isLoading}
+            selectedMonth={selectedRevenueMonth}
+            onSelectMonth={(month) => setSelectedRevenueMonth(month)}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <RevenueBreakdownCard selected={selectedRevenue} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">

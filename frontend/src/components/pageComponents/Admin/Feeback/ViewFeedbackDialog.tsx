@@ -89,7 +89,7 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                             <div className="flex items-center gap-2 text-sm pt-2 border-t">
                                 <Hash className="w-4 h-4 text-muted-foreground" />
                                 <span className="text-muted-foreground">Booking Reference:</span>
-                                <span className="font-mono font-semibold text-primary">
+                                <span className=" font-semibold text-primary">
                                     {feedback.bookingId}
                                 </span>
                             </div>

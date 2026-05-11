@@ -9,3 +9,11 @@ export const useGetPaymentReports = () => {
         refetchOnWindowFocus: false
     })
 }
+
+export const useGetRevenueAnalyticsQuery = () => {
+    return useQuery({
+        queryKey: ['payment', 'revenue-analytics'],
+        queryFn: paymentApi.getRevenueAnalytics,
+        refetchOnWindowFocus: false,
+    })
+}

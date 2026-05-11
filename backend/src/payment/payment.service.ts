@@ -70,6 +70,26 @@ export class PaymentService {
     async getPayments() {
     }
 
+    async getRevenueAnalytics() {
+        const revenueAnalytics = await this.prisma.$queryRaw`
+            SELECT
+                TO_CHAR("createdAt", 'YYYY-MM') as month,
+                COUNT(id)::int as count,
+                SUM("totalAmount")::int as totalamount,
+                SUM("accommodationAmount")::int as accommodationamount,
+                SUM("preOrderAmount")::int as preorderAmount,
+                SUM("guestFeeAmount")::int as guestfeeAmount
+            FROM "Payment"
+            WHERE 
+                "paymentStatus" = 'Completed' and
+                "createdAt" > NOW() - INTERVAL '1 year'
+            GROUP BY TO_CHAR("createdAt", 'YYYY-MM')
+            ORDER BY month ASC
+        `
+
+        return revenueAnalytics
+    }
+
     async getPaymentReportBreakdown() {
         const { lte, gte } = getDateRange('day')
         const today = toDateOnly(new Date());
@@ -95,6 +115,7 @@ export class PaymentService {
     }
 
     async getPaymentById(id: string) {
+        
     }
 
     async addExtraFees() {

@@ -63,7 +63,7 @@ const FeedbackList = () => {
                                                 <Calendar className="w-4 h-4" />
                                                 {formatToSmartDate(feedback.createdAt)}
                                             </span>
-                                            <span className="font-mono text-xs px-2 py-0.5 rounded bg-muted">
+                                            <span className=" text-xs px-2 py-0.5 rounded bg-muted">
                                                 {feedback.id}
                                             </span>
                                         </div>

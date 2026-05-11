@@ -88,7 +88,7 @@ const ViewGuest = ({ guest }: { guest: GuestUser }) => {
                         </div>
                         <div className="flex justify-between gap-6">
                             <span className="text-muted-foreground">User ID:</span>
-                            <span className="font-mono text-xs text-right break-all">{guest.id}</span>
+                            <span className=" text-xs text-right break-all">{guest.id}</span>
                         </div>
                     </div>
                 </div>
