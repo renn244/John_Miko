@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "nativewind/preflight.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --font-sans: "Inter", "sans-serif";
+
+    --radius-sm: 0.4rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.65rem;
+    --radius-xl: 0.9rem;
+    --radius-2xl: 1.15rem;
+    --radius-3xl: 1.4rem;
+    --radius-4xl: 1.65rem;
+
+    /* Light mode */
+    --color-background: #ffffff;
+    --color-foreground: #09090b;
+    --color-card: #ffffff;
+    --color-card-foreground: #09090b;
+    --color-popover: #ffffff;
+    --color-popover-foreground: #09090b;
+    --color-primary: #4f46e5;
+    --color-primary-foreground: #f5f3ff;
+    --color-secondary: #f4f4f5;
+    --color-secondary-foreground: #18181b;
+    --color-muted: #f4f4f5;
+    --color-muted-foreground: #71717a;
+    --color-accent: #f4f4f5;
+    --color-accent-foreground: #18181b;
+    --color-destructive: #ef4444;
+    --color-border: #e4e4e7;
+    --color-input: #e4e4e7;
+    --color-ring: #a1a1aa;
+}
+
+.dark {
+    --color-background: #09090b;
+    --color-foreground: #fafafa;
+    --color-card: #18181b;
+    --color-card-foreground: #fafafa;
+    --color-popover: #18181b;
+    --color-popover-foreground: #fafafa;
+    --color-primary: #4f46e5;
+    --color-primary-foreground: #f5f3ff;
+    --color-secondary: #27272a;
+    --color-secondary-foreground: #fafafa;
+    --color-muted: #27272a;
+    --color-muted-foreground: #a1a1aa;
+    --color-accent: #27272a;
+    --color-accent-foreground: #fafafa;
+    --color-destructive: #f87171;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-input: rgba(255, 255, 255, 0.15);
+    --color-ring: #71717a;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+}
