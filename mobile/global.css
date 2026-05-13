@@ -1,66 +1,65 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@import "nativewind/preflight.css";
-
-@custom-variant dark (&:is(.dark *));
+@import "tailwindcss";
+@import "uniwind";
 
 @theme {
-    --font-sans: "Inter", "sans-serif";
+  /* Primary */
+  --color-primary: #0E33F3;
+  --color-primary-dark: #0B69A3;
+  --color-primary-light: #2BB0ED;
+  
+  /* Secondary */
+  --color-secondary-green-dark: #014D40;
+  --color-secondary-green-light: #9BF9D3;
+  --color-secondary-blue-light: #D1F4FF;
+  --color-secondary-yellow-light: #FCE588;
+  --color-secondary-red-light: #AB091E;
+  --color-secondary-soft-orange: #FDE1CE;
+  --color-secondary-dark-blue: #E85737;
+  --color-secondary-red-dark: #AB091E;
+  --color-secondary-brown: #B16F05;
 
-    --radius-sm: 0.4rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.65rem;
-    --radius-xl: 0.9rem;
-    --radius-2xl: 1.15rem;
-    --radius-3xl: 1.4rem;
-    --radius-4xl: 1.65rem;
+  /* Neutral */
+  --color-neutral-dark-1: #1F2933;
+  --color-neutral-dark-2: #323F4B;
+  --color-neutral-grey-1: #6B7580;
+  --color-neutral-grey-2: #9FA8B1;
+  --color-neutral-grey-3: #B0B8BF;
+  --color-neutral-soft-grey-1: #DCDFE3;
+  --color-neutral-soft-grey-2: #EBEDF0;
+  --color-neutral-soft-grey-3: #FAFAFB;
 
-    /* Light mode */
-    --color-background: #ffffff;
-    --color-foreground: #09090b;
-    --color-card: #ffffff;
-    --color-card-foreground: #09090b;
-    --color-popover: #ffffff;
-    --color-popover-foreground: #09090b;
-    --color-primary: #4f46e5;
-    --color-primary-foreground: #f5f3ff;
-    --color-secondary: #f4f4f5;
-    --color-secondary-foreground: #18181b;
-    --color-muted: #f4f4f5;
-    --color-muted-foreground: #71717a;
-    --color-accent: #f4f4f5;
-    --color-accent-foreground: #18181b;
-    --color-destructive: #ef4444;
-    --color-border: #e4e4e7;
-    --color-input: #e4e4e7;
-    --color-ring: #a1a1aa;
-}
+  /* System */
+  --color-system-red: #EF4E4E;
+  --color-system-yellow: #FBBE4A;
+  --color-system-green: #3EBD93;
+  --color-system-blue: #37ABFF;
 
-.dark {
-    --color-background: #09090b;
-    --color-foreground: #fafafa;
-    --color-card: #18181b;
-    --color-card-foreground: #fafafa;
-    --color-popover: #18181b;
-    --color-popover-foreground: #fafafa;
-    --color-primary: #4f46e5;
-    --color-primary-foreground: #f5f3ff;
-    --color-secondary: #27272a;
-    --color-secondary-foreground: #fafafa;
-    --color-muted: #27272a;
-    --color-muted-foreground: #a1a1aa;
-    --color-accent: #27272a;
-    --color-accent-foreground: #fafafa;
-    --color-destructive: #f87171;
-    --color-border: rgba(255, 255, 255, 0.1);
-    --color-input: rgba(255, 255, 255, 0.15);
-    --color-ring: #71717a;
+  /* Gradient */
+  /* Later cause it's better to code it in the components itself */
+
+  /* Custom Font */
+  --font-sans: 'Inter';
+  --font-sans-medium: 'Inter-Medium';
+  --font-sans-semibold: 'Inter-SemiBold';
+  --font-sans-bold: 'Inter-Bold';
+  
+  /* Custom Font Size */
+  --text-sm: 10px;
+  --text-base: 12px;
+  --text-lg: 14px;
+  --text-xl: 16px;
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
+  .sub-heading-sm {
+    @apply font-sans-semibold font-semibold text-[length:var(--text-base)] leading-4;
+  }
+
+  .sub-heading-base {
+    @apply font-sans-semibold font-semibold text-[length:var(--text-xl)] leading-5;
+  }
+
+  .sub-heading-lg {
+    @apply font-sans-semibold font-medium text-[20px] leading-6;
+  }
 }

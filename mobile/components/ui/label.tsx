@@ -1,40 +1,45 @@
-import { cn } from '@/lib/utils';
-import * as LabelPrimitive from '@rn-primitives/label';
-import { Platform } from 'react-native';
+import { ComponentProps, ComponentRef, forwardRef } from "react";
+import { Text } from "react-native";
+import { tv } from "tailwind-variants";
 
-function Label({
-  className,
-  onPress,
-  onLongPress,
-  onPressIn,
-  onPressOut,
-  disabled,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Text>) {
-  return (
-    <LabelPrimitive.Root
-      className={cn(
-        'flex select-none flex-row items-center gap-2',
-        Platform.select({
-          web: 'cursor-default leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50',
-        }),
-        disabled && 'opacity-50'
-      )}
-      onPress={onPress}
-      onLongPress={onLongPress}
-      onPressIn={onPressIn}
-      onPressOut={onPressOut}
-      disabled={disabled}>
-      <LabelPrimitive.Text
-        className={cn(
-          'text-foreground text-sm font-medium',
-          Platform.select({ web: 'leading-none' }),
-          className
-        )}
+const label = tv({
+    base: "font-sans-semibold font-semibold",
+    variants: {
+        color: {
+            default: "text-neutral-grey-1",
+            destructive: "text-red-500",
+        },
+        size: {
+            default: "text-xl leading-5",
+            medium: "text-lg leading-4",
+            small: "text-base leading-4",
+        },
+    },
+    defaultVariants: {
+        color: "default",
+        size: "default",
+    }
+})
+
+type LabelProps = {
+    className?: string;
+    variant?: keyof typeof label.variants.color;
+    size?: keyof typeof label.variants.size;
+};
+
+const Label = forwardRef<
+    ComponentRef<typeof Text>,
+    LabelProps & ComponentProps<typeof Text>
+>(({ className, variant, size, ...props }, ref) => {
+    
+    return (
+        <Text 
+        ref={ref}
+        className={label({ color: variant, size, className })}
         {...props}
-      />
-    </LabelPrimitive.Root>
-  );
-}
+        />
+    )
+})
+Label.displayName = "Label";
 
-export { Label };
+export { Label, label, LabelProps };
