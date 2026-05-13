@@ -13,11 +13,14 @@
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
+    "@hookform/resolvers": "^5.2.2",
     "@marceloterreiro/flash-calendar": "^1.6.0",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@shopify/flash-list": "2.0.2",
+    "@tanstack/react-query": "^5.100.10",
+    "axios": "^1.16.0",
     "date-fns": "^4.1.0",
     "expo": "~54.0.34",
     "expo-asset": "~12.0.13",
@@ -35,6 +38,7 @@
     "lucide-react-native": "^0.562.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-hook-form": "^7.75.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-picker-select": "^9.3.1",
@@ -47,7 +51,8 @@
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.1.18",
-    "uniwind": "^1.2.4"
+    "uniwind": "^1.2.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

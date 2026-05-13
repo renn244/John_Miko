@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/Button";
+import { Button } from "../components/ui/button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import { Link } from "expo-router";
 import { Text } from "react-native";

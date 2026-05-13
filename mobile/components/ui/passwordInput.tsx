@@ -3,7 +3,7 @@ import { ComponentProps, ComponentRef, forwardRef, useState } from "react";
 import { View } from "react-native";
 import { TextInput } from "react-native/Libraries/Components/TextInput/TextInput";
 import { withUniwind } from "uniwind";
-import { Input, InputProps } from "./Input";
+import { Input, InputProps } from "./input";
 
 type passwordInputProps = {
 
@@ -21,15 +21,11 @@ const PasswordInput = forwardRef<
 
     return (
         <View className='relative w-full'>
-            <StyledLock
-            className='absolute left-4 top-3.5 z-99'
-            height={24} width={24} 
-            />
-            
+
             <Input 
             ref={ref}
             id='password'
-            style={{ paddingLeft: 44, paddingRight: 40 }}
+            style={{ paddingRight: 40 }}
             placeholder='Password'
             secureTextEntry={showPassword === false}
             {...props}

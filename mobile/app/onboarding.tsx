@@ -1,5 +1,5 @@
 import Logo from '@/assets/app/logo/logo.svg';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import CustomSafeAreaView from '@/components/ui/CustomSafeAreaView';
 import { Pressable, Text, View } from 'react-native';
 
@@ -14,6 +14,7 @@ import Animated, {
     SlideInRight,
     SlideOutLeft
 } from 'react-native-reanimated';
+import { Link, router } from 'expo-router';
 
 const informations = [
     {
@@ -93,6 +94,7 @@ const Onboarding = () => {
                 </View>
 
                 <Button 
+                onPress={() => router.push('/login')}
                 style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
                 className='w-full'>
                     <Text className="font-sans-semibold text-white text-lg">

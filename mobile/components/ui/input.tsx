@@ -10,9 +10,9 @@ const input = tv({
             destructive: "border-2 border-red-500",
         },
         size: {
-            default: "h-12 px-4 text-xl rounded-xl",
-            medium: "h-10 px-3 text-lg rounded-lg",
-            small: "h-8 px-2 text-md rounded-md",
+            default: "w-full h-12 px-4 text-xl rounded-xl",
+            medium: "w-full h-10 px-3 text-lg rounded-lg",
+            small: "w-full h-8 px-2 text-md rounded-md",
         },
         focused: {
             true: "border-2 border-system-blue bg-white",
