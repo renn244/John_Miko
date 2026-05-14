@@ -1,50 +1,55 @@
-import { ComponentProps, ComponentRef, forwardRef } from "react"
-import { Pressable } from "react-native"
-import { tv } from "tailwind-variants"
+import { ComponentProps, ComponentRef, forwardRef } from "react";
+import { Pressable } from "react-native";
+import { twMerge } from "tailwind-merge";
+import { tv } from "tailwind-variants";
 
-const button = tv({
-  base: "flex-row items-center justify-center gap-2",
+const buttonVariants = tv({
+  base: "flex-row items-center justify-center gap-2 rounded-md",
   variants: {
-    color: {
+    variant: {
       default: "bg-primary text-white",
       destructive: "bg-system-red text-white",
-      outline: "bg-transparent border border-gray-300 text-gray-700",
+      outline: "border border-neutral-soft-grey-1 bg-transparent text-neutral-dark-1",
+      secondary: "bg-neutral-soft-grey-2 text-neutral-dark-1",
+      ghost: "bg-transparent text-neutral-dark-1",
+      link: "bg-transparent text-primary underline",
     },
     size: {
-      default: "w-full h-12 px-5 py-3 rounded-xl",
-      medium: "w-full h-10 px-5 py-2 rounded-l",
-      small: "w-full h-8 px-4 py-2 rounded-[10px]"
-    }
+      default: "h-12 px-5",
+      sm: "h-10 px-4",
+      lg: "h-14 px-6",
+      icon: "h-12 w-12",
+    },
   },
   defaultVariants: {
-    color: "default",
-    size: "default"
-  }
-})
+    variant: "default",
+    size: "default",
+  },
+});
 
 type ButtonProps = {
   className?: string;
-  variant?: keyof typeof button["variants"]["color"];
-  size?: keyof typeof button["variants"]["size"];
-} & ComponentProps<typeof Pressable>
+  variant?: keyof typeof buttonVariants["variants"]["variant"];
+  size?: keyof typeof buttonVariants["variants"]["size"];
+} & ComponentProps<typeof Pressable>;
 
-const Button = forwardRef<
-  ComponentRef<typeof Pressable>,
-  ButtonProps
->(
-  (
-    { className, variant, size, ...props },
-    ref
-  ) => {
+const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(
+  ({ className, variant, size, disabled, ...props }, ref) => {
     return (
       <Pressable
         ref={ref}
-        className={button({ color: variant, size, className })}
+        className={twMerge(
+          buttonVariants({ variant, size }),
+          disabled ? "opacity-50" : "",
+          className
+        )}
+        disabled={disabled}
         {...props}
       />
     );
   }
 );
-Button.displayName = "Button"
+Button.displayName = "Button";
 
-export { Button, button, ButtonProps }
+export { Button, ButtonProps, buttonVariants };
+

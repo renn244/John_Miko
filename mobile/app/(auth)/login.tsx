@@ -1,99 +1,193 @@
+import Logo from '@/assets/app/logo/logo.svg';
+import { Button } from "@/components/ui/Button";
 import CustomSafeArea from "@/components/ui/CustomSafeAreaView";
-import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/passwordInput";
-import CustomSelect from "@/components/ui/Picker";
-import { handleNestError, ValidationError } from "@/lib/handleNestError";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Text, View } from "react-native";
-import { z } from 'zod';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLoginMutation } from "@/hooks/auth.hook";
+import { getErrorMessages } from "@/lib/getErrorMessages";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, type RelativePathString } from "expo-router";
+import { Controller, useForm } from "react-hook-form";
+import {
+    ActivityIndicator,
+    Pressable,
+    Text,
+    View
+} from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { z } from "zod";
 
 const LoginSchema = z.object({
-    role: z.enum(['RESORT_STAFF', 'KITCHEN_STAFF'], { message: "role must be Resort Staff or Kitchen Staff" }),
-    email: z.email().nonempty({ message: 'email is required!' }),
-    password: z.string().nonempty({ message: 'password is required' })
-})
+    role: z.string().nonempty("Role is required"),
+    email: z.email().nonempty("Email is required"),
+    password: z.string().nonempty("Password is required"),
+});
 
-export type loginSchema = z.infer<typeof LoginSchema>
+export type loginSchema = z.infer<typeof LoginSchema>;
+
+const forgotPasswordHref: RelativePathString = "./forgot-password";
 
 export default function Login() {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const { 
+    const {
         control,
         handleSubmit,
         setError,
+        formState: { errors },
     } = useForm<loginSchema>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
+            role: "",
             email: "",
-            password: ""
+            password: "",
         },
-        criteriaMode: "all"
-    })
+        criteriaMode: "all",
+    });
 
-    const { mutateAsync } = useLoginMutation()
+    const { mutateAsync, isPending } = useLoginMutation<loginSchema>(setError);
     const router = useRouter();
 
     const onSubmit = async (data: loginSchema) => {
-        setIsLoading(true)
         try {
-            await mutateAsync(data);
-
-            // redirect to proper dashboard if user is resort staff, kitchen staff, external maintenance
-            router.push('/')
-        } catch (error: any) {
-            if(error instanceof ValidationError) {
-                handleNestError(error.response, setError)
-            }
-            
-            // toast.error(error.message || "Unexpected Error!")
-        } finally {
-            setIsLoading(false)
+            const { role: _role, ...payload } = data;
+            await mutateAsync(payload);
+            router.replace('/redirecting');
+        } catch {
+            return;
         }
-    }
+    };
 
     return (
         <CustomSafeArea>
-            <View className="flex-1 flex justify-center p-4 gap-8">
-                
-                {/* John Miko's Logo */}
-                <View className="w-30 h-30 rounded-full bg-primary self-center" />
+            <KeyboardAwareScrollView
+            className="flex-1"
+            contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: "center",
+                paddingVertical: 32,
+            }}
+            bottomOffset={32}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            >
 
-                <View className="space-y-4">
-                    {/* Select role */}
-                    <CustomSelect 
-                    options={[
-                        { label: "Resort Staff", value: "RESORT_STAFF" },
-                        { label: "Kitchen Staff", value: "KITCHEN_STAFF" }
-                    ]}
-                    />
+                <View className="px-5 gap-5">
+                    <View className="items-center gap-1">
+                        <Logo height={40} width={40} />
+                        <Text className="font-sans-bold text-2xl text-neutral-dark-1">
+                            John Miko's
+                        </Text>
+                        <Text className="text-center text-neutral-grey-1 text-base">
+                            Use your staff account to continue.
+                        </Text>
+                    </View>
 
-                    {/* email input */}
-                    <Input
-                    keyboardType="email-address"
-                    textContentType="emailAddress"
-                    autoComplete="email"
-                    placeholder="Email"
-                    />
+                    <FieldSet className="gap-2">
+                        <Field className="gap-1">
+                            <FieldLabel className="text-base">Staff Role</FieldLabel>
+                            <Controller
+                                name="role"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        placeholder="Select role"
+                                        invalid={Boolean(errors.role)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select role" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
+                                            <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
+                                            <SelectItem value="MAINTENANCE_STAFF">Maintenance Staff</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                            <FieldError errors={getErrorMessages(errors.role)} />
+                        </Field>
 
-                    {/* password input */}
-                    <PasswordInput
-                    textContentType="password" 
-                    autoComplete="password"
-                    placeholder="Password"
-                    />
+                        <Field className="gap-1">
+                            <FieldLabel className="text-base">Email</FieldLabel>
+                            <Controller
+                                name="email"
+                                control={control}
+                                render={({ field }) => (
+                                    <Input
+                                    keyboardType="email-address"
+                                    textContentType="none"
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    placeholder="Email"
+                                    value={field.value}
+                                    onChangeText={field.onChange}
+                                    onBlur={field.onBlur}
+                                    invalid={Boolean(errors.email)}
+                                    />
+                                )}
+                            />
+                            <FieldError errors={getErrorMessages(errors.email)} />
+                        </Field>
+
+                        <Field>
+                            <FieldLabel className="text-base">Password</FieldLabel>
+                            <Controller
+                                name="password"
+                                control={control}
+                                render={({ field }) => (
+                                    <PasswordInput
+                                        textContentType="none"
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        placeholder="Password"
+                                        returnKeyType="done"
+                                        value={field.value}
+                                        onChangeText={field.onChange}
+                                        onBlur={field.onBlur}
+                                        onSubmitEditing={handleSubmit(onSubmit)}
+                                        invalid={Boolean(errors.password)}
+                                    />
+                                )}
+                            />
+                            <FieldError errors={getErrorMessages(errors.password)} />
+
+
+                            <View className="items-end">
+                                <Pressable
+                                onPress={() => router.push(forgotPasswordHref)}
+                                className="py-1"
+                                >
+                                    <Text className="text-primary font-sans-semibold text-base">
+                                        Forgot password?
+                                    </Text>
+                                </Pressable>
+                            </View>
+                            
+                        </Field>
+                    </FieldSet>
+
+                    <View className="pt-8">
+                        <Button
+                        onPress={handleSubmit(onSubmit)}
+                        disabled={isPending}
+                        style={({ pressed }: { pressed: boolean }) => ({
+                            opacity: pressed ? 0.85 : isPending ? 0.7 : 1,
+                        })}
+                        >
+                            {isPending ? (
+                                <ActivityIndicator color="#FFFFFF" />
+                            ) : (
+                                <Text className="text-white font-sans-semibold text-lg">
+                                    Login
+                                </Text>
+                            )}
+                        </Button>
+                    </View>
                 </View>
-
-
-                <Button className="w-full">
-                    <Text className="text-white font-semibold">Login</Text>
-                </Button>
-
-            </View>
+            </KeyboardAwareScrollView >
         </CustomSafeArea>
-    )
+    );
 }

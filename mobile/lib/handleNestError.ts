@@ -1,3 +1,4 @@
+import { toast } from "./toast";
 import type { ExceptionResponse } from "@/types/exceptionResponse.type";
 import type { FieldValues, UseFormSetError } from "react-hook-form";
 
@@ -13,19 +14,19 @@ export function handleNestError<T extends FieldValues>(
     error: ExceptionResponse,
     setError: UseFormSetError<T>,
 ) {
-    if(error.errors) {
+    if (error.errors) {
         const fieldErrors = error.errors;
         fieldErrors.forEach((fieldError) => {
-            fieldError.message.map((message) => setError(fieldError.field as any, { 
-                type: 'manual', message: message || "Invalid Input"
-            }));   
-        })
-    } else if(error.message) {
-        // find a reliable toast libary
-        // toast.error(error.message, {
-        //     description: "Please follow the instructions to correct the errors.",
-        // })
-        
-        return
+            fieldError.message.map((message) =>
+                setError(fieldError.field as any, {
+                    type: 'manual',
+                    message: message || "Invalid Input",
+                })
+            );
+        });
+    } else if (error.message) {
+        toast.error(error.message, {
+            description: "Please follow the instructions to correct the errors.",
+        });
     }
 }
