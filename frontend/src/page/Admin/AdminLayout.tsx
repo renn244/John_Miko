@@ -1,6 +1,6 @@
 import ProfileMenu from "@/components/common/ProfileMenu";
 import { useAuthContext } from "@/context/AuthContext";
-import { BarChart3, Bot, Calendar, ChevronLeft, DollarSign, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, Users, Wrench, X } from "lucide-react";
+import { BarChart3, Bot, Calendar, ChevronLeft, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, Users, Wrench, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 
@@ -21,11 +21,6 @@ const AdminLayout = () => {
             label: 'Reports',
             icon: BarChart3,
             path: '/admin/report',
-        },
-        {
-            label: 'Revenue',
-            icon: DollarSign,
-            path: '/admin/revenue',
         },
         {
             label: 'Accommodations',

@@ -3,7 +3,7 @@ import { useGetMenuItemsBulkQuery } from "@/hooks/admin/menu-item.hook";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import type { MenuItem } from "@/types/admin/menu-item.type";
 import { ArrowRight } from "lucide-react";
-import { useMemo, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, type Dispatch, type SetStateAction } from "react";
 import { useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
@@ -13,13 +13,14 @@ type ReviewFormProps = {
     stayType: 'OverNight' | 'DayStay',
     checkIn: Date,
     checkOut: Date,
-    price: number,
+    accommodationSubtotal: number,
     preOrderSubTotal: number,
+    guestFeeSubTotal: number,
     total: number,
 }
 
 const ReviewForm = ({ 
-    accommodation, stayType, checkIn, checkOut, price, preOrderSubTotal, total, setBookingStep 
+    accommodation, stayType, checkIn, checkOut, accommodationSubtotal, guestFeeSubTotal, preOrderSubTotal, total, setBookingStep 
 }: ReviewFormProps) => {
     const { watch } = useFormContext<multiStepBookingFormSchema>();
 
@@ -188,10 +189,18 @@ const ReviewForm = ({
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">
-                                {stayType === 'OverNight' ? 'Overnight Rate' : 'Day Stay Rate'}
+                                Accommodation Subtotal
                             </span>
                             <span className="font-semibold">
-                                ₱{price.toLocaleString()}
+                                ₱{accommodationSubtotal.toLocaleString()}
+                            </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span  className="text-muted-foreground">
+                                Guest Fee
+                            </span>
+                            <span className="font-semibold">
+                                ₱{guestFeeSubTotal.toLocaleString()}
                             </span>
                         </div>
                         {preOrderSubTotal > 0 && (

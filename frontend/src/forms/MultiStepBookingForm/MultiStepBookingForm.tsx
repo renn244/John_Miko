@@ -5,7 +5,7 @@ import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -28,7 +28,12 @@ const MultiStepBookingFormSchema = z.object({
     lastName: z.string().nonempty("Last name is required"),
     email: z.email().nonempty("Email is required"),
     contactNo: z.string().nonempty("Phone number is required"),
+    
+    adultGuests: z.number().optional(),
+    seniorGuests: z.number().optional(),
+    kidGuests: z.number().optional(),
     numberOfGuests: z.number().min(1, "At least 1 guest"),
+    
     specialRequest: z.string().optional(),
 
     // Step 2 - Review (No additional fields, just confirmation)
@@ -65,6 +70,9 @@ const MultiStepBookingForm = ({
             lastName: '',
             email: '',
             contactNo: '',
+            adultGuests: 0,
+            seniorGuests: 0,
+            kidGuests: 0,
             numberOfGuests: 1,
             specialRequest: '',
             stayType: stayType,
@@ -112,11 +120,24 @@ const MultiStepBookingForm = ({
         });
     }
 
+    const adultFee = form.watch('stayType') === 'DayStay' ? 150 : 180; // full price
+    const seniorFee = adultFee - (adultFee * 0.20); // 20 percent discount
+    const kidsFee = 100 // just a kid 4-7 years old
+
+    const adultCount = form.watch('adultGuests') || 0;
+    const kidsCount = form.watch('kidGuests') || 0;
+    const seniorCount = form.watch('seniorGuests') || 0;
+
+
+    const { totalGuestFee } = useMemo(() => {
+        const totalGuestFee = (adultCount * adultFee) + (seniorCount * seniorFee) + (kidsCount * kidsFee);
+
+        return { totalGuestFee };
+    }, [kidsCount, adultCount, seniorCount])
+
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayType);
 
-    const rate = accommodation.price;
-    const preOrderSubTotal = preOrderTotal;
-    const total = rate  + preOrderSubTotal
+    const total = accommodation.price  + preOrderTotal + totalGuestFee;
 
     return (  
         <FormProvider {...form}>
@@ -142,8 +163,9 @@ const MultiStepBookingForm = ({
                     <ReviewForm 
                     accommodation={accommodation}
                     stayType={stayType}
-                    price={rate}
-                    preOrderSubTotal={preOrderSubTotal}
+                    accommodationSubtotal={accommodation.price}
+                    preOrderSubTotal={preOrderTotal}
+                    guestFeeSubTotal={totalGuestFee}
                     total={total}
                     setBookingStep={setBookingStep}
                     checkIn={bookingCheckIn}

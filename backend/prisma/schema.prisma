@@ -125,6 +125,10 @@ model Booking {
   email           String
   contactNo       String
 
+  adultGuests     Int
+  kidGuests       Int
+  seniorGuest     Int
+
   numberOfGuests  Int
   specialRequests String?
 

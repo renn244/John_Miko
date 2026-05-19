@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { Prisma } from 'src/generated/prisma/client';
 import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { ValidationException } from 'src/lib/exception/ValidationException';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PaymentService } from 'src/payment/payment.service';
@@ -18,6 +19,18 @@ export class BookingService {
         private readonly paymentService: PaymentService
     ) {}
 
+    private calculateGuestFee(adultGuests: number, seniorGuests: number, kidGuests: number, timeSlot: BookingTimeSlot) {
+        const adultFee = timeSlot === 'DayStay' ? 150 : 180 // full price
+        const seniorFee = adultFee - (adultFee * 0.20); // 20 percent discount
+        const kidsFee = 100 // just a kid 4-7 years old
+
+        const adultTotal = adultGuests * adultFee;
+        const seniorTotal = seniorGuests * seniorFee;
+        const kidsTotal = kidGuests * kidsFee; 
+
+        return adultTotal + seniorTotal + kidsTotal
+    }
+
     async bookAccommodation(body: CreateBookingDto, user: UserSession) {
         
         const accommodation = await this.prisma.accommodation.findUnique({ where: { id: body.accommodationId } })
@@ -25,7 +38,14 @@ export class BookingService {
         if(!accommodation) {
             throw new NotFoundException('Accommodation not found')
         }
-        
+
+        if(!body.adultGuests  && !body.seniorGuests && !body.kidGuests) {
+            throw new ValidationException({
+                field: 'numberOfGuests',
+                message: ["at least 1 guests is required"]
+            })
+        }
+
         const booking = await this.prisma.$transaction(async (txprisma) => {
             const existingBooking = await txprisma.booking.findFirst({
                 where: {
@@ -43,6 +63,7 @@ export class BookingService {
             const newBooking = await this.createBooking(body, user, txprisma);
 
             const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
+            const guestFeeTotal = this.calculateGuestFee(body.adultGuests, body.seniorGuests, body.kidGuests, body.stayType)
 
             await txprisma.bookedAccommodation.create({
                 data: {
@@ -60,9 +81,9 @@ export class BookingService {
             const { paymentId, checkoutUrl } = await this.paymentService.createPayment({
                 bookingId: newBooking.id,
                 accommodationFee: accommodation.price,
-                guestFee: 0,
+                guestFee: guestFeeTotal,
                 preOrderFee: preOrderTotal,
-                amount: accommodation.price + preOrderTotal,
+                amount: accommodation.price + guestFeeTotal + preOrderTotal,
                 paymentType: body.paymentType,
             }, txprisma)
 
@@ -80,6 +101,8 @@ export class BookingService {
     }
 
     async createBooking(body: CreateBookingDto, user: UserSession, tx: Prisma.TransactionClient) {
+        const totalNumberofGuest = body.seniorGuests + body.adultGuests + body.kidGuests
+
         const newBooking = await tx.booking.create({
             data: {
                 userId: user.id,
@@ -87,11 +110,14 @@ export class BookingService {
                 bookingDate: body.checkIn,
                 timeSlot: body.stayType,
                 paymentType: body.paymentType,
-                numberOfGuests: body.numberOfGuests,
+                numberOfGuests: totalNumberofGuest,
                 specialRequests: body.specialRequest,
                 guestName: body.name,
                 email: body.email,
                 contactNo: body.contactNo,
+                kidGuests: body.kidGuests,
+                adultGuests: body.adultGuests,
+                seniorGuest: body.seniorGuests,
                 status: 'Confirmed'
             }
         })

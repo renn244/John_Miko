@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, Min, ValidateNested } from "class-validator";
+import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, ValidateNested } from "class-validator";
 import { BookingStatus, BookingTimeSlot, PaymentType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
@@ -32,9 +32,18 @@ export class CreateBookingDto {
     
     @Type(() => Number)
     @IsNumber()
-    @Min(1, { message: "At least 1 guest is required" })
-    @IsNotEmpty({ message: "Number of guests is required" })
-    numberOfGuests!: number;
+    @IsNotEmpty({ message: "adultGuests is required" })
+    adultGuests!: number;
+
+    @Type(() => Number)
+    @IsNumber()
+    @IsNotEmpty({ message: "kidGuests required" })
+    kidGuests!: number;
+
+    @Type(() => Number)
+    @IsNumber()
+    @IsNotEmpty({ message: "kidGuests required" })
+    seniorGuests!: number;
 
     @IsString()
     @IsOptional()
