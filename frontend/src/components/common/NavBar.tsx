@@ -11,7 +11,7 @@ const NavBar = () => {
 
     return (
         <>
-            <header className="bg-white border-b sticky top-0 z-50">
+            <header className="w-full bg-white border-b sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
 
@@ -69,10 +69,10 @@ const NavBar = () => {
 
             {/* BACKDROP */}
             <div 
-                className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
-                    isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                }`}
-                onClick={() => setIsOpen(false)}
+            className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
+                isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+            }`}
+            onClick={() => setIsOpen(false)}
             />
 
             {/* SIDE DRAWER */}

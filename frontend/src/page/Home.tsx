@@ -1,57 +1,23 @@
-import AvailabilityCalendar from "@/components/common/AvailabilityCalendar"
-import AvailabilityStayType from "@/components/common/AvailabilityStayType"
 import Footer from "@/components/common/Footer"
 import NavBar from "@/components/common/NavBar"
-import AccommodationBookingModal from "@/components/pageComponents/Accommodation/AccommodationBookingModal"
 import Chatbot from "@/components/pageComponents/Chatbot"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useGetAccommodationByIdQuery, useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook"
 import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant"
-import { useBookingSelectStore } from "@/store/booking/useBookingSelect"
-import { format } from "date-fns"
 import {
     Calendar as CalendarIcon,
     CheckCircle,
     ChevronRight,
     Clock,
     CreditCard,
-    Mail,
-    MapPin,
-    Phone,
     Shield,
     Sparkles,
     Star,
-    Utensils,
+    Utensils
 } from "lucide-react"
-import { useMemo, useState } from "react"
 import { Link } from "react-router"
 
 const Home = () => {
-    const [selectedAccommodationId, setSelectedAccommodationId] = useState<string>("")
-    const [isBookingOpen, setIsBookingOpen] = useState(false)
-    const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false)
-
-    const { bookingDate, setBookingDate, bookingType, setBookingType, reset } = useBookingSelectStore()
-
-    const { data: accommodationsResponse, isLoading: isAccommodationsLoading } = useGetAccommodationsQuery({
-        availability: "Available",
-        page: 1,
-        limit: 100,
-    })
-
-    const accommodations = accommodationsResponse?.data || []
-
-    const { data: selectedAccommodation } = useGetAccommodationByIdQuery(
-        selectedAccommodationId ? selectedAccommodationId : undefined
-    )
-
-    const selectedAccommodationLabel = useMemo(() => {
-        if (!selectedAccommodationId) return ""
-        return accommodations.find((a: any) => a.id === selectedAccommodationId)?.name || ""
-    }, [accommodations, selectedAccommodationId])
 
     const faqs = [
         {
@@ -92,9 +58,9 @@ const Home = () => {
                 loading="eager"
                 fetchPriority="high"
                 />
+        
                 <div className="absolute inset-0 bg-linear-to-b from-black/55 via-black/45 to-black/75" />
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-background to-transparent" />
-
+        
                 <div className="absolute inset-0">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
                         <div className="w-full text-white">
@@ -169,180 +135,6 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <section className="bg-background">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="relative -mt-12 pb-12">
-                        <div className="rounded-3xl border bg-card text-card-foreground shadow-md p-4 md:p-7">
-                            <div className="flex flex-col lg:flex-row lg:items-start gap-8">
-                                <div className="flex-1">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div>
-                                            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Start a Booking</h2>
-                                            <p className="text-sm md:text-base text-muted-foreground mt-1">
-                                                Pick a unit, choose your date, select DayStay/OverNight.
-                                            </p>
-                                        </div>
-                                        <Link to="/accommodation" className="shrink-0 hidden sm:block">
-                                            <Button variant="outline">Browse All</Button>
-                                        </Link>
-                                    </div>
-
-                                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">
-                                                Accommodation
-                                            </label>
-                                            <div className="mt-2">
-                                                <Select
-                                                value={selectedAccommodationId}
-                                                onValueChange={(value) => {
-                                                    setSelectedAccommodationId(value)
-                                                    reset()
-                                                    setIsDatePopoverOpen(false)
-                                                }}
-                                                >
-                                                    <SelectTrigger aria-label="Select accommodation">
-                                                        <SelectValue
-                                                            placeholder={
-                                                                isAccommodationsLoading ? "Loading..." : "Select an accommodation"
-                                                            }
-                                                        />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {accommodations.map((a: any) => (
-                                                            <SelectItem key={a.id} value={a.id}>
-                                                                {a.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-
-                                                {selectedAccommodationLabel && (
-                                                    <p className="mt-1 text-xs text-muted-foreground">
-                                                        Selected: <span className="font-medium">{selectedAccommodationLabel}</span>
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Date</label>
-                                            <div className="mt-2">
-                                                <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
-                                                    <PopoverTrigger asChild>
-                                                        <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        disabled={!selectedAccommodationId}
-                                                        className={`w-full justify-start text-left font-normal h-11 ${
-                                                            !bookingDate ? "text-muted-foreground" : ""
-                                                        }`}
-                                                        >
-                                                            <CalendarIcon className="w-4 h-4 mr-2" />
-                                                            {bookingDate ? format(bookingDate, "PPP") : "Select date"}
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                    <PopoverContent className="w-auto p-0" align="start">
-                                                        {selectedAccommodationId && (
-                                                            <AvailabilityCalendar
-                                                                accommodationId={selectedAccommodationId}
-                                                                selected={bookingDate}
-                                                                onSelect={(date: Date | undefined) => {
-                                                                    setBookingDate(date)
-                                                                    if (date) setIsDatePopoverOpen(false)
-                                                                }}
-                                                                className="border-0 rounded-xl p-2 text-s"
-                                                            />
-                                                        )}
-                                                    </PopoverContent>
-                                                </Popover>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-end">
-                                            <div className="w-full">
-                                                <label className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">
-                                                    Action
-                                                </label>
-                                                <div className="mt-2 flex flex-col sm:flex-row md:flex-col gap-2">
-                                                    <Button
-                                                        size="lg"
-                                                        className="w-full"
-                                                        disabled={!selectedAccommodationId || !bookingDate || !bookingType || !selectedAccommodation}
-                                                        onClick={() => setIsBookingOpen(true)}
-                                                    >
-                                                        <CalendarIcon className="w-5 h-5" />
-                                                        Book Now
-                                                    </Button>
-                                                    <Link to="/accommodation" className="sm:hidden md:block">
-                                                        <Button size="lg" variant="outline" className="w-full">
-                                                            Browse All
-                                                            <ChevronRight className="w-5 h-5" />
-                                                        </Button>
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-7">
-                                        <label className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">
-                                            Stay Type
-                                        </label>
-                                        <div className="mt-2">
-                                            {selectedAccommodationId ? (
-                                                <AvailabilityStayType
-                                                    accommodationId={selectedAccommodationId}
-                                                    checkInDate={bookingDate}
-                                                    value={bookingType || ""}
-                                                    onValueChange={(value) => setBookingType(value as any)}
-                                                />
-                                            ) : (
-                                                <div className="rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
-                                                    Select an accommodation to choose a stay type.
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <p className="mt-3 text-xs text-muted-foreground">
-                                            DayStay: {TIME_SLOT.DAY_STAY.CHECK_IN} – {TIME_SLOT.DAY_STAY.CHECK_OUT}. Overnight: Check-in {TIME_SLOT.OVERNIGHT.CHECK_IN}, Check-out {TIME_SLOT.OVERNIGHT.CHECK_OUT}.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="lg:w-80">
-                                    <div className="rounded-3xl border p-5 bg-muted/20">
-                                        <h3 className="font-bold text-base tracking-tight">Booking Tips</h3>
-                                        <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                                            <li className="flex items-start gap-2">
-                                                <CheckCircle className="w-4 h-4 text-primary mt-0.5" />
-                                                Weekends and holidays fill up fast—reserve early.
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <CheckCircle className="w-4 h-4 text-primary mt-0.5" />
-                                                A 50% down payment confirms the booking.
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <CheckCircle className="w-4 h-4 text-primary mt-0.5" />
-                                                Capacity limits are enforced for safety.
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {selectedAccommodation && (
-                    <AccommodationBookingModal
-                        isOpen={isBookingOpen}
-                        setIsOpen={setIsBookingOpen}
-                        accommodation={selectedAccommodation as any}
-                    />
-                )}
             </section>
 
             <section className="bg-background">

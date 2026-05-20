@@ -63,101 +63,57 @@ const GuestForm =  ({ accommodation, selectedStayType, selectedCheckIn, selected
     return (
         <div className="space-y-6">
 
-            <div className="p-2 rounded-md bg-muted">
-                <h3 className="font-bold mb-3">
-                    Your Selection
-                </h3>
-                <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Accommodation:</span>
-                        <span className="font-semibold">
-                            {accommodation.name}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Stay Type:</span>
-                        <span className="font-semibold">
-                            {selectedStayType === 'OverNight' ? 'Over Night' : 'Day Stay'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Check-in:</span>
-                        <span className="font-semibold">
-                            {selectedCheckIn.toLocaleString('en-PH', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                minute: '2-digit',
-                                hour: '2-digit',
-                                hour12: true,
-                            })}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Check-out:</span>
-                        <span className="font-semibold">
-                            {selectedCheckOut.toLocaleString('en-PH', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                minute: '2-digit',
-                                hour: '2-digit',
-                                hour12: true,
-                            })}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
             <div className="space-y-4">
                 <h3 className="font-bold text-lg">
-                    Personal Information
+                    Guest Information
                 </h3>
 
-                <Controller 
-                name="firstName"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                        <FieldLabel htmlFor={field.name} className="gap-1">
-                            First Name<span className="text-red-700">*</span>
-                        </FieldLabel>
+                <div className="flex gap-4">
+                    <Controller 
+                    name="firstName"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                            <FieldLabel htmlFor={field.name} className="gap-1">
+                                First Name<span className="text-red-700">*</span>
+                            </FieldLabel>
 
-                        <Input
-                        id={field.name}
-                        placeholder="Juan"
-                        aria-invalid={fieldState.invalid}
-                        {...field}
-                        />
+                            <Input
+                            id={field.name}
+                            placeholder="Juan"
+                            aria-invalid={fieldState.invalid}
+                            {...field}
+                            />
 
-                        {fieldState.invalid && (
-                            <FieldError errors={getErrorMessages(fieldState.error)} />
-                        )}
-                    </Field>
-                )}
-                />
+                            {fieldState.invalid && (
+                                <FieldError errors={getErrorMessages(fieldState.error)} />
+                            )}
+                        </Field>
+                    )}
+                    />
 
-                <Controller 
-                name="lastName"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                        <FieldLabel htmlFor={field.name} className="gap-1">
-                            Last Name<span className="text-red-700">*</span>
-                        </FieldLabel>
-                        <Input
-                        id={field.name}
-                        placeholder="Dela Cruz"
-                        aria-invalid={fieldState.invalid}
-                        {...field}
-                        />
+                    <Controller 
+                    name="lastName"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                            <FieldLabel htmlFor={field.name} className="gap-1">
+                                Last Name<span className="text-red-700">*</span>
+                            </FieldLabel>
+                            <Input
+                            id={field.name}
+                            placeholder="Dela Cruz"
+                            aria-invalid={fieldState.invalid}
+                            {...field}
+                            />
 
-                        {fieldState.invalid && (
-                            <FieldError errors={getErrorMessages(fieldState.error)} />
-                        )}
-                    </Field>
-                )}
-                />
+                            {fieldState.invalid && (
+                                <FieldError errors={getErrorMessages(fieldState.error)} />
+                            )}
+                        </Field>
+                    )}
+                    />
+                </div>
 
                 <Controller 
                 name="email"

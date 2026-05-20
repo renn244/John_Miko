@@ -1,13 +1,9 @@
 import NavBar from "@/components/common/NavBar";
-import AccommodationBookingModal from "@/components/pageComponents/Accommodation/AccommodationBookingModal";
 import AccommodationSideBooking from "@/components/pageComponents/Accommodation/AccommodationSideBooking";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
-import { useState } from "react";
 import { useParams } from "react-router";
 
 const AccommodationView = () => {
-    const [isOpen, setIsOpen] = useState(false);
-
     const { id } = useParams<{ id: string }>();
     const { data: accommodation, isLoading, error } = useGetAccommodationByIdQuery(id)
 
@@ -117,7 +113,6 @@ const AccommodationView = () => {
                     <aside className="lg:col-span-1">
                         <div className="sticky top-24">
                             <AccommodationSideBooking
-                            setIsOpen={setIsOpen}
                             accommodation={{
                                 id: accommodation.id,
                                 price: accommodation.price
@@ -127,12 +122,6 @@ const AccommodationView = () => {
                     </aside>
                 </div>
             </main>
-
-            <AccommodationBookingModal
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-            accommodation={accommodation as any}
-            />
         </div>
     )
 }

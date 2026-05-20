@@ -197,7 +197,7 @@ const ReviewForm = ({
                         </div>
                         <div className="flex justify-between text-sm">
                             <span  className="text-muted-foreground">
-                                Guest Fee
+                                Guest Fee Subtotal
                             </span>
                             <span className="font-semibold">
                                 ₱{guestFeeSubTotal.toLocaleString()}

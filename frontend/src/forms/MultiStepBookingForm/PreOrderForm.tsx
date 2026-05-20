@@ -87,13 +87,13 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
         <div className="space-y-6">
 
             <div>
-                <div className="flex items-center">
-                    <h3 className="font-bold text-lg" style={{ color: '#1F2937' }}>
+                <div className="flex items-center mb-2">
+                    <h3 className="font-bold text-lg">
                         Select Items
                     </h3>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-3">
                     <Button
                     onClick={() => setSelectedCategory(null)}
                     variant={selectedCategory === null ? "default" : "secondary"}
@@ -111,7 +111,7 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-150 overflow-y-auto  [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-150 overflow-y-auto  [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-2">
                     {menuItems?.map((item) => {
                         const cartEntry = fields.find((f) => f.menuItemId === item.id);
                         return (

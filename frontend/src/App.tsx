@@ -27,6 +27,7 @@ import Report from './page/Admin/Reports/Report';
 import AddStaff from './page/Admin/Staff-Management/AddStaff';
 import StaffManagement from './page/Admin/Staff-Management/StaffManagement';
 import Amenities from './page/Amenities';
+import BookingFlow from './page/Booking';
 import ForgotPassword from "./page/ForgotPassword";
 import CreateFeedback from './page/Guest/CreateFeedback';
 import EditFeedback from './page/Guest/EditFeedback';
@@ -72,6 +73,13 @@ const router = createBrowserRouter([
       { index: true, element: <AccommodationList /> },
       { path: ':id', element: <AccommodationView /> }
     ]
+  },
+  {
+    path: '/booking/:accommodationId',
+    element: (
+      // add protected route later after testing and all
+      <BookingFlow />
+    )
   },
   {
     path: '/my-bookings',

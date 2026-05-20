@@ -8,23 +8,22 @@ import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant";
 import { isSameDateOnly } from "@/lib/date.util";
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import {
-    Calendar,
-    CheckCircle
+    Calendar
 } from 'lucide-react';
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 type AccommodationSideBookingProps = {
     accommodation: {
         id: string;
         price: number;
     },
-    setIsOpen: (isOpen: boolean) => void
 }
 
 const AccommodationSideBooking = ({
     accommodation,
-    setIsOpen
 }: AccommodationSideBookingProps) => {
+    const navigate = useNavigate();
+
     const { bookingDate, setBookingDate, bookingType, setBookingType } = useBookingSelectStore();
     const { user } = useAuthContext();
 
@@ -121,7 +120,7 @@ const AccommodationSideBooking = ({
 
             {user ? (
                 <Button 
-                onClick={() => setIsOpen(true)}
+                onClick={() => navigate(`/booking/${accommodation.id}`)}
                 disabled={!bookingDate || !bookingType}
                 className="w-full">
                     <Calendar className="w-6 h-6" />

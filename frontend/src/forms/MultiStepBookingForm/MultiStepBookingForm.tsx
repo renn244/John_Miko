@@ -7,6 +7,7 @@ import type { Accommodation } from "@/types/admin/accommodation.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
 import GuestForm from "./GuestForm";
@@ -59,10 +60,15 @@ const MultiStepBookingForm = ({
 }: MultiStepBookingFormProps) => {
     const [preOrderTotal, setPreOrderTotal] = useState(0);
 
+    const navigate = useNavigate();    
     const stayType = useBookingSelectStore((state) => state.bookingType!);
     const checkIn = useBookingSelectStore((state) => state.bookingDate!);
     const reset = useBookingSelectStore((state) => state.reset);
-    
+
+    if(!stayType || !checkIn) {
+        navigate(`/accommodation/${accommodation.id}`)
+    }
+
     const form = useForm<multiStepBookingFormSchema>({
         resolver: zodResolver(MultiStepBookingFormSchema),
         defaultValues: {
