@@ -118,6 +118,8 @@ model Booking {
 
   bookedAccommodation BookedAccommodation?
   preOrders         PreOrderMenuItem[]
+  addOns            BookingAddOn[]
+
   feedback          Feedback?
   reports           Report[]
 
@@ -155,8 +157,9 @@ model Payment {
   booking             Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
 
-  accommodationAmount Int
+  accommodationAmount Int  
   preOrderAmount      Int
+  addOnAmount         Int
   guestFeeAmount      Int
 
   amountPaid          Int
@@ -186,6 +189,28 @@ model BookedAccommodation {
   amenities     String[] @default([])
 
   createdAt     DateTime @default(now())
+}
+
+model BookingAddOn {
+  id                    String  @id @default(cuid())
+
+  bookingId             String
+  booking               Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  addOnServiceId        String
+  addOnService          AddOnService @relation(fields: [addOnServiceId], references: [id])
+
+  quantity              Int
+
+  // Snapshots
+  name                  String
+  price                 Int
+
+  createdAt             DateTime  @default(now())
+
+  @@unique([bookingId, addOnServiceId]) // prevent duplicates of many services in one booking
+  @@index([bookingId])
+  @@index([addOnServiceId])
 }
 
 model PreOrderMenuItem {
@@ -287,6 +312,8 @@ model AddOnService {
   
   price         Int
   quantity      Int
+
+  Booking       BookingAddOn[]
 
   createdAt     DateTime @default(now())
 }

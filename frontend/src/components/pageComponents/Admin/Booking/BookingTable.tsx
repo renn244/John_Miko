@@ -9,6 +9,7 @@ import { useBookingSearch } from "@/hooks/admin/booking.search";
 import { useBookingAdminStore } from "@/store/admin/bookingAdmin.store";
 import { format } from "date-fns";
 import { CalendarSync, CircleCheck, CircleX, Eye, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router";
 
    
 const getStatusColor = (status: string) => {
@@ -34,10 +35,11 @@ const getPaymentTypeColor = (paymentType: string) => {
 }
 
 const BookingTable = () => {
-    const setViewId = useBookingAdminStore((state) => state.setViewId);
     const setRescheduleBookingId = useBookingAdminStore((state) => state.setRescheduleBookingId);
     const setMarkCompletedBookingId = useBookingAdminStore((state) => state.setMarkCompletedBookingId);
     const setMarkCancelBookingId = useBookingAdminStore((state) => state.setMarkCancelBookingId);
+
+    const navigate = useNavigate();
 
     const { 
         search, status, paymentType, accommodationId, bookingDate, page, limit,
@@ -105,7 +107,7 @@ const BookingTable = () => {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        <DropdownMenuItem onClick={() => setViewId(booking.id)}>
+                                        <DropdownMenuItem onClick={() => navigate(`/admin/booking/${booking.id}`)}>
                                             <Eye />
                                             View Details
                                         </DropdownMenuItem>

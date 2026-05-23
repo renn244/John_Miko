@@ -3,28 +3,30 @@ import { useGetMenuItemsBulkQuery } from "@/hooks/admin/menu-item.hook";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import type { MenuItem } from "@/types/admin/menu-item.type";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo, type Dispatch, type SetStateAction } from "react";
+import { useMemo, type Dispatch, type SetStateAction } from "react";
 import { useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type ReviewFormProps = {
     accommodation: Accommodation,
-    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'pre-order' | 'payment'>>,
+    setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
     stayType: 'OverNight' | 'DayStay',
     checkIn: Date,
     checkOut: Date,
     accommodationSubtotal: number,
+    addOnSubTotal: number,
     preOrderSubTotal: number,
     guestFeeSubTotal: number,
     total: number,
 }
 
 const ReviewForm = ({ 
-    accommodation, stayType, checkIn, checkOut, accommodationSubtotal, guestFeeSubTotal, preOrderSubTotal, total, setBookingStep 
+    accommodation, stayType, checkIn, checkOut, accommodationSubtotal, addOnSubTotal, guestFeeSubTotal, preOrderSubTotal, total, setBookingStep 
 }: ReviewFormProps) => {
     const { watch } = useFormContext<multiStepBookingFormSchema>();
 
     const preOrderItems = watch('preOrderItems') || [];
+    const addOnServices = watch('addOnServices') || [];
     const { data: menuItems } = useGetMenuItemsBulkQuery(preOrderItems.map((item) => item.menuItemId));
 
     const preOrders = useMemo(() => {
@@ -153,6 +155,45 @@ const ReviewForm = ({
 
                 <div>
                     <h4 className="font-bold mb-2">
+                        Add-on Services 
+                        ({addOnServices.length} {addOnServices.length === 1 ? 'Service' : 'Services'})
+                    </h4>
+                    <div className="space-y-3">
+                        {addOnServices.map((item) => (
+                            <div
+                            key={item.addOnServiceId}
+                            className="flex items-center gap-4 p-4 rounded-lg bg-muted"
+                            >
+                                {item.imageUrl ? (
+                                    <img
+                                    src={item.imageUrl}
+                                    alt={item.name || 'Service'}
+                                    className="w-16 h-16 rounded-lg object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-16 h-16 rounded-lg bg-gray-200" />
+                                )}
+
+                                <div className="flex-1">
+                                    <p className="font-bold mb-1">
+                                        {item.name || 'Service'}
+                                    </p>
+                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                        ₱{(item.price || 0).toLocaleString()} × {item.quantity}
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-primary">
+                                        ₱{(((item.price || 0) * item.quantity) || 0).toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div>
+                    <h4 className="font-bold mb-2">
                         Pre Order Items 
                         ({preOrders.length} {preOrders.length === 1 ? 'Item' : 'Items'})
                     </h4>
@@ -203,6 +244,14 @@ const ReviewForm = ({
                                 ₱{guestFeeSubTotal.toLocaleString()}
                             </span>
                         </div>
+                        {addOnSubTotal > 0 && (
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Add-on Subtotal</span>
+                                <span className="font-semibold">
+                                    ₱{addOnSubTotal.toLocaleString()}
+                                </span>
+                            </div>
+                        )}
                         {preOrderSubTotal > 0 && (
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Pre-Order Subtotal</span>

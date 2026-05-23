@@ -12,6 +12,14 @@ export class PreOrderItemDto {
     quantity!: number;
 }
 
+export class AddOnServiceItemDto {
+    @IsString()
+    addOnServiceId!: string;
+
+    @IsNumber()
+    quantity!: number;
+}
+
 export class CreateBookingDto {
     @IsString()
     @IsNotEmpty({ message: "Accommodation ID is required" })
@@ -42,7 +50,7 @@ export class CreateBookingDto {
 
     @Type(() => Number)
     @IsNumber()
-    @IsNotEmpty({ message: "kidGuests required" })
+    @IsNotEmpty({ message: "seniorGuests required" })
     seniorGuests!: number;
 
     @IsString()
@@ -66,7 +74,12 @@ export class CreateBookingDto {
     @Type(() => PreOrderItemDto)
     preOrderItems?: PreOrderItemDto[];
 
-    // create a payment type field in the database
+    @IsArray()
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => AddOnServiceItemDto)
+    addOnServices?: AddOnServiceItemDto[];
+
     @IsNotEmpty({ message: "Payment type is required" })
     @IsEnum(PaymentType, { message: "Payment type must be either 'full' or 'partial'" })
     paymentType!: PaymentType;

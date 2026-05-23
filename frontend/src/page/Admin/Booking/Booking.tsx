@@ -3,7 +3,6 @@ import BookingTable from "@/components/pageComponents/Admin/Booking/BookingTable
 import MarkCancelDialog from "@/components/pageComponents/Admin/Booking/MarkCancelDialog";
 import MarkCompletedDialog from "@/components/pageComponents/Admin/Booking/MarkCompletedDialog";
 import ReschedulingDialog from "@/components/pageComponents/Admin/Booking/ReschedulingDialog";
-import ViewBookingDialog from "@/components/pageComponents/Admin/Booking/ViewBookingDialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router";
@@ -33,8 +32,6 @@ const Booking = () => {
             <BookingFilter />
 
             <BookingTable />
-
-            <ViewBookingDialog />
 
             <ReschedulingDialog />
 

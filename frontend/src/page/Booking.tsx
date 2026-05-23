@@ -20,6 +20,10 @@ const Booking = () => {
         <div className="min-h-screen w-full flex flex-col items-center justify-center">
             <NavBar />
 
+            {/** Booking steps updated to include Add-on Services before Pre-order */}
+            {/** Steps: Guest Info -> Add-ons -> Pre-order -> Review -> Payment */}
+            {/** Total steps: 5 */}
+
             <div className="w-full border-b-2">
                 <header className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between mb-2">
@@ -28,15 +32,15 @@ const Booking = () => {
                         </h1>
 
                         <span className="text-sm font-medium text-muted-foreground">
-                            Step 1 of 4
+                            Step {currentStep} of 5
                         </span>
                     </div>
 
                     <div className="relative">
-                        <Progress className="w-full mt-1" value={25 * currentStep} />
+                        <Progress className="w-full mt-1" value={20 * currentStep} />
 
                         <div className="flex items-center justify-between  mt-4">
-                            {['Guest Information', 'Pre-order Items', 'Review Booking', 'Payment'].map((step, index) => (
+                            {['Guest Information', 'Add-on Services', 'Pre-order Items', 'Review Booking', 'Payment'].map((step, index) => (
                                 <div key={step} className="flex flex-col items-center w-1/5">
                                     <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all  ${
                                         index + 1 <= currentStep ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
@@ -62,8 +66,9 @@ const Booking = () => {
                 accommodation={accommodation}
                 bookingStep={
                     currentStep === 1 ? 'form' 
-                    : currentStep === 2 ? 'pre-order' 
-                    : currentStep === 3 ? 'review' 
+                    : currentStep === 2 ? 'add-on'
+                    : currentStep === 3 ? 'pre-order' 
+                    : currentStep === 4 ? 'review' 
                     : 'payment'
                 }
                 setBookingStep={(data) => {
@@ -71,14 +76,17 @@ const Booking = () => {
                         case 'form':
                             setCurrentStep(1);
                             break;
-                        case 'pre-order':
+                        case 'add-on':
                             setCurrentStep(2);
                             break;
-                        case 'review':
+                        case 'pre-order':
                             setCurrentStep(3);
                             break;
-                        case 'payment':
+                        case 'review':
                             setCurrentStep(4);
+                            break;
+                        case 'payment':
+                            setCurrentStep(5);
                             break;     
                     }
                 }}

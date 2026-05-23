@@ -10,6 +10,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
+import AddOnServiceForm from "./AddOnServiceForm";
 import GuestForm from "./GuestForm";
 import PaymentForm from "./PaymentForm";
 import PreOrderForm from "./PreOrderForm";
@@ -17,8 +18,8 @@ import ReviewForm from "./ReviewForm";
 
 type MultiStepBookingFormProps = {
     accommodation: Accommodation,
-    bookingStep: 'form' | 'review' | 'pre-order' | 'payment',
-    setBookingStep: React.Dispatch<React.SetStateAction<'form' | 'review' | 'pre-order' | 'payment'>>,
+    bookingStep: 'form' | 'add-on' | 'review' | 'pre-order' | 'payment',
+    setBookingStep: React.Dispatch<React.SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
     onSuccess?: () => void;
 }
 
@@ -28,7 +29,7 @@ const MultiStepBookingFormSchema = z.object({
     firstName: z.string().nonempty("First name is required"),
     lastName: z.string().nonempty("Last name is required"),
     email: z.email().nonempty("Email is required"),
-    contactNo: z.string().nonempty("Phone number is required"),
+    contactNo: z.string().nonempty("Phone number is required").regex(/^[0-9]{10,15}$/, "Phone number must be between 10 and 15 digits"),
     
     adultGuests: z.number().optional(),
     seniorGuests: z.number().optional(),
@@ -49,6 +50,18 @@ const MultiStepBookingFormSchema = z.object({
         })
     ),
 
+    // Step 3 (new) - Add-on services
+    addOnServices: z.array(
+        z.object({
+            addOnServiceId: z.string(),
+            quantity: z.number().min(1, "Quantity must be at least 1"),
+            // snapshots for review UI (not required by backend)
+            name: z.string().optional(),
+            price: z.number().optional(),
+            imageUrl: z.string().optional(),
+        })
+    ),
+
     // Step 4 - Payment
     paymentType: z.enum(['Full', 'Partial']),
 })
@@ -59,6 +72,7 @@ const MultiStepBookingForm = ({
     accommodation, bookingStep, setBookingStep, onSuccess
 }: MultiStepBookingFormProps) => {
     const [preOrderTotal, setPreOrderTotal] = useState(0);
+    const [addOnTotal, setAddOnTotal] = useState(0);
 
     const navigate = useNavigate();    
     const stayType = useBookingSelectStore((state) => state.bookingType!);
@@ -84,6 +98,7 @@ const MultiStepBookingForm = ({
             stayType: stayType,
             checkIn: checkIn,
             preOrderItems: [],
+            addOnServices: [],
             paymentType: undefined,
         },
         criteriaMode: "all"
@@ -92,12 +107,18 @@ const MultiStepBookingForm = ({
     const { mutateAsync, isPending } = useCreateBookingMutation();
 
     const onSubmit = async (data: multiStepBookingFormSchema) => {
-        const { firstName, lastName, checkIn, ...rest } = data;
+        const { firstName, lastName, checkIn, addOnServices, ...rest } = data;
+
+        const addOnServicesPayload = (addOnServices || []).map((s) => ({
+            addOnServiceId: s.addOnServiceId,
+            quantity: s.quantity,
+        }));
 
         await mutateAsync({
             accommodationId: accommodation.id,
             name: `${data.firstName} ${data.lastName}`,
             checkIn: toDateOnly(checkIn),
+            addOnServices: addOnServicesPayload,
             ...rest
         }, {
             onSuccess: (data) => {
@@ -143,7 +164,7 @@ const MultiStepBookingForm = ({
 
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayType);
 
-    const total = accommodation.price  + preOrderTotal + totalGuestFee;
+    const total = accommodation.price + addOnTotal + preOrderTotal + totalGuestFee;
 
     return (  
         <FormProvider {...form}>
@@ -155,6 +176,13 @@ const MultiStepBookingForm = ({
                     selectedCheckIn={bookingCheckIn}
                     selectedCheckOut={bookingCheckOut}
                     setBookingStep={setBookingStep}
+                    />
+                )}
+
+                {bookingStep === 'add-on' && (
+                    <AddOnServiceForm
+                        setBookingStep={setBookingStep}
+                        changeAddOnTotal={(total) => setAddOnTotal(total)}
                     />
                 )}
 
@@ -170,6 +198,7 @@ const MultiStepBookingForm = ({
                     accommodation={accommodation}
                     stayType={stayType}
                     accommodationSubtotal={accommodation.price}
+                    addOnSubTotal={addOnTotal}
                     preOrderSubTotal={preOrderTotal}
                     guestFeeSubTotal={totalGuestFee}
                     total={total}

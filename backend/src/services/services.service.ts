@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'src/generated/prisma/client';
+import { BookingTimeSlot, Prisma } from 'src/generated/prisma/client';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/services.dto';
@@ -26,11 +26,11 @@ export class ServicesService {
         }
 
         const [data, total] = await Promise.all([
-            await this.prisma.addOnService.findMany({ 
+            this.prisma.addOnService.findMany({ 
                 where, 
                 ...getPaginationArgs(query.page, query.limit)
             }),
-            await this.prisma.addOnService.count({
+            this.prisma.addOnService.count({
                 where
             })
         ])
@@ -41,10 +41,48 @@ export class ServicesService {
         }
     }
 
+    async getServicesAvailableForBooking(query: { bookingDate: Date, timeSlot: BookingTimeSlot }) {
+        const services = await this.prisma.addOnService.findMany()
+        const bookedServices = await this.prisma.bookingAddOn.findMany({
+            where: {
+                booking: {
+                    bookingDate: query.bookingDate,
+                    timeSlot: query.timeSlot,
+                    status: { notIn: ["Cancelled"] }
+                },
+            }
+        });
+
+        const serviceIdToBookedQuantityMap = bookedServices.reduce<Record<string, number>>((acc, bookedService) => {
+            const serviceId = bookedService.addOnServiceId;
+            const quantity = bookedService.quantity;
+
+            if(!acc[serviceId]) {
+                acc[serviceId] = 0;
+            }
+
+            acc[serviceId] += quantity;
+            return acc;
+        }, {})
+
+        const servicesWithAvailability = services.map((service) => {
+            const bookedQuantity = serviceIdToBookedQuantityMap[service.id] || 0;
+            
+            const availableQuantity = service.quantity - bookedQuantity;
+
+            return {
+                ...service,
+                quantity: availableQuantity ? availableQuantity : 0
+            }
+        })
+
+        return servicesWithAvailability.filter(service => service.quantity > 0);
+    }
+
     async getServicesStats() {
         const [totalStocks, services] = await Promise.all([
-            await this.prisma.addOnService.aggregate({ _sum: { quantity: true } }),
-            await this.prisma.addOnService.findMany({ select: { quantity: true, price: true } })
+            this.prisma.addOnService.aggregate({ _sum: { quantity: true } }),
+            this.prisma.addOnService.findMany({ select: { quantity: true, price: true } })
         ])
 
         const totalValue = services.reduce(

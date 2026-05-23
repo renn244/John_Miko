@@ -9,7 +9,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type PaymentFormProps = {
-    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'pre-order' | 'payment'>>,
+    setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
     total: number;
     isLoading: boolean;
 }

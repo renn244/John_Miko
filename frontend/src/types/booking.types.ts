@@ -13,6 +13,9 @@ export type Booking = {
     email: string;
     contactNo: string;
     numberOfGuests: number;
+    adultGuests?: number;
+    kidGuests?: number;
+    seniorGuest?: number;
     specialRequests?: string;
 
     bookingDate: string;
@@ -78,14 +81,25 @@ export type BookingWithAccommodationAndPreOrder = {
         quantity: number;
         createdAt: string;
     }[]
+    addOns?: {
+        id: string;
+        bookingId: string;
+        addOnServiceId: string;
+        name: string;
+        price: number;
+        quantity: number;
+        createdAt: string;
+    }[]
+    bookedAccommodation?: BookedAccommodation;
 } & BookingWithAccommodation
 
 export type BookingWithAccommodationAndPreOrderAndPayment = {
     payment: {
         id: string,
-        paymentStatus: 'Pending' | 'Paid' | 'Failed',
+        paymentStatus: 'Pending' | 'Completed' | 'Failed',
         accommodationAmount: number,
         preOrderAmount: number,
+        addOnAmount: number,
         guestFeeAmount: number,
         amountPaid: number,
         amountToPaid: number,

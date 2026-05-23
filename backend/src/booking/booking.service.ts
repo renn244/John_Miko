@@ -8,6 +8,7 @@ import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PaymentService } from 'src/payment/payment.service';
 import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { BookingServicesService } from 'src/services/booking-services.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
 
@@ -16,6 +17,7 @@ export class BookingService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly preOrderService: PreOrderService,
+        private readonly bookingServicesService: BookingServicesService,
         private readonly paymentService: PaymentService
     ) {}
 
@@ -45,14 +47,14 @@ export class BookingService {
                 message: ["at least 1 guests is required"]
             })
         }
-
+   
         const booking = await this.prisma.$transaction(async (txprisma) => {
             const existingBooking = await txprisma.booking.findFirst({
                 where: {
                     accommodationId: body.accommodationId,
                     bookingDate: body.checkIn,
                     timeSlot: body.stayType,
-                    status: { notIn: ['Cancelled', 'Pending'] }
+                    status: { notIn: ['Cancelled', 'Pending'] } // ask benef if he allowed pending as reservation fi there is already a receipt
                 }
             })
 
@@ -64,6 +66,8 @@ export class BookingService {
 
             const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
             const guestFeeTotal = this.calculateGuestFee(body.adultGuests, body.seniorGuests, body.kidGuests, body.stayType)
+
+            const { total: addOnServiceTotal } = await this.bookingServicesService.createBulk(newBooking.id, body.addOnServices || [], txprisma);
 
             await txprisma.bookedAccommodation.create({
                 data: {
@@ -83,6 +87,7 @@ export class BookingService {
                 accommodationFee: accommodation.price,
                 guestFee: guestFeeTotal,
                 preOrderFee: preOrderTotal,
+                addOnServiceFee: addOnServiceTotal,
                 amount: accommodation.price + guestFeeTotal + preOrderTotal,
                 paymentType: body.paymentType,
             }, txprisma)
@@ -210,27 +215,22 @@ export class BookingService {
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId },
             include: {
-                accommodation: {
-                    select: {
-                        id: true,
-                        name: true,
-                        type: true,
-                        imageUrl: true,
-                    }
-                },
+                bookedAccommodation: true,
                 payment: {
                     select: {
                         id: true,
                         paymentStatus: true,
                         accommodationAmount: true,
                         preOrderAmount: true,
+                        addOnAmount: true,
                         guestFeeAmount: true,
                         amountPaid: true,
                         amountToPaid: true,
                         totalAmount: true,
                     },
                 },
-                preOrders: true
+                preOrders: true,
+                addOns: true,
             }
         })
 

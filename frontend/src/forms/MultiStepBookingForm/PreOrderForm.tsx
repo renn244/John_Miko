@@ -7,7 +7,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type PreOrderFormProps = {
-    setBookingStep: Dispatch<SetStateAction<'form' | 'review' | 'pre-order' | 'payment'>>,
+    setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
     changePreOrderTotal?: (total: number) => void;
 }
 
@@ -244,8 +244,8 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                 <Button className="w-full" onClick={handleContinue}>
                     {fields.length > 0  ? "Continue to Review" : "Skip to Review"} <ArrowRight className="w-5 h-5" />
                 </Button>
-                <Button variant="outline" className="w-full" onClick={() => setBookingStep('form')}>
-                    Back to Form
+                <Button variant="outline" className="w-full" onClick={() => setBookingStep('add-on')}>
+                    Back to Add-ons
                 </Button>
             </div>
         </div>

@@ -13,6 +13,9 @@ export class CreatePaymentDto {
     preOrderFee!: number;
 
     @IsInt()
+    addOnServiceFee!: number;
+
+    @IsInt()
     guestFee!: number;
 
     @IsInt()

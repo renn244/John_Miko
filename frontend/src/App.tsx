@@ -14,6 +14,7 @@ import EditAddOnService from "./page/Admin/AddOnService/EditAddOnService";
 import AdminLayout from "./page/Admin/AdminLayout";
 import AddBooking from './page/Admin/Booking/AddBooking';
 import Booking from './page/Admin/Booking/Booking';
+import ViewBooking from './page/Admin/Booking/ViewBooking';
 import AddChatbotRule from './page/Admin/ChatbotRule/AddChatbotRule';
 import ChatbotRule from './page/Admin/ChatbotRule/ChatbotRule';
 import EditChatbotRule from './page/Admin/ChatbotRule/EditChatbotRule';
@@ -127,6 +128,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Booking /> },
           { path: 'add', element: <AddBooking /> },
+          { path: ':id', element: <ViewBooking /> },
         ]
       },
       {
