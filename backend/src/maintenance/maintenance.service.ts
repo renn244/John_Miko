@@ -63,10 +63,10 @@ export class MaintenanceService {
         const { gte, lte } = getDateRange('day')
 
         const [newToday, resolvedToday, highPriority, stillPending] = await Promise.all([
-            await this.prisma.maintenance.count({ where: { createdAt: { gte, lte } } }),
-            await this.prisma.maintenance.count({ where: { resolvedAt: { gte, lte } } }),
-            await this.prisma.maintenance.count({ where: { priority: 'High' } }),
-            await this.prisma.maintenance.count({ where: { status: 'Pending' } }),
+            this.prisma.maintenance.count({ where: { createdAt: { gte, lte } } }),
+            this.prisma.maintenance.count({ where: { resolvedAt: { gte, lte } } }),
+            this.prisma.maintenance.count({ where: { priority: 'High' } }),
+            this.prisma.maintenance.count({ where: { status: 'Pending' } }),
         ])
 
         return {

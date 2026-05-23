@@ -44,9 +44,9 @@ export class StaffReportsService {
             const { gte, lte } = getDateRange('day');
         
             const [totalToday, checkInReportToday, checkOutReportToday] = await Promise.all([
-                await this.prisma.report.count({ where: { createdAt: { gte, lte } } }),
-                await this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkIn' } }),
-                await this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkOut' } })
+                this.prisma.report.count({ where: { createdAt: { gte, lte } } }),
+                this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkIn' } }),
+                this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkOut' } })
             ])
 
             return {

@@ -56,11 +56,11 @@ export class RulesService {
         }
 
         const [rules, total] = await Promise.all([
-            await this.prisma.rules.findMany({
+            this.prisma.rules.findMany({
                 where: where,
                 ...((query.page && query.limit) && getPaginationArgs(query.page, query.limit))        
             }),
-            await this.prisma.rules.count({ where: where })
+            this.prisma.rules.count({ where: where })
         ])
 
         return {

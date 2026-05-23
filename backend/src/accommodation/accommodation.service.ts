@@ -47,14 +47,14 @@ export class AccommodationService {
         const { search, page, limit, ...rest } = cleanPrismaWhere(query);
 
         const [data, total] = await Promise.all([
-            await this.prisma.accommodation.findMany({ 
+            this.prisma.accommodation.findMany({ 
                 where: {
                     ...rest, name: { contains: search, mode: 'insensitive' },
                 },
                 ...getPaginationArgs(page, limit),
                 orderBy: { createdAt: 'desc' },
             }),
-            await this.prisma.accommodation.count({ where: { ...rest, name: { contains: search, mode: 'insensitive' } } })
+            this.prisma.accommodation.count({ where: { ...rest, name: { contains: search, mode: 'insensitive' } } })
         ])
 
         return { 

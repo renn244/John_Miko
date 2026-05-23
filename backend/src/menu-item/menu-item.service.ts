@@ -30,7 +30,7 @@ export class MenuItemService {
     const { search, page, limit, ...rest } = cleanPrismaWhere(query);
 
     const [data, total] = await Promise.all([
-      await this.prisma.menuItem.findMany({
+      this.prisma.menuItem.findMany({
         where: {
           ...rest, 
           name: { contains: search, mode: 'insensitive' }
@@ -41,7 +41,7 @@ export class MenuItemService {
           { createdAt: 'desc' } // Newest first
         ]
       }),
-      await this.prisma.menuItem.count({ where: { ...rest, name: { contains: search, mode: 'insensitive' } } })
+      this.prisma.menuItem.count({ where: { ...rest, name: { contains: search, mode: 'insensitive' } } })
     ])
 
     return {

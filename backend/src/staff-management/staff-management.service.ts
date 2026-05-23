@@ -64,12 +64,12 @@ export class StaffManagementService {
         }
 
         const [data, total] = await Promise.all([
-            await this.prisma.user.findMany({ 
+            this.prisma.user.findMany({ 
                 where: where, 
                 omit: { password: true },
                 ...getPaginationArgs(query.page, query.limit) 
             }),
-            await this.prisma.user.count({ where: where })
+            this.prisma.user.count({ where: where })
         ])
 
         return {

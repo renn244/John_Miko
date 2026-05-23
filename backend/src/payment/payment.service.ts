@@ -17,10 +17,10 @@ export class PaymentService {
         body: CreatePaymentDto, 
         tx: Prisma.TransactionClient=this.prisma
     ) {
-        const { bookingId, accommodationFee, preOrderFee, guestFee, amount } = body;
+        const { bookingId, accommodationFee, preOrderFee, addOnServiceFee, guestFee, amount } = body;
 
-        const lineItems = this.processLineItems(accommodationFee, preOrderFee, guestFee, body.paymentType);
-        const totalAmount = accommodationFee + preOrderFee + guestFee;
+        const lineItems = this.processLineItems(accommodationFee, preOrderFee, addOnServiceFee, guestFee, body.paymentType);
+        const totalAmount = accommodationFee + preOrderFee + addOnServiceFee + guestFee;
         const { amountToPay, amountPaid } = this.calculateAmounts(totalAmount, body.paymentType);
 
         // create paymongo link here
@@ -51,6 +51,7 @@ export class PaymentService {
                 paymentStatus: 'Completed',
                 accommodationAmount: accommodationFee,
                 preOrderAmount: preOrderFee,
+                addOnAmount: addOnServiceFee,
                 guestFeeAmount: guestFee,
                 amountPaid: amountPaid,
                 amountToPaid: amountToPay,
@@ -78,6 +79,7 @@ export class PaymentService {
                 SUM("totalAmount")::int as totalamount,
                 SUM("accommodationAmount")::int as accommodationamount,
                 SUM("preOrderAmount")::int as preorderAmount,
+                SUM("addOnAmount")::int as addonamount,
                 SUM("guestFeeAmount")::int as guestfeeAmount
             FROM "Payment"
             WHERE 
@@ -137,7 +139,7 @@ export class PaymentService {
         return { amountToPay, amountPaid };
     }
 
-    private processLineItems(accommodationFee: number, preOrderFee: number, guestFee: number, paymentType: PaymentType): CheckoutLineItem[] {
+    private processLineItems(accommodationFee: number, preOrderFee: number, addOnServiceFee: number, guestFee: number, paymentType: PaymentType): CheckoutLineItem[] {
         const isPartial = paymentType === 'Partial';
         const multiplier = isPartial ? 0.5 : 1;
         const label = isPartial ? ' (50% Downpayment)' : '';
@@ -162,6 +164,13 @@ export class PaymentService {
                 currency: 'PHP' as CheckoutLineItem['currency'],
                 name: `Guest Fee${label}`,
                 description: 'This is the fee for the guests during your stay.',
+                quantity: 1,
+            }] : []),
+            ...(addOnServiceFee > 0 ? [{
+                amount: Math.round(addOnServiceFee * multiplier) * 100,
+                currency: 'PHP' as CheckoutLineItem['currency'],
+                name: `Add-on Service Fee${label}`,
+                description: 'This is the fee for any additional services you may have availed.',
                 quantity: 1,
             }] : []),
         ];

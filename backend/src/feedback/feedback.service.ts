@@ -114,9 +114,9 @@ export class FeedbackService {
         const { gte, lte } = getDateRange('day');
     
         const [receivedToday, averageToday, distributionToday] = await Promise.all([
-            await this.prisma.feedback.count({ where: { createdAt: { lte, gte } } }),
-            await this.prisma.feedback.aggregate({ where: { createdAt: { lte, gte } }, _avg: { rating: true } }),
-            await this.getCountPerRating({ interval: 'day' })
+            this.prisma.feedback.count({ where: { createdAt: { lte, gte } } }),
+            this.prisma.feedback.aggregate({ where: { createdAt: { lte, gte } }, _avg: { rating: true } }),
+            this.getCountPerRating({ interval: 'day' })
         ])
 
         // TODO LATER: positive and complaints finding is wink-nlp sentiment will do later
