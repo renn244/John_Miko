@@ -278,6 +278,19 @@ model MenuItem {
   createdAt     DateTime @default(now())
 }
 
+model AddOnService {
+  id            String  @id @default(cuid())
+
+  imageUrl      String
+  name          String
+  description   String?
+  
+  price         Int
+  quantity      Int
+
+  createdAt     DateTime @default(now())
+}
+
 model Feedback {
   id            String   @id @default(cuid())
   userId        String

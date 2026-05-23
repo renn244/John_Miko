@@ -17,9 +17,18 @@ export function handleNestError<T extends FieldValues>(
     if(error.errors) {
         const fieldErrors = error.errors;
         fieldErrors.forEach((fieldError) => {
-            fieldError.message.map((message) => setError(fieldError.field as any, { 
-                type: 'manual', message: message || "Invalid Input"
-            }));   
+
+            const errorTypes: Record<string, string> = {};
+            
+            fieldError.message.forEach((message, index) => {
+                // Generates keys like manualError0, manualError1, etc.
+                // because error can't actually be on arrays
+                errorTypes[`manualError${index}`] = message || "Invalid Input";
+            });
+
+            setError(fieldError.field as any, { 
+                types: errorTypes // set all of it 
+            });   
         })
     } else if(error.message) {
         toast.error(error.message, {

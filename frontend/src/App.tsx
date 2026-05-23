@@ -8,6 +8,9 @@ import AccommodationView from './page/AccommodationView';
 import Accommodation from "./page/Admin/Accommodation/Accommodation";
 import AddAccommodation from "./page/Admin/Accommodation/AddAccommodation";
 import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
+import AddAddOnService from "./page/Admin/AddOnService/AddAddOnService";
+import AddOnService from "./page/Admin/AddOnService/AddOnService";
+import EditAddOnService from "./page/Admin/AddOnService/EditAddOnService";
 import AdminLayout from "./page/Admin/AdminLayout";
 import AddBooking from './page/Admin/Booking/AddBooking';
 import Booking from './page/Admin/Booking/Booking';
@@ -132,6 +135,14 @@ const router = createBrowserRouter([
           { index: true, element: <MenuItem /> },
           { path: 'add', element: <AddMenuItem /> },
           { path: ':id/edit', element: <EditMenuItem /> }
+        ]
+      },
+      {
+        path: 'add-on-service',
+        children: [
+          { index: true, element: <AddOnService /> },
+          { path: 'add', element: <AddAddOnService /> },
+          { path: ':id/edit', element: <EditAddOnService /> }
         ]
       },
       {
