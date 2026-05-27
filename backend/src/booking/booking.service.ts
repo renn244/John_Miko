@@ -34,7 +34,8 @@ export class BookingService {
     }
 
     async bookAccommodation(body: CreateBookingDto, user: UserSession) {
-        
+
+        // this sohuld be on the accommodation module
         const accommodation = await this.prisma.accommodation.findUnique({ where: { id: body.accommodationId } })
 
         if(!accommodation) {
@@ -211,11 +212,49 @@ export class BookingService {
         return result
     }
 
+    async getBookingsForClosure(accommodationId?: string) {
+        const bookings = await this.prisma.booking.findMany({
+            where: {
+                accommodationId: accommodationId,
+                bookingDate: { gte: new Date() },
+                status: {
+                    notIn: ['Cancelled', 'Pending']
+                }
+            },
+            select: { bookingDate: true, timeSlot: true, id: true },
+            orderBy: { bookingDate: 'asc' }
+        });
+
+        const groupMap = new Map<string, string[]>();
+        bookings.forEach(booking => {
+            const dateKey = booking.bookingDate.toISOString().split('T')[0];
+
+            if(!groupMap.has(dateKey)) {
+                groupMap.set(dateKey, []);
+            }
+
+            groupMap.get(dateKey)?.push(booking.id)
+        })
+
+        const result = Array.from(groupMap.entries()).map(([date, bookingIds]) => {
+            return { bookingDate: date, bookingIds }
+        })
+
+        return result
+    }
+
     async getBookingById(bookingId: string) {
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId },
             include: {
-                bookedAccommodation: true,
+                accommodation: {
+                    select: {
+                        id: true,
+                        name: true,
+                        type: true,
+                        imageUrl: true,
+                    }
+                },
                 payment: {
                     select: {
                         id: true,

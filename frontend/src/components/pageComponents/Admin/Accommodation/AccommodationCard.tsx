@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useClosureAdminStore } from "@/store/admin/closureAdmin.store"
 import type { Accommodation } from "@/types/admin/accommodation.type"
-import { CheckCircle, Edit, Info, MoreVertical, Tag, Users, XCircle } from "lucide-react"
+import { CheckCircle, Edit, Info, Lock, MoreVertical, Tag, Users, XCircle } from "lucide-react"
 import { Link } from "react-router"
 
 type AccommodationCardProps = {
@@ -18,6 +19,8 @@ type AccommodationCardProps = {
 }
 
 const AccommodationCard = (accommodation: AccommodationCardProps) => {
+    const setClosureOpen = useClosureAdminStore((s) => s.setClosureOpen);
+
   const getAvailabilityConfig = (status: Accommodation['availability']) => {
     const configs = {
       'Available': {
@@ -56,12 +59,12 @@ const AccommodationCard = (accommodation: AccommodationCardProps) => {
             className="w-full h-full object-cover"
             />
 
-            <Badge className="absolute top-3 left-3 capitalize z-99">
+            <Badge className="absolute top-3 left-3 capitalize z-20">
                 {accommodation.type}
             </Badge>
 
             <Badge 
-            className={`absolute top-3 right-3 z-99`}
+            className={`absolute top-3 right-3 z-20`}
             style={{ backgroundColor: availabilityConfig.bg, color: availabilityConfig.color }}
             >
                 <AvailabilityIcon className="w-3 h-3" />
@@ -94,18 +97,17 @@ const AccommodationCard = (accommodation: AccommodationCardProps) => {
                         </Link>              
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
-                            <DropdownMenuLabel>Change Availability</DropdownMenuLabel>
-                            <DropdownMenuItem>
-                                <CheckCircle className="w-4 h-4 text-green-600" />
-                                Set Available
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <XCircle className="w-4 h-4 text-red-600" />
-                                Set Unavailable
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <Info className="w-4 h-4 text-yellow-600" />
-                                Set in Maintenance
+                            <DropdownMenuLabel>Closure</DropdownMenuLabel>
+                            <DropdownMenuItem
+                            onClick={() =>
+                                setClosureOpen(true, {
+                                    id: accommodation.id,
+                                    name: accommodation.name,
+                                })
+                            }
+                            >
+                                <Lock className="w-4 h-4" />
+                                Set Closure
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                     </DropdownMenuContent>

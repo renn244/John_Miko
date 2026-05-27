@@ -16,6 +16,7 @@ import { PaymentModule } from './payment/payment.module';
 import { StaffManagementModule } from './staff-management/staff-management.module';
 import { GuestManagementModule } from './guest-management/guest-management.module';
 import { ServicesModule } from './services/services.module';
+import { ClosureModule } from './closure/closure.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ServicesModule } from './services/services.module';
     StaffManagementModule,
     GuestManagementModule,
     ServicesModule,
+    ClosureModule,
   ],
 })
 export class AppModule {}

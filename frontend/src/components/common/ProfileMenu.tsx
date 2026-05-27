@@ -1,5 +1,6 @@
 import { useAuthContext } from "@/context/AuthContext";
-import { BadgeCheckIcon, CreditCardIcon, FolderKanban, History, LogOutIcon } from "lucide-react";
+import { useClosureAdminStore } from "@/store/admin/closureAdmin.store";
+import { BadgeCheckIcon, CreditCardIcon, FolderKanban, History, Lock, LogOutIcon } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -67,6 +68,7 @@ const GuestMenu = () => {
 
 const AdminMenu = () => {
     const { handleLogout } = useAuthContext();
+    const setClosureOpen = useClosureAdminStore((s) => s.setClosureOpen);
 
     return (
         <>
@@ -75,6 +77,10 @@ const AdminMenu = () => {
                     {/* For the Account Information */}
                     <BadgeCheckIcon />
                     Account
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setClosureOpen(true, null)}>
+                    <Lock />
+                    Resort Closure
                 </DropdownMenuItem>
                 <Link to="/admin">
                     <DropdownMenuItem>

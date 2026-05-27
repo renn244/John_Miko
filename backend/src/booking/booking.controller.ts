@@ -34,6 +34,11 @@ export class BookingController {
         return this.bookingService.getBookingsByAccommodation(accommodationId)
     }
     
+    @Get('closure')
+    async GetBookingsForClosure(@Query() query: { accommodationId: string }) {
+        return this.bookingService.getBookingsForClosure(query.accommodationId);
+    }
+
     @Get('byBookingId/:bookingId')
     async GetBookingById(@Param('bookingId') bookingId: string) {
         return this.bookingService.getBookingById(bookingId)
