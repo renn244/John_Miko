@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
-import { availabilityRuleDto, createRuleDto, updateRuleDto } from './dto/rules.dto';
+import { AvailabilityRuleDto, CreateRuleDto, UpdateRuleDto } from './dto/rules.dto';
 import { GetAllRulesQuery } from './query/getAllRules.query';
 import { RulesService } from './rules.service';
 
@@ -10,7 +10,7 @@ export class RulesController {
     ) {}
     
     @Post()
-    async createRule(@Body() createRuleDto: createRuleDto) {
+    async createRule(@Body() createRuleDto: CreateRuleDto) {
         return this.rulesService.createRule(createRuleDto);
     } 
 
@@ -41,12 +41,12 @@ export class RulesController {
     }
 
     @Patch('availability/:id')
-    async updateRuleAvailability(@Param('id') id: string, @Body() availabilityRuleDto: availabilityRuleDto) {
+    async updateRuleAvailability(@Param('id') id: string, @Body() availabilityRuleDto: AvailabilityRuleDto) {
         return this.rulesService.updateRuleAvailability(id, availabilityRuleDto.isActive);
     }
 
     @Patch(':id')
-    async updateRule(@Param('id') id: string, @Body() updateRuleDto: updateRuleDto) {
+    async updateRule(@Param('id') id: string, @Body() updateRuleDto: UpdateRuleDto) {
         return this.rulesService.updateRule(id, updateRuleDto);
     }
 

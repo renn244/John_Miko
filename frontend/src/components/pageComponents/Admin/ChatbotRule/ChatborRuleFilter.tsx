@@ -34,7 +34,7 @@ const ChatbotRuleSearchFilter = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="pl-8"
-            placeholder="Search by keywords, name, or id"
+            placeholder="Search by training phrases, name, or id"
             />
         </div>
     )

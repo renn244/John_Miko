@@ -1,5 +1,5 @@
 import { useInteractWithChatbotMutation } from "@/hooks/admin/chatbot.rule.hook"
-import { Bot, MessageCircle, Send, User, X } from "lucide-react"
+import { Bot, MessageCircle, Send, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
@@ -46,7 +46,7 @@ const Chatbot = () => {
                         sender: 'bot',
                         text: response.response,
                         quickReplies: response.quickReplies.map((qr: string) => ({ label: qr, value: qr })),
-                        timestamp: new Date(response.createdAt),
+                        timestamp: new Date(),
                     }
 
                     setMessages((prev) => [...prev, botMessage]);
@@ -138,7 +138,7 @@ const Chatbot = () => {
                                             >
                                                 <p className="text-sm whitespace-pre-line">{message.text}</p>
                                             </div>
-                                            <p className="text-xs mt-1 px-1 text-muted-foreground">
+                                            <p className={`text-xs mt-1 px-1 text-muted-foreground ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
                                                 {message.timestamp.toLocaleTimeString('en-US', {
                                                     hour: 'numeric',
                                                     minute: '2-digit',
@@ -146,11 +146,6 @@ const Chatbot = () => {
                                             </p>
                                         </div>
 
-                                        {message.sender === 'user' && (
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-primary">
-                                                <User className="w-5 h-5 text-white" />
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
 

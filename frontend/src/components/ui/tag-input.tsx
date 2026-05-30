@@ -7,10 +7,11 @@ type InputTagsProps = ComponentProps<"input"> & {
     value: string[];
     onChange: (value: string[]) => void;
     fieldDescription?: string;
+    listHeading?: string;
     invalid? : boolean;
 } & ComponentProps<"input">;
 
-const InputTags = ({ className, value, onChange, fieldDescription, ref, invalid = false, ...props }: InputTagsProps) => {
+const InputTags = ({ className, value, onChange, fieldDescription, listHeading = 'Added Items', ref, invalid = false, ...props }: InputTagsProps) => {
     const [pendingDataPoint, setPendingDataPoint] = useState("");
 
     useEffect(() => {
@@ -63,7 +64,7 @@ const InputTags = ({ className, value, onChange, fieldDescription, ref, invalid 
             {value.length > 0 ? (
                 <div className="space-y-2">
                     <p className="text-sm font-medium" style={{ color: '#6B7280' }}>
-                        Added Amenities ({value.length}):
+                        {listHeading} ({value.length}):
                     </p>
                     <div className="flex flex-wrap gap-2">
                         {value.map((amenity, index) => (

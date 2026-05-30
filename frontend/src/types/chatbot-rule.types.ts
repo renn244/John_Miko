@@ -14,8 +14,8 @@ export type ChatbotRule = {
 }
 
 export type CreateChatbotRule = {
-    name: string;
-    keywords: string[];
+    intentName: string;
+    trainingPhrases: string[];
     response: string;
     quickReplies: string[];
     isActive: boolean;
