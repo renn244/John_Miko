@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { InputList } from "@/components/ui/input-list";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Switch } from "@/components/ui/switch";
 import { InputTags } from "@/components/ui/tag-input";
@@ -15,8 +16,13 @@ import { toast } from "sonner";
 import z from "zod";
 
 const ChatbotRuleSchema = z.object({
-    name: z.string().nonempty("Name is required"),
-    keywords: z.array(z.string()).nonempty("At least one keyword is required"),
+    intentName: z.string().nonempty("Intent name is required"),
+    trainingPhrases: z
+        .array(z.string())
+        .transform((arr) => arr.map((v) => v.trim()).filter(Boolean))
+        .refine((arr) => arr.length >= 5, {
+            message: "Please add at least 5 training phrases",
+        }),
     response: z.string().nonempty("Response is required"),
     quickReplies: z.array(z.string()).optional(),
     isActive: z.boolean().default(true).optional(),
@@ -41,8 +47,8 @@ const ChatbotRuleForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
     } = useForm<chatbotRuleSchema>({
         resolver: zodResolver(ChatbotRuleSchema),
         defaultValues: {
-            name: initialData?.name || "",
-            keywords: initialData?.keywords || [],
+            intentName: (initialData as any)?.intentName || (initialData as any)?.name || "",
+            trainingPhrases: (initialData as any)?.trainingPhrases || (initialData as any)?.keywords || [],
             response: initialData?.response || "",
             quickReplies: initialData?.quickReplies || [],
             isActive: initialData?.isActive ?? true
@@ -83,19 +89,19 @@ const ChatbotRuleForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
                     <div className="space-y-5">
 
                         <Controller 
-                        name="name"
+                        name="intentName"
                         control={control}
                         render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
                                 <FieldLabel htmlFor={field.name} className="gap-1">
-                                    Rule Name <span className="text-red-700">*</span>
+                                    Intent Name <span className="text-red-700">*</span>
                                 </FieldLabel>
                                 
                                 <Input
                                 {...field}
                                 id={field.name}
                                 aria-invalid={fieldState.invalid}
-                                placeholder="e.g., Pricing Information, Check-in Hours"
+                                placeholder="e.g., Check-in Hours, Pricing Information"
                                 />
 
                                 {fieldState.error && (
@@ -106,23 +112,26 @@ const ChatbotRuleForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
                         />
 
                         <Controller 
-                        name="keywords"
+                        name="trainingPhrases"
                         control={control}
                         render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid}>
                                 <FieldLabel htmlFor={field.name} className="gap-1">
-                                    Keywords <span className="text-red-700">*</span>
+                                    Training Phrases (Utterances) <span className="text-red-700">*</span>
                                 </FieldLabel>
 
-                                <InputTags 
-                                fieldDescription="no quick replies added yet! start adding some, to help the bot have an easier way identifying manual inputs!"
-                                value={field.value}
-                                onChange={field.onChange}
-                                invalid={fieldState.invalid}
+                                <InputList
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    invalid={fieldState.invalid}
+                                    addPlaceholder="Type a training phrase and press Enter"
+                                    itemPlaceholder="Training phrase"
+                                    listHeading="Training phrases"
+                                    emptyDescription="No training phrases added yet. Add at least 5 so Dialogflow can learn the intent."
                                 />
 
                                 <FieldDescription>
-                                    Enter keywords and enter to add them to the list. The chatbot will respond when any of these words are detected in the user's message.
+                                    Add example user messages that should match this intent. Press Enter or click Add to create a new phrase input below.
                                 </FieldDescription>
 
                                 {fieldState.error && (
@@ -186,6 +195,7 @@ const ChatbotRuleForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
 
                             <InputTags 
                             fieldDescription="no quick replies added yet! start adding some, to help user have an easier navigation!"
+                            listHeading="Added Quick Replies"
                             value={field.value || []}
                             onChange={field.onChange}
                             />
@@ -221,7 +231,7 @@ const ChatbotRuleForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
                                 </FieldLabel>
                                 <FieldDescription>
                                     {field.value
-                                        ? 'This rule is active and will respond to matching keywords'
+                                        ? 'This rule is active and will respond to matching intents'
                                         : 'This rule is inactive and will not trigger responses'}
                                 </FieldDescription>
 

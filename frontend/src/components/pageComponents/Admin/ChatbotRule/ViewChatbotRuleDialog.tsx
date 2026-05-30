@@ -65,7 +65,7 @@ const ChatbotRuleDetails = ({ selectedRule } : { selectedRule: ChatbotRule }) =>
 
                 <div className="grid gap-2">
                     <Label className="text-muted-foreground">
-                        Keywords
+                        Training Phrases (Utterances)
                     </Label>
                     <div className="flex flex-wrap gap-2">
                         {selectedRule.keywords.map((keyword) => (

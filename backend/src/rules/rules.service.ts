@@ -2,52 +2,59 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Rules } from 'src/generated/prisma/client';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { createRuleDto, updateRuleDto } from './dto/rules.dto';
+import { ChatbotService } from './chatbot.service';
+import { DialogflowService } from './dialogflow.service';
+import { CreateRuleDto, UpdateRuleDto } from './dto/rules.dto';
 import { GetAllRulesQuery } from './query/getAllRules.query';
 
 @Injectable()
 export class RulesService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly dialogflowService: DialogflowService,
+        private readonly chatbotService: ChatbotService,
     ) {}
 
-    async createRule(body: createRuleDto) {
+    private normalizeStrings(values: string[]): string[] {
+        return values.map((v) => v.trim()).filter(Boolean);
+    }
+
+    private areSameStringArrays(a: string[], b: string[]): boolean {
+        if (a.length !== b.length) {
+            return false;
+        }
+
+        const normalizedA = [...this.normalizeStrings(a)].sort();
+        const normalizedB = [...this.normalizeStrings(b)].sort();
+
+        for (let i = 0; i < normalizedA.length; i++) {
+            if (normalizedA[i] !== normalizedB[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    async createRule(body: CreateRuleDto) {
+        const intentName = body.intentName.trim();
+        const trainingPhrases = this.normalizeStrings(body.trainingPhrases);
+
+        await this.dialogflowService.createIntent(intentName, trainingPhrases);
+
         const newRule = await this.prisma.rules.create({
-            data: { ...body }
-        })
+            data: {
+                name: intentName,
+                keywords: trainingPhrases,
+                response: body.response,
+            },
+        });
 
         return newRule;
     }
 
-    // async relevanceScoring()
-
     async interactWithChatbot(messageDto: { message: string }): Promise<Rules> {
-        const rules = await this.getActiveRules();
-
-        const quickReplyMatched = rules.find(rule => rule.name.toLowerCase() === messageDto.message.toLowerCase());
-
-        if(quickReplyMatched) {
-            return quickReplyMatched;
-        }
-
-        // make this relevance score later
-        const words = messageDto.message.toLowerCase().split(/\s+/);
-        const matched = rules.find(rule => rule.keywords.some(kw => words.includes(kw.toLowerCase())));
-
-        if(!matched) {
-            return { 
-                id: new Date().getTime().toString(),
-                keywords: [],
-                name: "I Don't Understand",
-                response: "I'm sorry, I don't understand that.", 
-                quickReplies: ["Main Menu"],
-                isActive: true,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            };
-        }
-
-        return matched;
+        return this.chatbotService.handleMessage(messageDto.message);
     }
 
     async getAllRules(query: GetAllRulesQuery) {
@@ -120,16 +127,43 @@ export class RulesService {
         return updatedRule;
     }
 
-    async updateRule(id: string, body: updateRuleDto) {
+    async updateRule(id: string, body: UpdateRuleDto) {
         const rule = await this.getRuleById(id);
 
         if(!rule) {
             throw new NotFoundException('Rule not found');
         }
 
+        const existingIntentName = rule.name;
+        const existingTrainingPhrases = rule.keywords;
+
+        const nextIntentName = body.intentName ? body.intentName.trim() : existingIntentName;
+        const nextTrainingPhrases = body.trainingPhrases
+            ? this.normalizeStrings(body.trainingPhrases)
+            : existingTrainingPhrases;
+
+        const intentChanged =
+            typeof body.intentName === 'string' && nextIntentName !== existingIntentName;
+        const trainingPhrasesChanged =
+            Array.isArray(body.trainingPhrases) &&
+            !this.areSameStringArrays(nextTrainingPhrases, existingTrainingPhrases);
+
+        if (intentChanged) {
+            await this.dialogflowService.deleteIntent(existingIntentName);
+            await this.dialogflowService.createIntent(nextIntentName, nextTrainingPhrases);
+        } else if (trainingPhrasesChanged) {
+            await this.dialogflowService.updateIntent(existingIntentName, nextTrainingPhrases);
+        }
+
         const updatedRule = await this.prisma.rules.update({
             where: { id: id },
-            data: { ...body }
+            data: {
+                ...(typeof body.intentName === 'string' ? { name: nextIntentName } : {}),
+                ...(Array.isArray(body.trainingPhrases)
+                    ? { keywords: nextTrainingPhrases }
+                    : {}),
+                ...(typeof body.response === 'string' ? { response: body.response } : {}),
+            },
         });
 
         return updatedRule;
@@ -141,6 +175,8 @@ export class RulesService {
         if(!rule) {
             throw new NotFoundException('Rule not found');
         }
+
+        await this.dialogflowService.deleteIntent(rule.name);
 
         return this.prisma.rules.delete({
             where: { id: id }

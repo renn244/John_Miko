@@ -28,7 +28,7 @@ const ChatbotRuleTable = () => {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Name</TableHead>
-                        <TableHead>Keywords</TableHead>
+                        <TableHead>Training Phrases</TableHead>
                         <TableHead>Response Preview</TableHead>
                         <TableHead>Quick Replies</TableHead>
                         <TableHead>Status</TableHead>

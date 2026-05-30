@@ -87,7 +87,7 @@ const DeleteConfirmationChatbotRule = ({ chatbotRule } : { chatbotRule: ChatbotR
                             </span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">Keywords:</span>
+                            <span className="text-muted-foreground">Training Phrases:</span>
                             <span className="font-medium capitalize">
                                 {chatbotRule.keywords.length}
                             </span>
