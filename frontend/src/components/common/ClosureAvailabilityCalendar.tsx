@@ -14,7 +14,7 @@ const ClosureAvailabilityCalendar = ({
     const { data: bookedDates } = useGetClosureForBookingQuery(accommodationId);
     const bookedDatesOnly = bookedDates?.map((bookingData) => new Date(bookingData.bookingDate)) || [];
 
-    const { data: closureDates } = useGetClosuresQuery(accommodationId);
+    const { data: closureDates } = useGetClosuresQuery('withGlobal' ,accommodationId);
     const closedDatesOnly = closureDates?.map((closureData) => new Date(closureData.date)) || [];
 
     return (

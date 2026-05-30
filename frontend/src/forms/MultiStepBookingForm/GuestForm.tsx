@@ -8,6 +8,7 @@ import { ArrowRight, Minus, Plus, Users } from "lucide-react";
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
+import { useQueryClient } from "@tanstack/react-query";
 
 type GuestFormProps = {
     accommodation: Accommodation,
@@ -18,6 +19,7 @@ type GuestFormProps = {
 }
 
 const GuestForm =  ({ accommodation, selectedStayType, selectedCheckIn, selectedCheckOut, setBookingStep }: GuestFormProps) => {
+    const queryClient = useQueryClient();
     const { control, watch, reset, getValues, setError, setValue, trigger } = useFormContext<multiStepBookingFormSchema>();
 
     const adultGuests = watch('adultGuests'); 
@@ -338,7 +340,8 @@ const GuestForm =  ({ accommodation, selectedStayType, selectedCheckIn, selected
                 )}
                 />
 
-                <Button type="button" className="w-full" onClick={() => validateStep()}>
+                <Button type="button" className="w-full" 
+                onClick={() => validateStep()}>
                     Continue
                     <ArrowRight className="w-6 h-6" />
                 </Button>

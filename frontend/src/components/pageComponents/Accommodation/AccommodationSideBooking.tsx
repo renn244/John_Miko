@@ -3,6 +3,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuthContext } from "@/context/AuthContext";
+import { useGetClosuresQuery } from "@/hooks/admin/closure.hook";
 import { useGetBookingsByAccommodationQuery } from "@/hooks/booking.hook";
 import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant";
 import { isSameDateOnly } from "@/lib/date.util";
@@ -28,7 +29,8 @@ const AccommodationSideBooking = ({
     const { user } = useAuthContext();
 
     const { data: bookedDates } = useGetBookingsByAccommodationQuery(accommodation.id);
-    
+    const { data: closureDates } = useGetClosuresQuery('withGlobal', accommodation.id);
+
     const selectedDateBookingData = bookingDate ? bookedDates?.find((bookingData) => isSameDateOnly(bookingDate, new Date(bookingData.bookingDate))) : undefined;
 
     const isDayStayAvailable = !selectedDateBookingData?.timeSlotsOccupied.includes("DayStay");
@@ -36,6 +38,7 @@ const AccommodationSideBooking = ({
 
     const partialBookedDates = bookedDates?.filter((bookingData) => bookingData.bookingStatus === 'Partial').map((bookingData) => new Date(bookingData.bookingDate)) || [];
     const fullyBookedDates = bookedDates?.filter((bookingData) => bookingData.bookingStatus === 'Full').map((bookingData) => new Date(bookingData.bookingDate)) || [];
+    const closedDates = closureDates?.map((closure) => new Date(closure.date)) || [];
 
     return (
         <div className="bg-white rounded-2xl p-6 shadow-xl border-2">
@@ -63,15 +66,18 @@ const AccommodationSideBooking = ({
             }}
             disabled={[
                 { before: new Date() },
-                ...fullyBookedDates
+                ...fullyBookedDates,
+                ...closedDates
             ]}
             modifiers={{
                 partialBooked: partialBookedDates,
-                fullyBooked: fullyBookedDates
+                fullyBooked: fullyBookedDates,
+                closedDates: closedDates
             }}
             modifiersClassNames={{
                 partialBooked: '[&>button]:bg-yellow-400 [&>button]:bg-opacity-30 text-white',
                 fullyBooked: '[&>button]:bg-red-700 text-white pointer-events-none ',  
+                closedDates: '[&>button]:bg-red-700 text-white pointer-events-none'
             }}
             />
             

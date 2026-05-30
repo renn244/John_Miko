@@ -32,11 +32,11 @@ export const closureApi = {
         return response.data as BookingForClosure[]; 
     },
 
-    // getting the closure it self
-    // if no accommodationId is provided, it will return resort closures, 
-    getClosuresByAccommodationId: async (accommodationId?: string) => {
+    getClosuresByAccommodationId: async (mode: 'withGlobal' | 'specific', accommodationId?: string) => {
         const response = await apiClient.get(`/closure`, {
-            params: { accommodationId }
+            params: { 
+                accommodationId, mode
+            }
         });
 
         if (response.status >= 400) {
@@ -44,6 +44,21 @@ export const closureApi = {
         }
 
         return response.data as Closure[];
+    },
+
+    getClosureByDate: async (accommodationId: string | undefined, date: string) => {
+        const response = await apiClient.get('/closure/byDate', {
+            params: {
+                accommodationId,
+                date
+            }
+        })
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || "An error occured while getting the closure")
+        }
+
+        return response.data as Closure
     },
 
     deleteClosure: async (closureId: string) => {

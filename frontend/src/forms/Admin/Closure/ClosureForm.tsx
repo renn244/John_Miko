@@ -10,7 +10,7 @@ import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -33,7 +33,7 @@ const ClosureSchema = z.object({
     if(data.type === "Private" && data.reason) {
         ctx.addIssue({
             code: 'custom',
-            path: ["reason"], 
+            path: ["type"], 
             message: "Reason must be empty for private closures",
         });
         return
@@ -99,7 +99,7 @@ const ClosureForm = ({
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button
-                            aria-invlaid={fieldState.invalid}
+                            aria-invalid={fieldState.invalid}
                             variant="outline"
                             className="w-70 justify-start text-left data=[empty=true]:text-muted-foreground"
                             >
@@ -204,9 +204,6 @@ const ClosureForm = ({
                 type="submit"
                 className="flex-1"
                 disabled={isLoading}
-                onClick={() => {
-                    
-                }}
                 >
                     {isLoading ? <LoadingSpinner /> : "Confirm Closure"}
                 </Button>

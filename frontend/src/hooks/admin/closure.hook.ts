@@ -2,13 +2,22 @@ import { closureApi } from "@/api/admin/closure.api";
 import type { CreateClosureDto } from "@/types/admin/closure.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useGetClosuresQuery = (accommodationId?: string) => {
+export const useGetClosuresQuery = (mode: 'withGlobal' | 'specific', accommodationId?: string) => {
     return useQuery({
-        queryKey: ["closure", "get", accommodationId],
-        queryFn: () => closureApi.getClosuresByAccommodationId(accommodationId),
+        queryKey: ["closure", "get", mode, accommodationId],
+        queryFn: () => closureApi.getClosuresByAccommodationId(mode, accommodationId),
         refetchOnWindowFocus: false,
     });
 };
+
+export const useGetClosureByDate = (accommodationId: string | undefined, date?: string) => {
+    return useQuery({
+        queryKey: ['closure', 'get', 'byDate', accommodationId, date],
+        queryFn: () => closureApi.getClosureByDate(accommodationId ?? undefined, date!),
+        enabled: !!date,
+        refetchOnWindowFocus: false
+    })
+}
 
 export const useGetClosureForBookingQuery = (accommodationId?: string) => {
     return useQuery({
