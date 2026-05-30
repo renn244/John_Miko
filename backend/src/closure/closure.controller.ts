@@ -1,9 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ClosureService } from './closure.service';
-import { CreateClosureDto } from './dto/create-closure.dto';
+import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
-import { Roles } from 'src/lib/decorators/Roles.decorator';
+import { ClosureService } from './closure.service';
+import { CreateClosureDto } from './dto/create-closure.dto';
+import { GetClosureByDateQueryDto } from './query/getClosureByDate.query';
+import { getClosuresQueryDto } from './query/getClosures.query';
 
 @Controller('closure')
 @UseGuards(AuthGuard, RolesGuard)
@@ -19,8 +21,13 @@ export class ClosureController {
     }
 
     @Get()
-    async getClosures(@Query() query: { accommodationId?: string }) {
-        return this.closureService.getClosures(query.accommodationId);
+    async getClosures(@Query() query: getClosuresQueryDto) {
+        return this.closureService.getClosures(query.mode, query.accommodationId);
+    }
+
+    @Get('byDate')
+    async getClosureByDate(@Query() query: GetClosureByDateQueryDto) {
+        return this.closureService.getClosureByDate(query);
     }
 
     @Roles('ADMIN')

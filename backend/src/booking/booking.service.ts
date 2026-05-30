@@ -11,6 +11,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { BookingServicesService } from 'src/services/booking-services.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
+import { ClosureService } from 'src/closure/closure.service';
 
 @Injectable()
 export class BookingService {
@@ -18,7 +19,8 @@ export class BookingService {
         private readonly prisma: PrismaService,
         private readonly preOrderService: PreOrderService,
         private readonly bookingServicesService: BookingServicesService,
-        private readonly paymentService: PaymentService
+        private readonly paymentService: PaymentService,
+        private readonly closureService: ClosureService
     ) {}
 
     private calculateGuestFee(adultGuests: number, seniorGuests: number, kidGuests: number, timeSlot: BookingTimeSlot) {
@@ -56,13 +58,20 @@ export class BookingService {
                     bookingDate: body.checkIn,
                     timeSlot: body.stayType,
                     status: { notIn: ['Cancelled', 'Pending'] } // ask benef if he allowed pending as reservation fi there is already a receipt
-                }
+                },
+                select: { id: true }
             })
 
             if(existingBooking) {
                 throw new ConflictException('Accommodation is already booked for the selected date and time slot')
             }
             
+            const isClosed = await this.closureService.validateClosureDate(body.accommodationId, body.checkIn);
+
+            if(isClosed) {
+                throw new ConflictException('Accommodation is closed for the selected date')
+            }
+
             const newBooking = await this.createBooking(body, user, txprisma);
 
             const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
