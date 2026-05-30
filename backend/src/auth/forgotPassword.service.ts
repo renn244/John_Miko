@@ -37,13 +37,18 @@ export class ForgotPasswordService {
             }
         });
 
+        const isMobileUser = this.userService.isMobileUserByRole(user.role)
+        const confirmationUrl = isMobileUser 
+            ? `${process.env.MOBILE_URL}/reset-password?token=${rawToken}`
+            : `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`
+
         this.emailService.sendEmail({
             to: user.email,
             subject: 'Password Reset Request',
             template: 'forgotPassword',
             context: {
                 email,
-                confirmationUrl: `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`
+                confirmationUrl: confirmationUrl
             }
         });
     }

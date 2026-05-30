@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SignUpGuestDto } from 'src/auth/dto/auth.dto';
+import { Role } from 'src/generated/prisma/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -27,4 +28,10 @@ export class UserService {
         return this.prisma.user.findUnique({  where: { email }  });
     }
 
+
+    isMobileUserByRole(role: Role) {
+        const mobileRoles: Role[] = [Role.KITCHEN_STAFF, Role.RESORT_STAFF];
+
+        return mobileRoles.includes(role) ? true : false;
+    }
 }

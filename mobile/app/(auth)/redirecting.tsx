@@ -17,7 +17,7 @@ import Animated, {
 
 const roleRoutes = {
     RESORT_STAFF: "/",
-    KITCHEN_STAFF: "/",
+    KITCHEN_STAFF: "/(kitchen-staff)/index",
     MAINTENANCE_STAFF: "/",
 } as const;
 
@@ -118,13 +118,15 @@ function Redirecting() {
                     return;
                 }
 
+                console.log(response.data)
+
                 const role = response.data?.role as keyof typeof roleRoutes | undefined;
                 const destination = role ? roleRoutes[role] : "/";
 
                 setStatus("Opening your dashboard...");
                 redirectTimer = setTimeout(() => {
-                    router.replace(destination);
-                }, 6000);
+                    router.replace(destination as any);
+                }, 600);
             } catch {
                 if (!isActive) return;
                 setStatus("Something went wrong. Returning to login...");
