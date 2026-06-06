@@ -2,7 +2,6 @@ import AccommodationBreakdown from "@/components/pageComponents/Admin/Reports/Ac
 import GuestFeedback from "@/components/pageComponents/Admin/Reports/GuestFeedback"
 import MaintenanceTickets from "@/components/pageComponents/Admin/Reports/MaintenanceTickets"
 import RevenueBreakdown from "@/components/pageComponents/Admin/Reports/RevenueBreakdown"
-import Statistics from "@/components/pageComponents/Admin/Reports/Statistics"
 
 const Report = () => {
     return (

@@ -13,6 +13,7 @@ import { PreOrderModule } from './pre-order/pre-order.module';
 import { StaffReportsModule } from './staff-reports/staff-reports.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
 import { PaymentModule } from './payment/payment.module';
+import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { StaffManagementModule } from './staff-management/staff-management.module';
 import { GuestManagementModule } from './guest-management/guest-management.module';
 import { ServicesModule } from './services/services.module';
@@ -34,6 +35,7 @@ import { ClosureModule } from './closure/closure.module';
     StaffReportsModule,
     MaintenanceModule,
     PaymentModule,
+    PaymentMethodsModule,
     StaffManagementModule,
     GuestManagementModule,
     ServicesModule,

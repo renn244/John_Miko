@@ -43,6 +43,7 @@ model User {
 
   // for staff, this will be the reports they made
   reports   Report[]
+  verifiedPayments Payment[]
 
   createdAt DateTime @default(now())
 }
@@ -119,6 +120,13 @@ enum PaymentType {
   Partial
 }
 
+enum PaymentMethodType {
+  GCASH
+  MAYA
+  BANK
+  CASH
+}
+
 enum BookingTimeSlot {
   DayStay
   OverNight
@@ -170,8 +178,28 @@ model Booking {
 
 enum PaymentStatus {
   Pending
-  Completed
-  Failed
+  Approved
+  Rejected
+}
+
+model PaymentMethod {
+  id            String   @id @default(cuid())
+  name          String
+  type          PaymentMethodType
+  accountName   String?
+  accountNumber String?
+  instructions  String?
+  qrCodeUrl     String?
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+
+  payments      Payment[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
 }
 
 model Payment {
@@ -179,6 +207,9 @@ model Payment {
   
   bookingId           String   @unique
   booking             Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  methodId            String?
+  method              PaymentMethod? @relation(fields: [methodId], references: [id])
 
 
   accommodationAmount Int  
@@ -190,11 +221,19 @@ model Payment {
   amountToPaid        Int
   totalAmount         Int
 
-  paymentStatus       PaymentStatus @default(Pending)
-  paymentId           String   @unique // from payment gateway
+  status              PaymentStatus @default(Pending)
+  referenceNumber     String?  @unique
+  proofImageUrl       String?
+  rejectionNote       String?
+  verifiedAt          DateTime?
+  verifiedById        String?
+  verifiedBy          User?    @relation(fields: [verifiedById], references: [id])
 
   paidAt              DateTime?
   createdAt           DateTime @default(now())
+
+  @@index([methodId])
+  @@index([status])
 }
 
 // Snapshot of accommodation details at the time of booking to avoid issues with price changes or availability changes

@@ -27,6 +27,7 @@ import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
 import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
 import Overview from './page/Admin/Overview';
+import PaymentMethods from './page/Admin/PaymentMethods/PaymentMethods';
 import Report from './page/Admin/Reports/Report';
 import AddStaff from './page/Admin/Staff-Management/AddStaff';
 import StaffManagement from './page/Admin/Staff-Management/StaffManagement';
@@ -172,6 +173,12 @@ const router = createBrowserRouter([
         path: 'feedback',
         children: [
           { index: true, element: <Feedback /> }
+        ]
+      },
+      {
+        path: 'payment-methods',
+        children: [
+          { index: true, element: <PaymentMethods /> }
         ]
       },
       {

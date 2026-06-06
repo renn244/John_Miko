@@ -57,7 +57,7 @@ export class BookingService {
                     accommodationId: body.accommodationId,
                     bookingDate: body.checkIn,
                     timeSlot: body.stayType,
-                    status: { notIn: ['Cancelled', 'Pending'] } // ask benef if he allowed pending as reservation fi there is already a receipt
+                    status: { notIn: ['Cancelled'] }
                 },
                 select: { id: true }
             })
@@ -92,20 +92,21 @@ export class BookingService {
                 }
             })
 
-            const { paymentId, checkoutUrl } = await this.paymentService.createPayment({
+            const { paymentId, referenceNumber } = await this.paymentService.createPayment({
                 bookingId: newBooking.id,
+                methodId: body.paymentMethodId,
+                proofImageUrl: body.proofImageUrl,
                 accommodationFee: accommodation.price,
                 guestFee: guestFeeTotal,
                 preOrderFee: preOrderTotal,
                 addOnServiceFee: addOnServiceTotal,
-                amount: accommodation.price + guestFeeTotal + preOrderTotal,
                 paymentType: body.paymentType,
             }, txprisma)
 
             return {
                 ...newBooking,
                 paymentId,
-                checkoutUrl
+                referenceNumber
             }
         })
 
@@ -133,7 +134,7 @@ export class BookingService {
                 kidGuests: body.kidGuests,
                 adultGuests: body.adultGuests,
                 seniorGuest: body.seniorGuests,
-                status: 'Confirmed'
+                status: 'Pending'
             }
         })
           
@@ -192,7 +193,7 @@ export class BookingService {
                 accommodationId: accommodationId,
                 bookingDate: { gte: new Date() },
                 status: { 
-                    notIn: ['Cancelled', 'Pending']
+                    notIn: ['Cancelled']
                 }
             },
             select: { bookingDate: true, timeSlot: true },
@@ -227,7 +228,7 @@ export class BookingService {
                 accommodationId: accommodationId,
                 bookingDate: { gte: new Date() },
                 status: {
-                    notIn: ['Cancelled', 'Pending']
+                    notIn: ['Cancelled']
                 }
             },
             select: { bookingDate: true, timeSlot: true, id: true },
@@ -267,7 +268,22 @@ export class BookingService {
                 payment: {
                     select: {
                         id: true,
-                        paymentStatus: true,
+                        status: true,
+                        referenceNumber: true,
+                        proofImageUrl: true,
+                        rejectionNote: true,
+                        verifiedAt: true,
+                        method: {
+                            select: {
+                                id: true,
+                                name: true,
+                                type: true,
+                                accountName: true,
+                                accountNumber: true,
+                                instructions: true,
+                                qrCodeUrl: true,
+                            }
+                        },
                         accommodationAmount: true,
                         preOrderAmount: true,
                         addOnAmount: true,

@@ -1,14 +1,18 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
+import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
+import { Textarea } from "@/components/ui/textarea";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
+import { useApprovePaymentMutation, useRejectPaymentMutation } from "@/hooks/admin/payment.hook";
 import getCheckInOut from "@/lib/getCheckInOut";
 import type { BookingWithAccommodationAndPreOrderAndPayment } from "@/types/booking.types";
 import { ArrowLeft, Calendar, CheckCircle, CreditCard, FileText, MapPin, Pizza, PlusCircle, Users } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 const getPaymentTypeColor = (paymentType: "Full" | "Partial") => {
@@ -16,6 +20,17 @@ const getPaymentTypeColor = (paymentType: "Full" | "Partial") => {
         case 'Full':
             return { bg: '#D1FAE5', text: '#059669'};
         case 'Partial':
+            return { bg: '#FEF3C7', text: '#D97706' };
+    }
+}
+
+const getPaymentStatusColor = (status?: "Pending" | "Approved" | "Rejected") => {
+    switch (status) {
+        case 'Approved':
+            return { bg: '#D1FAE5', text: '#059669' };
+        case 'Rejected':
+            return { bg: '#FEE2E2', text: '#DC2626' };
+        default:
             return { bg: '#FEF3C7', text: '#D97706' };
     }
 }
@@ -57,6 +72,9 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
         booking.timeSlot
     );
 
+    const [isRejectOpen, setIsRejectOpen] = useState(false);
+    const [rejectionNote, setRejectionNote] = useState("");
+
     const addOnSubTotal = useMemo(() => {
         const addOns = booking.addOns || [];
         return addOns.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -69,6 +87,11 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
     const accommodationImage = booking.bookedAccommodation?.imageUrl ?? booking.accommodation?.imageUrl;
 
     const payment = booking.payment;
+    const paymentId = payment?.id || "";
+    const paymentStatusStyle = getPaymentStatusColor(payment?.status);
+
+    const { mutateAsync: approvePayment, isPending: isApproving } = useApprovePaymentMutation(paymentId);
+    const { mutateAsync: rejectPayment, isPending: isRejecting } = useRejectPaymentMutation(paymentId);
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
@@ -325,6 +348,81 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                                         </div>
                                     )}
                                 </div>
+
+                                <div className="rounded-lg border-2 p-4 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-muted-foreground">Payment Status</span>
+                                        <Badge style={{ backgroundColor: paymentStatusStyle.bg, color: paymentStatusStyle.text }}>
+                                            {payment.status}
+                                        </Badge>
+                                    </div>
+
+                                    {payment.referenceNumber && (
+                                        <div className="text-sm">
+                                            <span className="text-muted-foreground">Reference Number</span>
+                                            <p className="font-semibold break-all">{payment.referenceNumber}</p>
+                                        </div>
+                                    )}
+
+                                    {payment.method && (
+                                        <div className="text-sm space-y-1">
+                                            <span className="text-muted-foreground">Method</span>
+                                            <p className="font-semibold">{payment.method.name}</p>
+                                            <p className="text-muted-foreground">
+                                                {payment.method.type || "—"}
+                                                {payment.method.type && payment.method.accountNumber ? " • " : ""}
+                                                {payment.method.accountNumber || ""}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {payment.proofImageUrl && (
+                                        <div className="space-y-2 text-sm">
+                                            <span className="text-muted-foreground">Proof of Payment</span>
+                                            <ViewPhotoDialog imageUrl={payment.proofImageUrl}>
+                                                <img
+                                                src={payment.proofImageUrl}
+                                                alt="Payment proof"
+                                                className="h-40 w-full object-cover rounded-md"
+                                                />
+                                            </ViewPhotoDialog>
+                                        </div>
+                                    )}
+
+                                    {payment.rejectionNote && (
+                                        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm">
+                                            <p className="font-semibold text-destructive mb-1">Rejection Note</p>
+                                            <p>{payment.rejectionNote}</p>
+                                        </div>
+                                    )}
+
+                                    {payment.verifiedAt && (
+                                        <p className="text-xs text-muted-foreground">
+                                            Verified on {new Date(payment.verifiedAt).toLocaleString()}
+                                        </p>
+                                    )}
+
+                                    {payment.status === 'Pending' && (
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            <Button
+                                                disabled={isApproving}
+                                                onClick={async () => {
+                                                    if (!paymentId) return;
+                                                    await approvePayment();
+                                                }}
+                                            >
+                                                {isApproving ? <LoadingSpinner /> : 'Approve Payment'}
+                                            </Button>
+                                            <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => setIsRejectOpen(true)}
+                                            >
+                                                Reject Payment
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             <p className="text-sm text-muted-foreground">No payment record available.</p>
@@ -332,6 +430,44 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                     </Card>
                 </div>
             </div>
+
+            <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Reject Payment</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                            Provide a reason for rejection. This will be shown to the guest.
+                        </p>
+                        <Textarea
+                            rows={4}
+                            value={rejectionNote}
+                            onChange={(event) => setRejectionNote(event.target.value)}
+                            placeholder="Explain why the payment proof was rejected..."
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                        <Button variant="outline" type="button" onClick={() => setIsRejectOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={!rejectionNote || isRejecting}
+                            onClick={async () => {
+                                if (!paymentId) return;
+                                await rejectPayment(rejectionNote);
+                                setIsRejectOpen(false);
+                                setRejectionNote("");
+                            }}
+                        >
+                            {isRejecting ? <LoadingSpinner /> : 'Reject Payment'}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

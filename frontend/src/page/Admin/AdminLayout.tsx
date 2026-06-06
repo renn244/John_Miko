@@ -1,7 +1,7 @@
 import ProfileMenu from "@/components/common/ProfileMenu";
 import SetClosureDialog from "@/components/pageComponents/Admin/Closure/SetClosureDialog";
 import { useAuthContext } from "@/context/AuthContext";
-import { BarChart3, Bot, Calendar, ChevronLeft, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, PlusCircle, Users, Wrench, X } from "lucide-react";
+import { BarChart3, Bot, Calendar, ChevronLeft, CreditCard, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, PlusCircle, Users, Wrench, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 
@@ -32,6 +32,11 @@ const AdminLayout = () => {
             label: 'Bookings',
             icon: Calendar,
             path: '/admin/booking',
+        },
+        {
+            label: 'Payment Methods',
+            icon: CreditCard,
+            path: '/admin/payment-methods',
         },
         {
             label: 'Menu Items',

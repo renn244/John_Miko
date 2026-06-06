@@ -5,7 +5,7 @@ import type { StateSelectedStatus } from "@/types/booking.types"
 import { useState } from "react"
 
 const MyBookings = () => {
-    const [selectedStatus, setSelectedStatus] = useState<StateSelectedStatus>("completed");
+    const [selectedStatus, setSelectedStatus] = useState<StateSelectedStatus>("pending");
 
     return (
         <div className="min-h-screen">

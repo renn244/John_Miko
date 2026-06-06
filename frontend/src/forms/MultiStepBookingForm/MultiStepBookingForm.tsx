@@ -4,6 +4,7 @@ import { getBookingDates } from "@/lib/getBookingDates";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import type { Accommodation } from "@/types/admin/accommodation.type";
+import type { BookingWithPaymentInfo } from "@/types/booking.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -11,6 +12,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
 import AddOnServiceForm from "./AddOnServiceForm";
+import BookingConfirmation, { type BookingConfirmationSummary } from "./BookingConfirmation";
 import GuestForm from "./GuestForm";
 import PaymentForm from "./PaymentForm";
 import PreOrderForm from "./PreOrderForm";
@@ -64,6 +66,8 @@ const MultiStepBookingFormSchema = z.object({
 
     // Step 4 - Payment
     paymentType: z.enum(['Full', 'Partial']),
+    paymentMethodId: z.string().nonempty("Payment method is required"),
+    proofImageUrl: z.url().nonempty("Proof of payment is required"),
 })
 
 export type multiStepBookingFormSchema = z.infer<typeof MultiStepBookingFormSchema>;
@@ -73,6 +77,10 @@ const MultiStepBookingForm = ({
 }: MultiStepBookingFormProps) => {
     const [preOrderTotal, setPreOrderTotal] = useState(0);
     const [addOnTotal, setAddOnTotal] = useState(0);
+    const [confirmation, setConfirmation] = useState<{
+        booking: BookingWithPaymentInfo;
+        summary: BookingConfirmationSummary;
+    } | null>(null);
 
     const navigate = useNavigate();    
     const stayType = useBookingSelectStore((state) => state.bookingType!);
@@ -100,6 +108,8 @@ const MultiStepBookingForm = ({
             preOrderItems: [],
             addOnServices: [],
             paymentType: undefined,
+            paymentMethodId: '',
+            proofImageUrl: '',
         },
         criteriaMode: "all"
     })
@@ -114,37 +124,44 @@ const MultiStepBookingForm = ({
             quantity: s.quantity,
         }));
 
-        await mutateAsync({
-            accommodationId: accommodation.id,
-            name: `${data.firstName} ${data.lastName}`,
-            checkIn: toDateOnly(checkIn),
-            addOnServices: addOnServicesPayload,
-            ...rest
-        }, {
-            onSuccess: (data) => {
-                onSuccess?.();
-                reset();
-                
-                toast.promise<void>(
-                    () => new Promise((resolve) => setTimeout(() => resolve(), 1500)),
-                    {
-                        loading: "Redirecting...",
-                        success: () => {
-                            window.location.href = data.checkoutUrl;
-                            return "Redirecting to payment gateway!";
-                        }
-                    }
-                )
-            },
-            onError: (error) => {
-                if(error instanceof ValidationError) {
-                    handleNestError(error.response, form.setError);
-                    return
+        try {
+            const response = await mutateAsync({
+                accommodationId: accommodation.id,
+                name: `${data.firstName} ${data.lastName}`,
+                checkIn: toDateOnly(checkIn),
+                addOnServices: addOnServicesPayload,
+                ...rest
+            })
+
+            const paidNow = data.paymentType === 'Full' ? total : Math.round(total / 2);
+            const amountToPayLater = total - paidNow;
+
+            setConfirmation({
+                booking: response,
+                summary: {
+                    guestName: `${data.firstName} ${data.lastName}`,
+                    email: data.email,
+                    contactNo: data.contactNo,
+                    stayType: stayType,
+                    checkIn: bookingCheckIn,
+                    checkOut: bookingCheckOut,
+                    paymentType: data.paymentType,
+                    total,
+                    amountPaid: paidNow,
+                    amountToPayLater,
                 }
-                
-                toast.error(error.message)   
+            })
+
+            onSuccess?.();
+            toast.success('Payment proof submitted. We will verify shortly.');
+        } catch (error: any) {
+            if(error instanceof ValidationError) {
+                handleNestError(error.response, form.setError);
+                return
             }
-        });
+
+            toast.error(error.message)
+        }
     }
 
     const adultFee = form.watch('stayType') === 'DayStay' ? 150 : 180; // full price
@@ -165,6 +182,24 @@ const MultiStepBookingForm = ({
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayType);
 
     const total = accommodation.price + addOnTotal + preOrderTotal + totalGuestFee;
+
+    if(confirmation) {
+        return (
+            <BookingConfirmation
+            viewMyBookings={() => {
+                reset();
+                navigate(`/my-bookings/${confirmation.booking.id}`)
+            }}
+            backToHome={() => {
+                reset();
+                navigate('/');
+            }}
+            accommodation={accommodation}
+            booking={confirmation.booking}
+            summary={confirmation.summary}
+            />
+        )
+    }
 
     return (  
         <FormProvider {...form}>

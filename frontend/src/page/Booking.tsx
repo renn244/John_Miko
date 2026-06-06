@@ -1,4 +1,3 @@
-import NavBar from "@/components/common/NavBar";
 import { Progress } from "@/components/ui/progress";
 import MultiStepBookingForm from "@/forms/MultiStepBookingForm/MultiStepBookingForm";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
@@ -18,8 +17,6 @@ const Booking = () => {
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center">
-            <NavBar />
-
             {/** Booking steps updated to include Add-on Services before Pre-order */}
             {/** Steps: Guest Info -> Add-ons -> Pre-order -> Review -> Payment */}
             {/** Total steps: 5 */}
@@ -90,7 +87,6 @@ const Booking = () => {
                             break;     
                     }
                 }}
-                onSuccess={() => undefined}
                 />
             </main>
         </div>

@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, Matches, ValidateNested } from "class-validator";
+import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, ValidateNested } from "class-validator";
 import { BookingStatus, BookingTimeSlot, PaymentType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
@@ -83,6 +83,15 @@ export class CreateBookingDto {
     @IsNotEmpty({ message: "Payment type is required" })
     @IsEnum(PaymentType, { message: "Payment type must be either 'full' or 'partial'" })
     paymentType!: PaymentType;
+
+    @IsString()
+    @IsNotEmpty({ message: "Payment method is required" })
+    paymentMethodId!: string;
+
+    @IsString()
+    @IsNotEmpty({ message: "Proof of payment is required" })
+    @IsUrl()
+    proofImageUrl!: string;
 }
 
 export class RescheduleBookingDto {

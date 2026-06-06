@@ -29,7 +29,7 @@ export type Booking = {
 
 export type BookingWithPaymentInfo = {
     paymentId: string;
-    checkoutUrl: string;
+    referenceNumber: string;
 } & Booking
 
 export type BookedAccommodation = {
@@ -96,7 +96,20 @@ export type BookingWithAccommodationAndPreOrder = {
 export type BookingWithAccommodationAndPreOrderAndPayment = {
     payment: {
         id: string,
-        paymentStatus: 'Pending' | 'Completed' | 'Failed',
+        status: 'Pending' | 'Approved' | 'Rejected',
+        referenceNumber?: string | null,
+        proofImageUrl?: string | null,
+        rejectionNote?: string | null,
+        verifiedAt?: string | null,
+        method?: {
+            id: string,
+            name: string,
+            type: 'GCASH' | 'MAYA' | 'BANK' | 'CASH',
+            accountName?: string | null,
+            accountNumber?: string | null,
+            instructions?: string | null,
+            qrCodeUrl?: string | null,
+        } | null,
         accommodationAmount: number,
         preOrderAmount: number,
         addOnAmount: number,

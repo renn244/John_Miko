@@ -1,6 +1,6 @@
 import { useGetBookingsByUserQuery } from "@/hooks/booking.hook"
 import type { BookingWithAccommodation, StateSelectedStatus } from "@/types/booking.types"
-import { Calendar, CheckCircle, XCircle } from "lucide-react"
+import { Calendar, CheckCircle, Clock, XCircle } from "lucide-react"
 import { useMemo } from "react"
 import BookingCard from "./BookingCard"
 import EmptyListCard from "./EmptyListCard"
@@ -16,6 +16,7 @@ const MyBookingsList = ({
 
     const groupedBookings = useMemo(() => {
         const groups: Record<StateSelectedStatus, BookingWithAccommodation[]> = {
+            pending: [],
             completed: [],
             confirmed: [],
             cancelled: []
@@ -37,6 +38,18 @@ const MyBookingsList = ({
 
     return (
         <div className="space-y-4">
+
+            {selectedStatus === "pending" && (
+                groupedBookings.pending.length > 0 ? (
+                    groupedBookings.pending.map(booking => <BookingCard booking={booking} /> )
+                ) : (
+                    <EmptyListCard
+                    status={selectedStatus}
+                    message="Your bookings are pending verification."
+                    icon={Clock}
+                    />
+                )
+            )}
 
             {selectedStatus === "completed" && (
                 groupedBookings.completed.length > 0 ?  (

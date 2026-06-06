@@ -30,7 +30,7 @@ const Home = () => {
         },
         {
             question: "What payment methods do you accept?",
-            answer: "Cash, Bank Transfer, GCash, PayMaya, and PayMongo. 50% down payment required.",
+            answer: "Cash, Bank Transfer, GCash, Maya, and cash on-site. 50% down payment required.",
         },
         {
             question: "Is reservation required on weekends?",
@@ -175,7 +175,7 @@ const Home = () => {
                                     <div>
                                         <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Payment</p>
                                         <p className="mt-1 font-semibold leading-snug">50% down to confirm</p>
-                                        <p className="mt-1 text-sm text-muted-foreground">Supported: Cash, Bank, GCash, PayMaya, PayMongo</p>
+                                        <p className="mt-1 text-sm text-muted-foreground">Supported: Cash, Bank, GCash, Maya, Cash on-site</p>
                                     </div>
                                 </div>
                             </div>
@@ -336,7 +336,7 @@ const Home = () => {
                                         <div>
                                             <h3 className="font-bold text-lg">Payment Methods</h3>
                                             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                                                <li>• Cash, Bank Transfer, GCash, PayMaya, PayMongo</li>
+                                                <li>• Cash, Bank Transfer, GCash, Maya, Cash on-site</li>
                                                 <li>• 50% down payment required to confirm booking</li>
                                                 <li>• Balance payable upon check-in</li>
                                             </ul>

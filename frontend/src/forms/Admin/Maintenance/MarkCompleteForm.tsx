@@ -21,7 +21,7 @@ const MarkCompleteSchema = z.object({
 export type markCompleteSchema = z.infer<typeof MarkCompleteSchema>
 
 type MarkCompleteFormProps = {
-  onsubmit: (data: markCompleteSchema) => Promise<void>
+  onsubmit: (data: markCompleteSchema) => Promise<void | any>
   oncancel: () => void
   className?: string
 } & ComponentProps<"form">

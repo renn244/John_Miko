@@ -15,6 +15,8 @@ type BookingCardProps = {
 const BookingCard = ({ booking, className,  variant="default", ...props }: BookingCardProps) => {
     const getStatusColor = (status: string) => {
         switch (status) {
+            case 'Pending':
+                return { bg: '#FEF3C7', text: '#D97706', icon: Clock };
             case 'Confirmed':
                 return { bg: '#DBEAFE', text: '#1E73BE', icon: CheckCircle };
             case 'Completed':

@@ -1,54 +1,34 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PaymentType, Prisma } from 'src/generated/prisma/client';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { randomBytes } from 'crypto';
+import { Prisma } from 'src/generated/prisma/client';
+import { PaymentStatus, PaymentType } from 'src/generated/prisma/enums';
 import { getDateRange, toDateOnly } from 'src/lib/utils/date.util';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePaymentDto } from './dto/payment.dto';
-import { CheckoutLineItem } from './interface/paymongo.types';
-import { PaymongoService } from './paymongo.service';
 
 @Injectable()
 export class PaymentService {
     constructor(
-        private readonly prisma: PrismaService,
-        private readonly paymongoService: PaymongoService
+        private readonly prisma: PrismaService
     ) {}
 
     async createPayment(
         body: CreatePaymentDto, 
         tx: Prisma.TransactionClient=this.prisma
     ) {
-        const { bookingId, accommodationFee, preOrderFee, addOnServiceFee, guestFee, amount } = body;
-
-        const lineItems = this.processLineItems(accommodationFee, preOrderFee, addOnServiceFee, guestFee, body.paymentType);
+        const { bookingId, accommodationFee, preOrderFee, addOnServiceFee, guestFee } = body;
         const totalAmount = accommodationFee + preOrderFee + addOnServiceFee + guestFee;
         const { amountToPay, amountPaid } = this.calculateAmounts(totalAmount, body.paymentType);
 
-        // create paymongo link here
-        const checkoutSession = await this.paymongoService.createCheckoutSession({
-            data: {
-                attributes: {
-                    line_items: lineItems,
-                    payment_method_types: ['card', 'gcash', 'paymaya'],
-                    success_url: `${process.env.FRONTEND_URL}/payment/success`,
-                    cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
-                    reference_number: bookingId,
-                    show_line_items: true,
-                    send_email_receipt: true,
-                },
-            },
-        });
+        const referenceNumber = await this.generateReferenceNumber(tx);
 
-        // TODO LATER:
-        // maybe add here a way to let user select waht to pay for,
-        // but accommodatuion and guest fee is required
-
-        // if prisma fails after session is created, expire the session
-        // to avoid orphaned checkout sessions on paymongo
         const payment = await tx.payment.create({
             data: {
                 bookingId,
-                paymentId: checkoutSession.data.id,
-                paymentStatus: 'Completed',
+                methodId: body.methodId,
+                proofImageUrl: body.proofImageUrl,
+                referenceNumber,
+                status: PaymentStatus.Pending,
                 accommodationAmount: accommodationFee,
                 preOrderAmount: preOrderFee,
                 addOnAmount: addOnServiceFee,
@@ -57,18 +37,53 @@ export class PaymentService {
                 amountToPaid: amountToPay,
                 totalAmount: totalAmount,
             }
-        }).catch(async () => {
-            await this.paymongoService.expireCheckoutSession(checkoutSession.data.id);
+        }).catch(() => {
             throw new InternalServerErrorException('Failed to save payment record');
         });
 
         return {
             paymentId: payment.id,
-            checkoutUrl: checkoutSession.data.attributes.checkout_url
+            referenceNumber: payment.referenceNumber
         };
     }
 
     async getPayments() {
+        const payments = await this.prisma.payment.findMany({
+            include: {
+                booking: {
+                    select: {
+                        id: true,
+                        bookingDate: true,
+                        timeSlot: true,
+                        guestName: true,
+                        email: true,
+                        contactNo: true,
+                        status: true,
+                        accommodation: {
+                            select: {
+                                id: true,
+                                name: true,
+                                type: true,
+                                imageUrl: true,
+                            }
+                        }
+                    }
+                },
+                method: true,
+                verifiedBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+
+        return payments;
     }
 
     async getRevenueAnalytics() {
@@ -83,7 +98,7 @@ export class PaymentService {
                 SUM("guestFeeAmount")::int as guestfeeAmount
             FROM "Payment"
             WHERE 
-                "paymentStatus" = 'Completed' and
+                "status" = 'Approved' and
                 "createdAt" > NOW() - INTERVAL '1 year'
             GROUP BY TO_CHAR("createdAt", 'YYYY-MM')
             ORDER BY month ASC
@@ -101,7 +116,7 @@ export class PaymentService {
                 booking: {
                     bookingDate: today
                 },
-                paymentStatus: 'Completed',
+                status: 'Approved',
             }
         })   
         
@@ -117,7 +132,107 @@ export class PaymentService {
     }
 
     async getPaymentById(id: string) {
-        
+        const payment = await this.prisma.payment.findUnique({
+            where: { id },
+            include: {
+                booking: {
+                    select: {
+                        id: true,
+                        bookingDate: true,
+                        timeSlot: true,
+                        guestName: true,
+                        email: true,
+                        contactNo: true,
+                        status: true,
+                        accommodation: {
+                            select: {
+                                id: true,
+                                name: true,
+                                type: true,
+                                imageUrl: true,
+                            }
+                        }
+                    }
+                },
+                method: true,
+                verifiedBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    }
+                }
+            }
+        })
+
+        if(!payment) {
+            throw new NotFoundException('Payment not found');
+        }
+
+        return payment;
+    }
+
+    async approvePayment(id: string, verifiedById: string) {
+        const payment = await this.prisma.payment.findUnique({ where: { id } })
+
+        if(!payment) {
+            throw new NotFoundException('Payment not found');
+        }
+
+        const verifiedAt = new Date();
+
+        const updatedPayment = await this.prisma.$transaction(async (tx) => {
+            const nextPayment = await tx.payment.update({
+                where: { id },
+                data: {
+                    status: PaymentStatus.Approved,
+                    rejectionNote: null,
+                    verifiedAt,
+                    verifiedById,
+                    paidAt: verifiedAt
+                }
+            })
+
+            await tx.booking.update({
+                where: { id: payment.bookingId },
+                data: { status: 'Confirmed' }
+            })
+
+            return nextPayment;
+        })
+
+        return updatedPayment;
+    }
+
+    async rejectPayment(id: string, rejectionNote: string, verifiedById: string) {
+        const payment = await this.prisma.payment.findUnique({ where: { id } })
+
+        if(!payment) {
+            throw new NotFoundException('Payment not found');
+        }
+
+        const verifiedAt = new Date();
+
+        const updatedPayment = await this.prisma.$transaction(async (tx) => {
+            const nextPayment = await tx.payment.update({
+                where: { id },
+                data: {
+                    status: PaymentStatus.Rejected,
+                    rejectionNote,
+                    verifiedAt,
+                    verifiedById,
+                }
+            })
+
+            await tx.booking.update({
+                where: { id: payment.bookingId },
+                data: { status: 'Cancelled' }
+            })
+
+            return nextPayment;
+        })
+
+        return updatedPayment;
     }
 
     async addExtraFees() {
@@ -139,40 +254,19 @@ export class PaymentService {
         return { amountToPay, amountPaid };
     }
 
-    private processLineItems(accommodationFee: number, preOrderFee: number, addOnServiceFee: number, guestFee: number, paymentType: PaymentType): CheckoutLineItem[] {
-        const isPartial = paymentType === 'Partial';
-        const multiplier = isPartial ? 0.5 : 1;
-        const label = isPartial ? ' (50% Downpayment)' : '';
+    private async generateReferenceNumber(tx: Prisma.TransactionClient) {
+        for (let attempt = 0; attempt < 5; attempt++) {
+            const stamp = Date.now().toString(36).toUpperCase();
+            const randomPart = randomBytes(3).toString('hex').toUpperCase();
+            const referenceNumber = `JM-${stamp}-${randomPart}`;
 
-         return [
-            {
-                amount: Math.round(accommodationFee * multiplier) * 100,
-                currency: 'PHP' as CheckoutLineItem['currency'],
-                name: `Accommodation Fee${label}`,
-                description: 'This is the fee for the accommodations like room, cottage, etc.',
-                quantity: 1,
-            },
-            ...(preOrderFee > 0 ? [{
-                amount: Math.round(preOrderFee * multiplier) * 100,
-                currency: 'PHP' as CheckoutLineItem['currency'],
-                name: `Pre-order Fee${label}`,
-                description: 'This is the fee for your pre-ordered food during your stay.',
-                quantity: 1,
-            }] : []),
-            ...(guestFee > 0 ? [{
-                amount: Math.round(guestFee * multiplier) * 100,
-                currency: 'PHP' as CheckoutLineItem['currency'],
-                name: `Guest Fee${label}`,
-                description: 'This is the fee for the guests during your stay.',
-                quantity: 1,
-            }] : []),
-            ...(addOnServiceFee > 0 ? [{
-                amount: Math.round(addOnServiceFee * multiplier) * 100,
-                currency: 'PHP' as CheckoutLineItem['currency'],
-                name: `Add-on Service Fee${label}`,
-                description: 'This is the fee for any additional services you may have availed.',
-                quantity: 1,
-            }] : []),
-        ];
+            const existing = await tx.payment.findUnique({ where: { referenceNumber } })
+
+            if(!existing) {
+                return referenceNumber;
+            }
+        }
+
+        throw new InternalServerErrorException('Failed to generate reference number');
     }
 }
