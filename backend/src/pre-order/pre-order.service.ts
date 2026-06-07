@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { MenuItem, Prisma } from 'src/generated/prisma/client';
+import { MenuItem, PreOrderStatus, Prisma } from 'src/generated/prisma/client';
 import { PreOrderMenuItemCreateManyInput } from 'src/generated/prisma/models';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetAllPreOrdesQuery } from './query/get-all-preOrders.query';
@@ -77,31 +77,40 @@ export class PreOrderService {
 
     async getPreOrders(query: GetAllPreOrdesQuery) {
         const bookings = await this.prisma.booking.findMany({
-            // where: {
-            //     ...(query.search ? {
-            //         OR: [
-            //             { guestName: { contains: query.search, mode: 'insensitive' } },
-            //             { id: { contains: query.search, mode: 'insensitive' } }
-            //         ]
-            //     } : {}),
-            //     bookingDate: query.date
-            // },
+            where: {
+                preOrders: { some: {} },
+                ...(query.search ? {
+                    OR: [
+                        { guestName: { contains: query.search, mode: 'insensitive' } },
+                        { id: { contains: query.search, mode: 'insensitive' } }
+                    ]
+                } : {}),
+                ...(query.date ? { bookingDate: query.date } : {})
+            },
             select: {
                 id: true,
                 guestName: true,
                 bookingDate: true,
                 timeSlot: true,
-                status: true,
-                bookedAccommodation: {
+                preOrders: {
                     select: {
-                        name: true
+                        id: true,
+                        name: true,
+                        quantity: true,
+                        status: true
                     }
-                },
-                preOrders: true
-            }
+                }
+            },
+            orderBy: { bookingDate: 'desc' }
         })
 
-        return bookings;
+        return bookings.map((booking) => ({
+            bookingId: booking.id,
+            guestName: booking.guestName,
+            bookingDate: booking.bookingDate,
+            timeSlot: booking.timeSlot,
+            preOrders: booking.preOrders
+        }));
     }
 
     async getPreOrderDetailsByBookingId(bookingId: string) {
@@ -123,7 +132,8 @@ export class PreOrderService {
                     select: {
                         id: true,
                         name: true,
-                        quantity: true
+                        quantity: true,
+                        status: true
                     }
                 }
             }
@@ -133,6 +143,68 @@ export class PreOrderService {
             throw new NotFoundException('Booking not found')
         }
 
-        return booking
+        return {
+            bookingId: booking.id,
+            guestName: booking.guestName,
+            email: booking.email,
+            contactNo: booking.contactNo,
+            bookingDate: booking.bookingDate,
+            timeSlot: booking.timeSlot,
+            numberOfGuests: booking.numberOfGuests,
+            specialRequests: booking.specialRequests,
+            preOrders: booking.preOrders
+        }
+    }
+
+    async updatePreOrderStatus(itemId: string, status: PreOrderStatus) {
+        this.assertValidPreOrderStatus(status);
+
+        const existingPreOrder = await this.prisma.preOrderMenuItem.findUnique({
+            where: { id: itemId }
+        });
+
+        if(!existingPreOrder) {
+            throw new NotFoundException('Pre-order not found')
+        }
+
+        const preOrder = await this.prisma.preOrderMenuItem.update({
+            where: { id: itemId },
+            data: { status }
+        })
+
+        return {
+            message: 'Pre-order item status updated successfully',
+            preOrder
+        };
+    }
+
+    async completeAllPreOrdersByBookingId(bookingId: string) {
+        const booking = await this.prisma.booking.findFirst({
+            where: {
+                id: bookingId,
+                preOrders: { some: {} }
+            },
+            select: { id: true }
+        });
+
+        if(!booking) {
+            throw new NotFoundException('Booking pre-orders not found')
+        }
+
+        const result = await this.prisma.preOrderMenuItem.updateMany({
+            where: { bookingId },
+            data: { status: PreOrderStatus.Completed }
+        });
+
+        return {
+            message: 'All pre-order items marked as completed',
+            updatedCount: result.count
+        };
+    }
+
+    private assertValidPreOrderStatus(status: PreOrderStatus) {
+        if(!Object.values(PreOrderStatus).includes(status)) {
+            throw new BadRequestException('Invalid pre-order status. Use Pending or Completed')
+        }
     }
 }

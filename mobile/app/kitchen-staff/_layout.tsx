@@ -4,7 +4,8 @@ import { MenuIcon, Settings2Icon } from 'lucide-react-native';
 export default function KitchenStaffTabLayout() {
     return (
         <Tabs>
-            <Tabs.Screen 
+            <Tabs.Screen
+            
             name="index"
             options={{
                 headerShown: false,
@@ -25,15 +26,6 @@ export default function KitchenStaffTabLayout() {
                 tabBarIcon: ({ color, size }) => (
                     <Settings2Icon size={size} color={color} />
                 )
-            }}
-            />
-
-            <Tabs.Screen 
-            name="[orderId]"
-            options={{
-                tabBarStyle: { display: 'none' },
-                headerShown: false,
-                title: "Order Details",
             }}
             />
         </Tabs>

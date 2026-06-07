@@ -276,6 +276,12 @@ model BookingAddOn {
   @@index([addOnServiceId])
 }
 
+
+enum PreOrderStatus {
+  Pending
+  Completed
+}
+
 model PreOrderMenuItem {
   id            String   @id @default(cuid())
   
@@ -286,7 +292,8 @@ model PreOrderMenuItem {
   description   String
   category      String
   price         Int
-  
+  status        PreOrderStatus @default(Pending)
+
   quantity      Int
 
   createdAt     DateTime @default(now())

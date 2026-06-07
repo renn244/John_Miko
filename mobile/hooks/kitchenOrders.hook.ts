@@ -1,33 +1,46 @@
 import apiClient from "@/lib/apiClient";
-import type { GetKitchenOrdersQuery, KitchenOrder, KitchenOrderItem } from "@/types/kitchenOrder.type";
-import { useQuery } from "@tanstack/react-query";
+import { toast } from "@/lib/toast";
+import type { GetKitchenOrdersQuery, KitchenOrder, KitchenOrderItem, KitchenOrderStatus } from "@/types/kitchenOrder.type";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-type PreOrderListResponse = Array<{
-  id: string;
+type PreOrderListResponse = {
+  bookingId: string;
   guestName: string;
   bookingDate: string;
   timeSlot?: "DayStay" | "OverNight";
-  preOrders?: Array<{ id: string; name: string; quantity: number }>;
-}>;
+  kitchenStatus?: KitchenOrderStatus;
+  preOrders?: { id: string; name: string; quantity: number; status?: KitchenOrderStatus }[];
+}[];
 
 type PreOrderDetailsResponse = {
-  id: string;
+  bookingId: string;
   guestName: string;
   email?: string;
   contactNo?: string;
-  contnatNo?: string;
   bookingDate: string;
   timeSlot?: "DayStay" | "OverNight";
+  kitchenStatus?: KitchenOrderStatus;
   numberOfGuests?: number;
-  specialRequests?: string;
-  preOrders?: Array<{ id: string; name: string; quantity: number }>;
+  specialRequests?: string | null;
+  preOrders?: { id: string; name: string; quantity: number; status?: KitchenOrderStatus }[];
 };
 
-const mapItems = (items?: Array<{ id: string; name: string; quantity: number }>): KitchenOrderItem[] => {
+type KitchenStatusMutationResponse = {
+  message: string;
+};
+
+type UpdateKitchenItemStatusRequest = {
+  bookingId: string;
+  itemId: string;
+  status: KitchenOrderStatus;
+};
+
+const mapItems = (items?: { id: string; name: string; quantity: number; status?: KitchenOrderStatus }[]): KitchenOrderItem[] => {
   return (items ?? []).map((item) => ({
     id: item.id,
     name: item.name,
     quantity: item.quantity,
+    status: item.status ?? "Pending",
   }));
 };
 
@@ -39,8 +52,6 @@ const fetchKitchenOrders = async (query?: GetKitchenOrdersQuery) => {
     } satisfies GetKitchenOrdersQuery,
   });
 
-  console.log(response.data)
-
   if (response.status >= 400) {
     throw new Error(response.data?.message || "Failed to fetch pre-orders");
   }
@@ -49,11 +60,11 @@ const fetchKitchenOrders = async (query?: GetKitchenOrdersQuery) => {
 
   return (data ?? []).map(
     (booking): KitchenOrder => ({
-      orderId: booking.id,
-      bookingId: booking.id,
+      bookingId: booking.bookingId,
       guestName: booking.guestName,
       bookingDate: booking.bookingDate,
       timeSlot: booking.timeSlot,
+      kitchenStatus: booking.kitchenStatus,
       items: mapItems(booking.preOrders),
     })
   );
@@ -73,15 +84,15 @@ const fetchKitchenOrderDetails = async (bookingId: string) => {
   const data = response.data as PreOrderDetailsResponse;
 
   return {
-    orderId: data.id,
-    bookingId: data.id,
+    bookingId: data.bookingId,
     guestName: data.guestName,
     email: data.email,
-    contactNo: data.contactNo ?? data.contnatNo,
+    contactNo: data.contactNo,
     bookingDate: data.bookingDate,
     timeSlot: data.timeSlot,
+    kitchenStatus: data.kitchenStatus,
     numberOfGuests: data.numberOfGuests,
-    notes: data.specialRequests,
+    notes: data.specialRequests ?? undefined,
     items: mapItems(data.preOrders),
   } satisfies KitchenOrder;
 };
@@ -103,5 +114,69 @@ export const useKitchenOrderById = (orderId?: string) => {
     },
     enabled: Boolean(orderId),
     staleTime: 15_000,
+  });
+};
+
+export const useUpdateKitchenItemStatusMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["kitchen", "item-status"],
+    mutationFn: async ({ bookingId, itemId, status }: UpdateKitchenItemStatusRequest) => {
+      const response = await apiClient.patch(`/pre-order/${itemId}/status`, {
+        status,
+      });
+
+      if (response.status >= 400) {
+        throw new Error(response.data?.message || "Failed to update item status");
+      }
+
+      return response.data as KitchenStatusMutationResponse;
+    },
+    onSuccess: async (data, variables) => {
+      toast.success(data.message || "Item status updated.");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["kitchen", "order", variables.bookingId] }),
+        queryClient.invalidateQueries({ queryKey: ["kitchen", "orders"] }),
+      ]);
+    },
+    onError: (err) => {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    },
+  });
+};
+
+export const useCompleteAllKitchenItemsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["kitchen", "complete-all-items"],
+    mutationFn: async (bookingId: string) => {
+      const response = await apiClient.patch(`/pre-order/${bookingId}/status/complete-all`);
+
+      if (response.status >= 400) {
+        throw new Error(response.data?.message || "Failed to complete all items");
+      }
+
+      return response.data as KitchenStatusMutationResponse;
+    },
+    onSuccess: async (data, bookingId) => {
+      toast.success(data.message || "All items marked as completed.");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["kitchen", "order", bookingId] }),
+        queryClient.invalidateQueries({ queryKey: ["kitchen", "orders"] }),
+      ]);
+    },
+    onError: (err) => {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    },
   });
 };

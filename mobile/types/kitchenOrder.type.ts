@@ -1,20 +1,25 @@
 import type { BookingTimeSlot } from "@/types/booking.type";
 
+export type KitchenOrderStatus =
+    | "Pending"
+    | "Completed";
+
 export type KitchenOrderItem = {
     id: string;
     name: string;
     quantity: number;
+    status: KitchenOrderStatus;
 };
 
 // Kitchen view is booking-centric: one booking can contain many pre-order items.
 export type KitchenOrder = {
-    orderId: string; // currently equals bookingId
     bookingId: string;
     guestName: string;
     email?: string;
     contactNo?: string;
     bookingDate: string;
     timeSlot?: BookingTimeSlot;
+    kitchenStatus?: KitchenOrderStatus;
     numberOfGuests?: number;
     notes?: string;
     items: KitchenOrderItem[];

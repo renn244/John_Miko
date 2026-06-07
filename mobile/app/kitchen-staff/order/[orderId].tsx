@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
-import { useKitchenOrderById } from "@/hooks/kitchenOrders.hook";
+import { useCompleteAllKitchenItemsMutation, useKitchenOrderById, useUpdateKitchenItemStatusMutation } from "@/hooks/kitchenOrders.hook";
+import type { KitchenOrderStatus } from "@/types/kitchenOrder.type";
 import { addDays, format, parseISO } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 
 const formatDate = (raw?: string) => {
@@ -19,6 +21,7 @@ const formatDate = (raw?: string) => {
 };
 
 export default function KitchenOrderDetailsScreen() {
+  const [isLoadingItemId, setIsLoadingItemId] = useState<string | null>(null);
   const router = useRouter();
   const params = useLocalSearchParams<{ orderId?: string }>();
 
@@ -26,6 +29,10 @@ export default function KitchenOrderDetailsScreen() {
 
   const { data: order, isLoading, error, refetch, isRefetching } =
     useKitchenOrderById(orderId);
+  const { mutateAsync: updateItemStatus, isPending: isUpdatingItemStatus } =
+    useUpdateKitchenItemStatusMutation();
+  const { mutateAsync: completeAllItems, isPending: isCompletingAllItems } =
+    useCompleteAllKitchenItemsMutation();
 
   const checkInOut = useMemo(() => {
     const checkInRaw = order?.bookingDate;
@@ -46,6 +53,49 @@ export default function KitchenOrderDetailsScreen() {
       checkOut: format(checkOutDate, "MMM dd, yyyy"),
     };
   }, [order?.bookingDate, order?.timeSlot]);
+
+  const orderSummary = useMemo(() => {
+    const items = order?.items ?? [];
+    const completedCount = items.filter((item) => item.status === "Completed").length;
+    const pendingCount = items.length - completedCount;
+
+    return {
+      completedCount,
+      pendingCount,
+      allCompleted: items.length > 0 && pendingCount === 0,
+    };
+  }, [order?.items]);
+
+  const handleToggleItemStatus = async (itemId: string, currentStatus: KitchenOrderStatus) => {
+    if (!order?.bookingId) return;
+
+    setIsLoadingItemId(itemId);
+    await updateItemStatus({
+      bookingId: order.bookingId,
+      itemId,
+      status: currentStatus === "Completed" ? "Pending" : "Completed",
+    }, {
+      onSettled: () => {
+        setIsLoadingItemId(null);
+      }
+    });
+  };
+
+  const handleCompleteAll = () => {
+    if (!order?.bookingId || orderSummary.allCompleted) return;
+
+    Alert.alert(
+      "Mark all as done?",
+      "This will mark every pre-order item in this booking as completed.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Mark all done",
+          onPress: () => completeAllItems(order.bookingId),
+        },
+      ]
+    );
+  };
 
   if (isLoading) {
     return (
@@ -208,22 +258,77 @@ export default function KitchenOrderDetailsScreen() {
               Ordered meals
             </Text>
 
+            {order.items.length > 0 ? (
+              <View className="mt-3 rounded-2xl bg-neutral-soft-grey-3 px-4 py-3">
+                <View className="flex-row items-center justify-between gap-3">
+                  <View>
+                    <Text className="font-sans-semibold text-base text-neutral-dark-1">
+                      {orderSummary.completedCount}/{order.items.length} completed
+                    </Text>
+                    <Text className="text-sm text-neutral-grey-1">
+                      {orderSummary.pendingCount} pending
+                    </Text>
+                  </View>
+
+                  <Button
+                    size="sm"
+                    disabled={isCompletingAllItems || isUpdatingItemStatus || orderSummary.allCompleted}
+                    onPress={handleCompleteAll}
+                  >
+                    {isCompletingAllItems ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <Text className="font-sans-semibold text-base text-white">
+                        Done All
+                      </Text>
+                    )}
+                  </Button>
+                </View>
+              </View>
+            ) : null}
+
             {(order.items ?? []).length ? (
               <View className="mt-3 gap-3">
                 {(order.items ?? []).map((item) => (
                   <View
                     key={item.id}
-                    className="flex-row items-center justify-between"
+                    className="rounded-2xl bg-neutral-soft-grey-3 px-4 py-4 gap-3"
                   >
-                    <View className="flex-1 pr-3">
-                      <Text className="text-lg text-neutral-dark-1">
-                        {item.name}
-                      </Text>
+                    <View className="flex-row items-start justify-between gap-3">
+                      <View className="flex-1 pr-3">
+                        <Text className="text-lg text-neutral-dark-1">
+                          {item.name}
+                        </Text>
+                      </View>
+
+                      <View className="rounded-full bg-white px-3 py-1">
+                        <Text className="text-base font-sans-semibold text-neutral-dark-2">
+                          x{item.quantity}
+                        </Text>
+                      </View>
                     </View>
-                    <View className="rounded-full bg-neutral-soft-grey-2 px-3 py-1">
-                      <Text className="text-base font-sans-semibold text-neutral-dark-2">
-                        x{item.quantity}
-                      </Text>
+
+                    <View className="flex-row items-center justify-between gap-3">
+                      <View className={`rounded-full px-3 py-1 ${item.status === "Completed" ? "bg-green-100" : "bg-amber-100"}`}>
+                        <Text className={`font-sans-semibold text-sm ${item.status === "Completed" ? "text-green-700" : "text-amber-700"}`}>
+                          {item.status}
+                        </Text>
+                      </View>
+
+                      <Button
+                      size="sm"
+                      variant={item.status === "Completed" ? "outline" : "default"}
+                      disabled={isLoadingItemId === item.id}
+                      onPress={() => handleToggleItemStatus(item.id, item.status)}
+                      >
+                        {isLoadingItemId === item.id ? (
+                          <ActivityIndicator color={item.status === "Completed" ? "#1F2937" : "#FFFFFF"} />
+                        ) : (
+                          <Text className={`font-sans-semibold text-base ${item.status === "Completed" ? "text-neutral-dark-1" : "text-white"}`}>
+                            {item.status === "Completed" ? "Mark Pending" : "Mark Done"}
+                          </Text>
+                        )}
+                      </Button>
                     </View>
                   </View>
                 ))}

@@ -106,6 +106,8 @@ const StaffSettingsScreen = () => {
         router.replace("/login");
     };
 
+    const isChangePasswordDisabled = !passwordControl._formValues.currentPassword || !passwordControl._formValues.newPassword || !passwordControl._formValues.confirmPassword;
+
     if (isLoading) {
         return (
             <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3 items-center justify-center">
@@ -328,13 +330,13 @@ const StaffSettingsScreen = () => {
                                     <Field className="gap-1">
                                         <FieldLabel className="text-base">Confirm New Password</FieldLabel>
                                         <PasswordInput
-                                            autoCapitalize="none"
-                                            autoCorrect={false}
-                                            placeholder="Confirm new password"
-                                            value={field.value}
-                                            onChangeText={field.onChange}
-                                            onBlur={field.onBlur}
-                                            invalid={Boolean(fieldState.error)}
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        placeholder="Confirm new password"
+                                        value={field.value}
+                                        onChangeText={field.onChange}
+                                        onBlur={field.onBlur}
+                                        invalid={Boolean(fieldState.error)}
                                         />
                                         <FieldError errors={getErrorMessages(fieldState.error)} />
                                     </Field>
@@ -343,7 +345,7 @@ const StaffSettingsScreen = () => {
 
                             <Button
                             onPress={handlePasswordSubmit(onChangePasswordSubmit)}
-                            disabled={isChangingPassword}
+                            disabled={isChangingPassword || isChangePasswordDisabled}
                             >
                                 {isChangingPassword ? (
                                     <ActivityIndicator color="#FFFFFF" />

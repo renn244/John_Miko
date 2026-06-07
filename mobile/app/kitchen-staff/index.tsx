@@ -1,3 +1,4 @@
+import PreOrderFilters from "@/components/pageComponents/Kitchen Staff/PreOrderFilters";
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import { useKitchenOrders } from "@/hooks/kitchenOrders.hook";
@@ -14,7 +15,6 @@ import {
   Text,
   View,
 } from "react-native";
-import PreOrderFilters from "../../components/pageComponents/Kitchen Staff/PreOrderFilters";
 
 const isDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
 
@@ -78,8 +78,8 @@ export default function KitchenStaffPreOrdersScreen() {
         <Pressable
           onPress={() =>
             router.push({
-              pathname: "/(kitchen-staff)/[orderId]",
-              params: { orderId: item.orderId },
+              pathname: "/kitchen-staff/order/[orderId]",
+              params: { orderId: item.bookingId },
             })
           }
           className="mb-3 rounded-3xl bg-white px-5 py-4 shadow-sm"
@@ -131,7 +131,7 @@ export default function KitchenStaffPreOrdersScreen() {
         ) : (
             <FlatList
             data={filteredOrders}
-            keyExtractor={(item) => item.orderId}
+            keyExtractor={(item) => item.bookingId}
             renderItem={renderOrder}
             contentContainerStyle={{
                 paddingHorizontal: 24,

@@ -43,7 +43,7 @@ export default function ResortStaffHomeScreen() {
                         </Text>
                     </View>
 
-                    <Button onPress={() => router.push("/(resort-staff)/settings")}>
+                    <Button onPress={() => router.push("/resort-staff/settings")}>
                         <Settings2 color="#FFFFFF" size={18} />
                         <Text className="text-white font-sans-semibold text-lg">
                             Open Settings
