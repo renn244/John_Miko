@@ -21,7 +21,7 @@ import { z } from "zod";
 
 const LoginSchema = z.object({
     role: z.string().nonempty("Role is required"),
-    email: z.email().nonempty("Email is required"),
+    email: z.string().email("Email is invalid").nonempty("Email is required"),
     password: z.string().nonempty("Password is required"),
 });
 
@@ -76,7 +76,7 @@ export default function Login() {
                     <View className="items-center gap-1">
                         <Logo height={40} width={40} />
                         <Text className="font-sans-bold text-2xl text-neutral-dark-1">
-                            John Miko's
+                            John Miko&apos;s
                         </Text>
                         <Text className="text-center text-neutral-grey-1 text-base">
                             Use your staff account to continue.
@@ -102,7 +102,6 @@ export default function Login() {
                                         <SelectContent>
                                             <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
                                             <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
-                                            <SelectItem value="MAINTENANCE_STAFF">Maintenance Staff</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 )}

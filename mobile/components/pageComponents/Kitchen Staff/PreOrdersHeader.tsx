@@ -1,4 +1,4 @@
-import PreOrderFilters from "@/app/(kitchen-staff)/components/PreOrderFilters";
+import PreOrderFilters from "@/components/pageComponents/Kitchen Staff/PreOrderFilters";
 import { Text, View } from "react-native";
 
 type PreOrdersHeaderProps = {

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { MenuIcon } from 'lucide-react-native';
+import { MenuIcon, Settings2Icon } from 'lucide-react-native';
 
 export default function KitchenStaffTabLayout() {
     return (
@@ -17,10 +17,23 @@ export default function KitchenStaffTabLayout() {
             />
 
             <Tabs.Screen
+            name="settings/index"
+            options={{
+                headerShown: false,
+                title: "Settings",
+                tabBarShowLabel: false,
+                tabBarIcon: ({ color, size }) => (
+                    <Settings2Icon size={size} color={color} />
+                )
+            }}
+            />
+
+            <Tabs.Screen 
             name="[orderId]"
             options={{
+                tabBarStyle: { display: 'none' },
+                headerShown: false,
                 title: "Order Details",
-                href: null,
             }}
             />
         </Tabs>

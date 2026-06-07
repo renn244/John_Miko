@@ -31,7 +31,8 @@ export class StaffManagementService {
             })
         }
 
-        const password = await bcrypt.hash(this.generateRandomPassword(body.name), 10);
+        const rawPassword = this.generateRandomPassword(body.name)
+        const password = await bcrypt.hash(rawPassword, 10);
 
         const newStaff = await this.prisma.user.create({
             data: {
@@ -47,7 +48,6 @@ export class StaffManagementService {
         })
 
         // send email here to the staff
-
 
         return newStaff
     }

@@ -16,9 +16,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 const roleRoutes = {
-    RESORT_STAFF: "/",
+    RESORT_STAFF: "/(resort-staff)",
     KITCHEN_STAFF: "/(kitchen-staff)/index",
-    MAINTENANCE_STAFF: "/",
 } as const;
 
 const useDotStyle = (progress: SharedValue<number>, offset: number) => {
@@ -118,10 +117,8 @@ function Redirecting() {
                     return;
                 }
 
-                console.log(response.data)
-
                 const role = response.data?.role as keyof typeof roleRoutes | undefined;
-                const destination = role ? roleRoutes[role] : "/";
+                const destination = role ? roleRoutes[role] : "/login";
 
                 setStatus("Opening your dashboard...");
                 redirectTimer = setTimeout(() => {

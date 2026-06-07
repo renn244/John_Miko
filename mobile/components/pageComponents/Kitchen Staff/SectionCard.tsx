@@ -1,4 +1,5 @@
-import { Text, View, type ReactNode } from "react-native";
+import type { ReactNode } from "react";
+import { Text, View } from "react-native";
 import { twMerge } from "tailwind-merge";
 
 type SectionCardProps = {

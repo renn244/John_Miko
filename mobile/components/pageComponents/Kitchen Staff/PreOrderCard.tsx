@@ -3,7 +3,7 @@ import { ChevronRight } from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 import { twMerge } from "tailwind-merge";
 
-import { formatBookingDate, getTotalItems } from "@/app/(kitchen-staff)/components/preOrders.utils";
+import { formatBookingDate, getTotalItems } from "@/components/pageComponents/Kitchen Staff/preOrders.utils";
 
 type PreOrderCardProps = {
   order: KitchenOrder;
