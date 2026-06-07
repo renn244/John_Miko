@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/generated/prisma/client';
@@ -7,6 +7,8 @@ import { ValidationException } from 'src/lib/exception/ValidationException';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 import { SignUpGuestDto } from './dto/auth.dto';
+import { UpdateProfileDto } from './dto/updateProfile.dto';
+import { UpdatePasswordDto } from './dto/changePassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -75,9 +77,72 @@ export class AuthService {
                 email: true,
                 name: true,
                 role: true,
+                contactNo: true,
+                status: true
             }
         });
 
+        //maybe add a cache layer in here later
+
         return userProfile;
+    }
+
+    async updateProfile(user: UserSession, body: UpdateProfileDto) {
+        const existingUser = await this.userService.findUserByEmail(body.email);
+
+        if(existingUser?.status === "INACTIVE") {
+            throw new BadRequestException("Inactive User is not allowed to update profile.")
+        }
+
+        if(existingUser && existingUser.id !== user.id) {
+            throw new ValidationException({
+                field: "email",
+                message: ["email already exists"]
+            })
+        }
+
+        const updatedUser = await this.prisma.user.update({
+            where: {
+                id: user.id
+            },
+            data: {
+                name: body.name,
+                email: body.email,
+                contactNo: body.contactNo
+            }
+        })
+
+        return updatedUser;
+    }
+
+    async updatePassword(user: UserSession, body: UpdatePasswordDto) {
+        const currentUser = await this.userService.findUserById(user.id);
+        
+        if(!currentUser) {
+            throw new UnauthorizedException("User does not exist")
+        }
+
+        const isPasswordValid = await bcrypt.compare(body.currentPassword, currentUser.password)
+
+        if(!isPasswordValid) {
+            throw new ValidationException({
+                field: "currentPassword",
+                message: ["wrong password"]
+            })
+        }
+
+        const hashedNewPassword = await bcrypt.hash(body.newPassword, 10);
+        const updatedUser = await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedNewPassword
+            }
+        })
+
+        if(!updatedUser) {
+            throw new BadRequestException("Failed to update password, please try again.")
+        }
+
+        return { message: "Password updated successfully" }
     }
 }

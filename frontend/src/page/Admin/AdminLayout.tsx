@@ -1,7 +1,7 @@
 import ProfileMenu from "@/components/common/ProfileMenu";
 import SetClosureDialog from "@/components/pageComponents/Admin/Closure/SetClosureDialog";
 import { useAuthContext } from "@/context/AuthContext";
-import { BarChart3, Bot, Calendar, ChevronLeft, CreditCard, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, PlusCircle, Users, Wrench, X } from "lucide-react";
+import { BarChart3, Bot, Calendar, ChevronLeft, CreditCard, Hamburger, Home, LayoutDashboard, LogOut, Menu, MessageSquare, PlusCircle, Settings, Users, Wrench, X } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router";
 
@@ -72,12 +72,12 @@ const AdminLayout = () => {
             label: 'User Management',
             icon: Users,
             path: '/admin/user-management',
-        }
-        // {
-        //     label: 'Settings',
-        //     icon: Settings,
-        //     path: '/admin/settings',
-        // },
+        },
+        {
+            label: 'Settings',
+            icon: Settings,
+            path: '/admin/settings',
+        },
     ];
 
     return (

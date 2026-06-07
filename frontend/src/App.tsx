@@ -29,6 +29,7 @@ import MenuItem from './page/Admin/MenuItem/MenuItem';
 import Overview from './page/Admin/Overview';
 import PaymentMethods from './page/Admin/PaymentMethods/PaymentMethods';
 import Report from './page/Admin/Reports/Report';
+import AdminSettings from './page/Admin/Settings';
 import AddStaff from './page/Admin/Staff-Management/AddStaff';
 import StaffManagement from './page/Admin/Staff-Management/StaffManagement';
 import Amenities from './page/Amenities';
@@ -40,6 +41,7 @@ import MyBookings from './page/Guest/MyBookings';
 import Home from "./page/Home";
 import Login from "./page/Login";
 import ResetPassword from "./page/ResetPassword";
+import Settings from './page/Settings';
 import SignUpGuest from "./page/SignUpGuest";
 
 const router = createBrowserRouter([
@@ -91,6 +93,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
         <MyBookings />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '/settings',
+    element: (
+      <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+        <Settings />
       </ProtectedRoute>
     )
   },
@@ -188,6 +198,10 @@ const router = createBrowserRouter([
           { path: 'add', element: <AddChatbotRule /> },
           { path: ':id/edit', element: <EditChatbotRule /> }
         ]
+      },
+      {
+        path: 'settings',
+        element: <AdminSettings />
       }
     ]
   }

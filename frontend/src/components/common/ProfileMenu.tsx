@@ -51,11 +51,12 @@ const GuestMenu = () => {
                         My Bookings
                     </DropdownMenuItem>
                 </Link>
-                <DropdownMenuItem>
-                    {/* For the Settings and Privacy */}
-                    <CreditCardIcon />
-                    Settings
-                </DropdownMenuItem>
+                <Link to="/settings">
+                    <DropdownMenuItem>
+                        <CreditCardIcon />
+                        Settings
+                    </DropdownMenuItem>
+                </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>
@@ -88,11 +89,12 @@ const AdminMenu = () => {
                         Admin Dashboard
                     </DropdownMenuItem>
                 </Link>
-                <DropdownMenuItem>
-                    {/* For the Settings and Privacy */}
-                    <CreditCardIcon />
-                    Settings
-                </DropdownMenuItem>
+                <Link to="/admin/settings">
+                    <DropdownMenuItem>
+                        <CreditCardIcon />
+                        Settings
+                    </DropdownMenuItem>
+                </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleLogout()}>

@@ -1,27 +1,32 @@
-import { IsEmail, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { IsMatch } from "src/lib/customValidator/isMatch";
 
 export class forgotPasswordDto {
+    @IsNotEmpty()
     @IsString()
     @IsEmail({}, { message: "Invalid email" })
-    email: string;
+    email!: string;
 }
 
 export class resendForgotPasswordDto {
+    @IsNotEmpty()
     @IsString()
     @IsEmail({}, { message: "Invalid email" })
-    email: string;
+    email!: string;
 }
 
 export class resetPasswordDto {
+    @IsNotEmpty()
     @IsString()
-    token: string;
+    token!: string;
 
+    @IsNotEmpty()
     @IsString()
-    newPassword: string;
+    newPassword!: string;
     
+    @IsNotEmpty()
     @IsString()
     @IsMatch<resetPasswordDto>('newPassword', { message: 'Confirm password must match new password' })
-    confirmPassword: string;
+    confirmPassword!: string;
 }
     

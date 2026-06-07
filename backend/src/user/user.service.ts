@@ -24,10 +24,13 @@ export class UserService {
         
     } 
 
+    async findUserById(id: string) {
+        return this.prisma.user.findUnique({ where: { id } })
+    }
+
     async findUserByEmail(email: string) {
         return this.prisma.user.findUnique({  where: { email }  });
     }
-
 
     isMobileUserByRole(role: Role) {
         const mobileRoles: Role[] = [Role.KITCHEN_STAFF, Role.RESORT_STAFF];

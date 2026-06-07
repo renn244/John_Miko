@@ -1,16 +1,10 @@
 import apiClient from "@/lib/apiClient";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext, type PropsWithChildren } from "react";
-
-type userProfile = {
-    id: string;
-    name: string | null | undefined;
-    email: string;
-    role: string;
-}
+import type { UserProfileDto } from "@/types/auth.types";
 
 type AuthContextType = {
-    user: userProfile | null | undefined,
+    user: UserProfileDto | null | undefined,
     isLoading: boolean;
     isLoggedIn: boolean;    
     handleLogout: () => void;
@@ -25,6 +19,7 @@ const initialAuthContext: AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>(initialAuthContext);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuthContext = () => {
     return useContext(AuthContext);
 }
@@ -37,7 +32,7 @@ const AuthProvider = ({ children }: PropsWithChildren ) => {
 
             if(response?.status === 401) return null
             
-            return response?.data as userProfile
+            return response?.data as UserProfileDto
         },
         refetchOnWindowFocus: false,
     })

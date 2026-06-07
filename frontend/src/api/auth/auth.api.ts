@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { ForgotPasswordDto, LoginDto, ResetPasswordDto, SignUpGuest } from "@/types/auth.types";
+import type { BasicMessageResponse, ChangePasswordDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, SignUpGuest, UpdateProfileDto, UserProfileDto } from "@/types/auth.types";
 
 export const authApi = {
     login: async (data: LoginDto) => {
@@ -69,4 +69,39 @@ export const authApi = {
         return response.data
     },
     check: () => apiClient.get('/auth/profile'),
+    getProfile: async () => {
+        const response = await apiClient.get('/auth/profile');
+
+        if (response.status >= 401) {
+            throw new Error(response.data.message || "Unexpected error");
+        }
+
+        return response.data as UserProfileDto;
+    },
+    updateProfile: async (data: UpdateProfileDto) => {
+        const response = await apiClient.patch('/auth/profile', data);
+
+        if (response.status === 400) {
+            throw new ValidationError(response.data);
+        }
+
+        if (response.status >= 401) {
+            throw new Error(response.data.message || "Unexpected error");
+        }
+
+        return response.data as UserProfileDto;
+    },
+    changePassword: async (data: ChangePasswordDto) => {
+        const response = await apiClient.patch('/auth/change-password', data);
+
+        if (response.status === 400) {
+            throw new ValidationError(response.data);
+        }
+
+        if (response.status >= 401) {
+            throw new Error(response.data.message || "Unexpected error");
+        }
+
+        return response.data as BasicMessageResponse;
+    },
 }
