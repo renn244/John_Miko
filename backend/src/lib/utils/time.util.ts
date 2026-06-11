@@ -7,8 +7,7 @@ export const toTimeOnly = (input?: Date | string | null): Date | string | undefi
     if (!match) return input;
 
     const [, hour, minute, second = "0"] = match;
-    const date = new Date();
-    date.setHours(Number(hour), Number(minute), Number(second), 0);
+    const date = new Date(Date.UTC(1970, 0, 1, Number(hour), Number(minute), Number(second), 0));
 
     return date;
 };

@@ -1,8 +1,9 @@
 import { DAYSTAY_OVERNIGHT_PRESET } from "@/lib/constant/ACCOMMODATION_STAY_OPTION_PRESETS.constant";
+import { toTimeInputValue } from "@/lib/stayOptionTime";
 import type { Accommodation, CreateAccommodationDto, UpdateAccommodationDto } from "@/types/admin/accommodation.type";
 import type { AccommodationFormValues } from "./accommodationForm.schema";
 
-export const normalizeTimeInput = (time?: string | null) => time ? time.slice(0, 5) : "";
+export const normalizeTimeInput = (time?: string | null) => toTimeInputValue(time);
 
 const normalizeTimeOutput = (time?: string) => time ? `${time}:00` : undefined;
 
