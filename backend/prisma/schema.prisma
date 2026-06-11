@@ -65,12 +65,6 @@ enum AccommodationType {
   EventHall
 }
 
-enum AccommodationAvailability {
-  Available
-  Unavailable
-  Maintenance
-}
-
 model Accommodation {
   id            String  @id @default(cuid())
   name          String
@@ -82,14 +76,41 @@ model Accommodation {
   price         Int
 
   amenities     String[]  @default([]) 
-
-  availability  AccommodationAvailability
   
+  stayOptions   AccommodationStayOption[]
   closures      Closure[]
   bookings      Booking[]
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model AccommodationStayOption {
+  id              String  @id @default(cuid())
+  
+  accommodationId String
+  accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  code            String
+  label           String
+  
+  durationHours   Int?
+  
+  startTime       DateTime? @db.Time
+  endTime         DateTime? @db.Time
+  
+  sortOrder       Int     @default(0)
+  isActive        Boolean @default(true)
+
+  bookings         Booking[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([accommodationId, code])
+  @@unique([id, accommodationId])
+  @@index([accommodationId])
+  @@index([accommodationId, isActive, sortOrder])
 }
 
 enum ClosureType {
@@ -127,11 +148,6 @@ enum PaymentMethodType {
   CASH
 }
 
-enum BookingTimeSlot {
-  DayStay
-  OverNight
-}
-
 enum BookingStatus {
   Pending
   Confirmed
@@ -167,13 +183,25 @@ model Booking {
   specialRequests String?
 
   bookingDate      DateTime @db.Date
-  timeSlot         BookingTimeSlot
+
+  stayOptionId     String
+  stayOption       AccommodationStayOption @relation(fields: [stayOptionId, accommodationId], references: [id, accommodationId])
+  stayOptionCodeSnapshot  String
+  stayOptionLabelSnapshot String
+  stayDurationHoursSnapshot Int?
+
   status           BookingStatus @default(Pending)
   paymentType      PaymentType
   payment          Payment?
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([accommodationId, bookingDate])
+  @@index([userId])
+  @@index([status])
+  @@index([bookingDate, status])
+  @@index([bookingDate, stayOptionId])
 }
 
 enum PaymentStatus {

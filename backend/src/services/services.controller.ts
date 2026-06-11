@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { Public } from 'src/lib/decorators/Public.decorator';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
@@ -28,7 +27,7 @@ export class ServicesController {
     }
 
     @Get('available')
-    async getServicesAvailableForBooking(@Query() query: { bookingDate: Date, timeSlot: BookingTimeSlot }) {
+    async getServicesAvailableForBooking(@Query() query: { bookingDate: Date, stayOptionId: string }) {
         return this.servicesService.getServicesAvailableForBooking(query)
     }
 

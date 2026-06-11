@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
-import { AccommodationAvailability, AccommodationType } from "src/generated/prisma/enums";
+import { AccommodationType } from "src/generated/prisma/enums";
 
 export class GetAccommodationQueryDto {
     @IsOptional()
@@ -10,10 +10,6 @@ export class GetAccommodationQueryDto {
     @IsOptional()
     @IsEnum(AccommodationType, { message: `Type must be one of: ${Object.values(AccommodationType).join(', ')}` })
     type?: AccommodationType;
-
-    @IsOptional()
-    @IsEnum(AccommodationAvailability, { message: `Availability must be one of: ${Object.values(AccommodationAvailability).join(', ')}` })
-    availability?: AccommodationAvailability;
 
     @IsOptional()
     @Type(() => Number)

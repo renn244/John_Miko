@@ -1,4 +1,5 @@
 import type { PaymentMethod } from "@/types/payment-method.type";
+import type { AccommodationStayOption } from "./admin/accommodation.type";
 
 export type PaymentStatus = 'Pending' | 'Approved' | 'Rejected';
 
@@ -23,7 +24,8 @@ export type PaymentRecord = {
     booking: {
         id: string;
         bookingDate: string;
-        timeSlot: 'DayStay' | 'OverNight';
+        timeSlot: string;
+        stayOption?: AccommodationStayOption;
         guestName: string;
         email: string;
         contactNo: string;

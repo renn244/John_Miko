@@ -261,7 +261,7 @@ const Overview = () => {
                         {booking.guestName}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {booking.accommodation.name} · {format(new Date(booking.bookingDate), "MMM dd, yyyy")} · {booking.timeSlot}
+                        {booking.accommodation.name} · {format(new Date(booking.bookingDate), "MMM dd, yyyy")} · {booking.stayOption?.label ?? booking.stayOptionLabelSnapshot ?? booking.timeSlot ?? "Stay"}
                       </p>
                     </div>
                     <Badge

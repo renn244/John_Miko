@@ -1,9 +1,9 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useClosureAdminStore } from "@/store/admin/closureAdmin.store"
 import type { Accommodation } from "@/types/admin/accommodation.type"
-import { CheckCircle, Edit, Info, Lock, MoreVertical, Tag, Users, XCircle } from "lucide-react"
+import { Edit, Lock, MoreVertical, Tag, Users } from "lucide-react"
 import { Link } from "react-router"
 
 type AccommodationCardProps = {
@@ -12,7 +12,6 @@ type AccommodationCardProps = {
     name: Accommodation['name']
     description: Accommodation['description']
     type: Accommodation['type']
-    availability: Accommodation['availability']
     capacity: Accommodation['capacity']
     price: Accommodation['price']
     amenities: Accommodation['amenities']
@@ -21,34 +20,6 @@ type AccommodationCardProps = {
 const AccommodationCard = (accommodation: AccommodationCardProps) => {
     const setClosureOpen = useClosureAdminStore((s) => s.setClosureOpen);
 
-    const getAvailabilityConfig = (status: Accommodation['availability']) => {
-        const configs = {
-            'Available': {
-                label: 'Available',
-                color: '#0E9F6E',
-                bg: '#DEF7EC',
-                icon: CheckCircle,
-            },
-            'Unavailable': {
-                label: 'Unavailable',
-                color: '#DC2626',
-                bg: '#FEE2E2',
-                icon: XCircle,
-            },
-            'Maintenance': {
-                label: 'Maintenance',
-                color: '#D97706',
-                bg: '#FEF3C7',
-                icon: Info,
-            },
-        };
-
-        return configs[status];
-    };
-
-    const availabilityConfig = getAvailabilityConfig(accommodation.availability);
-    const AvailabilityIcon = availabilityConfig.icon;
-    
     return (
         <div className="bg-white rounded-xl shadow-md overflow-hidden border hover:shadow-xl transition-all">
             <div className="relative h-48 bg-gray-200 overflow-hidden">
@@ -61,14 +32,6 @@ const AccommodationCard = (accommodation: AccommodationCardProps) => {
 
                 <Badge className="absolute top-3 left-3 capitalize z-20">
                     {accommodation.type}
-                </Badge>
-
-                <Badge 
-                className={`absolute top-3 right-3 z-20`}
-                style={{ backgroundColor: availabilityConfig.bg, color: availabilityConfig.color }}
-                >
-                    <AvailabilityIcon className="w-3 h-3" />
-                    {availabilityConfig.label}
                 </Badge>
 
             </div>
