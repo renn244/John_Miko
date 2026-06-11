@@ -48,7 +48,12 @@ const BookingDetails = ({ selectedBooking } : { selectedBooking: BookingWithAcco
     const { 
         checkIn, checkInDayOfTheWeek,
         checkOut, checkOutDayOfTheWeek
-    } = getCheckInOut(selectedBooking.bookingDate, selectedBooking.timeSlot);
+    } = getCheckInOut({
+        bookingDate: selectedBooking.bookingDate,
+        startTime: selectedBooking.stayOption?.startTime,
+        endTime: selectedBooking.stayOption?.endTime,
+        label: selectedBooking.stayOption?.label ?? selectedBooking.stayOptionLabelSnapshot,
+    });
 
     return (
         <>

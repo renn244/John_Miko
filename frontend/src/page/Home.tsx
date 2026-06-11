@@ -3,7 +3,7 @@ import NavBar from "@/components/common/NavBar"
 import Chatbot from "@/components/pageComponents/Chatbot"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
-import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant"
+import { RESORT_OPERATIONAL_INFO } from "@/lib/constant/RESORT_OPERATIONAL_INFO.constant"
 import {
     Calendar as CalendarIcon,
     CheckCircle,
@@ -18,6 +18,8 @@ import {
 import { Link } from "react-router"
 
 const Home = () => {
+    const [dayUseHours, overnightHours] = RESORT_OPERATIONAL_INFO.operatingHours
+    const bookingOptionTypes = RESORT_OPERATIONAL_INFO.bookingOptionTypes.join(", ")
 
     const faqs = [
         {
@@ -102,7 +104,7 @@ const Home = () => {
                                             </div>
                                             <div>
                                                 <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold">DayStay hours</p>
-                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {TIME_SLOT.DAY_STAY.CHECK_IN} • Check-out {TIME_SLOT.DAY_STAY.CHECK_OUT}</p>
+                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {dayUseHours.checkIn} • Check-out {dayUseHours.checkOut}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -114,7 +116,7 @@ const Home = () => {
                                             </div>
                                             <div>
                                                 <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold">Overnight</p>
-                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {TIME_SLOT.OVERNIGHT.CHECK_IN} • Check-out {TIME_SLOT.OVERNIGHT.CHECK_OUT}</p>
+                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {overnightHours.checkIn} • Check-out {overnightHours.checkOut}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -158,10 +160,10 @@ const Home = () => {
                                     </div>
                                     <div>
                                         <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Time Slots</p>
-                                        <p className="mt-1 font-semibold leading-snug">DayStay or Overnight</p>
+                                        <p className="mt-1 font-semibold leading-snug">{bookingOptionTypes}</p>
                                         <p className="mt-1 text-sm text-muted-foreground">
-                                            DayStay {TIME_SLOT.DAY_STAY.CHECK_IN} – {TIME_SLOT.DAY_STAY.CHECK_OUT} <br/> 
-                                            Overnight {TIME_SLOT.OVERNIGHT.CHECK_IN} – {TIME_SLOT.OVERNIGHT.CHECK_OUT}
+                                            Day use {dayUseHours.checkIn} – {dayUseHours.checkOut} <br/> 
+                                            Overnight {overnightHours.checkIn} – {overnightHours.checkOut}
                                         </p>
                                     </div>
                                 </div>
@@ -315,12 +317,12 @@ const Home = () => {
                                             <h3 className="font-bold text-lg">Check-in & Check-out</h3>
                                             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                                                 <li>• Day Use: <br />
-                                                    Check-in {TIME_SLOT.DAY_STAY.CHECK_IN} - 
-                                                    Check-out {TIME_SLOT.DAY_STAY.CHECK_OUT}
+                                                    Check-in {dayUseHours.checkIn} - 
+                                                    Check-out {dayUseHours.checkOut}
                                                 </li>
                                                 <li>• Overnight: <br />
-                                                    Check-in {TIME_SLOT.OVERNIGHT.CHECK_IN} - 
-                                                    Check-out {TIME_SLOT.OVERNIGHT.CHECK_OUT}
+                                                    Check-in {overnightHours.checkIn} - 
+                                                    Check-out {overnightHours.checkOut}
                                                 </li>
                                                 <li>• Early check-in subject to availability</li>
                                             </ul>

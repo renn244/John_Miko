@@ -5,9 +5,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuthContext } from "@/context/AuthContext";
 import { useGetClosuresQuery } from "@/hooks/admin/closure.hook";
 import { useGetBookingsByAccommodationQuery } from "@/hooks/booking.hook";
-import { TIME_SLOT } from "@/lib/constant/TIME_SLOT.constant";
 import { isSameDateOnly } from "@/lib/date.util";
+import { formatStayOptionRange } from "@/lib/stayOptionTime";
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
+import type { AccommodationStayOption } from "@/types/admin/accommodation.type";
 import {
     Calendar
 } from 'lucide-react';
@@ -17,6 +18,7 @@ type AccommodationSideBookingProps = {
     accommodation: {
         id: string;
         price: number;
+        stayOptions: AccommodationStayOption[];
     },
 }
 
@@ -25,7 +27,7 @@ const AccommodationSideBooking = ({
 }: AccommodationSideBookingProps) => {
     const navigate = useNavigate();
 
-    const { bookingDate, setBookingDate, bookingType, setBookingType } = useBookingSelectStore();
+    const { bookingDate, setBookingDate, bookingType, setStayOption } = useBookingSelectStore();
     const { user } = useAuthContext();
 
     const { data: bookedDates } = useGetBookingsByAccommodationQuery(accommodation.id);
@@ -33,8 +35,10 @@ const AccommodationSideBooking = ({
 
     const selectedDateBookingData = bookingDate ? bookedDates?.find((bookingData) => isSameDateOnly(bookingDate, new Date(bookingData.bookingDate))) : undefined;
 
-    const isDayStayAvailable = !selectedDateBookingData?.timeSlotsOccupied.includes("DayStay");
-    const isOverNightAvailable = !selectedDateBookingData?.timeSlotsOccupied.includes("OverNight");
+    const activeStayOptions = accommodation.stayOptions.filter((stayOption) => stayOption.isActive);
+    const isStayOptionAvailable = (stayOptionId: string) => {
+        return !selectedDateBookingData?.timeSlotsOccupied.includes(stayOptionId);
+    }
 
     const partialBookedDates = bookedDates?.filter((bookingData) => bookingData.bookingStatus === 'Partial').map((bookingData) => new Date(bookingData.bookingDate)) || [];
     const fullyBookedDates = bookedDates?.filter((bookingData) => bookingData.bookingStatus === 'Full').map((bookingData) => new Date(bookingData.bookingDate)) || [];
@@ -49,7 +53,7 @@ const AccommodationSideBooking = ({
                         ₱{accommodation.price.toLocaleString()}
                     </span>
                     <span className="text-sm text-muted-foreground">
-                        / night or day
+                        / stay
                     </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -89,38 +93,34 @@ const AccommodationSideBooking = ({
                             Check-in & Check-out
                         </span>
                     </div>
-                        <RadioGroup value={bookingType || ''} onValueChange={(value) => setBookingType(value as 'OverNight' | 'DayStay')}>
-                            {isDayStayAvailable && (
-                                <FieldLabel htmlFor="DayStay">
+                        <RadioGroup
+                        value={bookingType || ''}
+                        onValueChange={(value) => {
+                            const selectedStayOption = activeStayOptions.find((stayOption) => stayOption.id === value);
+                            setStayOption(selectedStayOption);
+                        }}
+                        >
+                            {activeStayOptions.filter((stayOption) => isStayOptionAvailable(stayOption.id)).map((stayOption) => (
+                                <FieldLabel key={stayOption.id} htmlFor={stayOption.id}>
                                     <Field orientation="horizontal">
                                         <FieldContent>
-                                            <FieldTitle>Day Stay</FieldTitle>
+                                            <FieldTitle>{stayOption.label}</FieldTitle>
                                             <FieldDescription>
-                                                {TIME_SLOT.DAY_STAY.CHECK_IN} to {TIME_SLOT.DAY_STAY.CHECK_OUT}
+                                                {formatStayOptionRange(stayOption)}
                                             </FieldDescription>
                                         </FieldContent>
                                         <RadioGroupItem 
-                                        value="DayStay" id="DayStay" />
+                                        value={stayOption.id} id={stayOption.id} />
                                     </Field>
                                 </FieldLabel>
-                            )}
+                            ))}
+                        </RadioGroup>
 
-                            {isOverNightAvailable && (
-                                <FieldLabel htmlFor="OverNight">
-                                    <Field orientation="horizontal">
-                                        <FieldContent>
-                                            <FieldTitle>Over Night</FieldTitle>
-                                            <FieldDescription>
-                                                {TIME_SLOT.OVERNIGHT.CHECK_IN} to {TIME_SLOT.OVERNIGHT.CHECK_OUT}
-                                            </FieldDescription>
-                                        </FieldContent>
-                                        <RadioGroupItem 
-                                        value="OverNight" id="OverNight" 
-                                        /> 
-                                    </Field>
-                                </FieldLabel>
-                                )}
-                            </RadioGroup>
+                        {activeStayOptions.length === 0 && (
+                            <p className="text-sm text-muted-foreground">
+                                No stay options are currently available for this accommodation.
+                            </p>
+                        )}
                 </div>
             )}
 

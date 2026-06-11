@@ -1,5 +1,5 @@
 import type statusOptions from "@/lib/constant/MY_BOOKING_STATUS.constants";
-import type { Accommodation } from "./admin/accommodation.type";
+import type { Accommodation, AccommodationStayOption } from "./admin/accommodation.type";
 import type { Feedback } from "./feedback.types";
 import type { PaginationParams } from "./pagination.type";
 
@@ -19,7 +19,12 @@ export type Booking = {
     specialRequests?: string;
 
     bookingDate: string;
-    timeSlot: "DayStay" | "OverNight"
+    stayOptionId: string;
+    stayOptionCodeSnapshot: string;
+    stayOptionLabelSnapshot: string;
+    stayDurationHoursSnapshot?: number | null;
+    timeSlot?: string;
+    stayOption?: AccommodationStayOption;
     paymentType: 'Partial' | 'Full';
     status: "Pending" | "Confirmed" | "Cancelled" | "Completed";
 

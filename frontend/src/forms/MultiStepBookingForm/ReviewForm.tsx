@@ -10,7 +10,7 @@ import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 type ReviewFormProps = {
     accommodation: Accommodation,
     setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
-    stayType: 'OverNight' | 'DayStay',
+    stayType: string,
     checkIn: Date,
     checkOut: Date,
     accommodationSubtotal: number,
@@ -80,7 +80,7 @@ const ReviewForm = ({
                     <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">
                         <span className="text-muted-foreground text-sm">Stay Type:</span>
                         <span className="font-medium text-sm">
-                            {stayType === 'OverNight' ? 'Over Night' : 'Day Stay'}
+                            {stayType}
                         </span>
                     </div>
                     <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">

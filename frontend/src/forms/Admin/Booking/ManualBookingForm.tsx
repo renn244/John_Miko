@@ -25,7 +25,7 @@ const ManualBookingSchema = z.object({
     accommodationId: z.string().nonempty("Accommodation is required"),
 
     checkIn: z.date().nonoptional("Check-in date is required"),
-    stayType: z.enum(['OverNight', 'DayStay']),
+    stayOptionId: z.string().nonempty("Stay option is required"),
 
     paymentType: z.enum(['Partial', 'Full']).nonoptional("Payment type is required"),
 })
@@ -48,13 +48,13 @@ const ManualBookingForm = () => {
             numberOfGuests: 1,
             accommodationId: "",
             checkIn: undefined,
-            stayType: undefined,
+            stayOptionId: undefined,
             paymentType: undefined
         },
         criteriaMode: "all"
     })
 
-    const { data: accommodations } = useGetAccommodationsQuery({ availability: "Available", page: 1, limit: 100 });
+    const { data: accommodations } = useGetAccommodationsQuery({ page: 1, limit: 100 });
 
     const selectedAccommodationId = watch('accommodationId');
     const selectedCheckInDate = watch('checkIn');
@@ -196,7 +196,7 @@ const ManualBookingForm = () => {
                                 value={field.value}
                                 onValueChange={(value) => {
                                     resetField('checkIn')
-                                    resetField('stayType')
+                                    resetField('stayOptionId')
                                     field.onChange(value)
                                 }}
                                 aria-invalid={fieldState.invalid}
@@ -228,7 +228,7 @@ const ManualBookingForm = () => {
                                                     Up to 10
                                                 </div>
                                                 <div className="font-bold text-primary">
-                                                    ₱{acc.price.toLocaleString()}/(OverNight Or DayStay)
+                                                    ₱{acc.price.toLocaleString()}/stay
                                                 </div>
                                             </div>
                                         </FieldLabel>
@@ -247,7 +247,7 @@ const ManualBookingForm = () => {
                                 <div className="flex items-center gap-2">
                                     <CheckCircle className="w-4 h-4 text-green-600" />
                                     <span className="text-sm font-semibold text-green-600">
-                                        Selected: {selectedAccommodation.name} - ₱{selectedAccommodation.price.toLocaleString()}/(OverNight Or DayStay) (Max: {selectedAccommodation.capacity} guests)
+                                        Selected: {selectedAccommodation.name} - ₱{selectedAccommodation.price.toLocaleString()}/stay (Max: {selectedAccommodation.capacity} guests)
                                     </span>
                                 </div>
                             </div>
@@ -293,7 +293,7 @@ const ManualBookingForm = () => {
                                             selected={field.value}
                                             onSelect={(date) => {
                                                 if(date && !isSameDateOnly(date, new Date(field.value))) {
-                                                    resetField('stayType')
+                                                    resetField('stayOptionId')
                                                 }
                                                 field.onChange(date)
                                             }}
@@ -342,12 +342,12 @@ const ManualBookingForm = () => {
 
                         <FieldGroup>
                             <Controller
-                            name="stayType"
+                            name="stayOptionId"
                             control={control}
                             render={({ field, fieldState }) => (
                                 <FieldSet data-invalid={fieldState.invalid} className="grid gap-2">
                                     <FieldLegend data-invalid={fieldState.invalid} className="gap-1 data-[invalid=true]:text-destructive" variant="label">
-                                        Stay Type <span className="text-red-700">*</span>
+                                        Stay Option <span className="text-red-700">*</span>
                                     </FieldLegend>
                                     
                                     <AvailabilityStayType 
@@ -445,7 +445,7 @@ const ManualBookingForm = () => {
                                     <div className="flex justify-between items-center">
                                         <span className="text-muted-foreground">Base Price:</span>
                                         <span className="font-semibold" >
-                                            ₱{selectedAccommodation?.price || 0}/(OverNight Or DayStay)
+                                            ₱{selectedAccommodation?.price || 0}/stay
                                         </span>
                                     </div>
 
