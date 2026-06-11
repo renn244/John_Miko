@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import AccommodationForm from "@/forms/Admin/Accommodation/AccommodationForm";
+import { prepareAccommodationCreatePayload } from "@/forms/Admin/Accommodation/accommodationStayOptionForm.util";
 import { useCreateAccommodationMutation } from "@/hooks/admin/accommodation.hook";
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router";
@@ -28,7 +29,7 @@ const AddAccommodation = () => {
             </div>
     
             <AccommodationForm 
-            onsubmit={createAccommodation}
+            onsubmit={(data) => createAccommodation(prepareAccommodationCreatePayload(data))}
             oncancel={() => navigate("/admin/accommodation")}
             />
         </div>
