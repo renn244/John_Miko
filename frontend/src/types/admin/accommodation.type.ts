@@ -9,6 +9,7 @@ export type Accommodation = {
     type: "Room" | "Cottage" | "EventHall";
     capacity: number;
     price: number;
+    isGuestFeeWaived: boolean;
     
     amenities: string[];
     stayOptions: AccommodationStayOption[];
@@ -39,6 +40,7 @@ export type CreateAccommodationDto = {
     type: Accommodation['type'];
     capacity: Accommodation['capacity'];
     price: Accommodation['price'];
+    isGuestFeeWaived: Accommodation['isGuestFeeWaived'];
     
     amenities: Accommodation['amenities'];
     stayOptions: Array<{
@@ -52,7 +54,7 @@ export type CreateAccommodationDto = {
     }>;
 }
 
-export type UpdateAccommodationDto = Omit<CreateAccommodationDto, "stayOptions">;
+export type UpdateAccommodationDto = Omit<CreateAccommodationDto, "stayOptions" | "isGuestFeeWaived">;
 
 export type GetAccommodationQuery = {
     type?: Accommodation['type'];

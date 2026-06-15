@@ -41,6 +41,7 @@ export const getAccommodationFormDefaults = (initialData?: Accommodation, isUpda
     type: initialData?.type || "Room",
     capacity: initialData?.capacity || 0,
     price: initialData?.price || 0,
+    isGuestFeeWaived: initialData?.isGuestFeeWaived || false,
     description: initialData?.description || "",
     imageUrl: initialData?.imageUrl || "",
     amenities: initialData?.amenities || [],
@@ -71,7 +72,8 @@ export const prepareAccommodationCreatePayload = (data: AccommodationFormValues)
 });
 
 export const prepareAccommodationUpdatePayload = (data: AccommodationFormValues): UpdateAccommodationDto => {
-    const { stayOptions: _stayOptions, ...payload } = data;
+    const { stayOptions: _stayOptions, isGuestFeeWaived: _isGuestFeeWaived, ...payload } = data;
 
     return payload;
 };
+

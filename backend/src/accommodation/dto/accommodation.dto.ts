@@ -57,6 +57,9 @@ export class CreateAccommodationStayOptionDto {
 }
 
 export class CreateAccommodationDto extends AccommodationBaseDto {
+    @IsBoolean({ message: "isGuestFeeWaived must be a boolean" })
+    isGuestFeeWaived!: boolean;
+
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => CreateAccommodationStayOptionDto)

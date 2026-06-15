@@ -74,6 +74,7 @@ model Accommodation {
   type          AccommodationType
   capacity      Int
   price         Int
+  isGuestFeeWaived Boolean @default(false)
 
   amenities     String[]  @default([]) 
   
@@ -189,6 +190,7 @@ model Booking {
   stayOptionCodeSnapshot  String
   stayOptionLabelSnapshot String
   stayDurationHoursSnapshot Int?
+  guestFeeWaivedSnapshot Boolean @default(false)
 
   status           BookingStatus @default(Pending)
   paymentType      PaymentType
@@ -327,28 +329,52 @@ model PreOrderMenuItem {
   createdAt     DateTime @default(now())
 }
 
+enum ReportStatus {
+  Pending
+  Approved
+  Rejected
+}
+
 enum ReportType  {
   checkIn
   checkOut
+  maintenance
+}
+
+enum ReportSeverity {
+  Low
+  Medium
+  High
 }
 
 model Report {
   id            String   @id @default(cuid())
 
-  bookingId     String
-  booking       Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId     String?
+  booking       Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
-  userId        String // for staff, to identify who made the report. for accountability purposes
+  userId        String 
   user          User   @relation(fields: [userId], references: [id])
 
   title         String
   proofImages   String[]
   description   String
 
-  type    ReportType
+  type        ReportType
+  status      ReportStatus @default(Pending)
+  severity    ReportSeverity 
 
-  createdAt     DateTime @default(now())
-} 
+  rejectionNote String?
+  reviewedAt    DateTime?
+
+  createdAt   DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+  @@index([severity])
+  @@index([ status, severity])
+}
 
 enum MaintenanceStatus {
   Pending

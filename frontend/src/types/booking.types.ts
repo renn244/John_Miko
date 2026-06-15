@@ -23,6 +23,7 @@ export type Booking = {
     stayOptionCodeSnapshot: string;
     stayOptionLabelSnapshot: string;
     stayDurationHoursSnapshot?: number | null;
+    guestFeeWaivedSnapshot: boolean;
     timeSlot?: string;
     stayOption?: AccommodationStayOption;
     paymentType: 'Partial' | 'Full';

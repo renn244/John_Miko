@@ -15,6 +15,7 @@ export const AccommodationSchema = z.object({
     type: z.enum(["Room", "Cottage", "EventHall"]).nonoptional("Type is required"),
     capacity: z.number().nonnegative("Capicity must be a positive number").int("Capicity must be an integer").min(1, "Capacity must be at least 1"),
     price: z.number().nonnegative("Price must be a positive number").min(1, "Price must be at least 1"),
+    isGuestFeeWaived: z.boolean(),
     description: z.string().nonempty("Description is required"),
     imageUrl: z.url().nonempty("Image URL is required"),
     amenities: z.array(z.string()),

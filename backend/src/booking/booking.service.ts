@@ -9,7 +9,7 @@ import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BookingServicesService } from 'src/services/booking-services.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
-import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
+import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 import { ClosureService } from 'src/closure/closure.service';
 
 @Injectable()
@@ -89,10 +89,12 @@ export class BookingService {
                 throw new ConflictException('Accommodation is closed for the selected date')
             }
 
-            const newBooking = await this.createBooking(body, user, stayOption, txprisma);
+            const newBooking = await this.createBooking(body, user, stayOption, accommodation.isGuestFeeWaived, txprisma);
 
             const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
-            const guestFeeTotal = this.calculateGuestFee(body.adultGuests, body.seniorGuests, body.kidGuests, stayOption.code)
+            const guestFeeTotal = accommodation.isGuestFeeWaived
+                ? 0
+                : this.calculateGuestFee(body.adultGuests, body.seniorGuests, body.kidGuests, stayOption.code)
 
             const { total: addOnServiceTotal } = await this.bookingServicesService.createBulk(newBooking.id, body.addOnServices || [], txprisma);
 
@@ -133,7 +135,13 @@ export class BookingService {
         return booking
     }
 
-    async createBooking(body: CreateBookingDto, user: UserSession, stayOption: AccommodationStayOption, tx: Prisma.TransactionClient) {
+    async createBooking(
+        body: CreateBookingDto,
+        user: UserSession,
+        stayOption: AccommodationStayOption,
+        isGuestFeeWaived: boolean,
+        tx: Prisma.TransactionClient
+    ) {
         const totalNumberofGuest = body.seniorGuests + body.adultGuests + body.kidGuests
 
         const newBooking = await tx.booking.create({
@@ -145,6 +153,7 @@ export class BookingService {
                 stayOptionCodeSnapshot: stayOption.code,
                 stayOptionLabelSnapshot: stayOption.label,
                 stayDurationHoursSnapshot: stayOption.durationHours,
+                guestFeeWaivedSnapshot: isGuestFeeWaived,
                 paymentType: body.paymentType,
                 numberOfGuests: totalNumberofGuest,
                 specialRequests: body.specialRequest,
@@ -206,6 +215,150 @@ export class BookingService {
             data,
             meta: getPaginationMeta(total, page, limit)
         }
+    }
+
+    private getManilaDateOnly() {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Manila',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).formatToParts(new Date());
+
+        const year = parts.find((part) => part.type === 'year')?.value;
+        const month = parts.find((part) => part.type === 'month')?.value;
+        const day = parts.find((part) => part.type === 'day')?.value;
+
+        return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+    }
+
+    async getStaffBookings(query: GetStaffBookingsQuery) {
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const search = query.search?.trim();
+        const where: Prisma.BookingWhereInput = {
+            status: 'Confirmed',
+            bookingDate: { gte: this.getManilaDateOnly() },
+            ...(search ? {
+                OR: [
+                    { id: { contains: search, mode: 'insensitive' } },
+                    { guestName: { contains: search, mode: 'insensitive' } },
+                    { contactNo: { contains: search, mode: 'insensitive' } },
+                ]
+            } : {}),
+        };
+
+        const [data, total] = await Promise.all([
+            this.prisma.booking.findMany({
+                where,
+                select: {
+                    id: true,
+                    guestName: true,
+                    contactNo: true,
+                    bookingDate: true,
+                    numberOfGuests: true,
+                    status: true,
+                    stayOptionCodeSnapshot: true,
+                    stayOptionLabelSnapshot: true,
+                    stayDurationHoursSnapshot: true,
+                    guestFeeWaivedSnapshot: true,
+                    accommodation: {
+                        select: {
+                            id: true,
+                            name: true,
+                            type: true,
+                            imageUrl: true,
+                        }
+                    },
+                    stayOption: {
+                        select: {
+                            sortOrder: true,
+                            startTime: true,
+                            endTime: true,
+                        }
+                    },
+                },
+                ...getPaginationArgs(page, limit),
+                orderBy: [
+                    { bookingDate: 'asc' },
+                    { stayOption: { sortOrder: 'asc' } },
+                ],
+            }),
+            this.prisma.booking.count({ where }),
+        ]);
+
+        return {
+            data,
+            meta: getPaginationMeta(total, page, limit),
+        };
+    }
+
+    async getStaffBookingById(bookingId: string) {
+        const booking = await this.prisma.booking.findFirst({
+            where: {
+                id: bookingId,
+                status: 'Confirmed',
+                bookingDate: { gte: this.getManilaDateOnly() },
+            },
+            select: {
+                id: true,
+                guestName: true,
+                email: true,
+                contactNo: true,
+                adultGuests: true,
+                kidGuests: true,
+                seniorGuest: true,
+                numberOfGuests: true,
+                specialRequests: true,
+                bookingDate: true,
+                status: true,
+                stayOptionCodeSnapshot: true,
+                stayOptionLabelSnapshot: true,
+                stayDurationHoursSnapshot: true,
+                guestFeeWaivedSnapshot: true,
+                accommodation: {
+                    select: {
+                        id: true,
+                        name: true,
+                        type: true,
+                        imageUrl: true,
+                    }
+                },
+                stayOption: {
+                    select: {
+                        startTime: true,
+                        endTime: true,
+                        sortOrder: true,
+                    }
+                },
+                addOns: {
+                    select: {
+                        id: true,
+                        name: true,
+                        quantity: true,
+                        price: true,
+                    },
+                    orderBy: { name: 'asc' },
+                },
+                preOrders: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        category: true,
+                        quantity: true,
+                        status: true,
+                    },
+                    orderBy: { name: 'asc' },
+                },
+            },
+        });
+
+        if (!booking) {
+            throw new NotFoundException('Confirmed upcoming booking not found');
+        }
+
+        return booking;
     }
 
     async getBookingsByAccommodation(accommodationId: string) {
