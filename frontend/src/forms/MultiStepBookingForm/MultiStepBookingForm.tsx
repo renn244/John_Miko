@@ -175,10 +175,12 @@ const MultiStepBookingForm = ({
 
 
     const { totalGuestFee } = useMemo(() => {
-        const totalGuestFee = (adultCount * adultFee) + (seniorCount * seniorFee) + (kidsCount * kidsFee);
+        const totalGuestFee = accommodation.isGuestFeeWaived
+            ? 0
+            : (adultCount * adultFee) + (seniorCount * seniorFee) + (kidsCount * kidsFee);
 
         return { totalGuestFee };
-    }, [kidsCount, adultCount, seniorCount])
+    }, [accommodation.isGuestFeeWaived, kidsCount, adultCount, seniorCount])
 
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayOption);
 

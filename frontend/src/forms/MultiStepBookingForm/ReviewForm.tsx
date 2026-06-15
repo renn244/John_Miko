@@ -238,7 +238,7 @@ const ReviewForm = ({
                         </div>
                         <div className="flex justify-between text-sm">
                             <span  className="text-muted-foreground">
-                                Guest Fee Subtotal
+                                {accommodation.isGuestFeeWaived ? "Guest fees included in price" : "Guest Fee Subtotal"}
                             </span>
                             <span className="font-semibold">
                                 ₱{guestFeeSubTotal.toLocaleString()}
