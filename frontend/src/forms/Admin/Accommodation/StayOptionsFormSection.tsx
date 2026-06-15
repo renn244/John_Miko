@@ -12,18 +12,19 @@ import { formatStayOptionRange } from "@/lib/stayOptionTime";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Controller, useFieldArray, type Control, type FieldErrors } from "react-hook-form";
+import { Controller, useFieldArray, type Control, type FieldErrors, type UseFormSetValue } from "react-hook-form";
 import type { AccommodationFormValues } from "./accommodationForm.schema";
 import { createEmptyStayOption, getPresetStayOptions } from "./accommodationStayOptionForm.util";
 
 type StayOptionsFormSectionProps = {
     control: Control<AccommodationFormValues>;
     errors: FieldErrors<AccommodationFormValues>;
+    setValue: UseFormSetValue<AccommodationFormValues>;
     isUpdate?: boolean;
     existingStayOptions?: Accommodation["stayOptions"];
 };
 
-const StayOptionsFormSection = ({ control, errors, isUpdate, existingStayOptions = [] }: StayOptionsFormSectionProps) => {
+const StayOptionsFormSection = ({ control, errors, setValue, isUpdate, existingStayOptions = [] }: StayOptionsFormSectionProps) => {
     const [presetMode, setPresetMode] = useState<AccommodationStayOptionPresetMode>(
         ACCOMMODATION_STAY_OPTION_PRESET_MODE.DAYSTAY_OVERNIGHT
     );
@@ -32,6 +33,22 @@ const StayOptionsFormSection = ({ control, errors, isUpdate, existingStayOptions
         control,
         name: "stayOptions",
     });
+
+    const applyPreset = (nextMode: AccommodationStayOptionPresetMode) => {
+        setPresetMode(nextMode);
+        replace(getPresetStayOptions(nextMode));
+
+        if (nextMode === ACCOMMODATION_STAY_OPTION_PRESET_MODE.DAYSTAY_OVERNIGHT) {
+            setValue("isGuestFeeWaived", false);
+        }
+
+        if (
+            nextMode === ACCOMMODATION_STAY_OPTION_PRESET_MODE.TWENTY_TWO_HOURS ||
+            nextMode === ACCOMMODATION_STAY_OPTION_PRESET_MODE.TWELVE_HOURS_FLEXIBLE
+        ) {
+            setValue("isGuestFeeWaived", true);
+        }
+    };
 
     if (isUpdate) {
         return (
@@ -78,14 +95,29 @@ const StayOptionsFormSection = ({ control, errors, isUpdate, existingStayOptions
             </h2>
 
             <div className="space-y-4">
+                <div className="flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                        <p className="text-sm font-medium">Choose a starting model</p>
+                        <p className="text-sm text-muted-foreground">You can still edit the stay options after selecting a preset.</p>
+                    </div>
+
+                    <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 text-sm"
+                    onClick={() => applyPreset(ACCOMMODATION_STAY_OPTION_PRESET_MODE.CUSTOM)}
+                    >
+                        Custom
+                    </Button>
+                </div>
+
                 <RadioGroup
                 value={presetMode}
                 onValueChange={(value) => {
                     const nextMode = value as AccommodationStayOptionPresetMode;
-                    setPresetMode(nextMode);
-                    replace(nextMode === ACCOMMODATION_STAY_OPTION_PRESET_MODE.DAYSTAY_OVERNIGHT ? getPresetStayOptions() : []);
+                    applyPreset(nextMode);
                 }}
-                className="grid md:grid-cols-2 gap-3"
+                className="grid md:grid-cols-3 gap-3"
                 >
                     <FieldLabel htmlFor="preset-daystay-overnight">
                         <Field orientation="horizontal">
@@ -97,13 +129,23 @@ const StayOptionsFormSection = ({ control, errors, isUpdate, existingStayOptions
                         </Field>
                     </FieldLabel>
 
-                    <FieldLabel htmlFor="preset-custom">
+                    <FieldLabel htmlFor="preset-twenty-two-hours">
                         <Field orientation="horizontal">
                             <FieldContent>
-                                <FieldTitle>Custom</FieldTitle>
-                                <FieldDescription>Start blank and add only what this accommodation needs.</FieldDescription>
+                                <FieldTitle>22 Hours</FieldTitle>
+                                <FieldDescription>Single long-stay option with bundled guest fees.</FieldDescription>
                             </FieldContent>
-                            <RadioGroupItem value={ACCOMMODATION_STAY_OPTION_PRESET_MODE.CUSTOM} id="preset-custom" />
+                            <RadioGroupItem value={ACCOMMODATION_STAY_OPTION_PRESET_MODE.TWENTY_TWO_HOURS} id="preset-twenty-two-hours" />
+                        </Field>
+                    </FieldLabel>
+
+                    <FieldLabel htmlFor="preset-twelve-hours-flexible">
+                        <Field orientation="horizontal">
+                            <FieldContent>
+                                <FieldTitle>12 Hours Flexible</FieldTitle>
+                                <FieldDescription>Single flexible stay option with bundled guest fees.</FieldDescription>
+                            </FieldContent>
+                            <RadioGroupItem value={ACCOMMODATION_STAY_OPTION_PRESET_MODE.TWELVE_HOURS_FLEXIBLE} id="preset-twelve-hours-flexible" />
                         </Field>
                     </FieldLabel>
                 </RadioGroup>

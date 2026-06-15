@@ -36,6 +36,7 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
         control,
         handleSubmit,
         setError,
+        setValue,
         formState: { errors },
     } = useForm<AccommodationFormValues>({
         resolver: zodResolver(AccommodationSchema),
@@ -209,6 +210,7 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                 <StayOptionsFormSection
                 control={control}
                 errors={errors}
+                setValue={setValue}
                 isUpdate={isUpdate}
                 existingStayOptions={initialData?.stayOptions}
                 />

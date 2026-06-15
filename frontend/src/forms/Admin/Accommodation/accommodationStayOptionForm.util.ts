@@ -1,4 +1,10 @@
-import { DAYSTAY_OVERNIGHT_PRESET } from "@/lib/constant/ACCOMMODATION_STAY_OPTION_PRESETS.constant";
+import {
+    ACCOMMODATION_STAY_OPTION_PRESET_MODE,
+    DAYSTAY_OVERNIGHT_PRESET,
+    TWELVE_HOURS_FLEXIBLE_PRESET,
+    TWENTY_TWO_HOURS_PRESET,
+    type AccommodationStayOptionPresetMode,
+} from "@/lib/constant/ACCOMMODATION_STAY_OPTION_PRESETS.constant";
 import { toTimeInputValue } from "@/lib/stayOptionTime";
 import type { Accommodation, CreateAccommodationDto, UpdateAccommodationDto } from "@/types/admin/accommodation.type";
 import type { AccommodationFormValues } from "./accommodationForm.schema";
@@ -27,14 +33,28 @@ export const createEmptyStayOption = (index: number): AccommodationFormValues["s
     isActive: true,
 });
 
-export const getPresetStayOptions = (): AccommodationFormValues["stayOptions"] =>
-    DAYSTAY_OVERNIGHT_PRESET.map((stayOption, index) => ({
+const normalizePresetStayOptions = (stayOptions: CreateAccommodationDto["stayOptions"]): AccommodationFormValues["stayOptions"] =>
+    stayOptions.map((stayOption, index) => ({
         ...stayOption,
         durationHours: stayOption.durationHours ?? undefined,
         startTime: normalizeTimeInput(stayOption.startTime),
         endTime: normalizeTimeInput(stayOption.endTime),
         sortOrder: index,
     }));
+
+export const getPresetStayOptions = (presetMode: AccommodationStayOptionPresetMode = ACCOMMODATION_STAY_OPTION_PRESET_MODE.DAYSTAY_OVERNIGHT) => {
+    switch (presetMode) {
+        case ACCOMMODATION_STAY_OPTION_PRESET_MODE.TWENTY_TWO_HOURS:
+            return normalizePresetStayOptions(TWENTY_TWO_HOURS_PRESET);
+        case ACCOMMODATION_STAY_OPTION_PRESET_MODE.TWELVE_HOURS_FLEXIBLE:
+            return normalizePresetStayOptions(TWELVE_HOURS_FLEXIBLE_PRESET);
+        case ACCOMMODATION_STAY_OPTION_PRESET_MODE.CUSTOM:
+            return [];
+        case ACCOMMODATION_STAY_OPTION_PRESET_MODE.DAYSTAY_OVERNIGHT:
+        default:
+            return normalizePresetStayOptions(DAYSTAY_OVERNIGHT_PRESET);
+    }
+};
 
 export const getAccommodationFormDefaults = (initialData?: Accommodation, isUpdate?: boolean): AccommodationFormValues => ({
     name: initialData?.name || "",
@@ -76,4 +96,3 @@ export const prepareAccommodationUpdatePayload = (data: AccommodationFormValues)
 
     return payload;
 };
-
