@@ -15,14 +15,14 @@ export class CustomValidationPipe implements PipeTransform {
             return value
         }
 
-        const object = plainToInstance(metadata.metatype, value, {
-            enableImplicitConversion: true
-        });
+        const object = plainToInstance(metadata.metatype, value);
 
         // would return an array of errors if there are any errors        
         const error = await validate(object, {
             whitelist: true, // would remove any properties that are not defined in the DTO
         });
+
+        console.dir(error, { depth: null });
 
         if(error.length > 0) {
             const errors = error.map(err => {

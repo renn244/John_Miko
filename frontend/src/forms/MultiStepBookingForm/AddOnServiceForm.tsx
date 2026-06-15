@@ -15,9 +15,9 @@ type AddOnServiceFormProps = {
 
 const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceFormProps) => {
     const bookingDate = useBookingSelectStore((s) => s.bookingDate);
-    const timeSlot = useBookingSelectStore((s) => s.bookingType);
+    const stayOptionId = useBookingSelectStore((s) => s.bookingType);
 
-    const query = bookingDate && timeSlot ? { bookingDate: toDateOnly(bookingDate), timeSlot } : null;
+    const query = bookingDate && stayOptionId ? { bookingDate: toDateOnly(bookingDate), stayOptionId } : null;
     const { data: services, isLoading } = useGetAvailableServicesForBookingQuery(query);
 
     const [serviceCache, setServiceCache] = useState<Record<string, AddOnService>>({});

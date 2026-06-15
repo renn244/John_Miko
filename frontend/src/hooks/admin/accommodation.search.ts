@@ -7,7 +7,6 @@ export const useAccommodationSearchParams = () => {
 
     const search = searchParams.get("search") || undefined;
     const type = searchParams.get("type");
-    const status = searchParams.get("status");
     const page = Number(searchParams.get("page") || "1");
     const limit = 8;
 
@@ -17,9 +16,6 @@ export const useAccommodationSearchParams = () => {
     const updateType = (value: Accommodation['type'] | "all") => 
         updateSearchParams(setSearchParams, { type: value === "all" ? undefined : value, page: undefined });
 
-    const updateStatus = (value: Accommodation['availability'] | "all") => 
-        updateSearchParams(setSearchParams, { status: value === "all" ? undefined : value, page: undefined });
-    
     const updatePage = (value: number) => {
         updateSearchParams(setSearchParams, { page: value === 1 ? undefined : value.toString() });
     };
@@ -27,12 +23,10 @@ export const useAccommodationSearchParams = () => {
     return {
         search,
         type: type as Accommodation['type'],
-        status: status as Accommodation['availability'],
         page,
         limit,
         updateSearch,
         updateType,
-        updateStatus,
         updatePage
     };
 };

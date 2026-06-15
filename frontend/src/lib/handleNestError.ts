@@ -23,7 +23,7 @@ export function handleNestError<T extends FieldValues>(
             fieldError.message.forEach((message, index) => {
                 // Generates keys like manualError0, manualError1, etc.
                 // because error can't actually be on arrays
-                errorTypes[`manualError${index}`] = message || "Invalid Input";
+                errorTypes[`manual_error_${index}`] = message || "Invalid Input";
             });
 
             setError(fieldError.field as any, { 

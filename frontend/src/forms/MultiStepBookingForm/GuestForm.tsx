@@ -8,25 +8,24 @@ import { ArrowRight, Minus, Plus, Users } from "lucide-react";
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
-import { useQueryClient } from "@tanstack/react-query";
 
 type GuestFormProps = {
     accommodation: Accommodation,
-    selectedStayType: 'OverNight' | 'DayStay',
+    selectedStayType: string,
+    selectedStayCode?: string,
     selectedCheckIn: Date,
     selectedCheckOut: Date,
     setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review'  | 'pre-order' | 'payment'>>,
 }
 
-const GuestForm =  ({ accommodation, selectedStayType, selectedCheckIn, selectedCheckOut, setBookingStep }: GuestFormProps) => {
-    const queryClient = useQueryClient();
+const GuestForm =  ({ accommodation, selectedStayCode, setBookingStep }: GuestFormProps) => {
     const { control, watch, reset, getValues, setError, setValue, trigger } = useFormContext<multiStepBookingFormSchema>();
 
     const adultGuests = watch('adultGuests'); 
     const seniorGuests = watch('seniorGuests');
     const kidGuests = watch('kidGuests'); 
 
-    const adultFee = watch('stayType') === 'DayStay' ? 150 : 180; // full price
+    const adultFee = selectedStayCode?.toLowerCase() === 'daystay' ? 150 : 180; // full price
     const seniorFee = adultFee - (adultFee * 0.20); // 20 percent discount
     const kidsFee = 100 // just a kid 4-7 years old
 
@@ -37,14 +36,6 @@ const GuestForm =  ({ accommodation, selectedStayType, selectedCheckIn, selected
 
     }, [adultGuests, seniorGuests, kidGuests])
 
-    const calculateGuestFee = (adultGuests: number, seniorGuests: number, kidGuests: number) => {
-        const adultTotal = adultGuests * adultFee;
-        const seniorTotal = seniorGuests * seniorFee;
-        const kidsTotal = kidGuests * kidsFee; 
-
-        return { adultTotal, seniorTotal, kidsTotal };
-    }
- 
     const validateStep = async () => {
         const isValid = await trigger(["firstName", "lastName", "email", "contactNo", "numberOfGuests"]);
         

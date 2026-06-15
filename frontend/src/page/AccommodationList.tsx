@@ -2,12 +2,6 @@ import NavBar from "@/components/common/NavBar"
 import AccommodationCardView from "@/components/pageComponents/Accommodation/AccommodationCardView"
 import { Button } from "@/components/ui/button"
 import {
-    Card,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import {
     Empty,
     EmptyContent,
     EmptyDescription,
@@ -18,7 +12,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook"
 import type { Accommodation } from "@/types/admin/accommodation.type"
-import { AlertTriangle, BedDouble, Loader2, RefreshCcw } from "lucide-react"
+import { AlertTriangle, BedDouble, RefreshCcw } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router"
 
@@ -30,13 +24,11 @@ const AccommodationList = () => {
     const {
         data,
         isLoading,
-        isFetching,
         isError,
         error,
         refetch,
     } = useGetAccommodationsQuery({
         type: selectedType === "All" ? undefined : selectedType,
-        availability: "Available",
         page: 1, limit: 100
     })
 
@@ -48,8 +40,6 @@ const AccommodationList = () => {
         { value: "Cottage", label: "Cottage" },
         { value: "EventHall", label: "Event Hall" },
     ]
-
-    const resultsLabel = `${accommodations.length} ${accommodations.length === 1 ? "result" : "results"}`
 
     return (
         <div className="min-h-screen bg-muted/30">

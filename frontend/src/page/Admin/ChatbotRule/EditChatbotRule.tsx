@@ -41,7 +41,13 @@ const EditChatbotRule = () => {
         await mutateAsync({ ...formData, id });
         navigate("/admin/chatbot-rule");
       }}
-      initialData={chatbotRule}
+      initialData={{
+        intentName: chatbotRule.name,
+        trainingPhrases: chatbotRule.keywords,
+        response: chatbotRule.response,
+        quickReplies: chatbotRule.quickReplies,
+        isActive: chatbotRule.isActive,
+      }}
       isUpdate
       />
     </div>

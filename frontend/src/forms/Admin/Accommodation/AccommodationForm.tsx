@@ -1,138 +1,134 @@
-import { CloudinaryPreview } from "@/components/common/CloudinaryPreview"
-import { CloudinaryUpload } from "@/components/common/CloudinaryUpload"
-import { Button } from "@/components/ui/button"
-import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldSet, FieldTitle } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import LoadingSpinner from "@/components/ui/loadingSpinner"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { InputTags } from "@/components/ui/tag-input"
-import { Textarea } from "@/components/ui/textarea"
-import { getErrorMessages } from "@/lib/getErrorMessages"
-import { handleNestError, ValidationError } from "@/lib/handleNestError"
-import { cn } from "@/lib/utils"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
-import { Controller, useForm } from "react-hook-form"
-import { toast } from "sonner"
-import z from "zod"
-
-const AccommodationSchema = z.object({
-    name: z.string()
-        .nonempty("Name is required"),
-    type: z.enum(["Room", "Cottage", "EventHall"])
-        .nonoptional("Type is required"),
-    capacity: z.number()
-        .nonnegative("Capicity must be a positive number")
-        .int("Capicity must be an integer")
-        .min(1, "Capacity must be at least 1"),
-    price: z.number()
-        .nonnegative("Price must be a positive number")
-        .min(1, "Price must be at least 1"),
-    description: z.string()
-        .nonempty("Description is required"),
-    imageUrl: z.url()
-        .nonempty("Image URL is required"),
-    amenities: z.array(z.string()),
-    availability: z.enum(["Available", "Unavailable", "Maintenance"])
-})
-
-type accommodationSchema = z.infer<typeof AccommodationSchema>
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
+import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { InputTags } from "@/components/ui/tag-input";
+import { Textarea } from "@/components/ui/textarea";
+import { getErrorMessages } from "@/lib/getErrorMessages";
+import { handleNestError, ValidationError } from "@/lib/handleNestError";
+import { cn } from "@/lib/utils";
+import type { Accommodation } from "@/types/admin/accommodation.type";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Save } from "lucide-react";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { AccommodationSchema, type AccommodationFormValues } from "./accommodationForm.schema";
+import { getAccommodationFormDefaults } from "./accommodationStayOptionForm.util";
+import StayOptionsFormSection from "./StayOptionsFormSection";
 
 type AccommodationFormProps = {
-    onsubmit: (data: accommodationSchema) => Promise<void | any>,
-    oncancel: () => void,
-    className?: string,
-    initialData?: accommodationSchema,
-    isUpdate?: boolean,
-}
+    onsubmit: (data: AccommodationFormValues) => Promise<void | any>;
+    oncancel: () => void;
+    className?: string;
+    initialData?: Accommodation;
+    isUpdate?: boolean;
+};
 
 const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdate }: AccommodationFormProps) => {
     const [isLoading, setIsLoading] = useState(false);
+
     const {
-        handleSubmit,
         control,
-        setError
-    } = useForm<accommodationSchema>({
-        resolver:  zodResolver(AccommodationSchema),
-        defaultValues: {
-            name: initialData?.name || "",
-            type: initialData?.type || "Room",
-            capacity: initialData?.capacity || 0,
-            price: initialData?.price || 0,
-            description: initialData?.description || "",
-            imageUrl: initialData?.imageUrl || "",
-            amenities: initialData?.amenities || [],
-            availability: initialData?.availability || "Available"
-        },
-        criteriaMode: "all"
-    })
+        handleSubmit,
+        setError,
+        setValue,
+        formState: { errors },
+    } = useForm<AccommodationFormValues>({
+        resolver: zodResolver(AccommodationSchema),
+        defaultValues: getAccommodationFormDefaults(initialData, isUpdate),
+        criteriaMode: "all",
+    });
 
     const buttonText = isUpdate ? "Save" : "Create";
 
-    const onSubmit = async (data: accommodationSchema) => {
+    const onSubmit = async (data: AccommodationFormValues) => {
         setIsLoading(true);
         try {
             await onsubmit(data);
         } catch (error: any) {
-            if(error instanceof ValidationError) {
+            if (error instanceof ValidationError) {
                 handleNestError(error.response, setError);
-                return
+                return;
             }
 
             toast.error(error.message);
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     return (
-        <form 
+        <form
         className={cn("bg-white rounded-xl shadow-sm border overflow-hidden", className)}
         onSubmit={handleSubmit(onSubmit)}
         >
             <div className="p-6 md:p-8 space-y-6">
-
                 <div>
                     <h2 className="text-lg font-bold mb-4 pb-2 border-b">
                         Basic Information
                     </h2>
                     <div className="space-y-5">
-
-                        <Controller 
+                        <Controller
                         name="name"
                         control={control}
                         render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                                
                                 <FieldLabel htmlFor={field.name}>Accommodation Name</FieldLabel>
-                                
-                                <Input 
+
+                                <Input
                                 id={field.name}
                                 placeholder="e.g., Deluxe Ocean View Room"
                                 aria-invalid={fieldState.invalid}
                                 {...field}
                                 />
-                                
+
                                 {fieldState.invalid && (
                                     <FieldError errors={getErrorMessages(fieldState.error)} />
                                 )}
+                            </Field>
+                        )}
+                        />
 
+                        <Controller
+                        name="description"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gaps-2">
+                                <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+
+                                <Textarea
+                                id={field.name}
+                                aria-invalid={fieldState.invalid}
+                                placeholder="Enter description"
+                                className="max-h-50"
+                                {...field}
+                                />
+
+                                {fieldState.invalid ? (
+                                    <FieldError errors={getErrorMessages(fieldState.error)} />
+                                ) : (
+                                    <FieldDescription>
+                                        This will be shown to guests when browsing accommodations, so make it more detailed and enticing!
+                                    </FieldDescription>
+                                )}
                             </Field>
                         )}
                         />
 
                         <div className="grid md:grid-cols-2 gap-5">
-                            <Controller 
+                            <Controller
                             name="type"
                             control={control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                                    
                                     <FieldLabel htmlFor={field.name}>Type</FieldLabel>
-                                
-                                    <Select 
+
+                                    <Select
                                     name={field.name}
                                     value={field.value}
                                     onValueChange={field.onChange}
@@ -157,14 +153,14 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                             )}
                             />
 
-                            <Controller 
+                            <Controller
                             name="capacity"
                             control={control}
                             render={({ field, fieldState }) => (
                                 <Field data-invalid={fieldState.invalid} className="grid gap-2">
                                     <FieldLabel htmlFor={field.name}>Capacity (pax)</FieldLabel>
 
-                                    <Input 
+                                    <Input
                                     id={field.name}
                                     type="number"
                                     aria-invalid={fieldState.invalid}
@@ -172,24 +168,23 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                                     {...field}
                                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                                     />
-                                    
+
                                     {fieldState.invalid && (
                                         <FieldError errors={getErrorMessages(fieldState.error)} />
                                     )}
                                 </Field>
                             )}
                             />
-
                         </div>
 
-                        <Controller 
+                        <Controller
                         name="price"
                         control={control}
                         render={({ field, fieldState }) => (
                             <Field data-invalid={fieldState.invalid} className="grid gap-2">
                                 <FieldLabel htmlFor={field.name}>Price</FieldLabel>
 
-                                <Input 
+                                <Input
                                 id={field.name}
                                 type="number"
                                 aria-invalid={fieldState.invalid}
@@ -204,64 +199,69 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                             </Field>
                         )}
                         />
+
+                        <Controller
+                        name="isGuestFeeWaived"
+                        control={control}
+                        render={({ field }) => (
+                            <Field className="rounded-lg border bg-muted/20 px-4 py-4">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="space-y-1">
+                                        <FieldLabel htmlFor="guest-fee-waived">
+                                            Guest fees included in price
+                                        </FieldLabel>
+                                        <FieldDescription>
+                                            Enable this when guest entrance fees are already bundled into the accommodation price.
+                                        </FieldDescription>
+                                    </div>
+
+                                    {isUpdate ? (
+                                        <span className="text-sm font-medium text-muted-foreground">
+                                            {field.value ? "Included" : "Charged separately"}
+                                        </span>
+                                    ) : (
+                                        <Switch
+                                        id="guest-fee-waived"
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        />
+                                    )}
+                                </div>
+                            </Field>
+                        )}
+                        />
                     </div>
                 </div>
 
-                <div>
-
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Description
-                    </h2>
-
-                    <Controller 
-                    name="description"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid} className="grid gaps-2">
-                            <FieldLabel htmlFor={field.name}>Description</FieldLabel>
-                            
-                            <Textarea 
-                            id={field.name}
-                            aria-invalid={fieldState.invalid}
-                            placeholder="Enter description"
-                            {...field}
-                            />
-
-                            {fieldState.invalid ? (
-                                <FieldError errors={getErrorMessages(fieldState.error)} />
-                            ) : (
-                                 <FieldDescription>
-                                    This will be shown to guests when browsing accommodations, so make it more detailed and enticing!
-                                </FieldDescription>
-                            )}
-                        </Field>
-                    )}
-                    />
-
-                </div>
+                <StayOptionsFormSection
+                control={control}
+                errors={errors}
+                setValue={setValue}
+                isUpdate={isUpdate}
+                existingStayOptions={initialData?.stayOptions}
+                />
 
                 <div>
-
                     <h2 className="text-lg font-bold mb-4 pb-2 border-b">
                         Media
                     </h2>
 
-                    <Controller 
+                    <Controller
                     name="imageUrl"
                     control={control}
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid} className="grid gaps-2">
                             <FieldLabel htmlFor={field.name}>Image URL</FieldLabel>
-                            
+
                             {!field.value && (
-                                <CloudinaryUpload 
+                                <CloudinaryUpload
                                 onSuccess={(url) => field.onChange(url)}
-                                onError={(err) => setError('imageUrl', { type: 'manual', message: err.message })}
+                                onError={(err) => setError("imageUrl", { type: "manual", message: err.message })}
                                 />
                             )}
 
                             {field.value && (
-                                <CloudinaryPreview 
+                                <CloudinaryPreview
                                 images={[{ url: field.value }]}
                                 onRemove={() => field.onChange("")}
                                 />
@@ -270,29 +270,24 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                             {fieldState.invalid && (
                                 <FieldError errors={getErrorMessages(fieldState.error)} />
                             )}
-                            
                         </Field>
                     )}
                     />
-
-                    
-
                 </div>
 
                 <div>
-
                     <h2 className="text-lg font-bold mb-4 pb-2 border-b">
                         Amenities
                     </h2>
-                    
-                    <Controller 
+
+                    <Controller
                     name="amenities"
                     control={control}
                     render={({ field, fieldState }) => (
                         <Field data-invalid={fieldState.invalid} className="grid gap-2">
                             <FieldLabel htmlFor={field.name}>Amenities</FieldLabel>
 
-                            <InputTags 
+                            <InputTags
                             value={field.value}
                             onChange={field.onChange}
                             />
@@ -303,97 +298,34 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                         </Field>
                     )}
                     />
-                    
                 </div>
-
-                <div>
-                    
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Availability
-                    </h2>
-
-                    <div>
-                        <Label className="mb-2">
-                            Initial Availability Status
-                        </Label>
-
-                        <Controller 
-                        name="availability"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <FieldSet data-invalid={fieldState.invalid}>
-                                <RadioGroup 
-                                name={field.name}
-                                value={field.value}
-                                onValueChange={field.onChange}
-                                aria-invalid={fieldState.invalid} 
-                                className="grid md:grid-cols-3 gap-3"
-                                >
-                                    <FieldLabel htmlFor="available-status">
-                                        <Field data-invalid={fieldState.invalid} orientation="horizontal">
-                                            <FieldContent>
-                                                <FieldTitle>Available</FieldTitle>
-                                                <FieldDescription>
-                                                    The Accommodation is available upon creation.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem value="Available" id="available-status" />
-                                        </Field>
-                                    </FieldLabel>
-                                    <FieldLabel htmlFor="unavailable-status">
-                                        <Field  data-invalid={fieldState.invalid} orientation="horizontal">
-                                            <FieldContent>
-                                                <FieldTitle>Unavailable</FieldTitle>
-                                                <FieldDescription>
-                                                    The Accommodation is unavailable upon creation.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem value="Unavailable" id="unavailable-status" />
-                                        </Field>
-                                    </FieldLabel>
-                                    <FieldLabel htmlFor="maintenance-status">
-                                        <Field data-invalid={fieldState.invalid} orientation="horizontal">
-                                            <FieldContent>
-                                                <FieldTitle>Maintenance</FieldTitle>
-                                                <FieldDescription>
-                                                    The Accommodation is under maintenance upon creation.
-                                                </FieldDescription>
-                                            </FieldContent>
-                                            <RadioGroupItem value="Maintenance" id="maintenance-status" />
-                                        </Field>
-                                    </FieldLabel>
-                                </RadioGroup>
-
-                                {fieldState.invalid && (
-                                    <FieldError errors={getErrorMessages(fieldState.error)} />
-                                )}
-                            </FieldSet>
-                        )}
-                        />
-                    </div>
-
-                </div>
-
             </div>
 
-            <div 
+            <div
             className="px-6 md:px-8 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4"
-            style={{ backgroundColor: '#F9FAFB', borderColor: '#E5E7EB' }}
+            style={{ backgroundColor: "#F9FAFB", borderColor: "#E5E7EB" }}
             >
-                <p className="text-sm" style={{ color: '#6B7280' }}>
-                    <span style={{ color: '#DC2626' }}>*</span> Required fields
+                <p className="text-sm" style={{ color: "#6B7280" }}>
+                    <span style={{ color: "#DC2626" }}>*</span> Required fields
                 </p>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                     <Button onClick={oncancel} type="button" variant="outline">
                         Cancel
                     </Button>
                     <Button type="submit" disabled={isLoading}>
-                        {isLoading ? <LoadingSpinner /> : buttonText}
+                        {isLoading ? (
+                            <LoadingSpinner />
+                        ) : (
+                            <>
+                                <Save className="w-5 h-5" />
+                                {buttonText}
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>
         </form>
-    )
-}
+    );
+};
 
-export default AccommodationForm
+export default AccommodationForm;

@@ -79,7 +79,7 @@ const BookingTable = () => {
                             <TableCell>{booking.guestName}</TableCell>
                             <TableCell>{booking.accommodation.name}</TableCell>
                             <TableCell>{format(new Date(booking.bookingDate), "MMM dd, yyyy")}</TableCell>
-                            <TableCell>{booking.timeSlot}</TableCell>
+                            <TableCell>{booking.stayOption?.label ?? booking.stayOptionLabelSnapshot ?? booking.timeSlot ?? "Stay"}</TableCell>
                             <TableCell>{booking.numberOfGuests}</TableCell>
                             <TableCell>
                                 <Badge style={{

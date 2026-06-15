@@ -1,25 +1,25 @@
-import { addDays, format } from "date-fns";
-import { TIME_SLOT } from "./constant/TIME_SLOT.constant";
+import { format } from "date-fns";
+import { getBookingDates } from "./getBookingDates";
+import { formatStayOptionTime, type StayOptionTimeInput } from "./stayOptionTime";
 
-const getCheckInOut = (bookingDate: string, timeSlot: "DayStay" | "OverNight") => {
-    const date = new Date(bookingDate);
-    const nextDay = addDays(date, 1);
+type GetCheckInOutInput = StayOptionTimeInput & {
+    bookingDate: string;
+    label?: string | null;
+};
 
-    if (timeSlot === "DayStay") {
-        return {
-            checkIn: format(date, 'PPP') + " " + TIME_SLOT.DAY_STAY.CHECK_IN,
-            checkInDayOfTheWeek: format(date, 'EEEE'),
-            checkOut: format(date, 'PPP') + " " + TIME_SLOT.DAY_STAY.CHECK_OUT,
-            checkOutDayOfTheWeek: format(date, 'EEEE'),
-        };
-    } else {
-        return {
-            checkIn: format(date, 'PPP') + " " + TIME_SLOT.OVERNIGHT.CHECK_IN,
-            checkInDayOfTheWeek: format(date, 'EEEE'),
-            checkOut: format(nextDay, 'PPP') + " " + TIME_SLOT.OVERNIGHT.CHECK_OUT,
-            checkOutDayOfTheWeek: format(nextDay, 'EEEE'),
-        }
-    }
+const getCheckInOut = ({ bookingDate, startTime, endTime }: GetCheckInOutInput) => {
+    const baseDate = new Date(bookingDate);
+    const { checkIn, checkOut } = getBookingDates(baseDate, { startTime, endTime });
+
+    const checkInTime = startTime ? ` ${formatStayOptionTime(startTime)}` : "";
+    const checkOutTime = endTime ? ` ${formatStayOptionTime(endTime)}` : "";
+
+    return {
+        checkIn: format(checkIn, 'PPP') + checkInTime,
+        checkInDayOfTheWeek: format(checkIn, 'EEEE'),
+        checkOut: format(checkOut, 'PPP') + checkOutTime,
+        checkOutDayOfTheWeek: format(checkOut, 'EEEE'),
+    };
 };
 
 export default getCheckInOut;

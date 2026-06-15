@@ -50,7 +50,12 @@ const BookingReschedule = ({ booking }: { booking: BookingWithAccommodation }) =
 
     const { 
         checkIn, checkOut
-    } = getCheckInOut(booking.bookingDate, booking.timeSlot);
+    } = getCheckInOut({
+        bookingDate: booking.bookingDate,
+        startTime: booking.stayOption?.startTime,
+        endTime: booking.stayOption?.endTime,
+        label: booking.stayOption?.label ?? booking.stayOptionLabelSnapshot,
+    });
 
     return (
         <>
@@ -105,7 +110,7 @@ const BookingReschedule = ({ booking }: { booking: BookingWithAccommodation }) =
                     await rescheduleBooking({ 
                         bookingId: booking.id,
                         bookingDate: toDateOnly(data.bookingDate),
-                        stayType: data.stayType
+                        stayOptionId: data.stayOptionId
                     })
 
                     setIsRescheduleOpen(false)
@@ -113,7 +118,7 @@ const BookingReschedule = ({ booking }: { booking: BookingWithAccommodation }) =
                 isLoading={reschedulingLoading}
                 initialData={{
                     bookingDate: new Date(booking.bookingDate),
-                    stayType: booking.timeSlot
+                    stayOptionId: booking.stayOptionId
                 }}
                 accommodationId={booking.accommodation.id}
                 />

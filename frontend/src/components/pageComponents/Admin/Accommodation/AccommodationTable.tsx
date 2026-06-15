@@ -4,12 +4,11 @@ import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
 import { useAccommodationSearchParams } from "@/hooks/admin/accommodation.search";
 
 const AccommodationTable = () => {
-    const { search, type, status, page, limit, updatePage } = useAccommodationSearchParams();
+    const { search, type, page, limit, updatePage } = useAccommodationSearchParams();
 
     const { data, isLoading } = useGetAccommodationsQuery({ 
         search, 
         type, 
-        availability: status,
         page,
         limit,
     });
@@ -31,7 +30,6 @@ const AccommodationTable = () => {
                         name={acc.name}
                         description={acc.description}
                         type={acc.type}
-                        availability={acc.availability}
                         capacity={acc.capacity}
                         price={acc.price}
                         amenities={acc.amenities}

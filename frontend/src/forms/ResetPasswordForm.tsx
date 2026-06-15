@@ -109,7 +109,7 @@ const ResetPasswordForm = ({ token, onSuccess }: ResetPasswordFormProps) => {
                     />
 
                     {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
                 </Field>
             )}

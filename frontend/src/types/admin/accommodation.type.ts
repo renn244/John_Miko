@@ -9,10 +9,25 @@ export type Accommodation = {
     type: "Room" | "Cottage" | "EventHall";
     capacity: number;
     price: number;
+    isGuestFeeWaived: boolean;
     
     amenities: string[];
-    availability: "Available" | "Unavailable" | "Maintenance";
+    stayOptions: AccommodationStayOption[];
 
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type AccommodationStayOption = {
+    id: string;
+    accommodationId: string;
+    code: string;
+    label: string;
+    durationHours?: number | null;
+    startTime?: string | null;
+    endTime?: string | null;
+    sortOrder: number;
+    isActive: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -25,25 +40,33 @@ export type CreateAccommodationDto = {
     type: Accommodation['type'];
     capacity: Accommodation['capacity'];
     price: Accommodation['price'];
+    isGuestFeeWaived: Accommodation['isGuestFeeWaived'];
     
     amenities: Accommodation['amenities'];
-    availability: Accommodation['availability'];
+    stayOptions: Array<{
+        code: AccommodationStayOption['code'];
+        label: AccommodationStayOption['label'];
+        durationHours?: AccommodationStayOption['durationHours'];
+        startTime?: AccommodationStayOption['startTime'];
+        endTime?: AccommodationStayOption['endTime'];
+        sortOrder: AccommodationStayOption['sortOrder'];
+        isActive: AccommodationStayOption['isActive'];
+    }>;
 }
 
-export type UpdateAccommodationDto = CreateAccommodationDto;
+export type UpdateAccommodationDto = Omit<CreateAccommodationDto, "stayOptions" | "isGuestFeeWaived">;
 
 export type GetAccommodationQuery = {
     type?: Accommodation['type'];
-    availability?: Accommodation['availability'];
     search?: string;
 } & PaginationParams
 
 // Response types
 export type AccommodationStats = {
     total: number;
-    available: number;
-    unavailable: number;
-    maintenance: number;
+    room?: number;
+    cottage?: number;
+    eventhall?: number;
 }
 
 export type AccommodationOption = {

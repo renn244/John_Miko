@@ -16,7 +16,7 @@ const ChatbotRuleTable = () => {
     const { data, isLoading } = useGetAllChatbotRulesAdminQuery({ search, page, limit });
     const setViewId = useChatbotAdminStore((state) => state.setViewId);
     const setDeleteId = useChatbotAdminStore((state) => state.setDeleteId);
-    console.log(data)
+
     if(isLoading) return null;
 
     const chatbotRules = data?.data || [];

@@ -8,7 +8,7 @@ export type BookingConfirmationSummary = {
     guestName: string;
     email: string;
     contactNo: string;
-    stayType: 'OverNight' | 'DayStay';
+    stayType: string;
     checkIn: Date;
     checkOut: Date;
     paymentType: 'Full' | 'Partial';
@@ -61,7 +61,7 @@ const BookingConfirmation = ({ accommodation, summary, booking, backToHome, view
                     </div>
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Stay Type</p>
-                        <p className="font-semibold">{summary.stayType === 'OverNight' ? 'Over Night' : 'Day Stay'}</p>
+                        <p className="font-semibold">{summary.stayType}</p>
                     </div>
                     <div>
                         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Check-in</p>

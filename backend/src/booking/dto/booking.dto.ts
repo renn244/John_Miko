@@ -1,6 +1,6 @@
 import { Transform, Type } from "class-transformer";
 import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, ValidateNested } from "class-validator";
-import { BookingStatus, BookingTimeSlot, PaymentType } from "src/generated/prisma/enums";
+import { BookingStatus, PaymentType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
 
@@ -57,9 +57,9 @@ export class CreateBookingDto {
     @IsOptional()
     specialRequest?: string;
     
-    @IsNotEmpty({ message: "Stay type is required" })
-    @IsEnum(BookingTimeSlot, { message: "Stay type must be either 'overnight' or 'daystay'" })
-    stayType!: BookingTimeSlot;
+    @IsString()
+    @IsNotEmpty({ message: "Stay option is required" })
+    stayOptionId!: string;
     
     @Transform(({ value }) => toDateOnly(value))
     @Type(() => Date)
@@ -102,9 +102,9 @@ export class RescheduleBookingDto {
     @isNotPastDate({ message: "Booking date cannot be in the past" })
     bookingDate!: Date;
 
-    @IsNotEmpty({ message: "Stay type is required" })
-    @IsEnum(BookingTimeSlot, { message: "Stay type must be either 'overnight' or 'daystay'" })
-    stayType!: BookingTimeSlot;
+    @IsString()
+    @IsNotEmpty({ message: "Stay option is required" })
+    stayOptionId!: string;
 }
 
 export class ChangeStatusDto {

@@ -31,7 +31,12 @@ const BookingCard = ({ booking, className,  variant="default", ...props }: Booki
     const statusColor = getStatusColor(booking.status);
     const StatusIcon = statusColor.icon;
 
-    const { checkIn, checkOut } = getCheckInOut(booking.bookingDate, booking.timeSlot);
+    const { checkIn, checkOut } = getCheckInOut({
+        bookingDate: booking.bookingDate,
+        startTime: booking.stayOption?.startTime,
+        endTime: booking.stayOption?.endTime,
+        label: booking.stayOption?.label ?? booking.stayOptionLabelSnapshot,
+    });
 
     return (
         <div className={cn("bg-white rounded-xl border-2 overflow-hidden p-4", className)} {...props}>

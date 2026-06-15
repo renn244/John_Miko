@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BookingTimeSlot, Prisma } from 'src/generated/prisma/client';
+import { Prisma } from 'src/generated/prisma/client';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/services.dto';
@@ -41,13 +41,13 @@ export class ServicesService {
         }
     }
 
-    async getServicesAvailableForBooking(query: { bookingDate: Date, timeSlot: BookingTimeSlot }) {
+    async getServicesAvailableForBooking(query: { bookingDate: Date, stayOptionId: string }) {
         const services = await this.prisma.addOnService.findMany()
         const bookedServices = await this.prisma.bookingAddOn.findMany({
             where: {
                 booking: {
                     bookingDate: query.bookingDate,
-                    timeSlot: query.timeSlot,
+                    stayOptionId: query.stayOptionId,
                     status: { notIn: ["Cancelled"] }
                 },
             }

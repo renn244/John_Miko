@@ -5,7 +5,6 @@ import {
     type ChartConfig,
 } from "@/components/ui/chart"
 import { useGetFeedbackReportQuery } from "@/hooks/admin/feedback.hook"
-import { ThumbsDown, ThumbsUp } from "lucide-react"
 import { Label, Pie, PieChart } from "recharts"
 
 const chartConfig = {

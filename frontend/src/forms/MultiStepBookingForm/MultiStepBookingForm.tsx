@@ -41,7 +41,7 @@ const MultiStepBookingFormSchema = z.object({
     specialRequest: z.string().optional(),
 
     // Step 2 - Review (No additional fields, just confirmation)
-    stayType: z.enum(['OverNight', 'DayStay']),
+    stayOptionId: z.string().nonempty("Stay option is required"),
     checkIn: z.date("Check-in date is required"),
 
     // Step 3 - Pre-order (No additional fields, just confirmation)
@@ -83,11 +83,12 @@ const MultiStepBookingForm = ({
     } | null>(null);
 
     const navigate = useNavigate();    
-    const stayType = useBookingSelectStore((state) => state.bookingType!);
+    const stayOption = useBookingSelectStore((state) => state.stayOption);
+    const stayOptionId = useBookingSelectStore((state) => state.bookingType!);
     const checkIn = useBookingSelectStore((state) => state.bookingDate!);
     const reset = useBookingSelectStore((state) => state.reset);
 
-    if(!stayType || !checkIn) {
+    if(!stayOptionId || !stayOption || !checkIn) {
         navigate(`/accommodation/${accommodation.id}`)
     }
 
@@ -103,7 +104,7 @@ const MultiStepBookingForm = ({
             kidGuests: 0,
             numberOfGuests: 1,
             specialRequest: '',
-            stayType: stayType,
+            stayOptionId: stayOptionId,
             checkIn: checkIn,
             preOrderItems: [],
             addOnServices: [],
@@ -142,7 +143,7 @@ const MultiStepBookingForm = ({
                     guestName: `${data.firstName} ${data.lastName}`,
                     email: data.email,
                     contactNo: data.contactNo,
-                    stayType: stayType,
+                    stayType: stayOption?.label || "Stay",
                     checkIn: bookingCheckIn,
                     checkOut: bookingCheckOut,
                     paymentType: data.paymentType,
@@ -164,7 +165,7 @@ const MultiStepBookingForm = ({
         }
     }
 
-    const adultFee = form.watch('stayType') === 'DayStay' ? 150 : 180; // full price
+    const adultFee = stayOption?.code.toLowerCase() === 'daystay' ? 150 : 180; // full price
     const seniorFee = adultFee - (adultFee * 0.20); // 20 percent discount
     const kidsFee = 100 // just a kid 4-7 years old
 
@@ -174,12 +175,14 @@ const MultiStepBookingForm = ({
 
 
     const { totalGuestFee } = useMemo(() => {
-        const totalGuestFee = (adultCount * adultFee) + (seniorCount * seniorFee) + (kidsCount * kidsFee);
+        const totalGuestFee = accommodation.isGuestFeeWaived
+            ? 0
+            : (adultCount * adultFee) + (seniorCount * seniorFee) + (kidsCount * kidsFee);
 
         return { totalGuestFee };
-    }, [kidsCount, adultCount, seniorCount])
+    }, [accommodation.isGuestFeeWaived, kidsCount, adultCount, seniorCount])
 
-    const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayType);
+    const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayOption);
 
     const total = accommodation.price + addOnTotal + preOrderTotal + totalGuestFee;
 
@@ -207,7 +210,8 @@ const MultiStepBookingForm = ({
                 {bookingStep === 'form' && (
                     <GuestForm
                     accommodation={accommodation}
-                    selectedStayType={stayType}
+                    selectedStayType={stayOption?.label || "Stay"}
+                    selectedStayCode={stayOption?.code}
                     selectedCheckIn={bookingCheckIn}
                     selectedCheckOut={bookingCheckOut}
                     setBookingStep={setBookingStep}
@@ -231,7 +235,7 @@ const MultiStepBookingForm = ({
                 {bookingStep === 'review' && (
                     <ReviewForm 
                     accommodation={accommodation}
-                    stayType={stayType}
+                    stayType={stayOption?.label || "Stay"}
                     accommodationSubtotal={accommodation.price}
                     addOnSubTotal={addOnTotal}
                     preOrderSubTotal={preOrderTotal}

@@ -1,6 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'src/generated/prisma/client';
-import { BookingTimeSlot } from 'src/generated/prisma/enums';
+import { AccommodationStayOption, Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
@@ -10,7 +9,7 @@ import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BookingServicesService } from 'src/services/booking-services.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
-import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
+import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 import { ClosureService } from 'src/closure/closure.service';
 
 @Injectable()
@@ -23,8 +22,8 @@ export class BookingService {
         private readonly closureService: ClosureService
     ) {}
 
-    private calculateGuestFee(adultGuests: number, seniorGuests: number, kidGuests: number, timeSlot: BookingTimeSlot) {
-        const adultFee = timeSlot === 'DayStay' ? 150 : 180 // full price
+    private calculateGuestFee(adultGuests: number, seniorGuests: number, kidGuests: number, stayOptionCode: string) {
+        const adultFee = stayOptionCode.toLowerCase() === 'daystay' ? 150 : 180 // full price
         const seniorFee = adultFee - (adultFee * 0.20); // 20 percent discount
         const kidsFee = 100 // just a kid 4-7 years old
 
@@ -33,6 +32,22 @@ export class BookingService {
         const kidsTotal = kidGuests * kidsFee; 
 
         return adultTotal + seniorTotal + kidsTotal
+    }
+
+    private async findStayOptionOrThrow(accommodationId: string, stayOptionId: string, tx: Prisma.TransactionClient = this.prisma) {
+        const stayOption = await tx.accommodationStayOption.findFirst({
+            where: {
+                id: stayOptionId,
+                accommodationId,
+                isActive: true,
+            }
+        });
+
+        if(!stayOption) {
+            throw new NotFoundException('Stay option not found for this accommodation')
+        }
+
+        return stayOption;
     }
 
     async bookAccommodation(body: CreateBookingDto, user: UserSession) {
@@ -52,11 +67,13 @@ export class BookingService {
         }
    
         const booking = await this.prisma.$transaction(async (txprisma) => {
+            const stayOption = await this.findStayOptionOrThrow(body.accommodationId, body.stayOptionId, txprisma);
+
             const existingBooking = await txprisma.booking.findFirst({
                 where: {
                     accommodationId: body.accommodationId,
                     bookingDate: body.checkIn,
-                    timeSlot: body.stayType,
+                    stayOptionId: body.stayOptionId,
                     status: { notIn: ['Cancelled'] }
                 },
                 select: { id: true }
@@ -72,10 +89,12 @@ export class BookingService {
                 throw new ConflictException('Accommodation is closed for the selected date')
             }
 
-            const newBooking = await this.createBooking(body, user, txprisma);
+            const newBooking = await this.createBooking(body, user, stayOption, accommodation.isGuestFeeWaived, txprisma);
 
             const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
-            const guestFeeTotal = this.calculateGuestFee(body.adultGuests, body.seniorGuests, body.kidGuests, body.stayType)
+            const guestFeeTotal = accommodation.isGuestFeeWaived
+                ? 0
+                : this.calculateGuestFee(body.adultGuests, body.seniorGuests, body.kidGuests, stayOption.code)
 
             const { total: addOnServiceTotal } = await this.bookingServicesService.createBulk(newBooking.id, body.addOnServices || [], txprisma);
 
@@ -116,7 +135,13 @@ export class BookingService {
         return booking
     }
 
-    async createBooking(body: CreateBookingDto, user: UserSession, tx: Prisma.TransactionClient) {
+    async createBooking(
+        body: CreateBookingDto,
+        user: UserSession,
+        stayOption: AccommodationStayOption,
+        isGuestFeeWaived: boolean,
+        tx: Prisma.TransactionClient
+    ) {
         const totalNumberofGuest = body.seniorGuests + body.adultGuests + body.kidGuests
 
         const newBooking = await tx.booking.create({
@@ -124,7 +149,11 @@ export class BookingService {
                 userId: user.id,
                 accommodationId: body.accommodationId,
                 bookingDate: body.checkIn,
-                timeSlot: body.stayType,
+                stayOptionId: body.stayOptionId,
+                stayOptionCodeSnapshot: stayOption.code,
+                stayOptionLabelSnapshot: stayOption.label,
+                stayDurationHoursSnapshot: stayOption.durationHours,
+                guestFeeWaivedSnapshot: isGuestFeeWaived,
                 paymentType: body.paymentType,
                 numberOfGuests: totalNumberofGuest,
                 specialRequests: body.specialRequest,
@@ -173,7 +202,8 @@ export class BookingService {
                             type: true,
                             imageUrl: true,
                         }
-                    }
+                    },
+                    stayOption: true,
                 },
                 ...getPaginationArgs(page, limit),
                 orderBy: { bookingDate: 'desc' }
@@ -187,6 +217,150 @@ export class BookingService {
         }
     }
 
+    private getManilaDateOnly() {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Manila',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+        }).formatToParts(new Date());
+
+        const year = parts.find((part) => part.type === 'year')?.value;
+        const month = parts.find((part) => part.type === 'month')?.value;
+        const day = parts.find((part) => part.type === 'day')?.value;
+
+        return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+    }
+
+    async getStaffBookings(query: GetStaffBookingsQuery) {
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const search = query.search?.trim();
+        const where: Prisma.BookingWhereInput = {
+            status: 'Confirmed',
+            bookingDate: { gte: this.getManilaDateOnly() },
+            ...(search ? {
+                OR: [
+                    { id: { contains: search, mode: 'insensitive' } },
+                    { guestName: { contains: search, mode: 'insensitive' } },
+                    { contactNo: { contains: search, mode: 'insensitive' } },
+                ]
+            } : {}),
+        };
+
+        const [data, total] = await Promise.all([
+            this.prisma.booking.findMany({
+                where,
+                select: {
+                    id: true,
+                    guestName: true,
+                    contactNo: true,
+                    bookingDate: true,
+                    numberOfGuests: true,
+                    status: true,
+                    stayOptionCodeSnapshot: true,
+                    stayOptionLabelSnapshot: true,
+                    stayDurationHoursSnapshot: true,
+                    guestFeeWaivedSnapshot: true,
+                    accommodation: {
+                        select: {
+                            id: true,
+                            name: true,
+                            type: true,
+                            imageUrl: true,
+                        }
+                    },
+                    stayOption: {
+                        select: {
+                            sortOrder: true,
+                            startTime: true,
+                            endTime: true,
+                        }
+                    },
+                },
+                ...getPaginationArgs(page, limit),
+                orderBy: [
+                    { bookingDate: 'asc' },
+                    { stayOption: { sortOrder: 'asc' } },
+                ],
+            }),
+            this.prisma.booking.count({ where }),
+        ]);
+
+        return {
+            data,
+            meta: getPaginationMeta(total, page, limit),
+        };
+    }
+
+    async getStaffBookingById(bookingId: string) {
+        const booking = await this.prisma.booking.findFirst({
+            where: {
+                id: bookingId,
+                status: 'Confirmed',
+                bookingDate: { gte: this.getManilaDateOnly() },
+            },
+            select: {
+                id: true,
+                guestName: true,
+                email: true,
+                contactNo: true,
+                adultGuests: true,
+                kidGuests: true,
+                seniorGuest: true,
+                numberOfGuests: true,
+                specialRequests: true,
+                bookingDate: true,
+                status: true,
+                stayOptionCodeSnapshot: true,
+                stayOptionLabelSnapshot: true,
+                stayDurationHoursSnapshot: true,
+                guestFeeWaivedSnapshot: true,
+                accommodation: {
+                    select: {
+                        id: true,
+                        name: true,
+                        type: true,
+                        imageUrl: true,
+                    }
+                },
+                stayOption: {
+                    select: {
+                        startTime: true,
+                        endTime: true,
+                        sortOrder: true,
+                    }
+                },
+                addOns: {
+                    select: {
+                        id: true,
+                        name: true,
+                        quantity: true,
+                        price: true,
+                    },
+                    orderBy: { name: 'asc' },
+                },
+                preOrders: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        category: true,
+                        quantity: true,
+                        status: true,
+                    },
+                    orderBy: { name: 'asc' },
+                },
+            },
+        });
+
+        if (!booking) {
+            throw new NotFoundException('Confirmed upcoming booking not found');
+        }
+
+        return booking;
+    }
+
     async getBookingsByAccommodation(accommodationId: string) {
         const bookings = await this.prisma.booking.findMany({
             where: { 
@@ -196,10 +370,14 @@ export class BookingService {
                     notIn: ['Cancelled']
                 }
             },
-            select: { bookingDate: true, timeSlot: true },
+            select: {
+                bookingDate: true,
+                stayOptionId: true,
+                stayOptionLabelSnapshot: true,
+            },
         })
 
-        const groupMap = new Map<string, BookingTimeSlot[]>()
+        const groupMap = new Map<string, { id: string, label: string }[]>()
         bookings.forEach(booking => {
             const dateKey = booking.bookingDate.toISOString().split('T')[0]
 
@@ -207,16 +385,25 @@ export class BookingService {
                 groupMap.set(dateKey, [])
             }
 
-            groupMap.get(dateKey)?.push(booking.timeSlot)
+            groupMap.get(dateKey)?.push({
+                id: booking.stayOptionId,
+                label: booking.stayOptionLabelSnapshot
+            })
         })
 
-        const result = Array.from(groupMap.entries()).map(([date, timeSlots]) => {
-            const hasDayStay = timeSlots.includes('DayStay');
-            const hasOverNight = timeSlots.includes('OverNight');
+        const activeStayOptionCount = await this.prisma.accommodationStayOption.count({
+            where: { accommodationId, isActive: true }
+        });
 
-            const bookingStatus = hasDayStay && hasOverNight ? 'Full' : 'Partial';
+        const result = Array.from(groupMap.entries()).map(([date, stayOptions]) => {
+            const bookingStatus = stayOptions.length >= activeStayOptionCount ? 'Full' : 'Partial';
 
-            return { bookingDate: date, bookingStatus, timeSlotsOccupied: timeSlots }
+            return {
+                bookingDate: date,
+                bookingStatus,
+                timeSlotsOccupied: stayOptions.map((option) => option.id),
+                stayOptionsOccupied: stayOptions
+            }
         })
 
         return result
@@ -231,7 +418,7 @@ export class BookingService {
                     notIn: ['Cancelled']
                 }
             },
-            select: { bookingDate: true, timeSlot: true, id: true },
+            select: { bookingDate: true, id: true },
             orderBy: { bookingDate: 'asc' }
         });
 
@@ -295,6 +482,7 @@ export class BookingService {
                 },
                 preOrders: true,
                 addOns: true,
+                stayOption: true,
             }
         })
 
@@ -319,7 +507,8 @@ export class BookingService {
                         imageUrl: true
                     }
                 },
-                feedback: true
+                feedback: true,
+                stayOption: true,
             }
         })
 
@@ -333,11 +522,13 @@ export class BookingService {
             throw new NotFoundException('Booking not found')
         }
 
+        const stayOption = await this.findStayOptionOrThrow(booking.accommodationId, body.stayOptionId);
+
         const existingBooking = await this.prisma.booking.findFirst({
             where: {
                 accommodationId: booking.accommodationId,
                 bookingDate: body.bookingDate,
-                timeSlot: body.stayType,
+                stayOptionId: body.stayOptionId,
                 status: { not: 'Cancelled' },
                 id: { not: bookingId } //  exclude self to avoid false conflict
             }
@@ -351,7 +542,10 @@ export class BookingService {
             where: { id: bookingId },
             data: {
                 bookingDate: body.bookingDate,
-                timeSlot: body.stayType
+                stayOptionId: body.stayOptionId,
+                stayOptionCodeSnapshot: stayOption.code,
+                stayOptionLabelSnapshot: stayOption.label,
+                stayDurationHoursSnapshot: stayOption.durationHours,
             }
         })
 

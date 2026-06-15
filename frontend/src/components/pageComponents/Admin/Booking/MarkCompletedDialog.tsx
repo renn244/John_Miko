@@ -46,7 +46,12 @@ const MarkCompletedDialog = () => {
 const MarkCompletedBooking = ({ booking } : { booking: BookingWithAccommodation }) => {
     const setIsMarkCompletedOpen = useBookingAdminStore((state) => state.setIsMarkCompletedOpen);
     
-    const { checkOut } = getCheckInOut(booking.bookingDate, booking.timeSlot);
+    const { checkOut } = getCheckInOut({
+        bookingDate: booking.bookingDate,
+        startTime: booking.stayOption?.startTime,
+        endTime: booking.stayOption?.endTime,
+        label: booking.stayOption?.label ?? booking.stayOptionLabelSnapshot,
+    });
     const { mutateAsync, isPending } = useChangeBookingStatusAdminMutation(booking.id);
 
     return (

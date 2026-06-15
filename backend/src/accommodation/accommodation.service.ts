@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BookingTimeSlot } from 'src/generated/prisma/enums';
 import { toDateOnly } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
@@ -14,20 +13,42 @@ export class AccommodationService {
     ) {}
 
     async createAccommodation(body: CreateAccommodationDto) {
-        return this.prisma.accommodation.create({ data: body });
+        const { stayOptions, ...accommodationData } = body;
+        
+        return this.prisma.accommodation.create({
+            data: {
+                ...accommodationData,
+                stayOptions: {
+                    create: stayOptions.map((stayOption) => ({
+                        code: stayOption.code,
+                        label: stayOption.label,
+                        durationHours: stayOption.durationHours,
+                        startTime: stayOption.startTime,
+                        endTime: stayOption.endTime,
+                        sortOrder: stayOption.sortOrder,
+                        isActive: stayOption.isActive,
+                    }))
+                }
+            },
+            include: {
+                stayOptions: {
+                    orderBy: { sortOrder: 'asc' }
+                }
+            }
+        });
     }
 
     async getAccommodationStats() {
         const [total, grouped] = await Promise.all([
             this.prisma.accommodation.count(),
             this.prisma.accommodation.groupBy({
-                by: ['availability'],
-                _count: { availability: true },
+                by: ['type'],
+                _count: { type: true },
             })
         ]);
 
         const stats: Record<string, number> = {};
-        grouped.forEach((item) => stats[item.availability.toLowerCase()] = item._count.availability);
+        grouped.forEach((item) => stats[item.type.toLowerCase()] = item._count.type);
 
         return {
             total,
@@ -51,6 +72,12 @@ export class AccommodationService {
                 where: {
                     ...rest, name: { contains: search, mode: 'insensitive' },
                 },
+                include: {
+                    stayOptions: {
+                        where: { isActive: true },
+                        orderBy: { sortOrder: 'asc' }
+                    }
+                },
                 ...getPaginationArgs(page, limit),
                 orderBy: { createdAt: 'desc' },
             }),
@@ -65,16 +92,13 @@ export class AccommodationService {
 
     async getAccommodationReports() {
         const today = toDateOnly(new Date())
-        const timeSlot: BookingTimeSlot = 'DayStay'
 
         const accommodations = await this.prisma.accommodation.findMany({
-            where: { availability: 'Available' },
             select: {
                 type: true,
                 bookings: {
                     where: {
                         bookingDate: today,
-                        timeSlot: timeSlot,
                         status: {
                             in: ['Confirmed', 'Completed'],
                         },
@@ -82,7 +106,7 @@ export class AccommodationService {
                     select: {
                         id: true,
                         numberOfGuests: true,
-                        timeSlot: true
+                        stayOptionLabelSnapshot: true,
                     },
                 },
             }
@@ -126,7 +150,15 @@ export class AccommodationService {
     }
 
     async getAccommodationById(id: string) {
-        const accommodation = await this.prisma.accommodation.findUnique({ where: { id } });
+        const accommodation = await this.prisma.accommodation.findUnique({
+            where: { id },
+            include: {
+                stayOptions: {
+                    where: { isActive: true },
+                    orderBy: { sortOrder: 'asc' }
+                }
+            }
+        });
 
         if (!accommodation) {
             throw new NotFoundException('Accommodation not found');

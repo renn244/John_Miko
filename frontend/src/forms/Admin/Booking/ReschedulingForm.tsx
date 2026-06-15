@@ -18,7 +18,7 @@ import z from "zod"
 
 const RescheduleSchema = z.object({
     bookingDate: z.date(),
-    stayType: z.enum(['OverNight', 'DayStay'])
+    stayOptionId: z.string().nonempty("Stay option is required")
 })
 
 type rescheduleSchema = z.infer<typeof RescheduleSchema> 
@@ -42,7 +42,7 @@ const ReschedulingForm = ({ className, initialData, onsubmit, isLoading, accommo
         resolver: zodResolver(RescheduleSchema),
         defaultValues: {
             bookingDate: initialData.bookingDate,
-            stayType: undefined
+            stayOptionId: initialData.stayOptionId
         },
         criteriaMode: "all"
     })
@@ -100,7 +100,7 @@ const ReschedulingForm = ({ className, initialData, onsubmit, isLoading, accommo
                                 selected={field.value}
                                 onSelect={(date) => {
                                     if(date && !isSameDateOnly(date, new Date(field.value))) {
-                                        resetField("stayType")
+                                        resetField("stayOptionId")
                                     }
                                     field.onChange(date)
                                 }}
@@ -116,12 +116,12 @@ const ReschedulingForm = ({ className, initialData, onsubmit, isLoading, accommo
                 />
 
                 <Controller 
-                name="stayType"
+                name="stayOptionId"
                 control={control}
                 render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid} className="grid gap-2">
                         <FieldLabel htmlFor={field.name} className="gap-1">
-                            Time Slot <span className="text-destructive">*</span>
+                            Stay Option <span className="text-destructive">*</span>
                         </FieldLabel>
                         
                         <AvailabilityStayType 

@@ -115,7 +115,8 @@ const AccommodationView = () => {
                             <AccommodationSideBooking
                             accommodation={{
                                 id: accommodation.id,
-                                price: accommodation.price
+                                price: accommodation.price,
+                                stayOptions: accommodation.stayOptions
                             }}
                             />
                         </div>

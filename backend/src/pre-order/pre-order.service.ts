@@ -91,7 +91,7 @@ export class PreOrderService {
                 id: true,
                 guestName: true,
                 bookingDate: true,
-                timeSlot: true,
+                stayOptionLabelSnapshot: true,
                 preOrders: {
                     select: {
                         id: true,
@@ -108,7 +108,7 @@ export class PreOrderService {
             bookingId: booking.id,
             guestName: booking.guestName,
             bookingDate: booking.bookingDate,
-            timeSlot: booking.timeSlot,
+            timeSlot: booking.stayOptionLabelSnapshot,
             preOrders: booking.preOrders
         }));
     }
@@ -123,7 +123,7 @@ export class PreOrderService {
                 contactNo: true,
 
                 bookingDate: true,
-                timeSlot: true,
+                stayOptionLabelSnapshot: true,
                 numberOfGuests: true,
 
                 specialRequests: true,
@@ -149,7 +149,7 @@ export class PreOrderService {
             email: booking.email,
             contactNo: booking.contactNo,
             bookingDate: booking.bookingDate,
-            timeSlot: booking.timeSlot,
+            timeSlot: booking.stayOptionLabelSnapshot,
             numberOfGuests: booking.numberOfGuests,
             specialRequests: booking.specialRequests,
             preOrders: booking.preOrders

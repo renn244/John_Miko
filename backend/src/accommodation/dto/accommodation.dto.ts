@@ -1,8 +1,10 @@
 import { PartialType } from "@nestjs/mapped-types/dist/partial-type.helper";
-import { IsEnum, IsNumber, IsOptional, IsString, IsUrl } from "class-validator";
-import { AccommodationAvailability, AccommodationType } from "src/generated/prisma/enums";
+import { Transform, Type } from "class-transformer";
+import { IsArray, IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, IsString, IsUrl, ValidateNested } from "class-validator";
+import { AccommodationType } from "src/generated/prisma/enums";
+import { toTimeOnly } from "src/lib/utils/time.util";
 
-export class CreateAccommodationDto {
+class AccommodationBaseDto {
     @IsString({ message: "Name must be a string" })
     name!: string;
 
@@ -24,11 +26,45 @@ export class CreateAccommodationDto {
 
     @IsString({ each: true })
     amenities!: string[];
-
-    @IsString({ message: "Availability must be a string" })
-    @IsEnum(AccommodationAvailability)
-    availability!: AccommodationAvailability;
 }
 
-export class UpdateAccommodationDto extends PartialType(CreateAccommodationDto) {
+export class CreateAccommodationStayOptionDto {
+    @IsString({ message: "Code must be a string" })
+    code!: string;
+
+    @IsString({ message: "Label must be a string" })
+    label!: string;
+
+    @IsNumber({}, { message: "Duration must be a number" })
+    @IsOptional()
+    durationHours?: number;
+
+    @Transform(({ value }) => toTimeOnly(value))
+    @IsDate({ message: "Start time must be a valid time" })
+    @IsOptional()
+    startTime?: Date;
+
+    @Transform(({ value }) => toTimeOnly(value))
+    @IsDate({ message: "End time must be a valid time" })
+    @IsOptional()
+    endTime?: Date;
+
+    @IsNumber({}, { message: "Sort order must be a number" })
+    sortOrder!: number;
+
+    @IsBoolean({ message: "isActive must be a boolean" })
+    isActive!: boolean;
+}
+
+export class CreateAccommodationDto extends AccommodationBaseDto {
+    @IsBoolean({ message: "isGuestFeeWaived must be a boolean" })
+    isGuestFeeWaived!: boolean;
+
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateAccommodationStayOptionDto)
+    stayOptions!: CreateAccommodationStayOptionDto[];
+}
+
+export class UpdateAccommodationDto extends PartialType(AccommodationBaseDto) {
 }

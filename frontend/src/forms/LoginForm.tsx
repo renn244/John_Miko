@@ -6,6 +6,7 @@ import LoadingSpinner from "@/components/ui/loadingSpinner"
 import PasswordInput from "@/components/ui/passwordInput"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLoginMutation } from "@/hooks/auth.hook"
+import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Lock, LogIn, User } from "lucide-react"
 import { Controller, useForm } from "react-hook-form"
@@ -77,7 +78,7 @@ const LoginForm = () => {
                     </Select>
 
                     {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
                 </Field>
             )}
@@ -96,9 +97,8 @@ const LoginForm = () => {
                     aria-invalid={fieldState.invalid}
                     {...field}
                     />
-
                     {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
                 </Field>
             )}
@@ -118,7 +118,7 @@ const LoginForm = () => {
                         />
 
                     {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
+                        <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
                 </Field>
             )}

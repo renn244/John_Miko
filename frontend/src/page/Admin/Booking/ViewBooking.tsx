@@ -68,8 +68,12 @@ const ViewBooking = () => {
 
 const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndPreOrderAndPayment }) => {
     const { checkIn, checkInDayOfTheWeek, checkOut, checkOutDayOfTheWeek } = getCheckInOut(
-        booking.bookingDate,
-        booking.timeSlot
+        {
+            bookingDate: booking.bookingDate,
+            startTime: booking.stayOption?.startTime,
+            endTime: booking.stayOption?.endTime,
+            label: booking.stayOption?.label ?? booking.stayOptionLabelSnapshot,
+        }
     );
 
     const [isRejectOpen, setIsRejectOpen] = useState(false);

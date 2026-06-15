@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const AccommodationFilter = () => {
-    const { type, status, updateType, updateStatus } = useAccommodationSearchParams();
+    const { type, updateType } = useAccommodationSearchParams();
 
     return (
         <div className="bg-white p-4 rounded-xl border-2">
@@ -25,21 +25,6 @@ const AccommodationFilter = () => {
                             <SelectItem value="Room">Room</SelectItem>
                             <SelectItem value="Cottage">Cottage</SelectItem>
                             <SelectItem value="EventHall">Event Hall</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-
-                <Select value={status || "all"} onValueChange={updateStatus}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>Status</SelectLabel>
-                            <SelectItem value="all">All Status</SelectItem>
-                            <SelectItem value="Available">Available</SelectItem>
-                            <SelectItem value="Unavailable">Unavailable</SelectItem>
-                            <SelectItem value="Maintenance">Maintenance</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>

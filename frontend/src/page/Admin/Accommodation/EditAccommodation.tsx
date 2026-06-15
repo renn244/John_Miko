@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import AccommodationForm from "@/forms/Admin/Accommodation/AccommodationForm";
+import { prepareAccommodationUpdatePayload } from "@/forms/Admin/Accommodation/accommodationStayOptionForm.util";
 import { useGetAccommodationByIdQuery, useUpdateAccommodationMutation } from "@/hooks/admin/accommodation.hook";
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -39,7 +40,7 @@ const EditAccommodation = () => {
             <AccommodationForm 
             isUpdate
             initialData={accommodation}
-            onsubmit={updateAccommodation}
+            onsubmit={(data) => updateAccommodation(prepareAccommodationUpdatePayload(data))}
             oncancel={() => navigate("/admin/accommodation")}
             />
         </div>

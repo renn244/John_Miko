@@ -54,7 +54,7 @@ export class PaymentService {
                     select: {
                         id: true,
                         bookingDate: true,
-                        timeSlot: true,
+                        stayOptionLabelSnapshot: true,
                         guestName: true,
                         email: true,
                         contactNo: true,
@@ -83,7 +83,13 @@ export class PaymentService {
             }
         })
 
-        return payments;
+        return payments.map((payment) => ({
+            ...payment,
+            booking: {
+                ...payment.booking,
+                timeSlot: payment.booking.stayOptionLabelSnapshot,
+            }
+        }));
     }
 
     async getRevenueAnalytics() {
@@ -139,7 +145,7 @@ export class PaymentService {
                     select: {
                         id: true,
                         bookingDate: true,
-                        timeSlot: true,
+                        stayOptionLabelSnapshot: true,
                         guestName: true,
                         email: true,
                         contactNo: true,
@@ -169,7 +175,13 @@ export class PaymentService {
             throw new NotFoundException('Payment not found');
         }
 
-        return payment;
+        return {
+            ...payment,
+            booking: {
+                ...payment.booking,
+                timeSlot: payment.booking.stayOptionLabelSnapshot,
+            }
+        };
     }
 
     async approvePayment(id: string, verifiedById: string) {
