@@ -94,6 +94,32 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                         )}
                         />
 
+                        <Controller
+                        name="description"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gaps-2">
+                                <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+
+                                <Textarea
+                                id={field.name}
+                                aria-invalid={fieldState.invalid}
+                                placeholder="Enter description"
+                                className="max-h-50"
+                                {...field}
+                                />
+
+                                {fieldState.invalid ? (
+                                    <FieldError errors={getErrorMessages(fieldState.error)} />
+                                ) : (
+                                    <FieldDescription>
+                                        This will be shown to guests when browsing accommodations, so make it more detailed and enticing!
+                                    </FieldDescription>
+                                )}
+                            </Field>
+                        )}
+                        />
+
                         <div className="grid md:grid-cols-2 gap-5">
                             <Controller
                             name="type"
@@ -214,37 +240,6 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                 isUpdate={isUpdate}
                 existingStayOptions={initialData?.stayOptions}
                 />
-
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Description
-                    </h2>
-
-                    <Controller
-                    name="description"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid} className="grid gaps-2">
-                            <FieldLabel htmlFor={field.name}>Description</FieldLabel>
-
-                            <Textarea
-                            id={field.name}
-                            aria-invalid={fieldState.invalid}
-                            placeholder="Enter description"
-                            {...field}
-                            />
-
-                            {fieldState.invalid ? (
-                                <FieldError errors={getErrorMessages(fieldState.error)} />
-                            ) : (
-                                <FieldDescription>
-                                    This will be shown to guests when browsing accommodations, so make it more detailed and enticing!
-                                </FieldDescription>
-                            )}
-                        </Field>
-                    )}
-                    />
-                </div>
 
                 <div>
                     <h2 className="text-lg font-bold mb-4 pb-2 border-b">
