@@ -1,17 +1,77 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
+import { isBookingStayActive } from 'src/lib/utils/booking-stay.util';
 import { getDateRange } from 'src/lib/utils/date.util';
+import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateReportDto } from './dto/report.dto';
+import { CreateReportDto, GetStaffReportsQuery } from './dto/report.dto';
+
+const reportInclude = {
+    booking: {
+        select: {
+            id: true,
+            guestName: true,
+            bookingDate: true,
+            accommodation: {
+                select: {
+                    id: true,
+                    name: true,
+                    type: true,
+                }
+            }
+        }
+    }
+} satisfies Prisma.ReportInclude;
 
 @Injectable()
 export class StaffReportsService {
     constructor(
         private readonly prisma: PrismaService,
-        // inject booking
     ) {}
 
     async createReports(user: UserSession, body: CreateReportDto) {
+        if (body.type !== 'maintenance' && !body.bookingId) {
+            throw new BadRequestException('A booking is required for check-in and check-out reports');
+        }
+
+        if (body.bookingId) {
+            const booking = await this.prisma.booking.findUnique({
+                where: { id: body.bookingId },
+                select: {
+                    id: true,
+                    status: true,
+                    bookingDate: true,
+                    stayOption: {
+                        select: {
+                            startTime: true,
+                            endTime: true,
+                        }
+                    }
+                }
+            });
+
+            if (!booking) {
+                throw new NotFoundException('Booking not found');
+            }
+
+            if (booking.status !== 'Confirmed') {
+                throw new BadRequestException('Reports can only be linked to confirmed bookings');
+            }
+
+            const reportingOpen = isBookingStayActive({
+                bookingDate: booking.bookingDate,
+                startTime: booking.stayOption.startTime,
+                endTime: booking.stayOption.endTime,
+            });
+
+            if (!reportingOpen) {
+                throw new BadRequestException(
+                    'Booking-linked reports can only be submitted during the active stay',
+                );
+            }
+        }
+
         const report = await this.prisma.report.create({
             data: {
                 bookingId: body.bookingId,
@@ -19,67 +79,72 @@ export class StaffReportsService {
                 title: body.title,
                 description: body.description,
                 proofImages: body.proofImages,
-                type: body.type
-            }
+                type: body.type,
+                severity: body.severity,
+                status: 'Pending',
+            },
+            include: reportInclude,
         })
 
         return report;
     }
 
-    async viewReports(query: { page?: number }) {
-        const page = query.page || 1;
-        const skip = (page - 1) * 10;
-        
-        const reports = await this.prisma.report.findMany({
-            skip,
-            take: 10
-        })
-
-        return reports;
+    async viewReports(query: GetStaffReportsQuery) {
+        return this.getPaginatedReports(query);
     }
 
-    // Reports of Staff Reports (LOL)
-    async ReportsReport() {
-        try {
-            const { gte, lte } = getDateRange('day');
-        
-            const [totalToday, checkInReportToday, checkOutReportToday] = await Promise.all([
-                this.prisma.report.count({ where: { createdAt: { gte, lte } } }),
-                this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkIn' } }),
-                this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkOut' } })
-            ])
+    private async getPaginatedReports(query: GetStaffReportsQuery, userId?: string) {
+        const page = query.page ?? 1;
+        const limit = query.limit ?? 10;
+        const where: Prisma.ReportWhereInput = {
+            ...(userId ? { userId } : {}),
+            ...(query.bookingId ? { bookingId: query.bookingId } : {}),
+            ...(query.status ? { status: query.status } : {}),
+            ...(query.type ? { type: query.type } : {}),
+            ...(query.severity ? { severity: query.severity } : {}),
+        };
 
-            return {
-                totalToday, checkInReportToday, checkOutReportToday
-            }
-        } catch (error) {
-            console.log(error)   
+        const [data, total] = await Promise.all([
+            this.prisma.report.findMany({
+                where,
+                include: reportInclude,
+                ...getPaginationArgs(page, limit),
+                orderBy: { createdAt: 'desc' },
+            }),
+            this.prisma.report.count({ where }),
+        ]);
+
+        return {
+            data,
+            meta: getPaginationMeta(total, page, limit),
+        };
+    }
+
+    async ReportsReport() {
+        const { gte, lte } = getDateRange('day');
+        
+        const [totalToday, checkInReportToday, checkOutReportToday] = await Promise.all([
+            this.prisma.report.count({ where: { createdAt: { gte, lte } } }),
+            this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkIn' } }),
+            this.prisma.report.count({ where: { createdAt: { gte, lte }, type: 'checkOut' } })
+        ])
+
+        return {
+            totalToday, checkInReportToday, checkOutReportToday
         }
     }
  
-    async viewReportsByUserId(user: UserSession, query: { page?: number }) {
-        // only allow if the user is viewing their own reports, or if they are an admin
-        const page = query.page || 1;
-        const skip = (page - 1) * 10;
-
-        const reports = await this.prisma.report.findMany({
-            where: {
-                userId: user.id
-            },
-            skip,
-            take: 10
-        });
-
-        return reports;
+    async viewReportsByUserId(user: UserSession, query: GetStaffReportsQuery) {
+        return this.getPaginatedReports(query, user.id);
     }
 
     async viewReportById(user: UserSession, id: string) {
-        // only allow if the user is viewing their own report, or if they are an admin
-
-        const report = await this.prisma.report.findUnique({
+        const report = await this.prisma.report.findFirst({
             where: {
-                id
-            }
+                id,
+                ...(user.role === 'ADMIN' ? {} : { userId: user.id }),
+            },
+            include: reportInclude,
         });
 
         if (!report) {
