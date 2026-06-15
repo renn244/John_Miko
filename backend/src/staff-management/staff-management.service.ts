@@ -48,6 +48,8 @@ export class StaffManagementService {
         })
 
         // send email here to the staff
+        console.log("email: ", newStaff.email)
+        console.log("password: ", rawPassword)
 
         return newStaff
     }
