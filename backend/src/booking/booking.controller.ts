@@ -1,13 +1,16 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Role } from 'src/generated/prisma/enums';
 import { Public } from 'src/lib/decorators/Public.decorator';
+import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
+import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { BookingService } from './booking.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
-import { GetBookingsByUserQuery, GetBookingsQuery } from './query/getBookings.query';
+import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 
 @Controller('booking')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class BookingController {
     constructor(
         private readonly bookingService: BookingService
@@ -15,16 +18,29 @@ export class BookingController {
 
     // update or invalidate the cache when a new booking is made, 
     @Post()
+    @Roles(Role.GUEST, Role.ADMIN)
     async bookAccommodation(@Body() body: CreateBookingDto, @User() user: UserSession) {
         return this.bookingService.bookAccommodation(body, user)
     }
     
 
     @Get()
+    @Roles(Role.ADMIN)
     async GetBookings(@Query() query: GetBookingsQuery) {
         return this.bookingService.getBookings(query)
     }
 
+    @Get('staff')
+    @Roles(Role.RESORT_STAFF)
+    async getStaffBookings(@Query() query: GetStaffBookingsQuery) {
+        return this.bookingService.getStaffBookings(query);
+    }
+
+    @Get('staff/:bookingId')
+    @Roles(Role.RESORT_STAFF)
+    async getStaffBookingById(@Param('bookingId') bookingId: string) {
+        return this.bookingService.getStaffBookingById(bookingId);
+    }
 
     // make a query where pagination base on date? just to  optimize the query 
     // and avoid fetching too many data at once
@@ -35,32 +51,32 @@ export class BookingController {
     }
     
     @Get('closure')
+    @Roles(Role.ADMIN)
     async GetBookingsForClosure(@Query() query: { accommodationId: string }) {
         return this.bookingService.getBookingsForClosure(query.accommodationId);
     }
 
     @Get('byBookingId/:bookingId')
+    @Roles(Role.ADMIN, Role.GUEST)
     async GetBookingById(@Param('bookingId') bookingId: string) {
         return this.bookingService.getBookingById(bookingId)
     }
 
     @Get('byUser')
+    @Roles(Role.GUEST)
     async GetBookingsByUser(@User() user: UserSession, @Query() query: GetBookingsByUserQuery) {
         return this.bookingService.getBookingsByUser(user, query)
     }
     
     @Patch('reschedule/:bookingId')
+    @Roles(Role.ADMIN)
     async RescheduleBooking(@Param('bookingId') bookingId: string, @Body() body: RescheduleBookingDto) {
         return this.bookingService.rescheduleBooking(bookingId, body)
     }
 
     @Patch('changeStatus/:bookingId')
+    @Roles(Role.ADMIN)
     async changeStatus(@Param('bookingId') bookingId: string, @Body() body: ChangeStatusDto) {
         return this.bookingService.changeStatus(bookingId, body)
     }
-
-    // ADD REQUESTS FOR UPDATING OR CANCELLING BOOKINGS LATER
-    // make sure when updated, the cache if there is any should be invalidated and updated accordingly.
-
-    // NO DELETE!
 }
