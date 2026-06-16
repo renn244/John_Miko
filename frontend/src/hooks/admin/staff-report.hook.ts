@@ -36,8 +36,13 @@ export const useReviewStaffReportMutation = (reportId: string) => {
     return useMutation({
         mutationKey: ['staff-report', 'review', reportId],
         mutationFn: (data: ReviewStaffReportDto) => staffReportApi.reviewStaffReport(reportId, data),
-        onSuccess: (data) => {
-            toast.success(`Report ${data.status.toLowerCase()} successfully.`);
+        onSuccess: (data, variables) => {
+            toast.success(
+                variables.status === 'Approved'
+                    ? 'Report approved and maintenance ticket created.'
+                    : `Report ${data.status.toLowerCase()} successfully.`,
+            );
+            
             queryClient.invalidateQueries({ queryKey: ['staff-report', 'list'] });
             queryClient.invalidateQueries({ queryKey: ['staff-report', 'report'] });
             queryClient.invalidateQueries({ queryKey: ['staff-report', 'byId', reportId] });

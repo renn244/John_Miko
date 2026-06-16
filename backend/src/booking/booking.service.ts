@@ -483,6 +483,34 @@ export class BookingService {
                 preOrders: true,
                 addOns: true,
                 stayOption: true,
+                reports: {
+                    where: {
+                        type: {
+                            in: ['checkIn', 'checkOut'],
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        proofImages: true,
+                        type: true,
+                        status: true,
+                        severity: true,
+                        createdAt: true,
+                        rejectionNote: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                contactNo: true,
+                                role: true,
+                            },
+                        },
+                    },
+                },
             }
         })
 
@@ -509,6 +537,34 @@ export class BookingService {
                 },
                 feedback: true,
                 stayOption: true,
+                reports: {
+                    where: {
+                        type: {
+                            in: ['checkIn', 'checkOut'],
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        proofImages: true,
+                        type: true,
+                        status: true,
+                        severity: true,
+                        createdAt: true,
+                        rejectionNote: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                contactNo: true,
+                                role: true,
+                            },
+                        },
+                    },
+                },
             }
         })
 

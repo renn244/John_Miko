@@ -3,6 +3,25 @@ import type { Accommodation, AccommodationStayOption } from "./admin/accommodati
 import type { Feedback } from "./feedback.types";
 import type { PaginationParams } from "./pagination.type";
 
+export type BookingReportDocumentation = {
+    id: string;
+    title: string;
+    description: string;
+    proofImages: string[];
+    type: 'checkIn' | 'checkOut';
+    status: 'Pending' | 'Approved' | 'Rejected';
+    severity: 'Low' | 'Medium' | 'High';
+    createdAt: string;
+    rejectionNote?: string | null;
+    user: {
+        id: string;
+        name?: string | null;
+        email: string;
+        contactNo: string;
+        role: string;
+    };
+}
+
 export type Booking = {
     id: string;
 
@@ -97,6 +116,7 @@ export type BookingWithAccommodationAndPreOrder = {
         createdAt: string;
     }[]
     bookedAccommodation?: BookedAccommodation;
+    reports?: BookingReportDocumentation[];
 } & BookingWithAccommodation
 
 export type BookingWithAccommodationAndPreOrderAndPayment = {

@@ -221,42 +221,86 @@ export class StaffReportsService {
   }
 
   async reviewReport(user: UserSession, id: string, body: ReviewReportDto) {
-    const report = await this.prisma.report.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        status: true,
-      },
-    });
-
-    if (!report) {
-      throw new NotFoundException('Report not found');
-    }
-
-    if (report.status !== 'Pending') {
-      throw new BadRequestException('Only pending reports can be reviewed');
-    }
-
     if (body.status === 'Rejected' && !body.rejectionNote?.trim()) {
       throw new BadRequestException(
         'rejectionNote is required when rejecting a report',
       );
     }
 
-    const updatedReport = await this.prisma.report.update({
-      where: { id },
-      data: {
-        status: body.status,
-        rejectionNote:
-          body.status === 'Rejected'
-            ? (body.rejectionNote?.trim() ?? null)
-            : null,
-        reviewedAt: new Date(),
-        reviewedById: user.id,
-      },
-      include: reportInclude,
+    const updatedReport = await this.prisma.$transaction(async (tx) => {
+      const report = await tx.report.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          status: true,
+          title: true,
+          description: true,
+          proofImages: true,
+          severity: true,
+        },
+      });
+
+      if (!report) {
+        throw new NotFoundException('Report not found');
+      }
+
+      if (report.status !== 'Pending') {
+        throw new BadRequestException('Only pending reports can be reviewed');
+      }
+
+      const reviewResult = await tx.report.updateMany({
+        where: {
+          id,
+          status: 'Pending',
+        },
+        data: {
+          status: body.status,
+          rejectionNote:
+            body.status === 'Rejected'
+              ? (body.rejectionNote?.trim() ?? null)
+              : null,
+          reviewedAt: new Date(),
+          reviewedById: user.id,
+        },
+      });
+
+      if (reviewResult.count === 0) {
+        throw new BadRequestException('Only pending reports can be reviewed');
+      }
+
+      if (body.status === 'Approved') {
+        await this.createMaintenanceFromReport(tx, report);
+      }
+
+      return tx.report.findUnique({
+        where: { id },
+        include: reportInclude,
+      });
     });
 
+    if (!updatedReport) {
+      throw new NotFoundException('Report not found');
+    }
+
     return updatedReport;
+  }
+
+  private async createMaintenanceFromReport(
+    tx: Prisma.TransactionClient,
+    report: {
+      title: string;
+      description: string;
+      proofImages: string[];
+      severity: 'Low' | 'Medium' | 'High';
+    },
+  ) {
+    return tx.maintenance.create({
+      data: {
+        title: report.title,
+        description: report.description,
+        imagesUrl: report.proofImages,
+        priority: report.severity,
+      },
+    });
   }
 }
