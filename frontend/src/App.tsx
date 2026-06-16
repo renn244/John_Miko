@@ -23,6 +23,7 @@ import GuestManagement from './page/Admin/Guest-Management/GuestManagement';
 import AddMaintenance from './page/Admin/Maintenance/AddMaintenance';
 import EditMaintenance from './page/Admin/Maintenance/EditMaintenance';
 import Maintenance from './page/Admin/Maintenance/Maintenance';
+import ViewStaffReport from './page/Admin/Maintenance/ViewStaffReport';
 import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
 import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
 import MenuItem from './page/Admin/MenuItem/MenuItem';
@@ -163,6 +164,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Maintenance /> },
           { path: 'add', element: <AddMaintenance /> },
+          { path: 'reports/:id', element: <ViewStaffReport /> },
           { path: ':id/edit', element: <EditMaintenance /> }
         ]
       },

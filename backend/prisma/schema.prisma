@@ -42,7 +42,10 @@ model User {
   guestFeedbacks Feedback[]
 
   // for staff, this will be the reports they made
-  reports   Report[]
+  reports   Report[] @relation("User")
+  reviewedReports Report[] @relation("ReviewedBy")
+
+
   verifiedPayments Payment[]
 
   createdAt DateTime @default(now())
@@ -354,7 +357,7 @@ model Report {
   booking       Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   userId        String 
-  user          User   @relation(fields: [userId], references: [id])
+  user          User   @relation("User", fields: [userId], references: [id])
 
   title         String
   proofImages   String[]
@@ -366,6 +369,8 @@ model Report {
 
   rejectionNote String?
   reviewedAt    DateTime?
+  reviewedById   String?
+  reviewedBy   User?    @relation("ReviewedBy", fields: [reviewedById], references: [id])
 
   createdAt   DateTime @default(now())
 

@@ -22,8 +22,9 @@ export class CustomValidationPipe implements PipeTransform {
             whitelist: true, // would remove any properties that are not defined in the DTO
         });
 
-        console.dir(error, { depth: null });
-
+        // TODO LATER: Take into account the nested errors as well, 
+        // for example if there is a nested object that has validation errors, we need to return those errors as well
+        
         if(error.length > 0) {
             const errors = error.map(err => {
                 return {

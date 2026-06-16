@@ -2,14 +2,20 @@ import MaintenanceFilter from "@/components/pageComponents/Admin/Maintenance/Mai
 import MaintenanceKanbanBoard from "@/components/pageComponents/Admin/Maintenance/MaintenanceKanbanBoard"
 import MaintenanceStatistics from "@/components/pageComponents/Admin/Maintenance/MaintenanceStatistics"
 import MaintenanceTable from "@/components/pageComponents/Admin/Maintenance/MaintenanceTable"
+import StaffReportsTab from "@/components/pageComponents/Admin/Maintenance/StaffReportsTab"
 import MarkCompleteDialog from "@/components/pageComponents/Admin/Maintenance/MarkCompleteDialog"
 import ViewMaintenanceDialog from "@/components/pageComponents/Admin/Maintenance/ViewMaintenanceDialog"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { updateSearchParams } from "@/lib/updateSearchParams"
 import { Plus } from "lucide-react"
 import { Link } from "react-router"
+import { useSearchParams } from "react-router"
 
 const Maintenance = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "table";
+
   return (
     <div className="space-y-6">
     
@@ -24,10 +30,18 @@ const Maintenance = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="table">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) =>
+          updateSearchParams(setSearchParams, {
+            tab: value === "table" ? undefined : value,
+          })
+        }
+      >
         <TabsList>
           <TabsTrigger value="table">Table</TabsTrigger>
           <TabsTrigger value="kanban">Kanban</TabsTrigger>
+          <TabsTrigger value="staff-reports">Staff Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="table" className="space-y-6">
@@ -56,6 +70,10 @@ const Maintenance = () => {
           </div>
 
           <MaintenanceKanbanBoard />
+        </TabsContent>
+
+        <TabsContent value="staff-reports" className="space-y-6">
+          <StaffReportsTab />
         </TabsContent>
       </Tabs>
 
