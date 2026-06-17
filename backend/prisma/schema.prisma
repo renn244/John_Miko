@@ -359,6 +359,9 @@ model Report {
   userId        String 
   user          User   @relation("User", fields: [userId], references: [id])
 
+  maintenanceId String? @unique
+  maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
+
   title         String
   proofImages   String[]
   description   String
@@ -409,7 +412,10 @@ model Maintenance {
 
   startedAt     DateTime?
   resolvedAt    DateTime?
+  closedAt      DateTime?
   
+  report        Report? 
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

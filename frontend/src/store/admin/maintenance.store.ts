@@ -6,6 +6,9 @@ type maintenanceStore = {
     viewId: string | undefined;
     setViewId: (id: string | undefined) => void;
 
+    isSearchOpen: boolean;
+    setIsSearchOpen: (isOpen: boolean) => void;
+
     isCompleteOpen: boolean;
     setIsCompleteOpen: (isOpen: boolean) => void;
     completeId: string | undefined;
@@ -32,6 +35,13 @@ export const useMaintenanceStore = create<maintenanceStore>((set) => ({
         set({
             viewId: id,
             isViewOpen: !!id,
+        });
+    },
+
+    isSearchOpen: false,
+    setIsSearchOpen: (open) => {
+        set({
+            isSearchOpen: open,
         });
     },
 

@@ -7,10 +7,12 @@ export type Maintenance = {
     imagesUrl: string[];
     priority: 'Low' | 'Medium' | 'High';
     status: 'Pending' | 'InProgress' | 'Completed' | 'Closed';
+    notes?: string;
     createdAt: string;
     updatedAt: string;
     startedAt?: string;
     resolvedAt?: string;
+    closedAt?: string;
     resolutionNotes?: string;
 }
 

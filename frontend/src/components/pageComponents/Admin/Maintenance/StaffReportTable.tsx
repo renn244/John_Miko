@@ -27,15 +27,6 @@ const StaffReportTable = () => {
 
     return (
         <Card className="min-h-147.5 px-4">
-            <div className="flex items-center justify-between border-b py-4">
-                <div>
-                    <p className="text-sm font-medium text-foreground">Staff Report Review Queue</p>
-                    <p className="text-sm text-muted-foreground">
-                        {isLoading ? "Loading reports..." : `Showing ${meta?.total ?? 0} report${(meta?.total ?? 0) === 1 ? "" : "s"}`}
-                    </p>
-                </div>
-            </div>
-
             <Table>
                 <TableHeader>
                     <TableRow>
