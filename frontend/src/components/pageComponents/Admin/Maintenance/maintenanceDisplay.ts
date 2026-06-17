@@ -60,6 +60,10 @@ export const getMaintenancePriorityAccentBorder = (priority: Maintenance["priori
   }
 };
 
+export const getMaintenanceAssigneeLabel = (ticket: Maintenance) => {
+  return ticket.assignedTo?.name || ticket.assignedTo?.email || "Unassigned";
+};
+
 export const formatMaintenanceDateTime = (value?: string | null) => {
   if (!value) return "—";
   const date = new Date(value);

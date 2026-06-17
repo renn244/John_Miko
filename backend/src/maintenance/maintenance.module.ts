@@ -4,6 +4,7 @@ import { MaintenanceController } from './maintenance.controller';
 
 @Module({
   providers: [MaintenanceService],
-  controllers: [MaintenanceController]
+  controllers: [MaintenanceController],
+  exports: [MaintenanceService],
 })
 export class MaintenanceModule {}

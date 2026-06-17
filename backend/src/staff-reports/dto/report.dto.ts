@@ -17,6 +17,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 import {
+  MaintenanceExpertise,
   ReportSeverity,
   ReportStatus,
   ReportType,
@@ -122,4 +123,11 @@ export class ReviewReportDto {
     message: 'rejectionNote must be at most 400 characters long',
   })
   rejectionNote?: string;
+
+  @ValidateIf((body: ReviewReportDto) => body.status === ReportStatus.Approved)
+  @IsNotEmpty({ message: 'expertise is required when approving a report' })
+  @IsEnum(MaintenanceExpertise, {
+    message: 'expertise must be one of values (Electrical, Pool, Construction)',
+  })
+  expertise?: MaintenanceExpertise;
 }

@@ -1,5 +1,5 @@
 import { maintenanceApi } from "@/api/admin/maintenane.api";
-import type { GetMaintenancesQuery } from "@/types/admin/maintenance.type";
+import type { CompleteMaintenanceDto, GetMaintenancesQuery } from "@/types/admin/maintenance.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
@@ -90,7 +90,7 @@ export const useCompleteMaintenanceMutation = (id: string | undefined | null) =>
 
     return useMutation({
         mutationKey: ['maintenance', 'complete', id],
-        mutationFn: (resolutionNotes: string) => maintenanceApi.completeMaintenance(id || "", resolutionNotes),
+        mutationFn: (data: CompleteMaintenanceDto) => maintenanceApi.completeMaintenance(id || "", data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['maintenance', 'list'] });
             queryClient.invalidateQueries({ queryKey: ['maintenance', 'byId', id] });

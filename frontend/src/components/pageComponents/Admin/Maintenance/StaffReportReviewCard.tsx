@@ -2,8 +2,10 @@ import { getStaffReportStatusClasses } from "@/components/pageComponents/Admin/M
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useReviewStaffReportMutation } from "@/hooks/admin/staff-report.hook";
+import type { MaintenanceExpertise } from "@/types/admin/staff-management.type";
 import type { StaffReport } from "@/types/admin/staff-report.type";
 import { CheckCircle2, ShieldCheck, XCircle } from "lucide-react";
 import { useState } from "react";
@@ -15,6 +17,7 @@ type StaffReportReviewCardProps = {
 const StaffReportReviewCard = ({ report }: StaffReportReviewCardProps) => {
     const reviewMutation = useReviewStaffReportMutation(report.id);
     const [rejectionNote, setRejectionNote] = useState("");
+    const [expertise, setExpertise] = useState<MaintenanceExpertise | undefined>();
     const isPending = report.status === "Pending";
 
     return (
@@ -30,10 +33,27 @@ const StaffReportReviewCard = ({ report }: StaffReportReviewCardProps) => {
                         Review this report and choose whether to approve or reject it.
                     </p>
 
+                    <div className="space-y-2">
+                        <p className="text-sm font-medium">Maintenance expertise</p>
+                        <Select value={expertise} onValueChange={(value) => setExpertise(value as MaintenanceExpertise)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select expertise for routing" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Maintenance Expertise</SelectLabel>
+                                    <SelectItem value="Electrical">Electrical</SelectItem>
+                                    <SelectItem value="Pool">Pool</SelectItem>
+                                    <SelectItem value="Construction">Construction</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     <Button
                         className="w-full bg-emerald-600 hover:bg-emerald-700"
-                        disabled={reviewMutation.isPending}
-                        onClick={() => reviewMutation.mutate({ status: "Approved" })}
+                        disabled={reviewMutation.isPending || !expertise}
+                        onClick={() => reviewMutation.mutate({ status: "Approved", expertise })}
                     >
                         <CheckCircle2 className="mr-2 h-4 w-4" />
                         Approve Report

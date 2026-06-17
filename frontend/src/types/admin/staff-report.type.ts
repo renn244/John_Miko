@@ -1,5 +1,6 @@
 import type { BookingWithAccommodationAndPreOrderAndPayment } from "../booking.types";
 import type { PaginatedResponse, PaginationParams } from "../pagination.type";
+import type { MaintenanceExpertise } from "./staff-management.type";
 
 export type ReportStatus = "Pending" | "Approved" | "Rejected";
 export type ReportType = "checkIn" | "checkOut" | "maintenance";
@@ -53,6 +54,7 @@ export type StaffReport = {
     rejectionNote?: string | null;
     reviewedAt?: string | null;
     reviewedById?: string | null;
+    maintenanceId?: string | null;
     createdAt: string;
     booking: StaffReportBookingSummary;
     user: StaffReportUser;
@@ -69,6 +71,7 @@ export type GetStaffReportsAdminQuery = {
 export type ReviewStaffReportDto = {
     status: Exclude<ReportStatus, "Pending">;
     rejectionNote?: string;
+    expertise?: MaintenanceExpertise;
 }
 
 export type PaginatedStaffReports = PaginatedResponse<StaffReport>;

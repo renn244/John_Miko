@@ -102,6 +102,7 @@ export default function Login() {
                                         <SelectContent>
                                             <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
                                             <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
+                                            <SelectItem value="MAINTENANCE_STAFF">Maintenance Staff</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 )}

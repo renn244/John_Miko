@@ -3,6 +3,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { StaffRole } from "@/types/admin/staff-management.type";
 import { useViewportFitHeight } from "@/hooks/common/useViewportFitHeight";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
@@ -17,7 +18,16 @@ const StaffSchema = z.object({
     name: z.string().nonempty("Name is required"),
     email: z.string().email("Invalid email").nonempty("Email is required"),
     contactNo: z.string().nonempty("Contact number is required"),
-    role: z.enum(["KITCHEN_STAFF", "RESORT_STAFF"], { message: "Role is required" })
+    role: z.enum(["KITCHEN_STAFF", "RESORT_STAFF", "MAINTENANCE_STAFF"], { message: "Role is required" }),
+    expertise: z.enum(["Electrical", "Pool", "Construction"]).optional(),
+}).superRefine((value, ctx) => {
+    if (value.role === "MAINTENANCE_STAFF" && !value.expertise) {
+        ctx.addIssue({
+            code: "custom",
+            path: ["expertise"],
+            message: "Expertise is required for maintenance staff",
+        });
+    }
 });
 
 type staffSchema = z.infer<typeof StaffSchema>
@@ -34,17 +44,20 @@ const StaffForm = ({ onsubmit, oncancel, className, fitHeight = false, ...props 
     const {
         control,
         handleSubmit,
-        setError
+        setError,
+        watch,
     } = useForm<staffSchema>({
         resolver: zodResolver(StaffSchema),
         defaultValues: {
             name: "",
             email: "",
             contactNo: "",
-            role: "KITCHEN_STAFF"
+            role: "KITCHEN_STAFF",
+            expertise: undefined,
         },
         criteriaMode: "all",
     })
+    const selectedRole = watch("role") as StaffRole;
 
     const formRef = useRef<HTMLFormElement | null>(null);
     const formHeight = useViewportFitHeight(formRef, {
@@ -153,35 +166,71 @@ const StaffForm = ({ onsubmit, oncancel, className, fitHeight = false, ...props 
                             />
                         </div>
 
-                        <Controller
-                        name="role"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid}>
-                                <FieldLabel htmlFor={field.name}>
-                                    Role <span className="text-red-700">*</span>
-                                </FieldLabel>
-                                <Select
-                                value={field.value}
-                                onValueChange={field.onChange}
-                                >
-                                    <SelectTrigger id={field.name}>
-                                        <SelectValue placeholder="Select role" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Staff Role</SelectLabel>
-                                            <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
-                                            <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                {fieldState.invalid && (
-                                    <FieldError errors={getErrorMessages(fieldState.error)} />
+                        <div className="grid md:grid-cols-2 justify-between gap-5">
+                            <Controller
+                            name="role"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel htmlFor={field.name}>
+                                        Role <span className="text-red-700">*</span>
+                                    </FieldLabel>
+                                    <Select
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                    >
+                                        <SelectTrigger id={field.name}>
+                                            <SelectValue placeholder="Select role" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Staff Role</SelectLabel>
+                                                <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
+                                                <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
+                                                <SelectItem value="MAINTENANCE_STAFF">Maintenance Staff</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    {fieldState.invalid && (
+                                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                                    )}
+                                </Field>
+                            )}
+                            />
+
+                            {selectedRole === "MAINTENANCE_STAFF" && (
+                                <Controller
+                                name="expertise"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor={field.name}>
+                                            Expertise <span className="text-red-700">*</span>
+                                        </FieldLabel>
+                                        <Select
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        >
+                                            <SelectTrigger id={field.name}>
+                                                <SelectValue placeholder="Select expertise" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectLabel>Maintenance Expertise</SelectLabel>
+                                                    <SelectItem value="Electrical">Electrical</SelectItem>
+                                                    <SelectItem value="Pool">Pool</SelectItem>
+                                                    <SelectItem value="Construction">Construction</SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError errors={getErrorMessages(fieldState.error)} />
+                                        )}
+                                    </Field>
                                 )}
-                            </Field>
-                        )}
-                        />
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

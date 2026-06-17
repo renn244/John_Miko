@@ -1,3 +1,5 @@
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview"
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
@@ -15,7 +17,10 @@ const MarkCompleteSchema = z.object({
     resolutionNotes: z.string()
       .nonempty("Resolution notes are required")
       .min(20, "Resolution notes must be at least 20 characters")
-      .max(400, "Resolution notes must be less than 500 characters")
+      .max(400, "Resolution notes must be less than 500 characters"),
+    resolutionProofImages: z.array(z.url("Invalid URL format"))
+      .min(1, "At least one proof image is required")
+      .max(3, "A maximum of three proof images is allowed"),
 })
 
 export type markCompleteSchema = z.infer<typeof MarkCompleteSchema>
@@ -37,7 +42,8 @@ const MarkCompleteForm = ({
   } = useForm<markCompleteSchema>({
     resolver: zodResolver(MarkCompleteSchema),
     defaultValues: {
-      resolutionNotes: ""
+      resolutionNotes: "",
+      resolutionProofImages: [],
     },
     criteriaMode: "all"
   })
@@ -91,7 +97,41 @@ const MarkCompleteForm = ({
           )}
         </Field>
       )}
-      />        
+      />
+
+      <Controller
+      name="resolutionProofImages"
+      control={control}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel>
+            Resolution Proof Images <span className="text-red-700">*</span>
+          </FieldLabel>
+
+          <FieldDescription>
+            Upload 1 to 3 photos showing the completed work.
+          </FieldDescription>
+
+          {field.value.length < 3 ? (
+            <CloudinaryUpload
+            onSuccess={(url) => field.onChange([...field.value, url])}
+            onError={(err) => toast.error(err.message || "Image upload failed. Please try again.")}
+            />
+          ) : null}
+
+          {field.value.length > 0 ? (
+            <CloudinaryPreview
+            images={field.value.map((url) => ({ url }))}
+            onRemove={(index) => field.onChange(field.value.filter((_, currentIndex) => currentIndex !== index))}
+            />
+          ) : null}
+
+          {fieldState.invalid && (
+            <FieldError errors={getErrorMessages(fieldState.error)} />
+          )}
+        </Field>
+      )}
+      />
 
       <div className="flex justify-end gap-3">
         <Button variant="outline" disabled={isLoading} onClick={oncancel}>

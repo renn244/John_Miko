@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { CreateMaintenanceDto, GetMaintenancesQuery, GetMaintenanceStats, Maintenance, UpdateMaintenanceDto } from "@/types/admin/maintenance.type";
+import type { CompleteMaintenanceDto, CreateMaintenanceDto, GetMaintenancesQuery, GetMaintenanceStats, Maintenance, UpdateMaintenanceDto } from "@/types/admin/maintenance.type";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const maintenanceApi = {
@@ -79,8 +79,8 @@ export const maintenanceApi = {
 
         return response.data as Maintenance;
     },
-    completeMaintenance: async (id: string, resolutionNotes: string) => {
-        const response = await apiClient.patch(`/maintenance/${id}/complete`, { resolutionNotes: resolutionNotes });
+    completeMaintenance: async (id: string, data: CompleteMaintenanceDto) => {
+        const response = await apiClient.patch(`/maintenance/${id}/complete`, data);
         
         if(response.status >= 400) {
             throw new Error(response.data.message || 'An error occurred while resolving the maintenance ticket.');

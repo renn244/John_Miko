@@ -84,7 +84,13 @@ const DeactivateStaff = ({ staff }: { staff: StaffUser }) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Role:</span>
-                            <span className="font-medium">{staff.role === "KITCHEN_STAFF" ? "Kitchen Staff" : "Resort Staff"}</span>
+                            <span className="font-medium">
+                                {staff.role === "KITCHEN_STAFF"
+                                    ? "Kitchen Staff"
+                                    : staff.role === "RESORT_STAFF"
+                                        ? "Resort Staff"
+                                        : "Maintenance Staff"}
+                            </span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Status:</span>

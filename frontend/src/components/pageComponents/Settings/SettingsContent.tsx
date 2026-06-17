@@ -13,6 +13,7 @@ const roleLabels: Record<UserProfileDto["role"], string> = {
     GUEST: "Guest",
     KITCHEN_STAFF: "Kitchen Staff",
     RESORT_STAFF: "Resort Staff",
+    MAINTENANCE_STAFF: "Maintenance Staff",
 };
 
 const SettingsContent = ({ user }: SettingsContentProps) => {

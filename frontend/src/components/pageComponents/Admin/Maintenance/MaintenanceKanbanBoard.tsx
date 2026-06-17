@@ -8,8 +8,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import { useClosedMaintenanceMutation, useGetMaintenancesQuery, useStartMaintnenanceMutation } from "@/hooks/admin/maintenance.hook";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  useClosedMaintenanceMutation,
+  useGetMaintenancesQuery,
+  useStartMaintnenanceMutation,
+} from "@/hooks/admin/maintenance.hook";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
 import { Check, Edit, Eye, Lock, MoreHorizontal, Play } from "lucide-react";
@@ -18,6 +27,7 @@ import {
   ACTIVE_MAINTENANCE_STATUSES,
   type ActiveMaintenanceStatus,
   formatMaintenanceShortDate,
+  getMaintenanceAssigneeLabel,
   getMaintenancePriorityAccentBorder,
   getMaintenancePriorityClasses,
   getMaintenanceStatusClasses,
@@ -41,7 +51,7 @@ const MaintenanceKanbanBoard = () => {
   if (isLoading) return null;
 
   const tickets = sortMaintenanceByRelevantDate(
-    (data?.data ?? []).filter((ticket) => ticket.status !== "Closed")
+    (data?.data ?? []).filter((ticket) => ticket.status !== "Closed"),
   );
 
   if (tickets.length === 0) {
@@ -50,7 +60,9 @@ const MaintenanceKanbanBoard = () => {
         <Empty>
           <EmptyHeader>
             <EmptyTitle>No tickets to show</EmptyTitle>
-            <EmptyDescription>Closed tickets are excluded from this board.</EmptyDescription>
+            <EmptyDescription>
+              Closed tickets are excluded from this board.
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -62,12 +74,11 @@ const MaintenanceKanbanBoard = () => {
       acc[status] = tickets.filter((ticket) => ticket.status === status);
       return acc;
     },
-    {} as Record<ActiveMaintenanceStatus, Maintenance[]>
+    {} as Record<ActiveMaintenanceStatus, Maintenance[]>,
   );
 
   return (
     <div className="space-y-3">
-
       <div className="overflow-x-auto">
         <div className="grid min-w-225 grid-cols-3 gap-4">
           {ACTIVE_MAINTENANCE_STATUSES.map((columnStatus) => {
@@ -76,14 +87,18 @@ const MaintenanceKanbanBoard = () => {
             return (
               <div
                 key={columnStatus}
-                className="overflow-hidden rounded-xl border bg-muted/30 h-175"
+                className="h-175 overflow-hidden rounded-xl border bg-muted/30"
               >
                 <div className={`h-2 w-full ${getColumnAccent(columnStatus)}`} />
                 <div className="bg-background/60 p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{getMaintenanceStatusLabel(columnStatus)}</h3>
-                      <span className="text-sm text-muted-foreground">({columnTickets.length})</span>
+                      <h3 className="font-semibold">
+                        {getMaintenanceStatusLabel(columnStatus)}
+                      </h3>
+                      <span className="text-sm text-muted-foreground">
+                        ({columnTickets.length})
+                      </span>
                     </div>
                     <Badge className={getMaintenanceStatusClasses(columnStatus)}>
                       {getMaintenanceStatusLabel(columnStatus)}
@@ -100,12 +115,14 @@ const MaintenanceKanbanBoard = () => {
                     {columnTickets.map((ticket) => (
                       <div
                         key={ticket.id}
-                        className={`rounded-xl bg-background p-3 shadow-sm border-l-4 ${getMaintenancePriorityAccentBorder(ticket.priority)}`}
+                        className={`rounded-xl border-l-4 bg-background p-3 shadow-sm ${getMaintenancePriorityAccentBorder(ticket.priority)}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <div className="font-medium truncate">{ticket.title}</div>
-                            <div className="text-xs text-muted-foreground truncate">ID: {ticket.id}</div>
+                            <div className="truncate font-medium">{ticket.title}</div>
+                            <div className="truncate text-xs text-muted-foreground">
+                              ID: {ticket.id}
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -123,7 +140,7 @@ const MaintenanceKanbanBoard = () => {
                                 <DropdownMenuGroup>
                                   <Link to={`/admin/maintenance/${ticket.id}/edit`}>
                                     <DropdownMenuItem>
-                                      <Edit className="w-4 h-4 text-primary" />
+                                      <Edit className="h-4 w-4 text-primary" />
                                       Edit Details
                                     </DropdownMenuItem>
                                   </Link>
@@ -131,49 +148,63 @@ const MaintenanceKanbanBoard = () => {
                                 <DropdownMenuSeparator />
 
                                 <DropdownMenuItem onClick={() => setViewId(ticket.id)}>
-                                  <Eye className="w-4 h-4 text-primary" />
+                                  <Eye className="h-4 w-4 text-primary" />
                                   View Details
                                 </DropdownMenuItem>
 
-                                {ticket.status === "Pending" && (
+                                {ticket.status === "Pending" ? (
                                   <DropdownMenuItem
                                     disabled={startMutation.isPending}
                                     onClick={() => startMutation.mutate(ticket.id)}
                                   >
-                                    <Play className="w-4 h-4 text-primary" />
+                                    <Play className="h-4 w-4 text-primary" />
                                     Start Maintenance
                                   </DropdownMenuItem>
-                                )}
+                                ) : null}
 
-                                {ticket.status === "InProgress" && (
+                                {ticket.status === "InProgress" ? (
                                   <DropdownMenuItem onClick={() => setCompleteId(ticket.id)}>
-                                    <Check className="w-4 h-4 text-emerald-500" />
+                                    <Check className="h-4 w-4 text-emerald-500" />
                                     Complete
                                   </DropdownMenuItem>
-                                )}
+                                ) : null}
 
-                                {ticket.status === "Completed" && (
+                                {ticket.status === "Completed" ? (
                                   <DropdownMenuItem
                                     disabled={closeMutation.isPending}
                                     onClick={() => closeMutation.mutate(ticket.id)}
                                   >
-                                    <Lock className="w-4 h-4 text-amber-500" />
+                                    <Lock className="h-4 w-4 text-amber-500" />
                                     Close Ticket
                                   </DropdownMenuItem>
-                                )}
+                                ) : null}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
                         </div>
 
                         {ticket.description ? (
-                          <div className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                          <div className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                             {ticket.description}
                           </div>
                         ) : null}
 
+                        <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                          <div>
+                            <span className="font-medium text-foreground/80">Expertise:</span>{" "}
+                            <span>{ticket.expertise}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-foreground/80">Assigned:</span>{" "}
+                            <span>{getMaintenanceAssigneeLabel(ticket)}</span>
+                          </div>
+                        </div>
+
                         <div className="mt-2 text-xs text-muted-foreground">
-                          {getDateLabel(ticket.status)}: {formatMaintenanceShortDate(getMaintenanceStatusDate(ticket, ticket.status)) ?? "—"}
+                          {getDateLabel(ticket.status)}:{" "}
+                          {formatMaintenanceShortDate(
+                            getMaintenanceStatusDate(ticket, ticket.status),
+                          ) ?? "—"}
                         </div>
                       </div>
                     ))}

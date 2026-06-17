@@ -18,6 +18,7 @@ import Animated, {
 const roleRoutes = {
     RESORT_STAFF: "/resort-staff",
     KITCHEN_STAFF: "/kitchen-staff",
+    MAINTENANCE_STAFF: "/maintenance-staff",
 } as const;
 
 const useDotStyle = (progress: SharedValue<number>, offset: number) => {

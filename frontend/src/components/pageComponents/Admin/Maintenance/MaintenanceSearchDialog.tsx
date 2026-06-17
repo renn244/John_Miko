@@ -1,6 +1,7 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import {
   formatMaintenanceShortDate,
+  getMaintenanceAssigneeLabel,
   getMaintenancePriorityClasses,
   getMaintenanceStatusClasses,
   getMaintenanceStatusDate,
@@ -174,6 +175,8 @@ const SearchSection = ({
                   <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                     <span className="font-semibold text-primary">{ticket.id}</span>
                     {relevantDate ? <span>{relevantDate}</span> : null}
+                    <span>•</span>
+                    <span>{ticket.expertise}</span>
                   </div>
                   <div className="mt-1 flex items-start gap-3">
                     {ticket.imagesUrl?.[0] ? (
@@ -190,6 +193,9 @@ const SearchSection = ({
                       </div>
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                         {ticket.description}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Assigned to {getMaintenanceAssigneeLabel(ticket)}
                       </p>
                     </div>
                   </div>

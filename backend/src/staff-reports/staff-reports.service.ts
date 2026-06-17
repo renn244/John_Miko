@@ -4,11 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
+import { MaintenanceExpertise } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { isBookingStayActive } from 'src/lib/utils/booking-stay.util';
 import { getDateRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { MaintenanceService } from 'src/maintenance/maintenance.service';
 import {
   CreateReportDto,
   GetStaffReportsQuery,
@@ -50,7 +52,10 @@ const reportInclude = {
 
 @Injectable()
 export class StaffReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly maintenanceService: MaintenanceService,
+  ) {}
 
   async createReports(user: UserSession, body: CreateReportDto) {
     if (body.type !== 'maintenance' && !body.bookingId) {
@@ -140,9 +145,7 @@ export class StaffReportsService {
               { bookingId: { contains: search, mode: 'insensitive' } },
               { user: { name: { contains: search, mode: 'insensitive' } } },
               { user: { email: { contains: search, mode: 'insensitive' } } },
-              {
-                user: { contactNo: { contains: search, mode: 'insensitive' } },
-              },
+              { user: { contactNo: { contains: search, mode: 'insensitive' } } },
             ],
           }
         : {}),
@@ -269,7 +272,7 @@ export class StaffReportsService {
       }
 
       if (body.status === 'Approved') {
-        await this.createMaintenanceFromReport(tx, report);
+        await this.createMaintenanceFromReport(tx, report, body.expertise!);
       }
 
       return tx.report.findUnique({
@@ -288,19 +291,34 @@ export class StaffReportsService {
   private async createMaintenanceFromReport(
     tx: Prisma.TransactionClient,
     report: {
+      id: string;
       title: string;
       description: string;
       proofImages: string[];
       severity: 'Low' | 'Medium' | 'High';
     },
+    expertise: MaintenanceExpertise,
   ) {
-    return tx.maintenance.create({
+    const assignedToId = await this.maintenanceService.selectAssignee(expertise);
+
+    const maintenance = await tx.maintenance.create({
       data: {
         title: report.title,
         description: report.description,
         imagesUrl: report.proofImages,
         priority: report.severity,
+        expertise,
+        assignedToId,
       },
     });
+
+    await tx.report.update({
+      where: { id: report.id },
+      data: {
+        maintenanceId: maintenance.id,
+      },
+    });
+
+    return maintenance;
   }
 }

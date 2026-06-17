@@ -1,6 +1,5 @@
 import MaintenanceKanbanBoard from "@/components/pageComponents/Admin/Maintenance/MaintenanceKanbanBoard";
 import MaintenanceSearchDialog from "@/components/pageComponents/Admin/Maintenance/MaintenanceSearchDialog";
-import MaintenanceStatistics from "@/components/pageComponents/Admin/Maintenance/MaintenanceStatistics";
 import MarkCompleteDialog from "@/components/pageComponents/Admin/Maintenance/MarkCompleteDialog";
 import StaffReportsTab from "@/components/pageComponents/Admin/Maintenance/StaffReportsTab";
 import ViewMaintenanceDialog from "@/components/pageComponents/Admin/Maintenance/ViewMaintenanceDialog";

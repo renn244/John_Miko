@@ -13,6 +13,7 @@ import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 const roleLabels: Record<ProfileResponse["role"], string> = {
     KITCHEN_STAFF: "Kitchen Staff",
     RESORT_STAFF: "Resort Staff",
+    MAINTENANCE_STAFF: "Maintenance Staff",
 };
 
 const StaffSettingsScreen = () => {

@@ -1,58 +1,88 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Role } from 'src/generated/prisma/enums';
+import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
-import { CreateMaintenanceDto, UpdateMaintenanceDto } from './dto/maintenance.dto';
+import { RolesGuard } from 'src/lib/guards/Roles.guard';
+import { CompleteMaintenanceDto, CreateMaintenanceDto, UpdateMaintenanceDto } from './dto/maintenance.dto';
 import { MaintenanceService } from './maintenance.service';
 import { GetMaintenanceDto } from './query/getMaintenance.dto';
 
 @Controller('maintenance')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class MaintenanceController {
     constructor(
         private readonly maintenanceService: MaintenanceService
     ) {}
 
     @Post()
+    @Roles(Role.ADMIN)
     async createMaintenance(@User() user: UserSession, @Body() body: CreateMaintenanceDto) {
         return this.maintenanceService.createMaintenance(user, body);
     }
 
     @Get()
+    @Roles(Role.ADMIN)
     async getMaintenances(@Query() query: GetMaintenanceDto) {
         return this.maintenanceService.getMaintenances(query);
     }
 
     @Get('report')
+    @Roles(Role.ADMIN)
     async getMaintenanceReport() {
         return this.maintenanceService.getMaintenanceReport();
     }
 
     @Get('stats')
+    @Roles(Role.ADMIN)
     async getMaintenanceStats() {
         return this.maintenanceService.getMaintenanceStats();
     }
 
+    @Get('assigned/active')
+    @Roles(Role.MAINTENANCE_STAFF)
+    async getAssignedActiveMaintenances(@User() user: UserSession, @Query() query: GetMaintenanceDto) {
+        return this.maintenanceService.getAssignedActiveMaintenances(user, query);
+    }
+
+    @Get('assigned/history')
+    @Roles(Role.MAINTENANCE_STAFF)
+    async getAssignedMaintenanceHistory(@User() user: UserSession, @Query() query: GetMaintenanceDto) {
+        return this.maintenanceService.getAssignedMaintenanceHistory(user, query);
+    }
+
+    @Get('assigned/:id')
+    @Roles(Role.MAINTENANCE_STAFF)
+    async getAssignedMaintainanceById(@User() user: UserSession, @Param('id') id: string) {
+        return this.maintenanceService.getAssignedMaintenanceById(user, id);
+    }
+
     @Get(':id')
+    @Roles(Role.ADMIN)
     async getMaintainanceById(@Param('id') id: string) {
         return this.maintenanceService.getMaintenanceById(id);
     }
 
     @Patch(':id')
+    @Roles(Role.ADMIN)
     async updateMaintenance(@Param('id') id: string, @Body() body: UpdateMaintenanceDto) {
         return this.maintenanceService.updateMaintenance(id, body);
     }
 
     @Patch(':id/start')
-    async startMaintenance(@Param('id') id: string) {
-        return this.maintenanceService.startMaintenance(id);
+    @Roles(Role.ADMIN, Role.MAINTENANCE_STAFF)
+    async startMaintenance(@User() user: UserSession, @Param('id') id: string) {
+        return this.maintenanceService.startMaintenance(user, id);
     }
 
     @Patch(':id/complete')
-    async completeMaintenance(@Param('id') id: string, @Body('resolutionNotes') resolutionNotes: string) {
-        return this.maintenanceService.completeMaintenance(id, resolutionNotes);
+    @Roles(Role.ADMIN, Role.MAINTENANCE_STAFF)
+    async completeMaintenance(@User() user: UserSession, @Param('id') id: string, @Body() body: CompleteMaintenanceDto) {
+        return this.maintenanceService.completeMaintenance(user, id, body);
     }
 
     @Patch(':id/close')
+    @Roles(Role.ADMIN)
     async closeMaintenance(@Param('id') id: string) {
         return this.maintenanceService.closeMaintenance(id);
     }

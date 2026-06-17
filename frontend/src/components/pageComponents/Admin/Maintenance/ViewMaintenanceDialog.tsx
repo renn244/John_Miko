@@ -3,6 +3,7 @@ import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import {
   formatMaintenanceDateTime,
   formatMaintenanceShortDate,
+  getMaintenanceAssigneeLabel,
   getMaintenancePriorityClasses,
   getMaintenanceStatusLabel,
   MAINTENANCE_STATUS_ORDER,
@@ -131,6 +132,8 @@ const MaintenanceDetails = ({ maintenance }: { maintenance: Maintenance }) => {
           <MetaCard label="Updated" value={formatMaintenanceDateTime(maintenance.updatedAt)} />
           <MetaCard label="Started" value={formatMaintenanceDateTime(maintenance.startedAt)} />
           <MetaCard label="Resolved" value={formatMaintenanceDateTime(maintenance.resolvedAt)} />
+          <MetaCard label="Expertise" value={maintenance.expertise} />
+          <MetaCard label="Assigned To" value={getMaintenanceAssigneeLabel(maintenance)} />
         </div>
 
         {maintenance.resolutionNotes ? (
@@ -153,7 +156,7 @@ const MaintenanceDetails = ({ maintenance }: { maintenance: Maintenance }) => {
 
         {maintenance.imagesUrl?.length ? (
           <section className="space-y-3">
-            <h3 className="text-lg font-semibold tracking-tight">Photo Attachments</h3>
+            <h3 className="text-lg font-semibold tracking-tight">Issue Photos</h3>
             <div className="space-y-3">
               {selectedImage ? (
                 <img
@@ -184,6 +187,22 @@ const MaintenanceDetails = ({ maintenance }: { maintenance: Maintenance }) => {
                   ))}
                 </div>
               ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {maintenance.resolutionProofImages?.length ? (
+          <section className="space-y-3">
+            <h3 className="text-lg font-semibold tracking-tight">Resolution Proof</h3>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {maintenance.resolutionProofImages.map((imageUrl, index) => (
+                <img
+                  key={`${maintenance.id}-resolution-${index}`}
+                  src={imageUrl}
+                  alt={`${maintenance.title} resolution proof ${index + 1}`}
+                  className="h-40 w-full rounded-2xl border object-cover"
+                />
+              ))}
             </div>
           </section>
         ) : null}

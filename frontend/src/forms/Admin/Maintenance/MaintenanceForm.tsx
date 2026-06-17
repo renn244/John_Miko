@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
+import type { MaintenanceExpertise } from "@/types/admin/staff-management.type"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { handleNestError, ValidationError } from "@/lib/handleNestError"
 import { cn } from "@/lib/utils"
@@ -20,7 +21,8 @@ const MaintenanceSchema = z.object({
     title: z.string().nonempty("Title is required"),
     description: z.string().nonempty("Description is required"),
     imagesUrl: z.array(z.string().url("Invalid URL format")).nonempty("At least one image URL is required"),
-    priority: z.enum(["Low", "Medium", "High"], { message: "Priority must be one of: Low, Medium, High" })
+    priority: z.enum(["Low", "Medium", "High"], { message: "Priority must be one of: Low, Medium, High" }),
+    expertise: z.enum(["Electrical", "Pool", "Construction"], { message: "Expertise is required" }),
 })
 
 type maintenanceSchema = z.infer<typeof MaintenanceSchema>
@@ -45,7 +47,8 @@ const MaintenanceForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
             title: initialData?.title || "",
             description: initialData?.description || "",
             imagesUrl: initialData?.imagesUrl || [],
-            priority: initialData?.priority || "Low"
+            priority: initialData?.priority || "Low",
+            expertise: initialData?.expertise || "Electrical",
         },
         criteriaMode: "all",
     })
@@ -186,6 +189,78 @@ const MaintenanceForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
                                             <RadioGroupItem 
                                             value="High"
                                             id="form-rhf-radiogroup-High"
+                                            aria-invalid={fieldState.invalid}
+                                            />
+                                        </Field>
+                                    </FieldLabel>
+                                </RadioGroup>
+
+                                {fieldState.error && (
+                                    <FieldError errors={getErrorMessages(fieldState.error)} />
+                                )}
+                            </FieldSet>
+                        )} 
+                        />
+
+                        <Controller
+                        name="expertise"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <FieldSet>
+                                <FieldLegend data-invalid={fieldState.invalid} className="gap-1 data-[invalid=true]:text-destructive" variant="label">
+                                    Expertise <span className="text-red-700">*</span>
+                                </FieldLegend>
+
+                                <RadioGroup
+                                name={field.name}
+                                value={field.value}
+                                onValueChange={(value) => field.onChange(value as MaintenanceExpertise)}
+                                aria-invalid={fieldState.invalid}
+                                className="grid grid-cols-3 gap-3"
+                                >
+                                    <FieldLabel htmlFor="maintenance-expertise-electrical">
+                                        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+                                            <FieldContent>
+                                                <FieldTitle>Electrical</FieldTitle>
+                                                <FieldDescription>
+                                                    Use this for wiring, outlets, breakers, lighting, and electrical faults.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem
+                                            value="Electrical"
+                                            id="maintenance-expertise-electrical"
+                                            aria-invalid={fieldState.invalid}
+                                            />
+                                        </Field>
+                                    </FieldLabel>
+
+                                    <FieldLabel htmlFor="maintenance-expertise-pool">
+                                        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+                                            <FieldContent>
+                                                <FieldTitle>Pool</FieldTitle>
+                                                <FieldDescription>
+                                                    Use this for pool equipment, pumps, water issues, and pool-area upkeep.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem
+                                            value="Pool"
+                                            id="maintenance-expertise-pool"
+                                            aria-invalid={fieldState.invalid}
+                                            />
+                                        </Field>
+                                    </FieldLabel>
+
+                                    <FieldLabel htmlFor="maintenance-expertise-construction">
+                                        <Field orientation="horizontal" data-invalid={fieldState.invalid}>
+                                            <FieldContent>
+                                                <FieldTitle>Construction</FieldTitle>
+                                                <FieldDescription>
+                                                    Use this for structural repairs, furniture damage, and physical wear.
+                                                </FieldDescription>
+                                            </FieldContent>
+                                            <RadioGroupItem
+                                            value="Construction"
+                                            id="maintenance-expertise-construction"
                                             aria-invalid={fieldState.invalid}
                                             />
                                         </Field>

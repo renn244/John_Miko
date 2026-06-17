@@ -1,4 +1,5 @@
 import type { PaginationParams } from "../pagination.type";
+import type { MaintenanceExpertise } from "./staff-management.type";
 
 export type Maintenance = {
     id: string;
@@ -7,6 +8,14 @@ export type Maintenance = {
     imagesUrl: string[];
     priority: 'Low' | 'Medium' | 'High';
     status: 'Pending' | 'InProgress' | 'Completed' | 'Closed';
+    expertise: MaintenanceExpertise;
+    assignedToId?: string | null;
+    assignedTo?: {
+        id: string;
+        name?: string | null;
+        email: string;
+        expertise?: MaintenanceExpertise | null;
+    } | null;
     notes?: string;
     createdAt: string;
     updatedAt: string;
@@ -14,6 +23,7 @@ export type Maintenance = {
     resolvedAt?: string;
     closedAt?: string;
     resolutionNotes?: string;
+    resolutionProofImages?: string[];
 }
 
 export type CreateMaintenanceDto = {
@@ -21,9 +31,15 @@ export type CreateMaintenanceDto = {
     description: Maintenance['description'];
     imagesUrl?: Maintenance['imagesUrl'];
     priority: Maintenance['priority'];
+    expertise: Maintenance['expertise'];
 }
 
 export type UpdateMaintenanceDto = CreateMaintenanceDto;
+
+export type CompleteMaintenanceDto = {
+    resolutionNotes: string;
+    resolutionProofImages: string[];
+}
 
 export type GetMaintenancesQuery = {
     search?: string;
