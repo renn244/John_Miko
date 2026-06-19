@@ -1,3 +1,4 @@
+import BookingReportDocumentationsSection from "@/components/common/BookingReportDocumentationsSection";
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
@@ -232,6 +233,8 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                             )}
                         </div>
                     </Card>
+
+                    <BookingReportDocumentationsSection reports={booking.reports} compact />
                 </div>
 
                 <div className="flex flex-col gap-6">

@@ -5,11 +5,13 @@ import { PaymentStatus, PaymentType } from 'src/generated/prisma/enums';
 import { getDateRange, toDateOnly } from 'src/lib/utils/date.util';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePaymentDto } from './dto/payment.dto';
+import { PaymentEmailService } from './payment-email.service';
 
 @Injectable()
 export class PaymentService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly paymentEmailService: PaymentEmailService,
     ) {}
 
     async createPayment(
@@ -213,6 +215,8 @@ export class PaymentService {
             return nextPayment;
         })
 
+        await this.paymentEmailService.sendApprovedEmail(updatedPayment.id);
+
         return updatedPayment;
     }
 
@@ -243,6 +247,8 @@ export class PaymentService {
 
             return nextPayment;
         })
+
+        await this.paymentEmailService.sendRejectedEmail(updatedPayment.id);
 
         return updatedPayment;
     }

@@ -1,4 +1,4 @@
-export type StaffRole = "KITCHEN_STAFF" | "RESORT_STAFF";
+export type StaffRole = "KITCHEN_STAFF" | "RESORT_STAFF" | "MAINTENANCE_STAFF";
 
 export type UserStatus = "ACTIVE" | "INACTIVE";
 

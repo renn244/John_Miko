@@ -33,7 +33,7 @@ export class UserService {
     }
 
     isMobileUserByRole(role: Role) {
-        const mobileRoles: Role[] = [Role.KITCHEN_STAFF, Role.RESORT_STAFF];
+        const mobileRoles: Role[] = [Role.KITCHEN_STAFF, Role.RESORT_STAFF, Role.MAINTENANCE_STAFF];
 
         return mobileRoles.includes(role) ? true : false;
     }

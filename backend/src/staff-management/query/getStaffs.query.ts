@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
+import { Role } from "src/generated/prisma/enums";
+import { IsEnum, IsIn, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class getStaffsQueryDto {
     @IsOptional()
@@ -8,8 +9,10 @@ export class getStaffsQueryDto {
 
     @IsOptional()
     @IsString()
-    @IsEnum(['KITCHEN_STAFF', 'RESORT_STAFF'], { message: 'role must be one of KITCHEN_STAFF or RESORT_STAFF' })
-    role?: 'KITCHEN_STAFF' | 'RESORT_STAFF';
+    @IsIn([Role.KITCHEN_STAFF, Role.RESORT_STAFF, Role.MAINTENANCE_STAFF], {
+        message: 'role must be one of KITCHEN_STAFF, RESORT_STAFF, or MAINTENANCE_STAFF',
+    })
+    role?: 'KITCHEN_STAFF' | 'RESORT_STAFF' | 'MAINTENANCE_STAFF';
 
     @IsOptional()
     @IsString()

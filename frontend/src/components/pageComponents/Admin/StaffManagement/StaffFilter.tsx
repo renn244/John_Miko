@@ -58,6 +58,7 @@ const SelectStaffRole = () => {
                     <SelectItem value="all">All Roles</SelectItem>
                     <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
                     <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
+                    <SelectItem value="MAINTENANCE_STAFF">Maintenance Staff</SelectItem>
                 </SelectGroup>
             </SelectContent>
         </Select>

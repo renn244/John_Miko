@@ -107,6 +107,11 @@ export const useGetStaffStatsQuery = () => {
                 queryFn: () => staffManagementApi.getStaffs({ page: 1, limit: 1, role: 'RESORT_STAFF' }),
                 refetchOnWindowFocus: false,
             },
+            {
+                queryKey: ['staff-management', 'stats', 'maintenance'],
+                queryFn: () => staffManagementApi.getStaffs({ page: 1, limit: 1, role: 'MAINTENANCE_STAFF' }),
+                refetchOnWindowFocus: false,
+            },
         ]
     })
 
@@ -118,6 +123,7 @@ export const useGetStaffStatsQuery = () => {
         inactive: queries[2]?.data?.meta.total || 0,
         kitchen: queries[3]?.data?.meta.total || 0,
         resort: queries[4]?.data?.meta.total || 0,
+        maintenance: queries[5]?.data?.meta.total || 0,
     };
 
     return {

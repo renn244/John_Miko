@@ -5,6 +5,7 @@ import LoadingSpinner from "@/components/ui/loadingSpinner";
 import MarkCompleteForm from "@/forms/Admin/Maintenance/MarkCompleteForm";
 import { useCompleteMaintenanceMutation, useGetMaintenancebyId } from "@/hooks/admin/maintenance.hook";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
+import type { Maintenance } from "@/types/admin/maintenance.type";
 
 const MarkCompleteDialog = () => {
   const isCompleteOpen = useMaintenanceStore((state) => state.isCompleteOpen);
@@ -39,7 +40,7 @@ const MarkCompleteDialog = () => {
   )
 }
 
-const MarkComplete = ({ maintenance } : { maintenance: any }) => {
+const MarkComplete = ({ maintenance } : { maintenance: Maintenance }) => {
   const setIsCompleteOpen = useMaintenanceStore((state) => state.setIsCompleteOpen);
   
   const { mutateAsync } = useCompleteMaintenanceMutation(maintenance.id);
@@ -54,12 +55,16 @@ const MarkComplete = ({ maintenance } : { maintenance: any }) => {
     
       <div className="space-y-4">
 
-        <div className="flex gap-2">
-          <img
-          src={maintenance.imagesUrl[0]}
-          alt={maintenance.title}
-          className="h-20 w-20 object-cover rounded-md"
-          />
+        <div className="flex gap-3">
+          {maintenance.imagesUrl?.[0] ? (
+            <img
+            src={maintenance.imagesUrl[0]}
+            alt={maintenance.title}
+            className="h-20 w-20 object-cover rounded-md"
+            />
+          ) : (
+            <div className="h-20 w-20 rounded-md border bg-muted/30" />
+          )}
 
           <div className="flex flex-col gap-1">
             <h3 className="font-semibold text-lg">{maintenance.title}</h3>
@@ -72,7 +77,7 @@ const MarkComplete = ({ maintenance } : { maintenance: any }) => {
 
         <MarkCompleteForm 
         className="space-y-6 p-1"
-        onsubmit={async (data) => mutateAsync(data.resolutionNotes, { onSuccess: () => setIsCompleteOpen(false) })}
+        onsubmit={async (data) => mutateAsync(data, { onSuccess: () => setIsCompleteOpen(false) })}
         oncancel={() => setIsCompleteOpen(false)}
         />
 

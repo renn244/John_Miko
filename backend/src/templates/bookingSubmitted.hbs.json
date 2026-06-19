@@ -1,0 +1,46 @@
+{
+  "guestName": "Taylor Quinn",
+  "bookingId": "BK-2026-014",
+  "bookingDate": "June 29, 2026, Monday",
+  "stayOptionLabel": "Overnight",
+  "accommodationName": "Deluxe Beachfront Cottage",
+  "accommodationType": "Cottage",
+  "guestCount": 4,
+  "paymentType": "Partial",
+  "paymentMethodName": "GCash",
+  "referenceNumber": "REF-2026-5001",
+  "totalAmount": "PHP 10,500.00",
+  "amountPaid": "PHP 5,250.00",
+  "remainingAmount": "PHP 5,250.00",
+  "bookingStatus": "Pending",
+  "specialRequests": "Please prepare the room early if possible.",
+  "myBookingsUrl": "https://johnmikosplace.example.test/my-bookings",
+  "preOrders": [
+    {
+      "name": "Seafood Platter",
+      "quantity": 1,
+      "price": "PHP 850.00",
+      "subtotal": "PHP 850.00"
+    },
+    {
+      "name": "Fresh Mango Shake",
+      "quantity": 3,
+      "price": "PHP 120.00",
+      "subtotal": "PHP 360.00"
+    }
+  ],
+  "addOns": [
+    {
+      "name": "Extra Chairs",
+      "quantity": 2,
+      "price": "PHP 150.00",
+      "subtotal": "PHP 300.00"
+    },
+    {
+      "name": "Sound System",
+      "quantity": 1,
+      "price": "PHP 1,200.00",
+      "subtotal": "PHP 1,200.00"
+    }
+  ]
+}

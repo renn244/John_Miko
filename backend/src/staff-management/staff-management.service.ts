@@ -1,17 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/generated/prisma/enums';
 import { UserWhereInput } from 'src/generated/prisma/models';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStaffDto, UpdateStaffRole } from './dto/staff-management.dto';
 import { getStaffsQueryDto } from './query/getStaffs.query';
+import { StaffManagementEmailService } from './staff-management-email.service';
 
 @Injectable()
 export class StaffManagementService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly staffManagementEmailService: StaffManagementEmailService,
     ) {}
+
+    private readonly manageableRoles = [
+        Role.KITCHEN_STAFF,
+        Role.RESORT_STAFF,
+        Role.MAINTENANCE_STAFF,
+    ] as const;
 
     private generateRandomPassword(name: string) {
         const shortStr = Math.random().toString(36).substring(2, 7);
@@ -40,6 +49,7 @@ export class StaffManagementService {
                 email: body.email,
                 contactNo: body.contactNo,
                 role: body.role,
+                expertise: body.role === Role.MAINTENANCE_STAFF ? body.expertise : null,
                 password: password
             },
             omit: {
@@ -47,7 +57,13 @@ export class StaffManagementService {
             }
         })
 
-        // send email here to the staff
+        await this.staffManagementEmailService.sendCreatedEmail({
+            name: newStaff.name,
+            email: newStaff.email,
+            role: newStaff.role,
+            expertise: newStaff.expertise,
+            temporaryPassword: rawPassword,
+        });
 
         return newStaff
     }
@@ -59,7 +75,7 @@ export class StaffManagementService {
                 { name: { contains: query.search || "", mode: 'insensitive' } },
                 { id: { contains: query.search || "", mode: 'insensitive' } }
             ],
-            role: query.role ? query.role : { in: ['KITCHEN_STAFF', 'RESORT_STAFF'] },
+            role: query.role ? query.role : { in: [...this.manageableRoles] },
             status: query.status
         }
 
@@ -82,7 +98,7 @@ export class StaffManagementService {
         const staffUser = await this.prisma.user.findFirst({
             where: {
                 id: id,
-                role: { in: ['KITCHEN_STAFF', 'RESORT_STAFF'] },
+                role: { in: [...this.manageableRoles] },
             },
             omit: {
                 password: true
@@ -102,10 +118,21 @@ export class StaffManagementService {
         
         const updatedStaff = await this.prisma.user.update({
             where: { id },
-            data: body
+            data: {
+                role: body.role,
+                expertise: body.role === Role.MAINTENANCE_STAFF ? body.expertise : null,
+            },
+            omit: {
+                password: true,
+            }
         })
         
-        // send email to user
+        await this.staffManagementEmailService.sendRoleUpdatedEmail({
+            name: updatedStaff.name,
+            email: updatedStaff.email,
+            role: updatedStaff.role,
+            expertise: updatedStaff.expertise,
+        });
 
         return updatedStaff
     }
@@ -120,6 +147,13 @@ export class StaffManagementService {
             omit: { password: true }
         });
 
+        await this.staffManagementEmailService.sendDeactivatedEmail({
+            name: deactivatedStaffUser.name,
+            email: deactivatedStaffUser.email,
+            role: deactivatedStaffUser.role,
+            expertise: deactivatedStaffUser.expertise,
+        });
+
         return deactivatedStaffUser
     }
 
@@ -132,6 +166,13 @@ export class StaffManagementService {
             data: { status: 'ACTIVE' },
             omit: { password: true }
         })
+
+        await this.staffManagementEmailService.sendReactivatedEmail({
+            name: reactivatedStaffUser.name,
+            email: reactivatedStaffUser.email,
+            role: reactivatedStaffUser.role,
+            expertise: reactivatedStaffUser.expertise,
+        });
     
         return reactivatedStaffUser
     }

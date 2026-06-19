@@ -1,5 +1,5 @@
-import { PickType } from "@nestjs/mapped-types";
-import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsString } from "class-validator";
+import { MaintenanceExpertise, Role } from "src/generated/prisma/enums";
+import { IsEmail, IsEnum, IsIn, IsNotEmpty, IsNumberString, IsString, ValidateIf } from "class-validator";
 
 export class CreateStaffDto {
     @IsNotEmpty({ message: 'name is required!' })
@@ -17,8 +17,30 @@ export class CreateStaffDto {
     contactNo!: string;
 
     @IsNotEmpty({ message: 'role is required' })
-    @IsEnum(['KITCHEN_STAFF', 'RESORT_STAFF'], { message: 'role must be one of KITCHEN_STAFF or RESORT_STAFF' })
-    role!: 'KITCHEN_STAFF' | 'RESORT_STAFF';
+    @IsIn([Role.KITCHEN_STAFF, Role.RESORT_STAFF, Role.MAINTENANCE_STAFF], {
+        message: 'role must be one of KITCHEN_STAFF, RESORT_STAFF, or MAINTENANCE_STAFF',
+    })
+    role!: 'KITCHEN_STAFF' | 'RESORT_STAFF' | 'MAINTENANCE_STAFF';
+
+    @ValidateIf((body: CreateStaffDto) => body.role === Role.MAINTENANCE_STAFF)
+    @IsNotEmpty({ message: 'expertise is required for maintenance staff' })
+    @IsEnum(MaintenanceExpertise, {
+        message: 'expertise must be one of Electrical, Pool, or Construction',
+    })
+    expertise?: MaintenanceExpertise;
 }
 
-export class UpdateStaffRole extends PickType(CreateStaffDto, ['role']) {}
+export class UpdateStaffRole {
+    @IsNotEmpty({ message: 'role is required' })
+    @IsIn([Role.KITCHEN_STAFF, Role.RESORT_STAFF, Role.MAINTENANCE_STAFF], {
+        message: 'role must be one of KITCHEN_STAFF, RESORT_STAFF, or MAINTENANCE_STAFF',
+    })
+    role!: 'KITCHEN_STAFF' | 'RESORT_STAFF' | 'MAINTENANCE_STAFF';
+
+    @ValidateIf((body: UpdateStaffRole) => body.role === Role.MAINTENANCE_STAFF)
+    @IsNotEmpty({ message: 'expertise is required for maintenance staff' })
+    @IsEnum(['Electrical', 'Pool', 'Construction'], {
+        message: 'expertise must be one of Electrical, Pool, or Construction',
+    })
+    expertise?: MaintenanceExpertise;
+}

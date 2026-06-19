@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 export const useBookingsQuery = (query?: GetBookingsQuery) => {
   return useQuery({
     queryKey: ["bookings", query],
-    queryFn: () => async (query?: GetBookingsQuery) => {
+    queryFn: async () => {
         const response = await apiClient.get("/booking", { params: query });
 
         if (response.status >= 400) {
@@ -25,7 +25,7 @@ export const useBookingsQuery = (query?: GetBookingsQuery) => {
 export const useBookingByIdQuery = (bookingId?: string) => {
   return useQuery({
     queryKey: ["booking", bookingId],
-    queryFn: () => async (bookingId: string) => {
+    queryFn: async () => {
         const response = await apiClient.get(`/booking/byBookingId/${bookingId}`);
 
         if (response.status === 404) {

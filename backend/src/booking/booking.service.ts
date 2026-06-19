@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccommodationStayOption, Prisma } from 'src/generated/prisma/client';
+import { BookingStatus } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
@@ -11,6 +12,7 @@ import { BookingServicesService } from 'src/services/booking-services.service';
 import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 import { ClosureService } from 'src/closure/closure.service';
+import { BookingEmailService } from './booking-email.service';
 
 @Injectable()
 export class BookingService {
@@ -19,7 +21,8 @@ export class BookingService {
         private readonly preOrderService: PreOrderService,
         private readonly bookingServicesService: BookingServicesService,
         private readonly paymentService: PaymentService,
-        private readonly closureService: ClosureService
+        private readonly closureService: ClosureService,
+        private readonly bookingEmailService: BookingEmailService,
     ) {}
 
     private calculateGuestFee(adultGuests: number, seniorGuests: number, kidGuests: number, stayOptionCode: string) {
@@ -129,8 +132,7 @@ export class BookingService {
             }
         })
 
-        // send a receipt email to the user with the booking details and the accommodation details
-        
+        await this.bookingEmailService.sendSubmittedEmail(booking.id);
 
         return booking
     }
@@ -483,6 +485,34 @@ export class BookingService {
                 preOrders: true,
                 addOns: true,
                 stayOption: true,
+                reports: {
+                    where: {
+                        type: {
+                            in: ['checkIn', 'checkOut'],
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        proofImages: true,
+                        type: true,
+                        status: true,
+                        severity: true,
+                        createdAt: true,
+                        rejectionNote: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                contactNo: true,
+                                role: true,
+                            },
+                        },
+                    },
+                },
             }
         })
 
@@ -509,6 +539,34 @@ export class BookingService {
                 },
                 feedback: true,
                 stayOption: true,
+                reports: {
+                    where: {
+                        type: {
+                            in: ['checkIn', 'checkOut'],
+                        },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        proofImages: true,
+                        type: true,
+                        status: true,
+                        severity: true,
+                        createdAt: true,
+                        rejectionNote: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                contactNo: true,
+                                role: true,
+                            },
+                        },
+                    },
+                },
             }
         })
 
@@ -516,7 +574,17 @@ export class BookingService {
     }
 
     async rescheduleBooking(bookingId: string, body: RescheduleBookingDto) {
-        const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } })
+        const booking = await this.prisma.booking.findUnique({
+            where: { id: bookingId },
+            include: {
+                accommodation: {
+                    select: {
+                        name: true,
+                        type: true,
+                    },
+                },
+            },
+        })
 
         if(!booking) {
             throw new NotFoundException('Booking not found')
@@ -549,13 +617,32 @@ export class BookingService {
             }
         })
 
-        // send an email to the user about the rescheduled booking details
+        await this.bookingEmailService.sendRescheduledEmail({
+            bookingId: updatedBooking.id,
+            guestName: updatedBooking.guestName,
+            email: updatedBooking.email,
+            accommodationName: booking.accommodation.name,
+            previousBookingDate: booking.bookingDate,
+            previousStayOptionLabel: booking.stayOptionLabelSnapshot,
+            newBookingDate: updatedBooking.bookingDate,
+            newStayOptionLabel: updatedBooking.stayOptionLabelSnapshot,
+        });
 
         return updatedBooking
     }
 
     async changeStatus(bookingId: string, body: ChangeStatusDto) {
-        const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } })
+        const booking = await this.prisma.booking.findUnique({
+            where: { id: bookingId },
+            include: {
+                accommodation: {
+                    select: {
+                        name: true,
+                        type: true,
+                    },
+                },
+            },
+        })
 
         if(!booking) {
             throw new NotFoundException('Booking not found');
@@ -566,7 +653,27 @@ export class BookingService {
             data: { status: body.status }
         })
 
-        // send an email to the user about the booking status change
+        if (updatedBooking.status === BookingStatus.Cancelled) {
+            await this.bookingEmailService.sendCancelledEmail({
+                bookingId: updatedBooking.id,
+                guestName: updatedBooking.guestName,
+                email: updatedBooking.email,
+                accommodationName: booking.accommodation.name,
+                accommodationType: booking.accommodation.type,
+                bookingDate: updatedBooking.bookingDate,
+                stayOptionLabel: updatedBooking.stayOptionLabelSnapshot,
+            });
+        } else {
+            await this.bookingEmailService.sendStatusUpdatedEmail({
+                bookingId: updatedBooking.id,
+                guestName: updatedBooking.guestName,
+                email: updatedBooking.email,
+                accommodationName: booking.accommodation.name,
+                bookingDate: updatedBooking.bookingDate,
+                stayOptionLabel: updatedBooking.stayOptionLabelSnapshot,
+                status: updatedBooking.status,
+            });
+        }
 
         return updatedBooking
     }

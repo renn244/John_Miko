@@ -1,0 +1,8 @@
+{
+  "name": "Sky Rowan",
+  "email": "sky.rowan@example.test",
+  "role": "Kitchen Staff",
+  "temporaryPassword": "TempPass-4721",
+  "loginUrl": "https://portal.example.test/login",
+  "setPasswordUrl": "https://portal.example.test/set-password"
+}

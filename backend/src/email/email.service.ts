@@ -27,7 +27,7 @@ export class EmailService {
             this.logger.log(`Email sent to ${params.to} with subject "${params.subject}"`);
         } catch (error) {
             console.error(error);
-            this.logger.error(`Failed to send email to ${params.to} with subject "${params.subject}"`, error.stack);
+            this.logger.error(`Failed to send email to ${params.to} with subject "${params.subject}"`, error);
         }
     }
 }

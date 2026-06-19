@@ -7,12 +7,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useGetStaffsQuery } from "@/hooks/admin/staff-management.hook";
 import { useStaffManagementSearch } from "@/hooks/admin/staff-management.search";
 import { useStaffManagementStore } from "@/store/admin/staffManagement.store";
-import type { StaffRole, StaffStatus } from "@/types/admin/staff-management.type";
+import type { StaffRole, StaffStatus, StaffUser } from "@/types/admin/staff-management.type";
 import { format } from "date-fns";
 import { MoreHorizontal, UserCheck, UserCog, UserMinus } from "lucide-react";
 
 const getRoleLabel = (role: StaffRole) => {
-    return role === "KITCHEN_STAFF" ? "Kitchen Staff" : "Resort Staff";
+    switch (role) {
+        case "KITCHEN_STAFF":
+            return "Kitchen Staff";
+        case "RESORT_STAFF":
+            return "Resort Staff";
+        case "MAINTENANCE_STAFF":
+            return "Maintenance Staff";
+    }
 }
 
 const getStatusLabel = (status: StaffStatus) => {
@@ -25,7 +32,17 @@ const getRoleColor = (role: StaffRole) => {
             return { bg: "bg-amber-100", text: "text-amber-700", border: "border-amber-300" };
         case "RESORT_STAFF":
             return { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-300" };
+        case "MAINTENANCE_STAFF":
+            return { bg: "bg-violet-100", text: "text-violet-700", border: "border-violet-300" };
     }
+}
+
+const getExpertiseLabel = (staff: StaffUser) => {
+    if (staff.role !== "MAINTENANCE_STAFF") {
+        return null;
+    }
+
+    return staff.expertise ?? "No expertise";
 }
 
 const getStatusColor = (status: StaffStatus) => {
@@ -64,6 +81,7 @@ const StaffTable = () => {
                         <TableHead>Name</TableHead>
                         <TableHead>Contact</TableHead>
                         <TableHead>Role</TableHead>
+                        <TableHead>Expertise</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Joined</TableHead>
                         <TableHead>Actions</TableHead>
@@ -101,6 +119,11 @@ const StaffTable = () => {
                                     <Badge className={`${roleColor.bg} ${roleColor.text} ${roleColor.border}`}>
                                         {getRoleLabel(staff.role)}
                                     </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <span className="text-sm text-muted-foreground">
+                                        {getExpertiseLabel(staff) ?? "—"}
+                                    </span>
                                 </TableCell>
                                 <TableCell>
                                     <Badge className={`${statusColor.bg} ${statusColor.text} ${statusColor.border}`}>

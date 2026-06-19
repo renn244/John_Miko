@@ -1,18 +1,21 @@
+import BookingReportDocumentationsSection from "@/components/common/BookingReportDocumentationsSection";
 import { Button } from "@/components/ui/button";
 import getCheckInOut from "@/lib/getCheckInOut";
 import { cn } from "@/lib/utils";
-import type { BookingWithAccommodationAndFeedback } from "@/types/booking.types";
-import { Calendar, CheckCircle, Clock, Users, XCircle } from "lucide-react";
-import type { ComponentProps } from "react";
+import type { BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrder } from "@/types/booking.types";
+import { Calendar, CheckCircle, ChevronDown, ChevronUp, Clock, CreditCard, Users, XCircle } from "lucide-react";
+import { useMemo, useState, type ComponentProps } from "react";
 import { Link } from "react-router";
 
 type BookingCardProps = {
     variant?: "default" | "compact";
-    booking: BookingWithAccommodationAndFeedback;
+    booking: BookingWithAccommodationAndFeedback & Partial<BookingWithAccommodationAndPreOrder>;
     className?: string;
 } & ComponentProps<"div">;
 
 const BookingCard = ({ booking, className,  variant="default", ...props }: BookingCardProps) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'Pending':
@@ -37,6 +40,10 @@ const BookingCard = ({ booking, className,  variant="default", ...props }: Booki
         endTime: booking.stayOption?.endTime,
         label: booking.stayOption?.label ?? booking.stayOptionLabelSnapshot,
     });
+
+    const preOrderTotal = useMemo(() => {
+        return (booking.preOrders || []).reduce((total, item) => total + item.quantity, 0);
+    }, [booking.preOrders]);
 
     return (
         <div className={cn("bg-white rounded-xl border-2 overflow-hidden p-4", className)} {...props}>
@@ -96,6 +103,17 @@ const BookingCard = ({ booking, className,  variant="default", ...props }: Booki
                             </div>
                         </div>
                         <div className="flex items-start gap-2">
+                            <CreditCard className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
+                            <div>
+                                <p className="text-xs mb-0.5 text-muted-foreground">
+                                    Payment Type
+                                </p>
+                                <p className="text-sm font-semibold">
+                                    {booking.paymentType}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-2">
                             <Calendar className="w-5 h-5 shrink-0 mt-0.5 text-muted-foreground" />
                             <div>
                                 <p className="text-xs mb-0.5 text-muted-foreground">
@@ -131,6 +149,84 @@ const BookingCard = ({ booking, className,  variant="default", ...props }: Booki
                     </div>
                 </div>
             </div>
+
+            <div className="mt-4">
+                <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full justify-center gap-2 rounded-xl"
+                    onClick={() => setIsExpanded((prev) => !prev)}
+                >
+                    {isExpanded ? "Hide Details" : "View Details"}
+                    {isExpanded ? (
+                        <ChevronUp className="w-4 h-4" />
+                    ) : (
+                        <ChevronDown className="w-4 h-4" />
+                    )}
+                </Button>
+            </div>
+
+            {isExpanded && (
+                <div className="mt-6 space-y-6 border-t pt-6">
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide mb-1 text-muted-foreground">
+                                Accommodation Type
+                            </p>
+                            <p className="font-semibold">{booking.accommodation.type}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide mb-1 text-muted-foreground">
+                                Stay Type
+                            </p>
+                            <p className="font-semibold">{booking.stayOption?.label ?? booking.stayOptionLabelSnapshot}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide mb-1 text-muted-foreground">
+                                Payment Type
+                            </p>
+                            <p className="font-semibold">{booking.paymentType}</p>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide mb-1 text-muted-foreground">
+                                Pre-Ordered Items
+                            </p>
+                            <p className="font-semibold">{preOrderTotal} item{preOrderTotal === 1 ? "" : "s"}</p>
+                        </div>
+                    </div>
+
+                    {booking.specialRequests && (
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-muted-foreground">
+                                Special Requests
+                            </p>
+                            <div className="rounded-xl bg-muted/40 p-4">
+                                <p className="font-medium">{booking.specialRequests}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {(booking.preOrders || []).length > 0 && (
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-muted-foreground">
+                                Pre-Ordered Items
+                            </p>
+                            <div className="space-y-2">
+                                {booking.preOrders?.map((item) => (
+                                    <div key={item.id} className="flex items-center justify-between rounded-xl bg-muted/30 px-4 py-3">
+                                        <span className="font-medium">{item.name}</span>
+                                        <span className="text-sm font-semibold text-muted-foreground">
+                                            x{item.quantity}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <BookingReportDocumentationsSection reports={booking.reports} />
+                </div>
+            )}
         </div>
     )
 }

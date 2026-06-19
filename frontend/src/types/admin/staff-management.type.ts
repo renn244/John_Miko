@@ -1,7 +1,8 @@
 import type { PaginationParams } from "../pagination.type";
 
-export type StaffRole = "KITCHEN_STAFF" | "RESORT_STAFF";
+export type StaffRole = "KITCHEN_STAFF" | "RESORT_STAFF" | "MAINTENANCE_STAFF";
 export type StaffStatus = "ACTIVE" | "INACTIVE";
+export type MaintenanceExpertise = "Electrical" | "Pool" | "Construction";
 
 export type StaffUser = {
     id: string;
@@ -9,6 +10,7 @@ export type StaffUser = {
     email: string;
     contactNo: string;
     role: StaffRole;
+    expertise?: MaintenanceExpertise | null;
     status: StaffStatus;
     createdAt: string;
 }
@@ -18,10 +20,12 @@ export type CreateStaffDto = {
     email: string;
     contactNo: string;
     role: StaffRole;
+    expertise?: MaintenanceExpertise;
 }
 
 export type UpdateStaffRoleDto = {
     role: StaffRole;
+    expertise?: MaintenanceExpertise;
 }
 
 export type GetStaffsQuery = {
@@ -36,4 +40,5 @@ export type StaffStats = {
     inactive: number;
     kitchen: number;
     resort: number;
+    maintenance: number;
 }

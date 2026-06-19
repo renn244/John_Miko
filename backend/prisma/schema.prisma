@@ -18,6 +18,7 @@ enum Role {
   ADMIN
   KITCHEN_STAFF
   RESORT_STAFF
+  MAINTENANCE_STAFF
   GUEST
 }
 
@@ -34,6 +35,7 @@ model User {
   password  String
   role      Role     @default(GUEST)
   status    UserStatus @default(ACTIVE)
+  expertise MaintenanceExpertise?
 
   forgotPasswordTokens PasswordResetToken[]
 
@@ -42,7 +44,11 @@ model User {
   guestFeedbacks Feedback[]
 
   // for staff, this will be the reports they made
-  reports   Report[]
+  reports   Report[] @relation("User")
+  reviewedReports Report[] @relation("ReviewedBy")
+  assignedMaintenances Maintenance[] @relation("AssignedMaintenanceStaff")
+
+
   verifiedPayments Payment[]
 
   createdAt DateTime @default(now())
@@ -354,7 +360,10 @@ model Report {
   booking       Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
   userId        String 
-  user          User   @relation(fields: [userId], references: [id])
+  user          User   @relation("User", fields: [userId], references: [id])
+
+  maintenanceId String? @unique
+  maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
 
   title         String
   proofImages   String[]
@@ -366,6 +375,8 @@ model Report {
 
   rejectionNote String?
   reviewedAt    DateTime?
+  reviewedById   String?
+  reviewedBy   User?    @relation("ReviewedBy", fields: [reviewedById], references: [id])
 
   createdAt   DateTime @default(now())
 
@@ -389,6 +400,12 @@ enum MaintenancePriority {
   High
 }
 
+enum MaintenanceExpertise {
+  Electrical
+  Pool
+  Construction
+}
+
 model Maintenance {
   id            String   @id @default(cuid())
 
@@ -398,15 +415,27 @@ model Maintenance {
 
   status        MaintenanceStatus @default(Pending)
   priority      MaintenancePriority
+  expertise     MaintenanceExpertise
+
+  assignedToId  String?
+  assignedTo    User? @relation("AssignedMaintenanceStaff", fields: [assignedToId], references: [id], onDelete: SetNull)
 
   notes         String?            // general notes
   resolutionNotes String?          // final fix notes
+  resolutionProofImages String[] @default([])
 
   startedAt     DateTime?
   resolvedAt    DateTime?
+  closedAt      DateTime?
   
+  report        Report? 
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([expertise])
+  @@index([assignedToId])
+  @@index([status, expertise])
 }
 
 enum MenuItemAvailability {

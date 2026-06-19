@@ -24,7 +24,7 @@ export type ResetPasswordDto = {
     confirmPassword: string;
 }
 
-export type UserRole = "ADMIN" | "GUEST" | "KITCHEN_STAFF" | "RESORT_STAFF";
+export type UserRole = "ADMIN" | "GUEST" | "KITCHEN_STAFF" | "RESORT_STAFF" | "MAINTENANCE_STAFF";
 
 export type UserStatus = "ACTIVE" | "INACTIVE";
 

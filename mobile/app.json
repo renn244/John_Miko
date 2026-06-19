@@ -53,7 +53,14 @@
       ],
       "expo-asset",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow John Miko's staff app to select proof photos for reports.",
+          "cameraPermission": "Allow John Miko's staff app to take proof photos for reports."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
