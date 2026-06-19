@@ -1,0 +1,17 @@
+{
+  "guestName": "Morgan Vale",
+  "bookingId": "BK-2026-031",
+  "bookingDate": "July 2, 2026, Thursday",
+  "stayOptionLabel": "Overnight",
+  "accommodationName": "Family Hall",
+  "accommodationType": "Hall",
+  "paymentType": "Full",
+  "paymentMethodName": "Bank Transfer",
+  "referenceNumber": "REF-2026-6119",
+  "totalAmount": "PHP 18,000.00",
+  "amountPaid": "PHP 18,000.00",
+  "remainingAmount": "PHP 0.00",
+  "bookingStatus": "Cancelled",
+  "rejectionNote": "The proof of payment did not match the submitted reference details.",
+  "myBookingsUrl": "https://johnmikosplace.example.test/my-bookings"
+}

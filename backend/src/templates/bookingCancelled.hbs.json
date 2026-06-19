@@ -1,0 +1,10 @@
+{
+  "guestName": "Avery Stone",
+  "bookingId": "BK-2026-052",
+  "bookingDate": "July 3, 2026, Friday",
+  "stayOptionLabel": "Day Event",
+  "accommodationName": "Family Hall",
+  "accommodationType": "Hall",
+  "bookingStatus": "Cancelled",
+  "myBookingsUrl": "https://johnmikosplace.example.test/my-bookings"
+}

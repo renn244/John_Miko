@@ -7,11 +7,13 @@ import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateStaffDto, UpdateStaffRole } from './dto/staff-management.dto';
 import { getStaffsQueryDto } from './query/getStaffs.query';
+import { StaffManagementEmailService } from './staff-management-email.service';
 
 @Injectable()
 export class StaffManagementService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly staffManagementEmailService: StaffManagementEmailService,
     ) {}
 
     private readonly manageableRoles = [
@@ -55,9 +57,13 @@ export class StaffManagementService {
             }
         })
 
-        // send email here to the staff
-        console.log("email: ", newStaff.email)
-        console.log("password: ", rawPassword)
+        await this.staffManagementEmailService.sendCreatedEmail({
+            name: newStaff.name,
+            email: newStaff.email,
+            role: newStaff.role,
+            expertise: newStaff.expertise,
+            temporaryPassword: rawPassword,
+        });
 
         return newStaff
     }
@@ -121,7 +127,12 @@ export class StaffManagementService {
             }
         })
         
-        // send email to user
+        await this.staffManagementEmailService.sendRoleUpdatedEmail({
+            name: updatedStaff.name,
+            email: updatedStaff.email,
+            role: updatedStaff.role,
+            expertise: updatedStaff.expertise,
+        });
 
         return updatedStaff
     }
@@ -136,6 +147,13 @@ export class StaffManagementService {
             omit: { password: true }
         });
 
+        await this.staffManagementEmailService.sendDeactivatedEmail({
+            name: deactivatedStaffUser.name,
+            email: deactivatedStaffUser.email,
+            role: deactivatedStaffUser.role,
+            expertise: deactivatedStaffUser.expertise,
+        });
+
         return deactivatedStaffUser
     }
 
@@ -148,6 +166,13 @@ export class StaffManagementService {
             data: { status: 'ACTIVE' },
             omit: { password: true }
         })
+
+        await this.staffManagementEmailService.sendReactivatedEmail({
+            name: reactivatedStaffUser.name,
+            email: reactivatedStaffUser.email,
+            role: reactivatedStaffUser.role,
+            expertise: reactivatedStaffUser.expertise,
+        });
     
         return reactivatedStaffUser
     }
