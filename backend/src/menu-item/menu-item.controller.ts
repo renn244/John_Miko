@@ -5,9 +5,10 @@ import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { CreateMenuItemDto, UpdateMenuItemDto } from './dto/menu-item.dto';
 import { MenuItemService } from './menu-item.service';
 import { GetMenuItemsQuery } from './query/getMenuItem.query';
+import { RolesGuard } from 'src/lib/guards/Roles.guard';
 
 @Controller('menu-item')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class MenuItemController {
   constructor(
     private readonly menuItemService: MenuItemService
@@ -34,15 +35,15 @@ export class MenuItemController {
     return this.menuItemService.getMenuItemCategories();
   }
 
+  @Get(':id')
+  async getMenuItemById(@Param('id') id: string) {
+    return this.menuItemService.getMenuItemById(id);
+  }
+
   @Roles(Role.ADMIN)
   @Get('stats')
   async getMenuItemStats() {
     return this.menuItemService.getMenuItemStats();
-  }
-
-  @Get(':id')
-  async getMenuItemById(@Param('id') id: string) {
-    return this.menuItemService.getMenuItemById(id);
   }
 
   @Roles(Role.ADMIN)  

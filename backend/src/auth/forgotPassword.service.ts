@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import * as bcrypt from 'bcrypt';
 import { EmailService } from "src/email/email.service";
-import { ValidationException } from "src/lib/exception/ValidationException";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UserService } from "src/user/user.service";
 import { v4 as uuidv4 } from "uuid";
@@ -53,10 +52,7 @@ export class ForgotPasswordService {
         const user = await this.userService.findUserByEmail(email);
 
         if (!user) {
-            throw new ValidationException({
-                field: 'email',
-                message: ['User with this email does not exist']
-            });
+            return { message: 'If an account exists, we sent reset instructions' };
         }
 
         await this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
@@ -75,25 +71,29 @@ export class ForgotPasswordService {
             ? this.buildMobileResetRedirectUrl(rawToken)
             : this.buildResetUrl(process.env.FRONTEND_URL, rawToken)
 
-        await this.emailService.sendEmail({
-            to: user.email,
-            subject: 'Password Reset Request',
-            template: 'forgotPassword',
-            context: {
-                email,
-                confirmationUrl: confirmationUrl
-            }
-        });
+        try {
+            await this.emailService.sendEmail({
+                to: user.email,
+                subject: 'Password Reset Request',
+                template: 'forgotPassword',
+                context: {
+                    email,
+                    confirmationUrl: confirmationUrl
+                }
+            });
+
+            return { message: 'If an account exists, we sent reset instructions' };
+        } catch (error) {
+            return { message: 'If an account exists, we sent reset instructions' };
+        }
     }
 
     async forgetPassword(email: string) {
-        await this.generateAndSendResetToken(email);
-        return { message: 'Password reset email sent' };
+        return this.generateAndSendResetToken(email);
     }
 
     async resendForgotPassword(email: string) {
-        await this.generateAndSendResetToken(email);
-        return { message: 'Password reset email resent' };
+        return this.generateAndSendResetToken(email);
     }
 
     async resetPassword({ token, newPassword }: resetPasswordDto) {

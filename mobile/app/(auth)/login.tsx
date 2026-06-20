@@ -120,8 +120,8 @@ export default function Login() {
                             <FieldError errors={getErrorMessages(errors.email)} />
                         </Field>
 
-                        <Field>
-                            <FieldLabel className="text-base">Password</FieldLabel>
+                            <Field>
+                                <FieldLabel className="text-base">Password</FieldLabel>
                             <Controller
                                 name="password"
                                 control={control}
@@ -143,6 +143,7 @@ export default function Login() {
                                 )}
                             />
                             <FieldError errors={getErrorMessages(errors.password)} />
+                            <FieldError errors={getErrorMessages(errors.root)} />
 
 
                             <View className="items-end">

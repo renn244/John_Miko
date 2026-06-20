@@ -119,8 +119,6 @@ export class FeedbackService {
             this.getCountPerRating({ interval: 'day' })
         ])
 
-        // TODO LATER: positive and complaints finding is wink-nlp sentiment will do later
-
         return {
             receivedToday,
             averageToday: averageToday._avg.rating || 0,
@@ -146,7 +144,7 @@ export class FeedbackService {
         }
     }
 
-    async getFeedbackById(id: string) {
+    async getFeedbackById(id: string, user: UserSession) {
         const feedback = await this.prisma.feedback.findUnique({
             where: { id },
             include: {
@@ -162,6 +160,10 @@ export class FeedbackService {
 
         if(!feedback) {
             throw new NotFoundException('Feedback not found');
+        }
+
+        if(user.role === "GUEST" && feedback.userId !== user.id) {
+            throw new ForbiddenException('You can only view your own feedback')
         }
 
         return feedback;

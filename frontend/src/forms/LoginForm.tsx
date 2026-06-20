@@ -29,6 +29,7 @@ const LoginForm = () => {
         handleSubmit,
         control,
         setError,
+        formState: { errors },
     } = useForm<loginSchema>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
@@ -120,6 +121,8 @@ const LoginForm = () => {
                     {fieldState.invalid && (
                         <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
+
+                    <FieldError errors={getErrorMessages(errors.root)} />
                 </Field>
             )}
             />
