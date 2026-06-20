@@ -19,6 +19,8 @@ export type KitchenOrder = {
     contactNo?: string;
     bookingDate: string;
     timeSlot?: BookingTimeSlot;
+    startTime?: string | null;
+    endTime?: string | null;
     kitchenStatus?: KitchenOrderStatus;
     numberOfGuests?: number;
     notes?: string;

@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from '../lib/guards/auth.guard';
 import { AuthService } from './auth.service';
@@ -39,6 +40,15 @@ export class AuthController {
     @Post('resetPassword')
     async ResetPassword(@Body() body: resetPasswordDto) {
         return this.forgotPasswordService.resetPassword(body);
+    }
+
+    @Get('reset-password/open')
+    openResetPassword(@Query('token') token: string | undefined, @Res() response: Response) {
+        if (!token) {
+            throw new BadRequestException('Reset token is missing');
+        }
+
+        return response.redirect(this.forgotPasswordService.buildMobileResetUrl(token));
     }
     
     @UseGuards(AuthGuard)

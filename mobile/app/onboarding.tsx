@@ -2,35 +2,31 @@ import Logo from '@/assets/app/logo/logo.svg';
 import { Button } from '@/components/ui/Button';
 import CustomSafeAreaView from '@/components/ui/CustomSafeAreaView';
 import { hasSeenIntro, setSeenIntro } from '@/lib/introStorage';
-import { Pressable, Text, View } from 'react-native';
-
-import GetPaid from '@/assets/app/Onboarding/Get-Paid.svg';
-import KnowledgeLibrary from '@/assets/app/Onboarding/Knowledge-Library.svg';
-import Managing from '@/assets/app/Onboarding/Managing.svg';
+import { Image } from 'expo-image';
+import { PanResponder, Pressable, Text, View } from 'react-native';
 
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import Animated, {
     Easing,
+    FadeOut,
     SlideInLeft,
-    SlideInRight,
-    SlideOutLeft,
-    SlideOutRight
+    SlideInRight
 } from 'react-native-reanimated';
 
 const slides = [
     {
-        illustration: <Managing />,
+        illustration: require('@/assets/app/Onboarding/resort-staff.png'),
         title: 'Resort Ops Ready',
         description: 'Handle check-ins, room status, and guest requests in one flow.'
     },
     {
-        illustration: <KnowledgeLibrary />,
+        illustration: require('@/assets/app/Onboarding/kitchen-staff.png'),
         title: 'Kitchen Team Sync',
         description: 'See pre-orders, menu tasks, and service updates faster.'
     },
     {
-        illustration: <GetPaid />,
+        illustration: require('@/assets/app/Onboarding/maintenance-staff.png'),
         title: 'Maintenance On The Move',
         description: 'Log issues, track fixes, and keep facilities running smoothly.'
     }
@@ -40,6 +36,7 @@ const Onboarding = () => {
     const [slideIndex, setSlideIndex] = useState(0);
     const [direction, setDirection] = useState<'next' | 'prev'>('next');
     const [isChecking, setIsChecking] = useState(true);
+    const swipeThreshold = 50;
 
     useEffect(() => {
         let isActive = true;
@@ -95,56 +92,75 @@ const Onboarding = () => {
         setSlideIndex(index);
     };
 
+    const panResponder = useMemo(
+        () =>
+            PanResponder.create({
+                onMoveShouldSetPanResponder: (_event, gestureState) =>
+                    Math.abs(gestureState.dx) > 12 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+                onPanResponderRelease: (_event, gestureState) => {
+                    if (gestureState.dx <= -swipeThreshold) {
+                        handleNext();
+                        return;
+                    }
+
+                    if (gestureState.dx >= swipeThreshold) {
+                        handlePrev();
+                    }
+                },
+            }),
+        []
+    );
+
     const enteringAnimation = direction === 'next'
         ? SlideInRight.duration(220).easing(Easing.out(Easing.cubic))
         : SlideInLeft.duration(220).easing(Easing.out(Easing.cubic));
-    const exitingAnimation = direction === 'next'
-        ? SlideOutLeft.duration(140).easing(Easing.in(Easing.cubic))
-        : SlideOutRight.duration(140).easing(Easing.in(Easing.cubic));
+    const exitingAnimation = FadeOut.duration(90).easing(Easing.out(Easing.cubic));
 
     if (isChecking) {
         return <CustomSafeAreaView className='flex-1 bg-neutral-soft-grey-3' />;
     }
 
     return (
-        <CustomSafeAreaView className='px-6'>
-            <View className='flex-1 gap-6 items-center pt-15 pb-5'>
+        <CustomSafeAreaView className='bg-neutral-soft-grey-3 px-6'>
+            <View className='flex-1 items-center pb-5 pt-8'>
 
                 <View className='flex-row justify-center items-center gap-2'>
-                    <Logo height={32} width={32}  />
-                    <Text className='font-sans-bold font-bold text-xl'>John Miko's</Text>
+                    <Logo height={20} width={20}  />
+                    <Text className='font-sans-bold text-xl text-primary'>John Miko&apos;s</Text>
                 </View>
 
-                <View className='w-full pb-6 gap-6 items-center'>
-                    <View className='h-110 w-full items-center justify-center'>
+                <View className='w-full flex-1 items-center justify-between pt-8'>
+                    <View
+                        className='w-full flex-1 items-center justify-center'
+                        {...panResponder.panHandlers}
+                    >
                         <Animated.View
                         key={`slide-${slideIndex}`}
                         entering={enteringAnimation}
                         exiting={exitingAnimation}
-                        className='gap-10 items-center'
+                        className='w-full items-center gap-8'
                         >
-                            {slides[slideIndex].illustration}
+                            <View className='h-72 w-full items-center justify-center'>
+                                <Image
+                                    source={slides[slideIndex].illustration}
+                                    contentFit='contain'
+                                    style={{ height: '100%', width: '100%' }}
+                                />
+                            </View>
 
-                            <View className='gap-3 items-center'>
-                                <Text className='text-[18px] font-sans-semibold leading-5'>
+                            <View className='items-center gap-2 px-3'>
+                                <Text className='text-center font-sans-bold text-2xl leading-7 text-neutral-dark-1'>
                                     {slides[slideIndex].title}
                                 </Text>
-                                <Text className='text-center text-xl font-sans text-neutral-grey-1 leading-6 tracking-wider'>
+                                <Text className='max-w-72 text-center font-sans text-base leading-5 text-neutral-grey-1'>
                                     {slides[slideIndex].description}
                                 </Text>
                             </View>
                         </Animated.View>
                     </View>
-                    <View className='flex-row w-full gap-2 items-center justify-between'>
-                        <Pressable
-                        onPress={handlePrev}
-                        className='px-3 py-2'
-                        >
-                            <Text className='font-sans-semibold text-base text-neutral-grey-1'>
-                                Back
-                            </Text>
-                        </Pressable>
 
+                    <View className='w-full gap-5'>
+                    <View className='flex-row w-full items-center justify-center'>
                         <View className="flex-row gap-2 items-center">
                             {slides.map((_slide, idx) => (
                                 <Pressable
@@ -154,32 +170,24 @@ const Onboarding = () => {
                                 />
                             ))}
                         </View>
+                    </View>
 
-                        <Pressable
-                        onPress={handleNext}
-                        className='px-3 py-2'
-                        >
-                            <Text className='font-sans-semibold text-base text-primary'>
-                                Next
-                            </Text>
-                        </Pressable>
+                    <Button
+                    onPress={async () => {
+                        try {
+                            await setSeenIntro();
+                        } finally {
+                            router.replace('/login');
+                        }
+                    }}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
+                    className='w-full'>
+                        <Text className="font-sans-semibold text-white text-lg">
+                            LET&apos;S GO
+                        </Text>
+                    </Button>
                     </View>
                 </View>
-
-                <Button 
-                onPress={async () => {
-                    try {
-                        await setSeenIntro();
-                    } finally {
-                        router.replace('/login');
-                    }
-                }}
-                style={({ pressed }) => ({ opacity: pressed ? 0.75 : 1 })}
-                className='w-full'>
-                    <Text className="font-sans-semibold text-white text-lg">
-                        LET'S GO
-                    </Text>
-                </Button>
 
             </View>
         </CustomSafeAreaView>

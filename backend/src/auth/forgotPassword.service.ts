@@ -15,6 +15,39 @@ export class ForgotPasswordService {
         private readonly userService: UserService,
     ) {}
 
+    private appendPath(baseUrl: string, path: string) {
+        const normalizedPath = path.replace(/^\/+/, '');
+
+        if (baseUrl.endsWith('://')) {
+            return `${baseUrl}${normalizedPath}`;
+        }
+
+        return `${baseUrl.replace(/\/+$/, '')}/${normalizedPath}`;
+    }
+
+    private buildResetUrl(baseUrl: string | undefined, token: string) {
+        if (!baseUrl) {
+            throw new Error('Reset password URL is not configured');
+        }
+
+        const resetUrl = this.appendPath(baseUrl, 'reset-password');
+
+        return `${resetUrl}?token=${encodeURIComponent(token)}`;
+    }
+
+    private buildMobileResetRedirectUrl(token: string) {
+        const bridgeBaseUrl = process.env.PASSWORD_RESET_BRIDGE_URL
+            || process.env.BACKEND_URL
+            || 'http://localhost:3000';
+        const bridgeUrl = this.appendPath(bridgeBaseUrl, 'auth/reset-password/open');
+
+        return `${bridgeUrl}?token=${encodeURIComponent(token)}`;
+    }
+
+    buildMobileResetUrl(token: string) {
+        return this.buildResetUrl(process.env.MOBILE_URL, token);
+    }
+
     // do we also need to add roles validation for here later on
     private async generateAndSendResetToken(email: string) {
         const user = await this.userService.findUserByEmail(email);
@@ -39,10 +72,10 @@ export class ForgotPasswordService {
 
         const isMobileUser = this.userService.isMobileUserByRole(user.role)
         const confirmationUrl = isMobileUser 
-            ? `${process.env.MOBILE_URL}/reset-password?token=${rawToken}`
-            : `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`
+            ? this.buildMobileResetRedirectUrl(rawToken)
+            : this.buildResetUrl(process.env.FRONTEND_URL, rawToken)
 
-        this.emailService.sendEmail({
+        await this.emailService.sendEmail({
             to: user.email,
             subject: 'Password Reset Request',
             template: 'forgotPassword',

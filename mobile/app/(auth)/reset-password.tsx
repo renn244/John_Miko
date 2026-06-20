@@ -1,22 +1,20 @@
-import Logo from "@/assets/app/logo/logo.svg";
+import AuthScreenShell from "@/components/auth/AuthScreenShell";
 import { Button } from "@/components/ui/Button";
-import CustomSafeArea from "@/components/ui/CustomSafeAreaView";
 import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/passwordInput";
 import { useResetPasswordMutation } from "@/hooks/auth.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CheckCircle } from "lucide-react-native";
+import { AlertTriangle, ArrowRight, CheckCircle2, LockKeyhole, Mail, ShieldCheck } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import {
     ActivityIndicator,
     Pressable,
     Text,
     View
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { z } from "zod";
 
 const ResetPasswordSchema = z.object({
@@ -34,6 +32,29 @@ const ResetPasswordSchema = z.object({
 });
 
 type ResetPasswordSchemaType = z.infer<typeof ResetPasswordSchema>;
+
+const passwordChecks = [
+    {
+        label: "8+ Characters",
+        test: (value: string) => value.length >= 8,
+    },
+    {
+        label: "Lowercase",
+        test: (value: string) => /[a-z]/.test(value),
+    },
+    {
+        label: "Uppercase",
+        test: (value: string) => /[A-Z]/.test(value),
+    },
+    {
+        label: "1 Number",
+        test: (value: string) => /\d/.test(value),
+    },
+    {
+        label: "1 Special Char",
+        test: (value: string) => /[^A-Za-z0-9]/.test(value),
+    },
+];
 
 export default function ResetPassword() {
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -63,6 +84,8 @@ export default function ResetPassword() {
 
     const { mutateAsync: resetPassword, isPending } =
         useResetPasswordMutation<ResetPasswordSchemaType>(setError);
+    const newPasswordValue = useWatch({ control, name: "newPassword" }) ?? "";
+    const showPasswordChecklistErrors = Boolean(errors.newPassword);
 
     useEffect(() => {
         if (tokenValue) {
@@ -99,15 +122,16 @@ export default function ResetPassword() {
 
     if (!hasToken) {
         return (
-            <CustomSafeArea className="justify-center">
-                <View className="px-5 gap-4">
-                    <Text className="font-sans-semibold text-xl text-neutral-dark-1">
-                        Reset link is invalid
-                    </Text>
-                    <Text className="text-neutral-grey-1 text-base">
-                        Request a new password reset email to continue.
-                    </Text>
+            <AuthScreenShell
+                cue="Security alert"
+                cueIcon={<AlertTriangle color="#AB091E" height={12} width={12} />}
+                cueTone="danger"
+                title="Reset link is invalid"
+                subtitle="Request a new password reset email to continue."
+            >
+                <View className="gap-4">
                     <Button onPress={() => router.replace('./forgot-password')}>
+                        <Mail color="#FFFFFF" height={16} width={16} />
                         <Text className="text-white font-sans-semibold text-lg">
                             Request New Link
                         </Text>
@@ -118,34 +142,30 @@ export default function ResetPassword() {
                         </Text>
                     </Pressable>
                 </View>
-            </CustomSafeArea>
+            </AuthScreenShell>
         );
     }
 
     return (
-        <CustomSafeArea>
-            <KeyboardAwareScrollView
-            className="flex-1"
-            contentContainerStyle={{
-                flexGrow: 1,
-                justifyContent: "center",
-                paddingVertical: 32,
-            }}
-            bottomOffset={32}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            >
-                <View className="px-5 gap-6">
-                    <View className="items-center gap-1">
-                        <Logo height={40} width={40} />
-                        <Text className="font-sans-bold text-2xl text-neutral-dark-1">
-                            Reset Password
-                        </Text>
-                        <Text className="text-center text-neutral-grey-1 text-base">
-                            Create a new password for your account.
-                        </Text>
-                    </View>
-
+        <AuthScreenShell
+            cue={isSubmitted ? "Password updated" : "Secure password reset"}
+            cueIcon={
+                isSubmitted ? (
+                    <CheckCircle2 color="#014D40" height={12} width={12} />
+                ) : (
+                    <ShieldCheck color="#0B69A3" height={12} width={12} />
+                )
+            }
+            cueTone={isSubmitted ? "success" : "info"}
+            title={isSubmitted ? "Password updated" : "Create new password"}
+            subtitle={
+                isSubmitted
+                    ? "You can now log in with your new password."
+                    : "Choose a strong password for your staff workspace."
+            }
+            showHeader={!isSubmitted}
+        >
+                <View className="gap-6">
                     {!isSubmitted ? (
                         <>
                             <FieldSet className="gap-2">
@@ -162,14 +182,50 @@ export default function ResetPassword() {
                                                 autoCapitalize="none"
                                                 autoCorrect={false}
                                                 placeholder="New password"
+                                                surface="white"
+                                                leftIcon={<LockKeyhole color="#6B7580" height={18} width={18} />}
                                                 value={field.value}
                                                 onChangeText={field.onChange}
                                                 onBlur={field.onBlur}
-                                                invalid={Boolean(errors.newPassword)}
                                             />
                                         )}
                                     />
-                                    <FieldError errors={getErrorMessages(errors.newPassword)} />
+                                    <View className="flex-row flex-wrap gap-1.5 pt-1">
+                                        {passwordChecks.map((check) => {
+                                            const passed = check.test(newPasswordValue);
+                                            const failed = showPasswordChecklistErrors && !passed;
+
+                                            return (
+                                                <View
+                                                    key={check.label}
+                                                    className={`flex-row items-center gap-1 rounded-sm px-2 py-1 ${
+                                                        passed
+                                                            ? "bg-secondary-green-light"
+                                                            : failed
+                                                                ? "border border-system-red/20 bg-system-red/10"
+                                                                : "bg-secondary-blue-light"
+                                                    }`}
+                                                >
+                                                    {passed ? (
+                                                        <CheckCircle2 color="#014D40" height={10} width={10} />
+                                                    ) : (
+                                                        <View className={`h-2.5 w-2.5 rounded-full border ${
+                                                            failed ? "border-system-red" : "border-primary"
+                                                        }`} />
+                                                    )}
+                                                    <Text className={`font-sans-semibold text-sm ${
+                                                        passed
+                                                            ? "text-secondary-green-dark"
+                                                            : failed
+                                                                ? "text-system-red"
+                                                                : "text-neutral-dark-1"
+                                                    }`}>
+                                                        {check.label}
+                                                    </Text>
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
                                 </Field>
 
                                 <Field className="gap-1">
@@ -183,6 +239,8 @@ export default function ResetPassword() {
                                                 autoCapitalize="none"
                                                 autoCorrect={false}
                                                 placeholder="Confirm password"
+                                                surface="white"
+                                                leftIcon={<LockKeyhole color="#6B7580" height={18} width={18} />}
                                                 value={field.value}
                                                 onChangeText={field.onChange}
                                                 onBlur={field.onBlur}
@@ -222,28 +280,45 @@ export default function ResetPassword() {
                             </Pressable>
                         </>
                     ) : (
-                        <View className="items-center gap-3">
-                            <View className="size-16 rounded-full bg-secondary-green-light items-center justify-center">
-                                <CheckCircle color="#3EBD93" width={32} height={32} />
-                            </View>
-                            <Text className="font-sans-semibold text-xl text-neutral-dark-1">
-                                Password updated
-                            </Text>
-                            <Text className="text-center text-neutral-grey-1 text-base">
-                                You can now log in with your new password.
-                            </Text>
-                            <Text className="text-neutral-grey-1 text-base">
-                                Redirecting in {redirectTimer}s
-                            </Text>
-                            <Button onPress={() => router.replace('/login')}>
-                                <Text className="text-white font-sans-semibold text-lg">
-                                    Go to Login
+                        <View className="rounded-xl border border-neutral-soft-grey-1 bg-white px-8 py-10 shadow-sm">
+                            <View className="items-center gap-5">
+                                <View className="size-10 items-center justify-center rounded-full bg-primary">
+                                    <AlertTriangle color="#FFFFFF" height={20} width={20} />
+                                </View>
+
+                                <View className="flex-row items-center gap-2 rounded-full bg-secondary-green-light px-4 py-2">
+                                    <CheckCircle2 color="#014D40" height={14} width={14} />
+                                    <Text className="font-sans-semibold text-sm uppercase tracking-wide text-secondary-green-dark">
+                                        Password updated
+                                    </Text>
+                                </View>
+
+                                <View className="items-center gap-1">
+                                    <Text className="text-center font-sans-bold text-2xl text-neutral-dark-1">
+                                        Password updated
+                                    </Text>
+                                    <Text className="max-w-60 text-center text-base leading-5 text-neutral-grey-1">
+                                        You can now log in with your new password.
+                                    </Text>
+                                </View>
+
+                                <Button
+                                    onPress={() => router.replace('/login')}
+                                    className="mt-2 w-full"
+                                >
+                                    <Text className="text-white font-sans-semibold text-lg">
+                                        Go to Login
+                                    </Text>
+                                    <ArrowRight color="#FFFFFF" height={16} width={16} />
+                                </Button>
+
+                                <Text className="text-center text-neutral-grey-1 text-sm">
+                                    Redirecting in {redirectTimer}s
                                 </Text>
-                            </Button>
+                            </View>
                         </View>
                     )}
                 </View>
-            </KeyboardAwareScrollView>
-        </CustomSafeArea>
+        </AuthScreenShell>
     );
 }

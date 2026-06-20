@@ -1,6 +1,5 @@
-import Logo from "@/assets/app/logo/logo.svg";
+import AuthScreenShell from "@/components/auth/AuthScreenShell";
 import { Button } from "@/components/ui/Button";
-import CustomSafeArea from "@/components/ui/CustomSafeAreaView";
 import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +9,7 @@ import {
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
+import { CheckCircle2, Mail, ShieldCheck } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -18,7 +18,6 @@ import {
     Text,
     View
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { z } from "zod";
 
 const ForgotPasswordSchema = z.object({
@@ -93,29 +92,24 @@ export default function ForgotPassword() {
     };
 
     return (
-        <CustomSafeArea>
-            <KeyboardAwareScrollView
-            className="flex-1"
-            contentContainerStyle={{
-                flexGrow: 1,
-                justifyContent: "center",
-                paddingVertical: 32,
-            }}
-            bottomOffset={32}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            >
-                <View className="px-5 gap-6">
-                    <View className="items-center gap-1">
-                        <Logo height={40} width={40} />
-                        <Text className="font-sans-bold text-2xl text-neutral-dark-1">
-                            Forgot Password
-                        </Text>
-                        <Text className="text-center text-neutral-grey-1 text-base">
-                            Enter your email to receive reset instructions.
-                        </Text>
-                    </View>
-
+        <AuthScreenShell
+            cue={isSubmitted ? "Reset link sent" : "Secure staff access"}
+            cueIcon={
+                isSubmitted ? (
+                    <CheckCircle2 color="#014D40" height={12} width={12} />
+                ) : (
+                    <ShieldCheck color="#0B69A3" height={12} width={12} />
+                )
+            }
+            cueTone={isSubmitted ? "success" : "info"}
+            title={isSubmitted ? "Check your email" : "Reset your password"}
+            subtitle={
+                isSubmitted
+                    ? "We sent reset instructions to your staff email."
+                    : "Enter your staff email and we'll send instructions to help you get back in."
+            }
+        >
+                <View className="gap-6">
                     {!isSubmitted ? (
                         <>
                             <FieldSet className="gap-2">
@@ -131,6 +125,8 @@ export default function ForgotPassword() {
                                             autoCapitalize="none"
                                             autoCorrect={false}
                                             placeholder="Email"
+                                            surface="white"
+                                            leftIcon={<Mail color="#6B7580" height={18} width={18} />}
                                             value={field.value}
                                             onChangeText={field.onChange}
                                             onBlur={field.onBlur}
@@ -171,15 +167,12 @@ export default function ForgotPassword() {
                         </>
                     ) : (
                         <View className="items-center gap-3">
-                            <Text className="font-sans-semibold text-xl text-neutral-dark-1">
-                                Check your email
-                            </Text>
-                            <Text className="text-center text-neutral-grey-1 text-base">
-                                Reset instructions were sent to
-                            </Text>
-                            <Text className="font-sans-semibold text-primary text-base">
-                                {email}
-                            </Text>
+                            <View className="w-full flex-row items-center justify-center gap-2 rounded-xl bg-secondary-blue-light px-4 py-3">
+                                <Mail color="#0E33F3" height={16} width={16} />
+                                <Text className="text-center font-sans-semibold text-primary text-base">
+                                    {email}
+                                </Text>
+                            </View>
 
                             <Text className="text-center text-neutral-grey-1 text-base">
                                 Did not receive the email?
@@ -187,16 +180,18 @@ export default function ForgotPassword() {
 
                             {isResendAllowed ? (
                                 <Button
-                                variant="secondary"
                                 onPress={handleResend}
                                 disabled={isResending}
                                 >
                                     {isResending ? (
-                                        <ActivityIndicator color="#1F2933" />
+                                        <ActivityIndicator color="#FFFFFF" />
                                     ) : (
-                                        <Text className="text-neutral-dark-1 font-sans-semibold text-base">
-                                            Resend Email
-                                        </Text>
+                                        <>
+                                            <Mail color="#FFFFFF" height={14} width={14} />
+                                            <Text className="text-white font-sans-semibold text-base">
+                                                Resend Email
+                                            </Text>
+                                        </>
                                     )}
                                 </Button>
                             ) : (
@@ -216,7 +211,6 @@ export default function ForgotPassword() {
                         </View>
                     )}
                 </View>
-            </KeyboardAwareScrollView>
-        </CustomSafeArea>
+        </AuthScreenShell>
     );
 }

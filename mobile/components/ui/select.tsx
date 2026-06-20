@@ -25,6 +25,7 @@ type SelectContextValue = {
   placeholder: string;
   size: "default" | "sm";
   invalid?: boolean;
+  surface: "soft" | "white";
   labelMap: Map<string, string>;
 };
 
@@ -39,7 +40,7 @@ const useSelect = () => {
 };
 
 const triggerStyles = tv({
-  base: "w-full border bg-neutral-soft-grey-3 text-neutral-dark-1 font-sans",
+  base: "w-full border text-neutral-dark-1 font-sans",
   variants: {
     size: {
       default: "h-12 px-4 rounded-xl",
@@ -50,10 +51,15 @@ const triggerStyles = tv({
       focused: "border-system-blue bg-white",
       invalid: "border-system-red bg-white",
     },
+    surface: {
+      soft: "bg-neutral-soft-grey-3",
+      white: "bg-white",
+    },
   },
   defaultVariants: {
     size: "default",
     state: "default",
+    surface: "soft",
   },
 });
 
@@ -82,6 +88,7 @@ type SelectProps = {
   placeholder?: string;
   size?: "default" | "sm";
   invalid?: boolean;
+  surface?: "soft" | "white";
   children: ReactNode;
 };
 
@@ -109,6 +116,7 @@ const Select = ({
   placeholder = "Select an option",
   size = "default",
   invalid,
+  surface = "soft",
   children,
 }: SelectProps) => {
   const [open, setOpen] = useState(false);
@@ -129,6 +137,7 @@ const Select = ({
         placeholder,
         size,
         invalid,
+        surface,
         labelMap,
       }}
     >
@@ -139,21 +148,25 @@ const Select = ({
 
 type SelectTriggerProps = ComponentProps<typeof Pressable> & {
   className?: string;
+  leftIcon?: ReactNode;
 };
 
-const SelectTrigger = ({ className, ...props }: SelectTriggerProps) => {
-  const { open, setOpen, size, invalid } = useSelect();
+const SelectTrigger = ({ className, leftIcon, ...props }: SelectTriggerProps) => {
+  const { open, setOpen, size, invalid, surface } = useSelect();
   const state = invalid ? "invalid" : open ? "focused" : "default";
 
   return (
     <View className={ringStyles({ state, size })}>
       <Pressable
-        className={twMerge(triggerStyles({ state, size }), className)}
+        className={twMerge(triggerStyles({ state, size, surface }), className)}
         onPress={() => setOpen(true)}
         {...props}
       >
         <View className="flex-1 flex-row items-center justify-between">
-          <SelectValue />
+          <View className="flex-1 flex-row items-center gap-3">
+            {leftIcon}
+            <SelectValue />
+          </View>
           <ChevronDown width={20} height={20} color="#9FA8B1" />
         </View>
       </Pressable>
@@ -262,4 +275,3 @@ export {
     SelectTrigger,
     SelectValue
 };
-
