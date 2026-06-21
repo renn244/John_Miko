@@ -4,7 +4,7 @@ import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ChatbotService } from './chatbot.service';
 import { DialogflowService } from './dialogflow.service';
-import { CreateRuleDto, UpdateRuleDto } from './dto/rules.dto';
+import { ChatbotMessageDto, CreateRuleDto, UpdateRuleDto } from './dto/rules.dto';
 import { GetAllRulesQuery } from './query/getAllRules.query';
 
 @Injectable()
@@ -53,8 +53,12 @@ export class RulesService {
         return newRule;
     }
 
-    async interactWithChatbot(messageDto: { message: string }): Promise<Rules> {
-        return this.chatbotService.handleMessage(messageDto.message);
+    async interactWithChatbot(messageDto: ChatbotMessageDto): Promise<Rules> {
+        return this.chatbotService.handleMessage(
+            messageDto.message,
+            messageDto.sessionId,
+            messageDto.userName,
+        );
     }
 
     async getAllRules(query: GetAllRulesQuery) {

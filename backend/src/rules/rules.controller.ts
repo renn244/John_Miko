@@ -16,6 +16,7 @@ import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import {
+  ChatbotMessageDto,
   AvailabilityRuleDto,
   CreateRuleDto,
   UpdateRuleDto,
@@ -38,7 +39,7 @@ export class RulesController {
   @Post('chatbot')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  async interactWithChatbot(@Body() messageDto: any) {
+  async interactWithChatbot(@Body() messageDto: ChatbotMessageDto) {
     return this.rulesService.interactWithChatbot(messageDto);
   }
 

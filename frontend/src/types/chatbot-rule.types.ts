@@ -23,6 +23,12 @@ export type CreateChatbotRule = {
 
 export type UpdateChatbotRule = CreateChatbotRule;
 
+export type InteractWithChatbotPayload = {
+    message: string;
+    sessionId?: string;
+    userName?: string;
+}
+
 export type GetChatbotRuleQuery = {
     search?: string;
 } & PaginationParams
