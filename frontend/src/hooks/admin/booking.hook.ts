@@ -8,7 +8,7 @@ export const useCreateBookingAdminMutation = () => {
 
     return useMutation({
         mutationKey: ['booking', 'create', 'admin'],
-        mutationFn: bookingApi.bookAccommodation,
+        mutationFn: bookingApi.createManualBooking,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['booking', 'admin'] })
         }

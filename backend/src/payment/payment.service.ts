@@ -49,6 +49,54 @@ export class PaymentService {
         };
     }
 
+    async createManualPayment(
+        body: {
+            bookingId: string;
+            accommodationFee: number;
+            preOrderFee: number;
+            addOnServiceFee: number;
+            guestFee: number;
+            paymentType: PaymentType;
+            verifiedById: string;
+        },
+        tx: Prisma.TransactionClient = this.prisma
+    ) {
+        const totalAmount = body.accommodationFee + body.preOrderFee + body.addOnServiceFee + body.guestFee;
+        const { amountToPay, amountPaid } = this.calculateAmounts(totalAmount, body.paymentType);
+
+        const referenceNumber = await this.generateReferenceNumber(tx);
+        const verifiedAt = new Date();
+
+        const payment = await tx.payment.create({
+            data: {
+                bookingId: body.bookingId,
+                referenceNumber,
+                status: PaymentStatus.Approved,
+                accommodationAmount: body.accommodationFee,
+                preOrderAmount: body.preOrderFee,
+                addOnAmount: body.addOnServiceFee,
+                guestFeeAmount: body.guestFee,
+                amountPaid,
+                amountToPaid: amountToPay,
+                totalAmount,
+                verifiedAt,
+                verifiedById: body.verifiedById,
+                paidAt: verifiedAt,
+            }
+        }).catch(() => {
+            throw new InternalServerErrorException('Failed to save payment record');
+        });
+
+        return {
+            paymentId: payment.id,
+            referenceNumber: payment.referenceNumber
+        };
+    }
+
+    async sendApprovedPaymentEmail(paymentId: string) {
+        await this.paymentEmailService.sendApprovedEmail(paymentId);
+    }
+
     async getPayments() {
         const payments = await this.prisma.payment.findMany({
             include: {

@@ -9,7 +9,7 @@ import { PaymentService } from 'src/payment/payment.service';
 import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BookingServicesService } from 'src/services/booking-services.service';
-import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
+import { ChangeStatusDto, CreateBookingDto, CreateManualBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 import { ClosureService } from 'src/closure/closure.service';
 import { BookingEmailService } from './booking-email.service';
@@ -53,6 +53,33 @@ export class BookingService {
         return stayOption;
     }
 
+    private async ensureBookingSlotAvailable(
+        accommodationId: string,
+        checkIn: Date,
+        stayOptionId: string,
+        tx: Prisma.TransactionClient
+    ) {
+        const existingBooking = await tx.booking.findFirst({
+            where: {
+                accommodationId,
+                bookingDate: checkIn,
+                stayOptionId,
+                status: { notIn: ['Cancelled'] }
+            },
+            select: { id: true }
+        });
+
+        if(existingBooking) {
+            throw new ConflictException('Accommodation is already booked for the selected date and time slot');
+        }
+
+        const isClosed = await this.closureService.validateClosureDate(accommodationId, checkIn);
+
+        if(isClosed) {
+            throw new ConflictException('Accommodation is closed for the selected date');
+        }
+    }
+
     async bookAccommodation(body: CreateBookingDto, user: UserSession) {
 
         // this sohuld be on the accommodation module
@@ -71,28 +98,9 @@ export class BookingService {
    
         const booking = await this.prisma.$transaction(async (txprisma) => {
             const stayOption = await this.findStayOptionOrThrow(body.accommodationId, body.stayOptionId, txprisma);
+            await this.ensureBookingSlotAvailable(body.accommodationId, body.checkIn, body.stayOptionId, txprisma);
 
-            const existingBooking = await txprisma.booking.findFirst({
-                where: {
-                    accommodationId: body.accommodationId,
-                    bookingDate: body.checkIn,
-                    stayOptionId: body.stayOptionId,
-                    status: { notIn: ['Cancelled'] }
-                },
-                select: { id: true }
-            })
-
-            if(existingBooking) {
-                throw new ConflictException('Accommodation is already booked for the selected date and time slot')
-            }
-            
-            const isClosed = await this.closureService.validateClosureDate(body.accommodationId, body.checkIn);
-
-            if(isClosed) {
-                throw new ConflictException('Accommodation is closed for the selected date')
-            }
-
-            const newBooking = await this.createBooking(body, user, stayOption, accommodation.isGuestFeeWaived, txprisma);
+            const newBooking = await this.createBooking(body, user.id, stayOption, accommodation.isGuestFeeWaived, txprisma);
 
             const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
             const guestFeeTotal = accommodation.isGuestFeeWaived
@@ -137,18 +145,100 @@ export class BookingService {
         return booking
     }
 
+    async createManualBooking(body: CreateManualBookingDto, user: UserSession) {
+        const accommodation = await this.prisma.accommodation.findUnique({ where: { id: body.accommodationId } });
+
+        if(!accommodation) {
+            throw new NotFoundException('Accommodation not found');
+        }
+
+        if(body.numberOfGuests < 1) {
+            throw new ValidationException({
+                field: 'numberOfGuests',
+                message: ['at least 1 guest is required']
+            });
+        }
+
+        if(body.numberOfGuests > accommodation.capacity) {
+            throw new ValidationException({
+                field: 'numberOfGuests',
+                message: [`Maximum capacity for ${accommodation.name} is ${accommodation.capacity} guests`]
+            });
+        }
+
+        const booking = await this.prisma.$transaction(async (txprisma) => {
+            const stayOption = await this.findStayOptionOrThrow(body.accommodationId, body.stayOptionId, txprisma);
+            await this.ensureBookingSlotAvailable(body.accommodationId, body.checkIn, body.stayOptionId, txprisma);
+
+            const bookingPayload = {
+                ...body,
+                email: body.email.trim().toLowerCase(),
+                adultGuests: body.numberOfGuests,
+                kidGuests: 0,
+                seniorGuests: 0,
+            };
+
+            const newBooking = await this.createBooking(
+                bookingPayload,
+                null,
+                stayOption,
+                accommodation.isGuestFeeWaived,
+                txprisma,
+                'Confirmed'
+            );
+
+            const guestFeeTotal = accommodation.isGuestFeeWaived
+                ? 0
+                : this.calculateGuestFee(bookingPayload.adultGuests, bookingPayload.seniorGuests, bookingPayload.kidGuests, stayOption.code);
+
+            await txprisma.bookedAccommodation.create({
+                data: {
+                    bookingId: newBooking.id,
+                    name: accommodation.name,
+                    type: accommodation.type,
+                    price: accommodation.price,
+                    imageUrl: accommodation.imageUrl,
+                    capacity: accommodation.capacity,
+                    description: accommodation.description,
+                    amenities: accommodation.amenities,
+                }
+            });
+
+            const { paymentId, referenceNumber } = await this.paymentService.createManualPayment({
+                bookingId: newBooking.id,
+                accommodationFee: accommodation.price,
+                guestFee: guestFeeTotal,
+                preOrderFee: 0,
+                addOnServiceFee: 0,
+                paymentType: body.paymentType,
+                verifiedById: user.id,
+            }, txprisma);
+
+            return {
+                ...newBooking,
+                paymentId,
+                referenceNumber
+            };
+        });
+
+        await this.paymentService.sendApprovedPaymentEmail(booking.paymentId);
+
+        return booking;
+    }
+
     async createBooking(
-        body: CreateBookingDto,
-        user: UserSession,
+        body: Pick<CreateBookingDto, 'accommodationId' | 'checkIn' | 'stayOptionId' | 'paymentType' | 'specialRequest' | 'name' | 'email' | 'contactNo' | 'kidGuests' | 'adultGuests' | 'seniorGuests'>,
+        userId: string | null,
         stayOption: AccommodationStayOption,
         isGuestFeeWaived: boolean,
-        tx: Prisma.TransactionClient
+        tx: Prisma.TransactionClient,
+        status: BookingStatus = 'Pending'
     ) {
         const totalNumberofGuest = body.seniorGuests + body.adultGuests + body.kidGuests
 
         const newBooking = await tx.booking.create({
             data: {
-                userId: user.id,
+                userId,
                 accommodationId: body.accommodationId,
                 bookingDate: body.checkIn,
                 stayOptionId: body.stayOptionId,
@@ -165,7 +255,7 @@ export class BookingService {
                 kidGuests: body.kidGuests,
                 adultGuests: body.adultGuests,
                 seniorGuest: body.seniorGuests,
-                status: 'Pending'
+                status
             }
         })
           
@@ -520,7 +610,7 @@ export class BookingService {
             throw new NotFoundException('Booking not found')
         }
 
-        if(user.role === 'GUEST' && booking.userId !== user.id) {
+        if(user.role === 'GUEST' && (!booking.userId || booking.userId !== user.id)) {
             throw new ForbiddenException('You do not have permission to view this booking')
         }
 

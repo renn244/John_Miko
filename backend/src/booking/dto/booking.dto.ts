@@ -94,6 +94,49 @@ export class CreateBookingDto {
     proofImageUrl!: string;
 }
 
+export class CreateManualBookingDto {
+    @IsString()
+    @IsNotEmpty({ message: "Accommodation ID is required" })
+    accommodationId!: string;
+
+    @IsString()
+    @IsNotEmpty({ message: "Name is required" })
+    name!: string;
+
+    @IsEmail()
+    @IsNotEmpty({ message: "Email is required" })
+    email!: string;
+
+    @IsNumberString()
+    @IsNotEmpty({ message: "Phone number is required" })
+    @Matches(/^[0-9]{10,15}$/, { message: "Phone number must be between 10 and 15 digits" })
+    contactNo!: string;
+
+    @Type(() => Number)
+    @IsNumber()
+    @IsNotEmpty({ message: "numberOfGuests is required" })
+    numberOfGuests!: number;
+
+    @IsString()
+    @IsOptional()
+    specialRequest?: string;
+
+    @IsString()
+    @IsNotEmpty({ message: "Stay option is required" })
+    stayOptionId!: string;
+
+    @Transform(({ value }) => toDateOnly(value))
+    @Type(() => Date)
+    @IsDate({ message: "Check-in date must be a valid date" })
+    @IsNotEmpty({ message: "Check-in date is required" })
+    @isNotPastDate({ message: "Check-in date cannot be in the past" })
+    checkIn!: Date;
+
+    @IsNotEmpty({ message: "Payment type is required" })
+    @IsEnum(PaymentType, { message: "Payment type must be either 'full' or 'partial'" })
+    paymentType!: PaymentType;
+}
+
 export class RescheduleBookingDto {
     @Transform(({ value }) => toDateOnly(value))
     @Type(() => Date)

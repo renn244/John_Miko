@@ -8,13 +8,17 @@ import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
+import { useCreateBookingAdminMutation } from "@/hooks/admin/booking.hook";
 import { isSameDateOnly } from "@/lib/date.util";
 import { getErrorMessages } from "@/lib/getErrorMessages";
+import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckCircle, Users } from "lucide-react";
 import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import z from "zod";
 
 const ManualBookingSchema = z.object({
@@ -33,6 +37,7 @@ const ManualBookingSchema = z.object({
 type manualBookingSchema = z.infer<typeof ManualBookingSchema>;
 
 const ManualBookingForm = () => {
+    const navigate = useNavigate();
     const {
         control,
         handleSubmit,
@@ -53,6 +58,7 @@ const ManualBookingForm = () => {
         },
         criteriaMode: "all"
     })
+    const { mutateAsync: createBooking, isPending } = useCreateBookingAdminMutation();
 
     const { data: accommodations } = useGetAccommodationsQuery({ page: 1, limit: 100 });
 
@@ -62,7 +68,7 @@ const ManualBookingForm = () => {
 
     const isAccommodationSelected = !!selectedAccommodationId;
 
-    const onSubmit = (data: manualBookingSchema) => {
+    const onSubmit = async (data: manualBookingSchema) => {
         if(selectedAccommodation && (data.numberOfGuests > selectedAccommodation?.capacity)) {
             setError('numberOfGuests', {
                 type: 'manual',
@@ -71,7 +77,28 @@ const ManualBookingForm = () => {
             return;
         }
 
-        console.log(data);
+        try {
+            const booking = await createBooking({
+                accommodationId: data.accommodationId,
+                name: data.name.trim(),
+                email: data.email.trim().toLowerCase(),
+                contactNo: data.contactNo.trim(),
+                numberOfGuests: data.numberOfGuests,
+                checkIn: data.checkIn,
+                stayOptionId: data.stayOptionId,
+                paymentType: data.paymentType,
+            });
+
+            toast.success("Booking created successfully");
+            navigate(`/admin/booking/${booking.id}`);
+        } catch (error: any) {
+            if(error instanceof ValidationError) {
+                handleNestError(error.response, setError);
+                return;
+            }
+
+            toast.error(error.message || "Failed to create booking");
+        }
     }
 
     const selectedAccommodation = useMemo(() => {
@@ -484,12 +511,12 @@ const ManualBookingForm = () => {
                 </p>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <Button type="button" variant="outline">
+                    <Button type="button" variant="outline" onClick={() => navigate("/admin/booking")}>
                         Cancel
                     </Button>
                     
-                    <Button type="submit">
-                        {false ? <LoadingSpinner /> : "Create Booking"}
+                    <Button type="submit" disabled={isPending}>
+                        {isPending ? <LoadingSpinner /> : "Create Booking"}
                     </Button>
                 </div>
             </div>
