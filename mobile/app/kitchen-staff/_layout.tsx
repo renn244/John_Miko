@@ -28,6 +28,14 @@ export default function KitchenStaffTabLayout() {
                 )
             }}
             />
+
+            <Tabs.Screen
+            name="order"
+            options={{
+                headerShown: false,
+                href: null,
+            }}
+            />
         </Tabs>
     )
 }

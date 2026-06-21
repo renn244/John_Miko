@@ -40,8 +40,8 @@ export class AuthService {
 
         if(!user) {
             throw new ValidationException({
-                field: "email",
-                message: ["User with this email does not exist"]
+                field: "root",
+                message: ["Invalid email or password"]
             });
         }
 
@@ -53,8 +53,8 @@ export class AuthService {
 
         if(!isPasswordValid) {
             throw new ValidationException({
-                field: "password",
-                message: ["Incorrect password"]
+                field: "root",
+                message: ["Invalid email or password"]
             });
         }
 

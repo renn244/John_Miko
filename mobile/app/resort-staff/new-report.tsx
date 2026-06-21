@@ -22,17 +22,18 @@ export default function NewStaffReportScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingTop: 16,
-          paddingBottom: 36,
+          paddingHorizontal: 12,
+          paddingTop: 10,
+          paddingBottom: 32,
+          gap: 16,
         }}
       >
-        <View className="mb-6 flex-row items-start gap-3">
+        <View className="flex-row items-start gap-3">
           <Pressable
             onPress={() => router.back()}
-            className="h-11 w-11 items-center justify-center rounded-full bg-white"
+            className="h-9 w-9 items-center justify-center"
           >
-            <ArrowLeft size={21} color="#1F2933" />
+            <ArrowLeft size={21} color="#0E33F3" />
           </Pressable>
           <View className="flex-1">
             <Text className="font-sans-bold text-2xl text-neutral-dark-1">
@@ -44,17 +45,15 @@ export default function NewStaffReportScreen() {
           </View>
         </View>
 
-        <View className="rounded-3xl bg-white px-5 py-6 shadow-sm">
-          <StaffReportForm
-            key={`general-${formInstanceKey}`}
-            onCreated={(reportId) =>
-              router.replace({
-                pathname: "/resort-staff/reports/[reportId]",
-                params: { reportId },
-              })
-            }
-          />
-        </View>
+        <StaffReportForm
+          key={`general-${formInstanceKey}`}
+          onCreated={(reportId) =>
+            router.replace({
+              pathname: "/resort-staff/reports/[reportId]",
+              params: { reportId },
+            })
+          }
+        />
       </ScrollView>
     </CustomSafeAreaView>
   );

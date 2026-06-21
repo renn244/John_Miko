@@ -9,7 +9,7 @@ import { useLoginMutation } from "@/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Lock, LogIn, User } from "lucide-react"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, type FieldError as HookFormFieldError } from "react-hook-form"
 import { Link } from "react-router"
 import z from "zod"
 
@@ -29,6 +29,7 @@ const LoginForm = () => {
         handleSubmit,
         control,
         setError,
+        formState: { errors },
     } = useForm<loginSchema>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
@@ -41,6 +42,7 @@ const LoginForm = () => {
     })
 
     const { mutateAsync, isPending } = useLoginMutation<loginSchema>(setError)
+    const rootError = errors.root as HookFormFieldError | undefined;
     
     const onSubmit = async (data: loginSchema) => {
         await mutateAsync(data)
@@ -120,6 +122,8 @@ const LoginForm = () => {
                     {fieldState.invalid && (
                         <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
+
+                    <FieldError errors={getErrorMessages(rootError)} />
                 </Field>
             )}
             />

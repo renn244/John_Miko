@@ -58,8 +58,8 @@ export class BookingController {
 
     @Get('byBookingId/:bookingId')
     @Roles(Role.ADMIN, Role.GUEST)
-    async GetBookingById(@Param('bookingId') bookingId: string) {
-        return this.bookingService.getBookingById(bookingId)
+    async GetBookingById(@Param('bookingId') bookingId: string, @User() user: UserSession) {
+        return this.bookingService.getBookingById(bookingId, user)
     }
 
     @Get('byUser')

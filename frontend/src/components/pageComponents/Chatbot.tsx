@@ -1,23 +1,72 @@
 import { useInteractWithChatbotMutation } from "@/hooks/admin/chatbot.rule.hook"
+import { useAuthContext } from "@/context/AuthContext";
 import { Bot, MessageCircle, Send, X } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 
 type chatBotMessage = {
     id: string;
+    backendId?: string;
     sender: 'user' | 'bot';
     text: string;
     timestamp: Date;
     quickReplies?: { label: string; value: string }[];
+    isLoading?: boolean;
+    isTyping?: boolean;
 }
+
+const CHATBOT_SESSION_STORAGE_KEY = "jm-chatbot-session-id";
+
+const createChatbotSessionId = () => {
+    if (typeof window === "undefined") {
+        return `chatbot-${Date.now()}`;
+    }
+
+    const existingSessionId = window.sessionStorage.getItem(CHATBOT_SESSION_STORAGE_KEY);
+
+    if (existingSessionId) {
+        return existingSessionId;
+    }
+
+    const nextSessionId =
+        typeof window.crypto?.randomUUID === "function"
+            ? window.crypto.randomUUID()
+            : `chatbot-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    window.sessionStorage.setItem(CHATBOT_SESSION_STORAGE_KEY, nextSessionId);
+
+    return nextSessionId;
+};
+
+const BOT_TYPING_SPEED_MS = 18;
+const BOT_TYPING_CHUNK_SIZE = 2;
+
+const LoadingDots = () => {
+    return (
+        <div className="flex items-center gap-1 py-1">
+            {[0, 1, 2].map((index) => (
+                <span
+                key={index}
+                className="h-2 w-2 rounded-full bg-slate-400 animate-bounce"
+                style={{ animationDelay: `${index * 0.12}s` }}
+                />
+            ))}
+        </div>
+    );
+};
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<chatBotMessage[]>([]);
+    const [hasStartedConversation, setHasStartedConversation] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+    const typingIntervalRef = useRef<number | null>(null);
+    const pendingTimeoutsRef = useRef<number[]>([]);
+    const sessionId = useMemo(() => createChatbotSessionId(), []);
+    const { user } = useAuthContext();
     
     const { 
         mutateAsync, 
@@ -25,8 +74,14 @@ const Chatbot = () => {
     } = useInteractWithChatbotMutation();
 
     useEffect(() => {
-        getBotResponse("Main Menu");
-    }, [])
+        return () => {
+            if (typingIntervalRef.current) {
+                window.clearInterval(typingIntervalRef.current);
+            }
+
+            pendingTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
+        };
+    }, []);
 
     useEffect(() => {
         if(ref.current) {
@@ -34,25 +89,114 @@ const Chatbot = () => {
         }  
     }, [messages])
 
-    const getBotResponse = (userMessage: string) => {
-        const normalizedInput = userMessage.toLowerCase();
-        
-        mutateAsync(
-            { message: normalizedInput || "Main Menu" },
-            { 
-                onSuccess: (response) => {
-                    const botMessage: chatBotMessage = {
-                        id: response.id,
-                        sender: 'bot',
-                        text: response.response,
-                        quickReplies: response.quickReplies.map((qr: string) => ({ label: qr, value: qr })),
-                        timestamp: new Date(),
-                    }
+    useEffect(() => {
+        if (!isOpen || hasStartedConversation) {
+            return;
+        }
 
-                    setMessages((prev) => [...prev, botMessage]);
-                }
+        setHasStartedConversation(true);
+        getBotResponse("Main Menu");
+    }, [hasStartedConversation, isOpen])
+
+    const addPendingTimeout = (callback: () => void, delay: number) => {
+        const timeoutId = window.setTimeout(() => {
+            pendingTimeoutsRef.current = pendingTimeoutsRef.current.filter((id) => id !== timeoutId);
+            callback();
+        }, delay);
+
+        pendingTimeoutsRef.current.push(timeoutId);
+    };
+
+    const stopTypingAnimation = () => {
+        if (typingIntervalRef.current) {
+            window.clearInterval(typingIntervalRef.current);
+            typingIntervalRef.current = null;
+        }
+    };
+
+    const startTypingReply = (
+        messageId: string,
+        fullText: string,
+        quickReplies: { label: string; value: string }[],
+    ) => {
+        stopTypingAnimation();
+
+        let visibleLength = 0;
+
+        typingIntervalRef.current = window.setInterval(() => {
+            visibleLength = Math.min(visibleLength + BOT_TYPING_CHUNK_SIZE, fullText.length);
+
+            const nextText = fullText.slice(0, visibleLength);
+            const isDone = visibleLength >= fullText.length;
+
+            setMessages((prev) =>
+                prev.map((message) =>
+                    message.id === messageId
+                        ? {
+                            ...message,
+                            text: nextText,
+                            isTyping: !isDone,
+                            isLoading: false,
+                            quickReplies: isDone ? quickReplies : undefined,
+                        }
+                        : message,
+                ),
+            );
+
+            if (isDone) {
+                stopTypingAnimation();
             }
-        )
+        }, BOT_TYPING_SPEED_MS);
+    };
+
+    const getBotResponse = async (userMessage: string) => {
+        const normalizedInput = userMessage.trim();
+        const loadingMessageId = `bot-loading-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        stopTypingAnimation();
+        setMessages((prev) => [
+            ...prev,
+            {
+                id: loadingMessageId,
+                sender: 'bot',
+                text: '',
+                timestamp: new Date(),
+                isLoading: true,
+            },
+        ]);
+
+        try {
+            const response = await mutateAsync({
+                message: normalizedInput || "Main Menu",
+                sessionId,
+                userName: user?.name ?? undefined,
+            });
+
+            const quickReplies = response.quickReplies.map((qr: string) => ({ label: qr, value: qr }));
+            const botMessageId = `bot-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+            setMessages((prev) =>
+                prev.map((message) =>
+                    message.id === loadingMessageId
+                        ? {
+                            ...message,
+                            id: botMessageId,
+                            backendId: response.id,
+                            text: '',
+                            timestamp: new Date(),
+                            isLoading: false,
+                            isTyping: true,
+                        }
+                        : message,
+                ),
+            );
+
+            startTypingReply(botMessageId, response.response, quickReplies);
+        } catch {
+            setMessages((prev) =>
+                prev.filter((message) => message.id !== loadingMessageId),
+            );
+        }
     }
 
     const handleQuickReply = (value: string) => {
@@ -65,9 +209,9 @@ const Chatbot = () => {
 
         setMessages(prev => [...prev, userMessage]);
 
-        setTimeout(() => {
+        addPendingTimeout(() => {
             getBotResponse(value);
-        }, 500)
+        }, 500);
     }
 
     const handleSendMessage = () => {
@@ -83,9 +227,9 @@ const Chatbot = () => {
         setMessages((prev) => [...prev, userMessage]);
         setInput('');
 
-        setTimeout(() => {
+        addPendingTimeout(() => {
             getBotResponse(input);
-        }, 500)
+        }, 500);
     }
 
     return (
@@ -136,7 +280,11 @@ const Chatbot = () => {
                                                 borderBottomRightRadius: message.sender === 'user' ? '4px' : '16px',
                                             }}
                                             >
-                                                <p className="text-sm whitespace-pre-line">{message.text}</p>
+                                                {message.isLoading ? (
+                                                    <LoadingDots />
+                                                ) : (
+                                                    <p className="text-sm whitespace-pre-line min-h-5">{message.text}</p>
+                                                )}
                                             </div>
                                             <p className={`text-xs mt-1 px-1 text-muted-foreground ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
                                                 {message.timestamp.toLocaleTimeString('en-US', {
@@ -149,7 +297,7 @@ const Chatbot = () => {
                                     </div>
                                 </div>
 
-                                {message.sender === 'bot' && message.quickReplies && (
+                                {message.sender === 'bot' && message.quickReplies && !message.isTyping && !message.isLoading && (
                                     <div className="flex flex-wrap gap-2 mt-3 ml-10">
                                         {message.quickReplies.map((reply) => (
                                             <Button

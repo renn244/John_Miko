@@ -23,11 +23,12 @@ export class EmailService {
                 context: params.context,
             }
 
-            const response = await this.mailerService.sendMail(emailOptions);
+            await this.mailerService.sendMail(emailOptions);
             this.logger.log(`Email sent to ${params.to} with subject "${params.subject}"`);
         } catch (error) {
             console.error(error);
             this.logger.error(`Failed to send email to ${params.to} with subject "${params.subject}"`, error);
+            throw error;
         }
     }
 }

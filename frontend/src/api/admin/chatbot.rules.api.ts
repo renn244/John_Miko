@@ -1,6 +1,11 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { ChatbotRule, ChatbotRuleStatistics, GetChatbotRuleQuery } from "@/types/chatbot-rule.types";
+import type {
+    ChatbotRule,
+    ChatbotRuleStatistics,
+    GetChatbotRuleQuery,
+    InteractWithChatbotPayload,
+} from "@/types/chatbot-rule.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const chatbotRulesApi = {
@@ -17,7 +22,7 @@ export const chatbotRulesApi = {
 
         return response.data as ChatbotRule;
     },
-    interactWithChatbot: async (data: any) => {
+    interactWithChatbot: async (data: InteractWithChatbotPayload) => {
         const response = await apiClient.post('/rules/chatbot', data);
 
         if(response.status >= 400) {

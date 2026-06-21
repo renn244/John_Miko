@@ -1,6 +1,5 @@
-import Logo from '@/assets/app/logo/logo.svg';
+import AuthScreenShell from "@/components/auth/AuthScreenShell";
 import { Button } from "@/components/ui/Button";
-import CustomSafeArea from "@/components/ui/CustomSafeAreaView";
 import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/passwordInput";
@@ -9,6 +8,7 @@ import { useLoginMutation } from "@/hooks/auth.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, type RelativePathString } from "expo-router";
+import { CheckCircle2, LockKeyhole, Mail, UsersRound } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import {
     ActivityIndicator,
@@ -16,7 +16,6 @@ import {
     Text,
     View
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { z } from "zod";
 
 const LoginSchema = z.object({
@@ -59,31 +58,15 @@ export default function Login() {
     };
 
     return (
-        <CustomSafeArea>
-            <KeyboardAwareScrollView
-            className="flex-1"
-            contentContainerStyle={{
-                flexGrow: 1,
-                justifyContent: "center",
-                paddingVertical: 32,
-            }}
-            bottomOffset={32}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            >
-
-                <View className="px-5 gap-5">
-                    <View className="items-center gap-1">
-                        <Logo height={40} width={40} />
-                        <Text className="font-sans-bold text-2xl text-neutral-dark-1">
-                            John Miko&apos;s
-                        </Text>
-                        <Text className="text-center text-neutral-grey-1 text-base">
-                            Use your staff account to continue.
-                        </Text>
-                    </View>
-
-                    <FieldSet className="gap-2">
+        <AuthScreenShell
+            cue="System check - All operational"
+            cueIcon={<CheckCircle2 color="#014D40" height={12} width={12} />}
+            cueTone="success"
+            title="Welcome back"
+            subtitle="Sign in to continue your staff workspace."
+        >
+                <View className="gap-5">
+                    <FieldSet className="gap-3">
                         <Field className="gap-1">
                             <FieldLabel className="text-base">Staff Role</FieldLabel>
                             <Controller
@@ -94,9 +77,12 @@ export default function Login() {
                                         value={field.value}
                                         onValueChange={field.onChange}
                                         placeholder="Select role"
+                                        surface="white"
                                         invalid={Boolean(errors.role)}
                                     >
-                                        <SelectTrigger>
+                                        <SelectTrigger
+                                            leftIcon={<UsersRound color="#6B7580" height={18} width={18} />}
+                                        >
                                             <SelectValue placeholder="Select role" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -122,6 +108,8 @@ export default function Login() {
                                     autoCapitalize="none"
                                     autoCorrect={false}
                                     placeholder="Email"
+                                    surface="white"
+                                    leftIcon={<Mail color="#6B7580" height={18} width={18} />}
                                     value={field.value}
                                     onChangeText={field.onChange}
                                     onBlur={field.onBlur}
@@ -132,8 +120,8 @@ export default function Login() {
                             <FieldError errors={getErrorMessages(errors.email)} />
                         </Field>
 
-                        <Field>
-                            <FieldLabel className="text-base">Password</FieldLabel>
+                            <Field>
+                                <FieldLabel className="text-base">Password</FieldLabel>
                             <Controller
                                 name="password"
                                 control={control}
@@ -144,6 +132,8 @@ export default function Login() {
                                         autoCorrect={false}
                                         placeholder="Password"
                                         returnKeyType="done"
+                                        surface="white"
+                                        leftIcon={<LockKeyhole color="#6B7580" height={18} width={18} />}
                                         value={field.value}
                                         onChangeText={field.onChange}
                                         onBlur={field.onBlur}
@@ -153,6 +143,7 @@ export default function Login() {
                                 )}
                             />
                             <FieldError errors={getErrorMessages(errors.password)} />
+                            <FieldError errors={getErrorMessages(errors.root)} />
 
 
                             <View className="items-end">
@@ -187,7 +178,6 @@ export default function Login() {
                         </Button>
                     </View>
                 </View>
-            </KeyboardAwareScrollView >
-        </CustomSafeArea>
+        </AuthScreenShell>
     );
 }

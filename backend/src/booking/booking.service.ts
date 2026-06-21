@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccommodationStayOption, Prisma } from 'src/generated/prisma/client';
 import { BookingStatus } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
@@ -442,7 +442,7 @@ export class BookingService {
         return result
     }
 
-    async getBookingById(bookingId: string) {
+    async getBookingById(bookingId: string, user: UserSession) {
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId },
             include: {
@@ -518,6 +518,10 @@ export class BookingService {
 
         if(!booking) {
             throw new NotFoundException('Booking not found')
+        }
+
+        if(user.role === 'GUEST' && booking.userId !== user.id) {
+            throw new ForbiddenException('You do not have permission to view this booking')
         }
 
         return booking

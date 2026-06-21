@@ -8,6 +8,8 @@ type PreOrderListResponse = {
   guestName: string;
   bookingDate: string;
   timeSlot?: "DayStay" | "OverNight";
+  startTime?: string | null;
+  endTime?: string | null;
   kitchenStatus?: KitchenOrderStatus;
   preOrders?: { id: string; name: string; quantity: number; status?: KitchenOrderStatus }[];
 }[];
@@ -19,6 +21,8 @@ type PreOrderDetailsResponse = {
   contactNo?: string;
   bookingDate: string;
   timeSlot?: "DayStay" | "OverNight";
+  startTime?: string | null;
+  endTime?: string | null;
   kitchenStatus?: KitchenOrderStatus;
   numberOfGuests?: number;
   specialRequests?: string | null;
@@ -90,6 +94,8 @@ const fetchKitchenOrderDetails = async (bookingId: string) => {
     contactNo: data.contactNo,
     bookingDate: data.bookingDate,
     timeSlot: data.timeSlot,
+    startTime: data.startTime,
+    endTime: data.endTime,
     kitchenStatus: data.kitchenStatus,
     numberOfGuests: data.numberOfGuests,
     notes: data.specialRequests ?? undefined,

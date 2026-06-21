@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import * as bcrypt from 'bcrypt';
 import { EmailService } from "src/email/email.service";
-import { ValidationException } from "src/lib/exception/ValidationException";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UserService } from "src/user/user.service";
 import { v4 as uuidv4 } from "uuid";
@@ -15,15 +14,45 @@ export class ForgotPasswordService {
         private readonly userService: UserService,
     ) {}
 
+    private appendPath(baseUrl: string, path: string) {
+        const normalizedPath = path.replace(/^\/+/, '');
+
+        if (baseUrl.endsWith('://')) {
+            return `${baseUrl}${normalizedPath}`;
+        }
+
+        return `${baseUrl.replace(/\/+$/, '')}/${normalizedPath}`;
+    }
+
+    private buildResetUrl(baseUrl: string | undefined, token: string) {
+        if (!baseUrl) {
+            throw new Error('Reset password URL is not configured');
+        }
+
+        const resetUrl = this.appendPath(baseUrl, 'reset-password');
+
+        return `${resetUrl}?token=${encodeURIComponent(token)}`;
+    }
+
+    private buildMobileResetRedirectUrl(token: string) {
+        const bridgeBaseUrl = process.env.PASSWORD_RESET_BRIDGE_URL
+            || process.env.BACKEND_URL
+            || 'http://localhost:3000';
+        const bridgeUrl = this.appendPath(bridgeBaseUrl, 'auth/reset-password/open');
+
+        return `${bridgeUrl}?token=${encodeURIComponent(token)}`;
+    }
+
+    buildMobileResetUrl(token: string) {
+        return this.buildResetUrl(process.env.MOBILE_URL, token);
+    }
+
     // do we also need to add roles validation for here later on
     private async generateAndSendResetToken(email: string) {
         const user = await this.userService.findUserByEmail(email);
 
         if (!user) {
-            throw new ValidationException({
-                field: 'email',
-                message: ['User with this email does not exist']
-            });
+            return { message: 'If an account exists, we sent reset instructions' };
         }
 
         await this.prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
@@ -39,28 +68,32 @@ export class ForgotPasswordService {
 
         const isMobileUser = this.userService.isMobileUserByRole(user.role)
         const confirmationUrl = isMobileUser 
-            ? `${process.env.MOBILE_URL}/reset-password?token=${rawToken}`
-            : `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`
+            ? this.buildMobileResetRedirectUrl(rawToken)
+            : this.buildResetUrl(process.env.FRONTEND_URL, rawToken)
 
-        this.emailService.sendEmail({
-            to: user.email,
-            subject: 'Password Reset Request',
-            template: 'forgotPassword',
-            context: {
-                email,
-                confirmationUrl: confirmationUrl
-            }
-        });
+        try {
+            await this.emailService.sendEmail({
+                to: user.email,
+                subject: 'Password Reset Request',
+                template: 'forgotPassword',
+                context: {
+                    email,
+                    confirmationUrl: confirmationUrl
+                }
+            });
+
+            return { message: 'If an account exists, we sent reset instructions' };
+        } catch (error) {
+            return { message: 'If an account exists, we sent reset instructions' };
+        }
     }
 
     async forgetPassword(email: string) {
-        await this.generateAndSendResetToken(email);
-        return { message: 'Password reset email sent' };
+        return this.generateAndSendResetToken(email);
     }
 
     async resendForgotPassword(email: string) {
-        await this.generateAndSendResetToken(email);
-        return { message: 'Password reset email resent' };
+        return this.generateAndSendResetToken(email);
     }
 
     async resetPassword({ token, newPassword }: resetPasswordDto) {

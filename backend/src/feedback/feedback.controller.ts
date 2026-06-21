@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Role } from 'src/generated/prisma/enums';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
@@ -54,8 +54,8 @@ export class FeedbackController {
 
     @Roles(Role.GUEST, Role.ADMIN)
     @Get(':id')
-    async getFeedbackById(@Param('id') id: string) {
-        return this.feedbackService.getFeedbackById(id);
+    async getFeedbackById(@Param('id') id: string, @User() user: UserSession) {
+        return this.feedbackService.getFeedbackById(id, user);
     }
 
     @Roles(Role.GUEST)
@@ -65,7 +65,7 @@ export class FeedbackController {
     }
 
     @Roles(Role.GUEST)  
-    @Patch(':id')
+    @Delete(':id')
     async deleteFeedback(@Param('id') id: string, @User() user: UserSession) {
         return this.feedbackService.deleteFeedback(id, user);
     }

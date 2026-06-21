@@ -1,16 +1,23 @@
 import PreOrderFilters from "@/components/pageComponents/Kitchen Staff/PreOrderFilters";
-import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
+import OperationalCard from "@/components/ui/operational-card";
+import ScreenState from "@/components/ui/screen-state";
+import StatusChip from "@/components/ui/status-chip";
 import { useKitchenOrders } from "@/hooks/kitchenOrders.hook";
 import { useKitchenPreOrdersFilterStore } from "@/store/kitchenPreOrdersFilter.store";
-import type { KitchenOrder } from "@/types/kitchenOrder.type";
+import type { KitchenOrder, KitchenOrderStatus } from "@/types/kitchenOrder.type";
 import { format, parseISO } from "date-fns";
 import { useRouter } from "expo-router";
+import {
+  AlertTriangle,
+  CalendarDays,
+  ClipboardList,
+  Clock,
+  ShoppingBag,
+} from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
-  Pressable,
   RefreshControl,
   Text,
   View,
@@ -37,6 +44,33 @@ const formatBookingDate = (raw: string) => {
 
 const getTotalItems = (order: KitchenOrder) =>
   (order.items ?? []).reduce((total, item) => total + (item.quantity || 0), 0);
+
+const formatBookingReference = (bookingId: string) =>
+  `Booking ID: ${bookingId}`;
+
+const formatStayLabel = (timeSlot?: KitchenOrder["timeSlot"]) => {
+  if (!timeSlot) return undefined;
+  return timeSlot.replace(/([a-z])([A-Z])/g, "$1 $2");
+};
+
+const getItemPreview = (order: KitchenOrder) => {
+  const items = order.items ?? [];
+  const preview = items
+    .slice(0, 2)
+    .map((item) => `${item.quantity}x ${item.name}`)
+    .join(" - ");
+  const remaining = items.length - 2;
+
+  return remaining > 0 ? `${preview} - +${remaining} more` : preview;
+};
+
+const getKitchenStatus = (order: KitchenOrder): KitchenOrderStatus => {
+  if (order.kitchenStatus) return order.kitchenStatus;
+  return order.items.length > 0 &&
+    order.items.every((item) => item.status === "Completed")
+    ? "Completed"
+    : "Pending";
+};
 
 export default function KitchenStaffPreOrdersScreen() {
   const router = useRouter();
@@ -73,100 +107,147 @@ export default function KitchenStaffPreOrdersScreen() {
   const renderOrder = useCallback(
     ({ item }: { item: KitchenOrder }) => {
       const totalItems = getTotalItems(item);
+      const status = getKitchenStatus(item);
+      const isCompleted = status === "Completed";
+      const stayLabel = formatStayLabel(item.timeSlot);
+      const itemPreview = getItemPreview(item);
 
       return (
-        <Pressable
+        <OperationalCard
           onPress={() =>
             router.push({
               pathname: "/kitchen-staff/order/[orderId]",
               params: { orderId: item.bookingId },
             })
           }
-          className="mb-3 rounded-3xl bg-white px-5 py-4 shadow-sm"
+          leftAccentClassName={
+            isCompleted ? "bg-secondary-green-light" : "bg-secondary-yellow-light"
+          }
+          contentClassName="gap-3 px-4 py-4"
+          className="mb-3 rounded-md"
         >
           <View className="flex-row items-start justify-between gap-3">
             <View className="flex-1">
-              <Text className="font-sans-semibold text-xl text-neutral-dark-1">
+              <Text className="font-sans-bold text-lg text-neutral-dark-1">
                 {item.guestName}
               </Text>
-              <Text className="text-base text-neutral-grey-1 mt-1">
+              <Text className="mt-1 text-sm text-neutral-grey-1">
+                {formatBookingReference(item.bookingId)}
+              </Text>
+            </View>
+            <StatusChip
+              label={status}
+              tone={isCompleted ? "completed" : "pending"}
+              size="sm"
+            />
+          </View>
+
+          <View className="flex-row items-center gap-4">
+            <View className="flex-row items-center gap-1.5">
+              <CalendarDays size={15} color="#4D5963" />
+              <Text className="text-base text-neutral-dark-2">
                 {formatBookingDate(item.bookingDate)}
+              </Text>
+            </View>
+            {stayLabel ? (
+              <View className="flex-row items-center gap-1.5">
+                <Clock size={15} color="#4D5963" />
+                <Text className="text-base text-neutral-dark-2">
+                  {stayLabel}
+                </Text>
+              </View>
+            ) : null}
+            <View className="flex-row items-center gap-1.5">
+              <ShoppingBag size={15} color="#4D5963" />
+              <Text className="text-base text-neutral-dark-2">
+                {totalItems} item{totalItems === 1 ? "" : "s"}
               </Text>
             </View>
           </View>
 
-          <View className="mt-3 flex-row items-center justify-between">
-            <Text className="text-base text-neutral-grey-1">
-              Booking ID: {item.bookingId}
-            </Text>
-            <Text className="text-base font-sans-semibold text-neutral-dark-2">
-              {totalItems} item{totalItems === 1 ? "" : "s"}
-            </Text>
-          </View>
-        </Pressable>
+          {itemPreview ? (
+            <View className="rounded-sm bg-neutral-soft-grey-3 px-3 py-2">
+              <Text
+                numberOfLines={2}
+                className="text-base leading-5 text-neutral-dark-2"
+              >
+                {itemPreview}
+              </Text>
+            </View>
+          ) : null}
+        </OperationalCard>
       );
     },
     [router]
   );
 
   return (
-    <CustomSafeAreaView className="bg-neutral-soft-grey-3">
-      <View className="px-4 pt-4 pb-3 gap-3">
+    <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
+      <View className="gap-4 border-b border-neutral-soft-grey-2 px-5 pb-4 pt-4">
         <View>
-          <Text className="font-sans-bold text-2xl text-neutral-dark-1">
-            Pre-orders
+          <Text className="font-sans-bold text-3xl text-neutral-dark-1">
+            Kitchen queue
           </Text>
-          <Text className="text-base text-neutral-grey-1 mt-1">
-            Reservations with meals to prepare
+          <Text className="mt-1 text-base text-neutral-grey-1">
+            Guest meal pre-orders ready for preparation.
           </Text>
         </View>
 
         <PreOrderFilters />
       </View>
 
-        {isLoading ? (
-            <View className="mt-4 w-full px-6 pb-6 pt-12 items-center justify-center">
-                <ActivityIndicator size="large" />
+      {isLoading ? (
+        <View className="gap-3 px-5 pt-5">
+          <Text className="text-base text-neutral-grey-1">
+            Loading pre-orders...
+          </Text>
+          {[0, 1, 2, 3].map((item) => (
+            <View
+              key={item}
+              className="h-28 rounded-md border border-neutral-soft-grey-2 bg-white"
+            >
+              <View className="h-full w-1 bg-secondary-blue-light" />
             </View>
-        ) : (
-            <FlatList
-            data={filteredOrders}
-            keyExtractor={(item) => item.bookingId}
-            renderItem={renderOrder}
-            contentContainerStyle={{
-                paddingHorizontal: 24,
-                paddingBottom: 24,
-                paddingTop: 6,
-            }}
-            refreshControl={
-                <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
-            }
-            ListEmptyComponent={
-                <View className="items-center justify-center py-12">
-                    <Text className="font-sans-semibold text-lg text-neutral-dark-1">
-                        No pre-orders found
-                    </Text>
-                    <Text className="mt-2 text-base text-neutral-grey-1 text-center">
-                        Try changing the filters or pull to refresh.
-                    </Text>
-                    {error ? (
-                        <View className="mt-4 w-full">
-                            <Button
-                            variant="outline"
-                            onPress={() => refetch()}
-                            style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
-                            >
-                            <Text className="text-neutral-dark-1 font-sans-semibold text-lg">
-                                Retry
-                            </Text>
-                            </Button>
-                        </View>
-                    ) : null}
-                </View>
-            }
-            />
-        )}
-
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          data={filteredOrders}
+          keyExtractor={(item) => item.bookingId}
+          renderItem={renderOrder}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingBottom: 28,
+            paddingTop: 16,
+            flexGrow: filteredOrders.length === 0 ? 1 : undefined,
+          }}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center px-2">
+              <ScreenState
+                tone={error ? "danger" : "info"}
+                icon={
+                  error ? (
+                    <AlertTriangle size={24} color="#AB091E" />
+                  ) : (
+                    <ClipboardList size={24} color="#0E33F3" />
+                  )
+                }
+                title={error ? "Could not load pre-orders" : "No pre-orders found"}
+                description={
+                  error
+                    ? "There was a problem connecting to the kitchen display system."
+                    : "Try changing the search or date filter."
+                }
+                actionLabel={error ? "Retry" : undefined}
+                onAction={error ? () => refetch() : undefined}
+              />
+            </View>
+          }
+        />
+      )}
     </CustomSafeAreaView>
   );
 }

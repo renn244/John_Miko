@@ -1,7 +1,9 @@
-import { Module, Provider } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { ChatbotService } from './chatbot.service';
 import { DialogflowService } from './dialogflow.service';
+import { GeminiService } from './gemini.service';
+import GEMINI_OPTIONS from './gemini-options.provider';
 import { RulesController } from './rules.controller';
 import { RulesService } from './rules.service';
 import DIALOGFLOW_OPTIONS from './dialogo-options.provider';
@@ -11,7 +13,9 @@ import DIALOGFLOW_OPTIONS from './dialogo-options.provider';
   providers: [
     RulesService,
     DIALOGFLOW_OPTIONS,
-    DialogflowService, 
+    GEMINI_OPTIONS,
+    DialogflowService,
+    GeminiService,
     ChatbotService],
   controllers: [RulesController]
 })

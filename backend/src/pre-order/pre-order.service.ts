@@ -124,6 +124,12 @@ export class PreOrderService {
 
                 bookingDate: true,
                 stayOptionLabelSnapshot: true,
+                stayOption: {
+                    select: {
+                        startTime: true,
+                        endTime: true
+                    }
+                },
                 numberOfGuests: true,
 
                 specialRequests: true,
@@ -150,6 +156,8 @@ export class PreOrderService {
             contactNo: booking.contactNo,
             bookingDate: booking.bookingDate,
             timeSlot: booking.stayOptionLabelSnapshot,
+            startTime: booking.stayOption?.startTime,
+            endTime: booking.stayOption?.endTime,
             numberOfGuests: booking.numberOfGuests,
             specialRequests: booking.specialRequests,
             preOrders: booking.preOrders

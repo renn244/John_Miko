@@ -150,17 +150,17 @@ export class DialogflowService {
         }
     }
 
-    async detectIntent(message: string): Promise<DialogflowDetectIntentResult> {
+    async detectIntent(message: string, sessionId?: string): Promise<DialogflowDetectIntentResult> {
         try {
-            const sessionId = uuidv4();
+            const effectiveSessionId = sessionId?.trim() || uuidv4();
             const sessionPath =
                 this.location && this.location !== 'global'
                 ? this.sessionsClient.projectLocationAgentSessionPath(
                         this.projectId,
                         this.location,
-                        sessionId,
+                        effectiveSessionId,
                     )
-                : this.sessionsClient.projectAgentSessionPath(this.projectId, sessionId);
+                : this.sessionsClient.projectAgentSessionPath(this.projectId, effectiveSessionId);
 
             const request: protos.google.cloud.dialogflow.v2.IDetectIntentRequest = {
                 session: sessionPath,

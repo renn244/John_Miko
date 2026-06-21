@@ -5,7 +5,7 @@ export default function MaintenanceStaffHistoryScreen() {
     <AssignedMaintenanceListScreen
       scope="history"
       title="Maintenance History"
-      description="Review your completed and closed maintenance work."
+      description="view completed and closed maintenance work."
       emptyTitle="No maintenance history yet"
       emptyDescription="Completed tickets will appear here for documentation."
     />
