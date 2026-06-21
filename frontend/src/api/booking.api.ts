@@ -3,6 +3,17 @@ import { ValidationError } from "@/lib/handleNestError";
 import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrderAndPayment, BookingWithPaymentInfo, GetBookingsQuery } from "@/types/booking.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
+export type CreateManualBookingDto = {
+    accommodationId: string;
+    name: string;
+    email: string;
+    contactNo: string;
+    numberOfGuests: number;
+    checkIn: Date;
+    stayOptionId: string;
+    paymentType: "Partial" | "Full";
+};
+
 export const bookingApi = {
     bookAccommodation: async (data: any) => {
         const response = await apiClient.post('/booking', data)
@@ -20,6 +31,19 @@ export const bookingApi = {
 
         if(response.status >= 400) {
             throw new Error(response.data.message || 'Failed to book accommodation');
+        }
+
+        return response.data as BookingWithPaymentInfo;
+    },
+    createManualBooking: async (data: CreateManualBookingDto) => {
+        const response = await apiClient.post('/booking/manual', data);
+
+        if(response.status === 400) {
+            throw new ValidationError(response.data);
+        }
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'Failed to create booking');
         }
 
         return response.data as BookingWithPaymentInfo;

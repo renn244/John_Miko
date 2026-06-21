@@ -24,7 +24,7 @@ export class FeedbackService {
             throw new NotFoundException('Booking not found');
         }
 
-        if(booking.userId !== user.id) {
+        if(!booking.userId || booking.userId !== user.id) {
             throw new ForbiddenException('You can only leave feedback for your own bookings');
         }
 

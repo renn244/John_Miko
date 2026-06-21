@@ -1,18 +1,134 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { BookingService } from './booking.service';
 
 describe('BookingService', () => {
+  const prisma = {
+    accommodation: { findUnique: jest.fn() },
+    $transaction: jest.fn(),
+  } as any;
+  const preOrderService = { createBulkPreOrder: jest.fn() } as any;
+  const bookingServicesService = { createBulk: jest.fn() } as any;
+  const paymentService = {
+    createPayment: jest.fn(),
+    createManualPayment: jest.fn(),
+    sendApprovedPaymentEmail: jest.fn(),
+  } as any;
+  const closureService = { validateClosureDate: jest.fn() } as any;
+  const bookingEmailService = { sendSubmittedEmail: jest.fn() } as any;
+
   let service: BookingService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [BookingService],
-    }).compile();
-
-    service = module.get<BookingService>(BookingService);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    service = new BookingService(
+      prisma,
+      preOrderService,
+      bookingServicesService,
+      paymentService,
+      closureService,
+      bookingEmailService,
+    );
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('creates manual bookings without linking a user account', async () => {
+    prisma.accommodation.findUnique.mockResolvedValue({
+      id: 'acc-1',
+      name: 'Villa 1',
+      type: 'Room',
+      price: 2000,
+      imageUrl: 'https://example.com/room.jpg',
+      capacity: 6,
+      description: 'Ocean view',
+      amenities: ['Pool'],
+      isGuestFeeWaived: false,
+    });
+
+    closureService.validateClosureDate.mockResolvedValue(false);
+    paymentService.createManualPayment.mockResolvedValue({
+      paymentId: 'pay-1',
+      referenceNumber: 'REF-1',
+    });
+    paymentService.sendApprovedPaymentEmail.mockResolvedValue(undefined);
+
+    const tx = {
+      accommodationStayOption: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'stay-1',
+          code: 'overnight',
+          label: 'Overnight',
+          durationHours: 22,
+        }),
+      },
+      booking: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockImplementation(async ({ data }) => ({
+          id: 'booking-1',
+          ...data,
+        })),
+      },
+      bookedAccommodation: {
+        create: jest.fn().mockResolvedValue({ id: 'snapshot-1' }),
+      },
+    };
+
+    prisma.$transaction.mockImplementation(async (callback: (txArg: typeof tx) => Promise<unknown>) => callback(tx));
+
+    const result = await service.createManualBooking(
+      {
+        accommodationId: 'acc-1',
+        name: 'Juan Dela Cruz',
+        email: 'guest@example.com',
+        contactNo: '09123456789',
+        numberOfGuests: 3,
+        stayOptionId: 'stay-1',
+        checkIn: new Date('2026-06-25'),
+        paymentType: 'Full',
+      },
+      { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
+    );
+
+    expect(tx.booking.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: null,
+          guestName: 'Juan Dela Cruz',
+          email: 'guest@example.com',
+          contactNo: '09123456789',
+          status: 'Confirmed',
+        }),
+      }),
+    );
+    expect(paymentService.createManualPayment).toHaveBeenCalledWith(
+      expect.objectContaining({ bookingId: 'booking-1' }),
+      tx,
+    );
+    expect(paymentService.sendApprovedPaymentEmail).toHaveBeenCalledWith('pay-1');
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 'booking-1',
+        paymentId: 'pay-1',
+        referenceNumber: 'REF-1',
+      }),
+    );
+  });
+
+  it('throws when creating a manual booking for a missing accommodation', async () => {
+    prisma.accommodation.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.createManualBooking(
+        {
+          accommodationId: 'missing-acc',
+          name: 'Juan Dela Cruz',
+          email: 'guest@example.com',
+          contactNo: '09123456789',
+          numberOfGuests: 2,
+          stayOptionId: 'stay-1',
+          checkIn: new Date('2026-06-25'),
+          paymentType: 'Partial',
+        },
+        { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });

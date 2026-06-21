@@ -6,7 +6,7 @@ import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { BookingService } from './booking.service';
-import { ChangeStatusDto, CreateBookingDto, RescheduleBookingDto } from './dto/booking.dto';
+import { ChangeStatusDto, CreateBookingDto, CreateManualBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 
 @Controller('booking')
@@ -22,8 +22,13 @@ export class BookingController {
     async bookAccommodation(@Body() body: CreateBookingDto, @User() user: UserSession) {
         return this.bookingService.bookAccommodation(body, user)
     }
-    
 
+    @Post('manual')
+    @Roles(Role.ADMIN)
+    async createManualBooking(@Body() body: CreateManualBookingDto, @User() user: UserSession) {
+        return this.bookingService.createManualBooking(body, user);
+    }
+    
     @Get()
     @Roles(Role.ADMIN)
     async GetBookings(@Query() query: GetBookingsQuery) {
@@ -63,7 +68,7 @@ export class BookingController {
     }
 
     @Get('byUser')
-    @Roles(Role.GUEST)
+    @Roles(Role.GUEST, Role.ADMIN)
     async GetBookingsByUser(@User() user: UserSession, @Query() query: GetBookingsByUserQuery) {
         return this.bookingService.getBookingsByUser(user, query)
     }
