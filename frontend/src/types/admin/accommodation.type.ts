@@ -73,3 +73,24 @@ export type AccommodationOption = {
     id: string;
     name: string;
 }
+
+export type AccommodationReport = {
+    cottages: {
+        occupied: number;
+        free: number;
+        total: number;
+    };
+    room: {
+        occupied: number;
+        free: number;
+        total: number;
+    };
+    eventHalls: {
+        occupied: number;
+        free: number;
+        total: number;
+    };
+    occupancyRate: number;
+    totalCapacity: number;
+    totalFree: number;
+}

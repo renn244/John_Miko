@@ -3,10 +3,10 @@ import type { GetStaffReportsAdminQuery, ReviewStaffReportDto } from "@/types/ad
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
-export const useGetStaffReportReportsQuery = () => {
+export const useGetStaffReportReportsQuery = (date?: string) => {
     return useQuery({
-        queryKey: ['staff-report', 'report'],
-        queryFn: staffReportApi.getStaffReportReports,
+        queryKey: ['staff-report', 'report', date],
+        queryFn: () => staffReportApi.getStaffReportReports(date),
         refetchOnWindowFocus: false
     })
 }

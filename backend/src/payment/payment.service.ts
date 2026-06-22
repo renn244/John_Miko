@@ -2,17 +2,43 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { randomBytes } from 'crypto';
 import { Prisma } from 'src/generated/prisma/client';
 import { PaymentStatus, PaymentType } from 'src/generated/prisma/enums';
-import { getDateRange, toDateOnly } from 'src/lib/utils/date.util';
+import { toDateOnly } from 'src/lib/utils/date.util';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePaymentDto } from './dto/payment.dto';
 import { PaymentEmailService } from './payment-email.service';
 
 @Injectable()
 export class PaymentService {
+    private static readonly PRIVATE_CLOSURE_REVENUE = 35000;
+
     constructor(
         private readonly prisma: PrismaService,
         private readonly paymentEmailService: PaymentEmailService,
     ) {}
+
+    private getMonthKey(date: Date) {
+        return toDateOnly(date).toISOString().slice(0, 7);
+    }
+
+    private isRevenueEligiblePrivateClosure(closure: { accommodationId: string | null; type: string }) {
+        return closure.accommodationId === null && closure.type === 'Private';
+    }
+
+    private async getQualifyingPrivateClosures(where: Prisma.ClosureWhereInput = {}) {
+        return this.prisma.closure.findMany({
+            where: {
+                accommodationId: null,
+                type: 'Private',
+                ...where,
+            },
+            select: {
+                id: true,
+                date: true,
+                type: true,
+                accommodationId: true,
+            }
+        });
+    }
 
     async createPayment(
         body: CreatePaymentDto, 
@@ -143,46 +169,124 @@ export class PaymentService {
     }
 
     async getRevenueAnalytics() {
-        const revenueAnalytics = await this.prisma.$queryRaw`
-            SELECT
-                TO_CHAR("createdAt", 'YYYY-MM') as month,
-                COUNT(id)::int as count,
-                SUM("totalAmount")::int as totalamount,
-                SUM("accommodationAmount")::int as accommodationamount,
-                SUM("preOrderAmount")::int as preorderAmount,
-                SUM("addOnAmount")::int as addonamount,
-                SUM("guestFeeAmount")::int as guestfeeAmount
-            FROM "Payment"
-            WHERE 
-                "status" = 'Approved' and
-                "createdAt" > NOW() - INTERVAL '1 year'
-            GROUP BY TO_CHAR("createdAt", 'YYYY-MM')
-            ORDER BY month ASC
-        `
+        const cutoff = new Date();
+        cutoff.setFullYear(cutoff.getFullYear() - 1);
 
-        return revenueAnalytics
+        const [payments, privateClosures] = await Promise.all([
+            this.prisma.payment.findMany({
+                where: {
+                    status: 'Approved',
+                    createdAt: { gt: cutoff },
+                },
+                select: {
+                    createdAt: true,
+                    totalAmount: true,
+                    accommodationAmount: true,
+                    preOrderAmount: true,
+                    addOnAmount: true,
+                    guestFeeAmount: true,
+                }
+            }),
+            this.getQualifyingPrivateClosures({
+                date: { gt: toDateOnly(cutoff) }
+            }),
+        ]);
+
+        const analyticsMap = new Map<string, {
+            month: string;
+            count: number;
+            totalamount: number;
+            accommodationamount: number;
+            preorderamount: number;
+            addonamount: number;
+            guestfeeamount: number;
+            privateclosurerevenueamount: number;
+        }>();
+
+        const ensureMonth = (month: string) => {
+            if (!analyticsMap.has(month)) {
+                analyticsMap.set(month, {
+                    month,
+                    count: 0,
+                    totalamount: 0,
+                    accommodationamount: 0,
+                    preorderamount: 0,
+                    addonamount: 0,
+                    guestfeeamount: 0,
+                    privateclosurerevenueamount: 0,
+                });
+            }
+
+            return analyticsMap.get(month)!;
+        };
+
+        payments.forEach((payment) => {
+            const month = this.getMonthKey(payment.createdAt);
+            const bucket = ensureMonth(month);
+
+            bucket.count += 1;
+            bucket.totalamount += payment.totalAmount;
+            bucket.accommodationamount += payment.accommodationAmount;
+            bucket.preorderamount += payment.preOrderAmount;
+            bucket.addonamount += payment.addOnAmount;
+            bucket.guestfeeamount += payment.guestFeeAmount;
+        });
+
+        privateClosures
+            .filter((closure) => this.isRevenueEligiblePrivateClosure(closure))
+            .forEach((closure) => {
+            const month = this.getMonthKey(closure.date);
+            const bucket = ensureMonth(month);
+
+            bucket.count += 1;
+            bucket.totalamount += PaymentService.PRIVATE_CLOSURE_REVENUE;
+            bucket.privateclosurerevenueamount += PaymentService.PRIVATE_CLOSURE_REVENUE;
+        });
+
+        return Array.from(analyticsMap.values()).sort((a, b) => a.month.localeCompare(b.month));
     }
 
-    async getPaymentReportBreakdown() {
-        const { lte, gte } = getDateRange('day')
-        const today = toDateOnly(new Date());
+    async getPaymentReportBreakdown(date?: Date) {
+        const reportDate = toDateOnly(date ?? new Date());
 
-        const payments = await this.prisma.payment.findMany({
-            where: {
-                booking: {
-                    bookingDate: today
-                },
-                status: 'Approved',
-            }
-        })   
+        const [payments, privateClosures] = await Promise.all([
+            this.prisma.payment.findMany({
+                where: {
+                    booking: {
+                        bookingDate: reportDate
+                    },
+                    status: 'Approved',
+                }
+            }),
+            this.getQualifyingPrivateClosures({
+                date: reportDate,
+            }),
+        ]);
         
         const reportData: Record<string, number> = payments.reduce((acc, payment) => ({
             accommodationFee: acc.accommodationFee + payment.accommodationAmount,
             preOrderFee: acc.preOrderFee + payment.preOrderAmount,
+            addOnServiceFee: acc.addOnServiceFee + payment.addOnAmount,
             guestFee: acc.guestFee + payment.guestFeeAmount,
-            paidOnBooking: acc.paidOnBooking + payment.amountPaid,
-            paidOnCash: acc.paidOnCash + payment.amountToPaid,
-        }), { accommodationFee: 0, preOrderFee: 0, guestFee: 0, paidOnBooking: 0, paidOnCash: 0 })
+            privateClosureRevenue: acc.privateClosureRevenue,
+            totalRevenue:
+                acc.totalRevenue +
+                payment.accommodationAmount +
+                payment.preOrderAmount +
+                payment.addOnAmount +
+                payment.guestFeeAmount,
+        }), {
+            accommodationFee: 0,
+            preOrderFee: 0,
+            addOnServiceFee: 0,
+            guestFee: 0,
+            privateClosureRevenue: 0,
+            totalRevenue: 0,
+        })
+
+        reportData.privateClosureRevenue =
+            privateClosures.filter((closure) => this.isRevenueEligiblePrivateClosure(closure)).length *
+            PaymentService.PRIVATE_CLOSURE_REVENUE;
     
         return reportData;
     }

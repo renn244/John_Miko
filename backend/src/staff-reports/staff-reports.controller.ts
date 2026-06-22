@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Role } from 'src/generated/prisma/enums';
+import { DateReportQueryDto } from 'src/lib/dto/date-report.query';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
@@ -39,8 +40,8 @@ export class StaffReportsController {
 
   @Get('report')
   @Roles(Role.ADMIN)
-  async getReportsReport() {
-    return this.staffReportsService.ReportsReport();
+  async getReportsReport(@Query() query: DateReportQueryDto) {
+    return this.staffReportsService.ReportsReport(query.date);
   }
 
   @Get('byUser')

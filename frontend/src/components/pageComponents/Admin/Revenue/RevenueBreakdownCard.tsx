@@ -16,6 +16,7 @@ const chartConfig = {
 	accommodation: { label: "Accommodation", color: "var(--chart-1)" },
 	preOrder: { label: "Pre-order", color: "var(--chart-2)" },
 	guestFee: { label: "Guest fee", color: "var(--chart-3)" },
+	privateClosure: { label: "Private closure", color: "var(--chart-4)" },
 } satisfies ChartConfig;
 
 const formatCurrency = (value: number) => `₱${value.toLocaleString()}`;
@@ -59,6 +60,11 @@ const RevenueBreakdownCard = ({ selected }: RevenueBreakdownCardProps) => {
 			name: "guestFee",
 			value: Number(selected.guestFeeAmount) || 0,
 			fill: "var(--color-guestFee)",
+		},
+		{
+			name: "privateClosure",
+			value: Number(selected.privateClosureRevenueAmount) || 0,
+			fill: "var(--color-privateClosure)",
 		},
 	];
 
@@ -165,6 +171,15 @@ const RevenueBreakdownCard = ({ selected }: RevenueBreakdownCardProps) => {
 							</div>
 							<div className=" font-medium tabular-nums text-foreground">
 								{formatCurrency(Number(selected.guestFeeAmount) || 0)}
+							</div>
+						</div>
+						<div className="flex items-center justify-between gap-3 text-sm">
+							<div className="flex items-center gap-2 text-muted-foreground">
+								<span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "var(--color-privateClosure)" }} />
+								Private closure
+							</div>
+							<div className=" font-medium tabular-nums text-foreground">
+								{formatCurrency(Number(selected.privateClosureRevenueAmount) || 0)}
 							</div>
 						</div>
 					</div>

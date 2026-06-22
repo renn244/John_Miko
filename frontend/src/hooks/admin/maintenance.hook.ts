@@ -27,10 +27,10 @@ export const useGetMaintenancesQuery = (query: GetMaintenancesQuery) => {
     });
 }
 
-export const useGetMaintenanceReportQuery = () => {
+export const useGetMaintenanceReportQuery = (date?: string) => {
     return useQuery({
-        queryKey: ['maintenance', 'report'],
-        queryFn: maintenanceApi.getMaintenanceReport,
+        queryKey: ['maintenance', 'report', date],
+        queryFn: () => maintenanceApi.getMaintenanceReport(date),
         refetchOnWindowFocus: false,
         placeholderData: (prev) => prev
     })

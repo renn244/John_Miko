@@ -7,7 +7,7 @@ import {
     UserStatus,
 } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
-import { getDateRange } from 'src/lib/utils/date.util';
+import { getDateRange, getSingleDayRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -83,21 +83,17 @@ export class MaintenanceService {
         };
     }
 
-    async getMaintenanceReport() {
-        const { gte, lte } = getDateRange('day')
+    async getMaintenanceReport(date?: Date) {
+        const { gte, lte } = getSingleDayRange(date)
 
-        const [newToday, resolvedToday, highPriority, stillPending] = await Promise.all([
+        const [newTickets, resolvedTickets] = await Promise.all([
             this.prisma.maintenance.count({ where: { createdAt: { gte, lte } } }),
             this.prisma.maintenance.count({ where: { resolvedAt: { gte, lte } } }),
-            this.prisma.maintenance.count({ where: { priority: 'High' } }),
-            this.prisma.maintenance.count({ where: { status: 'Pending' } }),
         ])
 
         return {
-            newToday,
-            resolvedToday,
-            highPriority,
-            stillPending
+            newTickets,
+            resolvedTickets
         }
     }
 

@@ -6,6 +6,17 @@ export const toDateOnly = (input: Date | string): Date => {
     return date; 
 };
 
+export const getSingleDayRange = (input?: Date | string): { gte: Date; lte: Date } => {
+    const baseDate = input ? new Date(input) : new Date();
+    const gte = new Date(baseDate);
+    const lte = new Date(baseDate);
+
+    gte.setHours(0, 0, 0, 0);
+    lte.setHours(23, 59, 59, 999);
+
+    return { gte, lte };
+};
+
 /**
  * This is used mainly for analytics date range
  * 

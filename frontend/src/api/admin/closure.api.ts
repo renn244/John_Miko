@@ -61,6 +61,24 @@ export const closureApi = {
         return response.data as Closure
     },
 
+    getResortClosureByDate: async (date: string) => {
+        const response = await apiClient.get('/closure/byDate', {
+            params: {
+                date
+            }
+        })
+
+        if (response.status === 404) {
+            return null;
+        }
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || "An error occured while getting the closure")
+        }
+
+        return response.data as Closure
+    },
+
     deleteClosure: async (closureId: string) => {
         const response = await apiClient.delete(`/closure/${closureId}`);
 

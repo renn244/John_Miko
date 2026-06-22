@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Role } from 'src/generated/prisma/enums';
+import { DateReportQueryDto } from 'src/lib/dto/date-report.query';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
@@ -42,8 +43,8 @@ export class FeedbackController {
 
     @Roles(Role.ADMIN)
     @Get('report')
-    async getFeedbackReport() {
-        return this.feedbackService.getFeedbackReport();
+    async getFeedbackReport(@Query() query: DateReportQueryDto) {
+        return this.feedbackService.getFeedbackReport(query.date);
     }
 
     @Roles(Role.ADMIN)

@@ -1,13 +1,15 @@
 import { useGetMaintenanceReportQuery } from "@/hooks/admin/maintenance.hook";
 import { useGetStaffReportReportsQuery } from "@/hooks/admin/staff-report.hook";
+import { toDateOnly } from "@/lib/date.util";
 
-const MaintenanceTickets = () => {
-    const { data: maintenance, isLoading: maintenanceLoading } = useGetMaintenanceReportQuery();
-    const { data: report, isLoading: staffLoading } = useGetStaffReportReportsQuery()
+const MaintenanceTickets = ({ selectedDate }: { selectedDate: Date }) => {
+    const selectedDateValue = toDateOnly(selectedDate);
+    const { data: maintenance, isLoading: maintenanceLoading } = useGetMaintenanceReportQuery(selectedDateValue);
+    const { data: report, isLoading: staffLoading } = useGetStaffReportReportsQuery(selectedDateValue);
 
-    if(maintenanceLoading || staffLoading) return
+    if(maintenanceLoading || staffLoading) return;
 
-    if(!maintenance || !report) return
+    if(!maintenance || !report) return;
 
     return (
         <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
@@ -16,55 +18,45 @@ const MaintenanceTickets = () => {
             </h3>
 
             <div className="space-y-3">
-
                 <TicketItem
-                label="New today"
-                value={maintenance.newToday}
+                    label="Tickets created today"
+                    value={maintenance.newTickets}
                 />
 
                 <TicketItem
-                label="Resolved"
-                value={maintenance.resolvedToday}
-                valueColor="text-emerald-600"
+                    label="Tickets resolved today"
+                    value={maintenance.resolvedTickets}
+                    valueColor="text-emerald-600"
                 />
 
-                <TicketItem
-                label="Still pending"
-                value={maintenance.stillPending}
-                valueColor="text-amber-600"
-                />
-
-                <TicketItem
-                label="High Priority"
-                value={maintenance.highPriority}
-                valueColor="text-red-600"
-                />
-
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                     <MiniTicket
-                    label="From Check-in"
-                    value={report.checkInReportToday}
+                        label="Check-in reports today"
+                        value={report.checkInReportToday}
                     />
                     <MiniTicket
-                    label="From Check-out"
-                    value={report.checkOutReportToday}
+                        label="Check-out reports today"
+                        value={report.checkOutReportToday}
+                    />
+                    <MiniTicket
+                        label="Maintenance reports today"
+                        value={report.maintenanceReportToday}
                     />
                 </div>
 
                 <div className="p-4 rounded-lg bg-muted">
                     <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-muted-foreground">
-                            Staff reports
+                            Reports submitted today
                         </span>
                         <span className="text-sm font-bold text-foreground">
                             {report.totalToday} {report.totalToday > 1 ? "reports" : "report"}
                         </span>
                     </div>
                 </div>
-
             </div>
         </div>
-    )
+    );
 }
 
 type TicketItemProps = {
@@ -85,7 +77,7 @@ const TicketItem = ({ label, value, valueColor }: TicketItemProps) => {
                 </span>
             </div>
         </div>
-    )
+    );
 }
 
 type MiniTicketProps = {
@@ -104,7 +96,7 @@ const MiniTicket = ({ label, value, valueColor }: MiniTicketProps) => {
                 {value}
             </div>
         </div>
-    )
+    );
 }
 
-export default MaintenanceTickets
+export default MaintenanceTickets;
