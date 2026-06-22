@@ -4,173 +4,87 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Staff Account Updated</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-
-      body {
-        background-color: #f8fafc;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-        color: #0f172a;
-        padding: 40px 16px;
-      }
-
-      .wrapper { max-width: 560px; margin: 0 auto; }
-
-      .card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        overflow: hidden;
-      }
-
-      .header {
-        padding: 36px 40px 20px;
-        border-bottom: 1px solid #e2e8f0;
-      }
-
-      .brand {
-        font-size: 13px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #64748b;
-        margin-bottom: 18px;
-      }
-
-      .title {
-        font-size: 22px;
-        font-weight: 700;
-        color: #0f172a;
-        line-height: 1.3;
-      }
-
-      .subtitle {
-        margin-top: 8px;
-        font-size: 14px;
-        color: #475569;
-        line-height: 1.6;
-      }
-
-      .body { padding: 28px 40px; }
-
-      .pill {
-        display: inline-block;
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        border-radius: 999px;
-        padding: 6px 12px;
-        font-size: 12px;
-        color: #334155;
-        margin-bottom: 18px;
-      }
-
-      .section {
-        margin-top: 18px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 16px;
-      }
-
-      .row {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        font-size: 13px;
-        line-height: 1.6;
-        margin-top: 8px;
-      }
-
-      .label { color: #64748b; }
-      .value { color: #0f172a; font-weight: 600; word-break: break-word; }
-
-      .btn {
-        display: block;
-        width: 100%;
-        background: #2563eb;
-        color: #ffffff;
-        text-decoration: none;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 700;
-        padding: 14px 18px;
-        border-radius: 10px;
-        margin-top: 18px;
-      }
-
-      .hint {
-        margin-top: 14px;
-        font-size: 12px;
-        color: #64748b;
-        line-height: 1.6;
-      }
-
-      .footer {
-        padding: 18px 40px;
-        border-top: 1px solid #e2e8f0;
-        background: #f8fafc;
-      }
-
-      .footer p {
-        font-size: 12px;
-        color: #64748b;
-        line-height: 1.6;
-      }
-    </style>
   </head>
-  <body>
-    <div class="wrapper">
-      <div class="card">
-        <div class="header">
-          <div class="brand">John Miko's Place</div>
-          <div class="title">Your staff account access has been updated</div>
-          <div class="subtitle">
-            Hi{{#if name}} {{name}}{{/if}}, your staff role details were updated. Please review your current access information below.
-          </div>
-        </div>
+  <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f8fafc;">
+      <tr>
+        <td align="center" style="padding: 40px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 560px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;">
+            <tr>
+              <td style="padding: 36px 40px 20px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; margin-bottom: 18px;">
+                  John Miko's Place
+                </div>
+                <div style="font-size: 22px; font-weight: 700; line-height: 1.3; color: #0f172a;">
+                  Your staff account access has been updated
+                </div>
+                <div style="margin-top: 8px; font-size: 14px; line-height: 1.6; color: #475569;">
+                  Hi{{#if name}} {{name}}{{/if}}, your staff role details were updated. Please review your current access information below.
+                </div>
+              </td>
+            </tr>
 
-        <div class="body">
-          <div class="pill">Updated Staff Access</div>
+            <tr>
+              <td style="padding: 28px 40px;">
+                <div style="display: inline-block; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 12px; font-size: 12px; color: #334155; margin-bottom: 18px;">
+                  Updated Staff Access
+                </div>
 
-          <div class="section">
-            <div class="row">
-              <div class="label">Email</div>
-              <div class="value">{{email}}</div>
-            </div>
-            {{#if role}}
-            <div class="row">
-              <div class="label">Role</div>
-              <div class="value">{{role}}</div>
-            </div>
-            {{/if}}
-            {{#if expertise}}
-            <div class="row">
-              <div class="label">Expertise</div>
-              <div class="value">{{expertise}}</div>
-            </div>
-            {{/if}}
-          </div>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 18px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                  <tr>
+                    <td style="padding: 16px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                          <td style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #64748b; vertical-align: top;">Email</td>
+                          <td align="right" style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #0f172a; font-weight: 600; vertical-align: top; word-break: break-all;">{{email}}</td>
+                        </tr>
+                        {{#if role}}
+                        <tr>
+                          <td style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #64748b; vertical-align: top;">Role</td>
+                          <td align="right" style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #0f172a; font-weight: 600; vertical-align: top; word-break: break-word;">{{role}}</td>
+                        </tr>
+                        {{/if}}
+                        {{#if expertise}}
+                        <tr>
+                          <td style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #64748b; vertical-align: top;">Expertise</td>
+                          <td align="right" style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #0f172a; font-weight: 600; vertical-align: top; word-break: break-word;">{{expertise}}</td>
+                        </tr>
+                        {{/if}}
+                      </table>
+                    </td>
+                  </tr>
+                </table>
 
-          {{#if loginUrl}}
-          <a class="btn" href="{{loginUrl}}">Open Staff Login</a>
+                {{#if loginUrl}}
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 18px;">
+                  <tr>
+                    <td align="center" bgcolor="#2563eb" style="border-radius: 10px;">
+                      <a href="{{loginUrl}}" style="display: block; padding: 14px 18px; font-size: 14px; font-weight: 700; color: #ffffff; text-decoration: none;">Open Staff Login</a>
+                    </td>
+                  </tr>
+                </table>
 
-          <div class="hint">
-            If the button doesn't work, copy and paste this link into your browser:
-            <br />
-            <a href="{{loginUrl}}">{{loginUrl}}</a>
-          </div>
-          {{/if}}
+                <div style="margin-top: 14px; font-size: 12px; line-height: 1.6; color: #64748b;">
+                  If the button doesn't work, copy and paste this link into your browser:
+                  <br />
+                  <a href="{{loginUrl}}" style="color: #2563eb; word-break: break-all;">{{loginUrl}}</a>
+                </div>
+                {{/if}}
 
-          <div class="hint">
-            If you were not expecting this update, please contact the resort administrator.
-          </div>
-        </div>
+                <div style="margin-top: 14px; font-size: 12px; line-height: 1.6; color: #64748b;">
+                  If you were not expecting this update, please contact the resort administrator.
+                </div>
+              </td>
+            </tr>
 
-        <div class="footer">
-          <p>
-            This email was sent to {{email}}.
-          </p>
-        </div>
-      </div>
-    </div>
+            <tr>
+              <td style="padding: 18px 40px; border-top: 1px solid #e2e8f0; background-color: #f8fafc; font-size: 12px; line-height: 1.6; color: #64748b;">
+                This email was sent to {{email}}.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

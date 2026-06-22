@@ -52,6 +52,43 @@ export class BookingEmailService {
         }
     }
 
+    private getStatusBadgeConfig(status: BookingStatus) {
+        switch (status) {
+            case BookingStatus.Completed:
+                return {
+                    badgeLabel: 'Booking Completed',
+                    badgeBackgroundColor: '#ecfdf5',
+                    badgeBorderColor: '#a7f3d0',
+                    badgeTextColor: '#047857',
+                    showStatusDetails: false,
+                };
+            case BookingStatus.Confirmed:
+                return {
+                    badgeLabel: 'Status: Confirmed',
+                    badgeBackgroundColor: '#ecfdf5',
+                    badgeBorderColor: '#a7f3d0',
+                    badgeTextColor: '#047857',
+                    showStatusDetails: true,
+                };
+            case BookingStatus.Cancelled:
+                return {
+                    badgeLabel: 'Status: Cancelled',
+                    badgeBackgroundColor: '#fef2f2',
+                    badgeBorderColor: '#fecaca',
+                    badgeTextColor: '#b91c1c',
+                    showStatusDetails: true,
+                };
+            default:
+                return {
+                    badgeLabel: `Status: ${this.formatBookingStatus(status)}`,
+                    badgeBackgroundColor: '#f1f5f9',
+                    badgeBorderColor: '#e2e8f0',
+                    badgeTextColor: '#334155',
+                    showStatusDetails: true,
+                };
+        }
+    }
+
     async sendCancelledEmail(params: {
         bookingId: string;
         guestName: string;
@@ -191,6 +228,8 @@ export class BookingEmailService {
         stayOptionLabel: string;
         status: BookingStatus;
     }) {
+        const badgeConfig = this.getStatusBadgeConfig(params.status);
+
         await this.emailService.sendEmail({
             to: params.email,
             subject: this.getStatusEmailSubject(params.status),
@@ -203,6 +242,7 @@ export class BookingEmailService {
                 stayOptionLabel: params.stayOptionLabel,
                 status: this.formatBookingStatus(params.status),
                 statusMessage: this.getStatusEmailMessage(params.status),
+                ...badgeConfig,
             },
         });
     }

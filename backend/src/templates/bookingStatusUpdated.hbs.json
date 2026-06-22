@@ -5,5 +5,10 @@
   "bookingDate": "July 3, 2026, Friday",
   "stayOptionLabel": "Day Event",
   "status": "Confirmed",
-  "statusMessage": "Your booking has been confirmed by the resort. Please keep this email for your reference before arrival."
+  "statusMessage": "Your booking has been confirmed by the resort. Please keep this email for your reference before arrival.",
+  "badgeLabel": "Status: Confirmed",
+  "badgeBackgroundColor": "#ecfdf5",
+  "badgeBorderColor": "#a7f3d0",
+  "badgeTextColor": "#047857",
+  "showStatusDetails": true
 }
