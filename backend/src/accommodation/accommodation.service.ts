@@ -90,15 +90,15 @@ export class AccommodationService {
         }
     }
 
-    async getAccommodationReports() {
-        const today = toDateOnly(new Date())
+    async getAccommodationReports(date?: Date) {
+        const reportDate = toDateOnly(date ?? new Date())
 
         const accommodations = await this.prisma.accommodation.findMany({
             select: {
                 type: true,
                 bookings: {
                     where: {
-                        bookingDate: today,
+                        bookingDate: reportDate,
                         status: {
                             in: ['Confirmed', 'Completed'],
                         },

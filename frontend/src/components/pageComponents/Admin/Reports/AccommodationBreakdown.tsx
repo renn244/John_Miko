@@ -1,11 +1,12 @@
 import { useGetAccommodationReportQuery } from "@/hooks/admin/accommodation.hook";
+import { toDateOnly } from "@/lib/date.util";
 
-const AccommodationBreakdown = () => {
-    const { data, isLoading } = useGetAccommodationReportQuery();
+const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
+    const { data, isLoading } = useGetAccommodationReportQuery(toDateOnly(selectedDate));
     
-    if(isLoading) return
+    if(isLoading) return;
 
-    if(!data) return
+    if(!data) return;
     
     return (
         <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
@@ -16,32 +17,32 @@ const AccommodationBreakdown = () => {
             <div className="space-y-3">
 
                 <AccommodationItem
-                label="Rooms"
-                data={data.room}
-                color="bg-primary"
+                    label="Rooms"
+                    data={data.room}
+                    color="bg-primary"
                 />
 
                 <AccommodationItem
-                label="Cottages"
-                data={data.cottages}
-                color="bg-green-500"
+                    label="Cottages"
+                    data={data.cottages}
+                    color="bg-green-500"
                 />
 
                 <AccommodationItem
-                label="Event Halls"
-                data={data.eventHalls}
-                color="bg-red-500"
+                    label="Event Halls"
+                    data={data.eventHalls}
+                    color="bg-red-500"
                 />
 
                 <div className="grid grid-cols-2 gap-3">
                     <MiniStat
-                    label="Occupancy Rate"
-                    value={`${data.occupancyRate}%`}
-                    valueColor="text-green-600"
+                        label="Occupancy Rate"
+                        value={`${data.occupancyRate}%`}
+                        valueColor="text-green-600"
                     />
                     <MiniStat
-                    label="Total Capacity"
-                    value={`${data.totalCapacity} units`}
+                        label="Total Capacity"
+                        value={`${data.totalCapacity} units`}
                     />
                 </div>
 
@@ -58,7 +59,7 @@ const AccommodationBreakdown = () => {
 
             </div>
         </div>
-    )
+    );
 }
 
 type AccommodationItemProps = {
@@ -75,7 +76,6 @@ const AccommodationItem = ({ label, data, color }: AccommodationItemProps) => {
     return (
         <div className="p-4 rounded-lg border border-border bg-muted/40">
             <div className="flex items-center justify-between mb-2">
-                
                 <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full ${color}`} />
                     <span className="text-sm font-medium text-foreground">
@@ -97,7 +97,7 @@ const AccommodationItem = ({ label, data, color }: AccommodationItemProps) => {
                 Total capacity: {data.total} units
             </div>
         </div>
-    )
+    );
 }
 
 type MiniStatProps = {
@@ -116,7 +116,7 @@ const MiniStat = ({ label, value, valueColor }: MiniStatProps) => {
                 {value}
             </div>
         </div>
-    )
+    );
 }
 
-export default AccommodationBreakdown
+export default AccommodationBreakdown;

@@ -10,6 +10,7 @@ export type StaffReportSummary = {
     totalToday: number;
     checkInReportToday: number;
     checkOutReportToday: number;
+    maintenanceReportToday: number;
     total: number;
     pending: number;
     approved: number;

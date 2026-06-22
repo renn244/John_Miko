@@ -7,7 +7,7 @@ import { Prisma } from 'src/generated/prisma/client';
 import { MaintenanceExpertise } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { isBookingStayActive } from 'src/lib/utils/booking-stay.util';
-import { getDateRange } from 'src/lib/utils/date.util';
+import { getDateRange, getSingleDayRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MaintenanceService } from 'src/maintenance/maintenance.service';
@@ -167,13 +167,14 @@ export class StaffReportsService {
     };
   }
 
-  async ReportsReport() {
-    const { gte, lte } = getDateRange('day');
+  async ReportsReport(date?: Date) {
+    const { gte, lte } = getSingleDayRange(date);
 
     const [
       totalToday,
       checkInReportToday,
       checkOutReportToday,
+      maintenanceReportToday,
       total,
       pending,
       approved,
@@ -186,6 +187,9 @@ export class StaffReportsService {
       this.prisma.report.count({
         where: { createdAt: { gte, lte }, type: 'checkOut' },
       }),
+      this.prisma.report.count({
+        where: { createdAt: { gte, lte }, type: 'maintenance' },
+      }),
       this.prisma.report.count(),
       this.prisma.report.count({ where: { status: 'Pending' } }),
       this.prisma.report.count({ where: { status: 'Approved' } }),
@@ -196,6 +200,7 @@ export class StaffReportsService {
       totalToday,
       checkInReportToday,
       checkOutReportToday,
+      maintenanceReportToday,
       total,
       pending,
       approved,

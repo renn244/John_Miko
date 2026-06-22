@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
-import { getDateRange } from 'src/lib/utils/date.util';
+import { getDateRange, getSingleDayRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -110,21 +110,28 @@ export class FeedbackService {
         return data;
     }
 
-    async getFeedbackReport() {
-        const { gte, lte } = getDateRange('day');
+    async getFeedbackReport(date?: Date) {
+        const { gte, lte } = getSingleDayRange(date);
     
-        const [receivedToday, averageToday, distributionToday] = await Promise.all([
+        const [receivedOnDate, averageOnDate, distributionOnDate] = await Promise.all([
             this.prisma.feedback.count({ where: { createdAt: { lte, gte } } }),
             this.prisma.feedback.aggregate({ where: { createdAt: { lte, gte } }, _avg: { rating: true } }),
-            this.getCountPerRating({ interval: 'day' })
+            this.prisma.feedback.groupBy({
+                where: {
+                    createdAt: { gte, lte }
+                },
+                by: ['rating'],
+                _count: true,
+            })
         ])
 
         return {
-            receivedToday,
-            averageToday: averageToday._avg.rating || 0,
-            distributionToday,
-            positive: 5, // dummy data
-            complaints: 1 // dummy data
+            receivedOnDate,
+            averageOnDate: averageOnDate._avg.rating || 0,
+            distribution: distributionOnDate.map((item) => ({
+                rating: item.rating,
+                count: item._count,
+            })),
         }
     }
 

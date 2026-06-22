@@ -16,10 +16,10 @@ export const useCreateAccommodationMutation = () => {
     })
 }
 
-export const useGetAccommodationReportQuery = () => {
+export const useGetAccommodationReportQuery = (date?: string) => {
     return useQuery({
-        queryKey: ['accommodation', 'report'],
-        queryFn: accommodationApi.getAccommodationReports,
+        queryKey: ['accommodation', 'report', date],
+        queryFn: () => accommodationApi.getAccommodationReports(date),
         refetchOnWindowFocus: false
     })
 }

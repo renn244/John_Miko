@@ -19,6 +19,15 @@ export const useGetClosureByDate = (accommodationId: string | undefined, date?: 
     })
 }
 
+export const useGetResortClosureByDate = (date?: string) => {
+    return useQuery({
+        queryKey: ['closure', 'get', 'resortByDate', date],
+        queryFn: () => closureApi.getResortClosureByDate(date!),
+        enabled: !!date,
+        refetchOnWindowFocus: false
+    })
+}
+
 export const useGetClosureForBookingQuery = (accommodationId?: string) => {
     return useQuery({
         queryKey: ["closure", "getForBooking", accommodationId],

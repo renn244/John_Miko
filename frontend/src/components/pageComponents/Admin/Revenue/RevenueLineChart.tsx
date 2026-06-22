@@ -20,7 +20,9 @@ export type RevenueLineChartPoint = {
 	totalAmount: number;
 	accommodationAmount: number;
 	preOrderAmount: number;
+	addOnAmount: number;
 	guestFeeAmount: number;
+	privateClosureRevenueAmount: number;
 };
 
 type RevenueLineChartProps = {
@@ -86,7 +88,7 @@ function RevenueLineTooltip({ active, payload }: RevenueLineTooltipProps) {
 					</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
-					<span className="font-medium">Transactions:</span>
+					<span className="font-medium">Revenue entries:</span>
 					<span className=" font-medium tabular-nums text-foreground">
 						{Number(point.count || 0).toLocaleString()}
 					</span>

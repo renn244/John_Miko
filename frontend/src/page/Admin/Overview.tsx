@@ -35,7 +35,9 @@ const normalizeRevenueRow = (row: RevenueAnalyticsApiItem): RevenueLineChartPoin
   totalAmount: Number(row.totalamount) || 0,
   accommodationAmount: Number(row.accommodationamount) || 0,
   preOrderAmount: Number(row.preorderamount) || 0,
+  addOnAmount: Number(row.addonamount) || 0,
   guestFeeAmount: Number(row.guestfeeamount) || 0,
+  privateClosureRevenueAmount: Number(row.privateclosurerevenueamount) || 0,
 });
 
 const toMonthKey = (date: Date) => {
@@ -75,7 +77,9 @@ const buildLastMonthsSeries = (
         totalAmount: 0,
         accommodationAmount: 0,
         preOrderAmount: 0,
+        addOnAmount: 0,
         guestFeeAmount: 0,
+        privateClosureRevenueAmount: 0,
       }
     );
   }
@@ -93,7 +97,9 @@ const Overview = () => {
   const { data: recentFeedbacks, isLoading: recentFeedbackLoading } = useGetRecentFeedbacksQuery(5);
   const { data: staffReport, isLoading: staffReportLoading } = useGetStaffReportReportsQuery();
 
-  const totalRevenue = paymentReport ? paymentReport.paidOnBooking + paymentReport.paidOnCash : 0;
+  const totalRevenue = paymentReport
+    ? paymentReport.totalRevenue + paymentReport.privateClosureRevenue
+    : 0;
   const totalBookings = bookingSummary?.meta.total || 0;
   const bookings = bookingSummary?.data || [];
   const feedbacks = recentFeedbacks?.data || [];
@@ -391,7 +397,7 @@ const Overview = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-foreground">Staff Reports Today</h3>
-                  <p className="text-xs text-muted-foreground">Check-in and check-out notes</p>
+                  <p className="text-xs text-muted-foreground">Reports submitted on the selected day</p>
                 </div>
               </div>
               <Link to="/admin/report" className="text-xs font-semibold text-primary">
@@ -405,11 +411,11 @@ const Overview = () => {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-lg border border-border bg-muted/40">
-                    <div className="text-xs mb-1 text-muted-foreground">From Check-in</div>
+                    <div className="text-xs mb-1 text-muted-foreground">Check-in reports today</div>
                     <div className="text-sm font-bold text-foreground">{staffReport.checkInReportToday}</div>
                   </div>
                   <div className="p-3 rounded-lg border border-border bg-muted/40">
-                    <div className="text-xs mb-1 text-muted-foreground">From Check-out</div>
+                    <div className="text-xs mb-1 text-muted-foreground">Check-out reports today</div>
                     <div className="text-sm font-bold text-foreground">{staffReport.checkOutReportToday}</div>
                   </div>
                 </div>

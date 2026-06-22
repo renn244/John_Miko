@@ -40,3 +40,8 @@ export type FeedbackStats = {
     maxRating: number;
 }
 
+export type FeedbackReport = {
+    receivedOnDate: number;
+    averageOnDate: number;
+    distribution: FeedbackCountPerRating[];
+}

@@ -54,3 +54,8 @@ export type GetMaintenanceStats = {
     Completed: number;
     Closed: number;
 }
+
+export type MaintenanceReport = {
+    newTickets: number;
+    resolvedTickets: number;
+}
