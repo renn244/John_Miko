@@ -3,7 +3,8 @@ import { Public } from 'src/lib/decorators/Public.decorator';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
-import { CreateServiceDto } from './dto/services.dto';
+import { CreateServiceDto, UpdateServiceAvailabilityDto } from './dto/services.dto';
+import { GetAvailableServicesForBookingQueryDto } from './query/get-available-services-for-booking.dto';
 import { GetServicesQueryDto } from './query/getServices.dto';
 import { ServicesService } from './services.service';
 
@@ -27,7 +28,7 @@ export class ServicesController {
     }
 
     @Get('available')
-    async getServicesAvailableForBooking(@Query() query: { bookingDate: Date, stayOptionId: string }) {
+    async getServicesAvailableForBooking(@Query() query: GetAvailableServicesForBookingQueryDto) {
         return this.servicesService.getServicesAvailableForBooking(query)
     }
 
@@ -41,6 +42,15 @@ export class ServicesController {
     @Get(':serviceId')
     async getServiceById(@Param('serviceId') serviceId: string) {
         return this.servicesService.getServiceById(serviceId);       
+    }
+
+    @Roles("ADMIN")
+    @Patch('availability/:serviceId')
+    async updateServiceAvailability(
+        @Param('serviceId') serviceId: string,
+        @Body() body: UpdateServiceAvailabilityDto
+    ) {
+        return this.servicesService.updateServiceAvailability(serviceId, body.isActive);
     }
 
     @Roles("ADMIN")

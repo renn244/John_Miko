@@ -5,6 +5,7 @@ export type AddOnService = {
     description?: string | null;
     price: number;
     quantity: number;
+    isActive: boolean;
     createdAt: string;
 }
 
@@ -17,6 +18,10 @@ export type CreateAddOnServiceDto = {
 }
 
 export type UpdateAddOnServiceDto = CreateAddOnServiceDto
+
+export type UpdateAddOnServiceAvailabilityDto = {
+    isActive: boolean;
+}
 
 export type GetAddOnServicesQuery = {
     search?: string;

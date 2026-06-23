@@ -5,6 +5,7 @@ import type {
     AddOnServiceStats,
     CreateAddOnServiceDto,
     GetAddOnServicesQuery,
+    UpdateAddOnServiceAvailabilityDto,
     UpdateAddOnServiceDto,
 } from "@/types/admin/add-on-service.type";
 import type { PaginatedResponse } from "@/types/pagination.type";
@@ -67,6 +68,20 @@ export const addOnServiceApi = {
 
         if (response.status >= 400) {
             throw new Error(response.data.message || "An error occurred while updating the add-on service.");
+        }
+
+        return response.data as AddOnService;
+    },
+
+    updateAddOnServiceAvailability: async (id: string, data: UpdateAddOnServiceAvailabilityDto) => {
+        const response = await apiClient.patch(`/services/availability/${id}`, data);
+
+        if (response.status === 400) {
+            throw new ValidationError(response.data);
+        }
+
+        if (response.status >= 400) {
+            throw new Error(response.data.message || "An error occurred while updating add-on service availability.");
         }
 
         return response.data as AddOnService;

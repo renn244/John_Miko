@@ -1,18 +1,47 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ServicesController } from './services.controller';
+import { ArgumentMetadata } from '@nestjs/common';
+import { CustomValidationPipe } from 'src/CustomValidationPipe';
+import { UpdateServiceAvailabilityDto } from './dto/services.dto';
+import { GetAvailableServicesForBookingQueryDto } from './query/get-available-services-for-booking.dto';
 
-describe('ServicesController', () => {
-  let controller: ServicesController;
+describe('GetAvailableServicesForBookingQueryDto', () => {
+  it('transforms bookingDate query strings into Date instances', async () => {
+    const pipe = new CustomValidationPipe();
+    const metadata: ArgumentMetadata = {
+      type: 'query',
+      metatype: GetAvailableServicesForBookingQueryDto,
+      data: '',
+    };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [ServicesController],
-    }).compile();
+    const result = await pipe.transform(
+      {
+        bookingDate: '2026-06-30T00:00:00.000Z',
+        stayOptionId: 'stay-1',
+      },
+      metadata,
+    );
 
-    controller = module.get<ServicesController>(ServicesController);
+    expect(result.bookingDate).toBeInstanceOf(Date);
+    expect(result.bookingDate.toISOString()).toBe('2026-06-30T00:00:00.000Z');
+    expect(result.stayOptionId).toBe('stay-1');
   });
+});
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+describe('UpdateServiceAvailabilityDto', () => {
+  it('transforms boolean availability payloads for admin updates', async () => {
+    const pipe = new CustomValidationPipe();
+    const metadata: ArgumentMetadata = {
+      type: 'body',
+      metatype: UpdateServiceAvailabilityDto,
+      data: '',
+    };
+
+    const result = await pipe.transform(
+      {
+        isActive: false,
+      },
+      metadata,
+    );
+
+    expect(result.isActive).toBe(false);
   });
 });

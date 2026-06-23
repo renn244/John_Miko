@@ -465,6 +465,7 @@ model AddOnService {
   
   price         Int
   quantity      Int
+  isActive      Boolean @default(true)
 
   Booking       BookingAddOn[]
 
