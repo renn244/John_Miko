@@ -4,7 +4,6 @@ export const ACCOMMODATION_STAY_OPTION_PRESET_MODE = {
     DAYSTAY_OVERNIGHT: "preset_daystay_overnight",
     TWENTY_TWO_HOURS: "preset_twenty_two_hours",
     TWELVE_HOURS_FLEXIBLE: "preset_twelve_hours_flexible",
-    CUSTOM: "custom",
 } as const;
 
 export type AccommodationStayOptionPresetMode =
