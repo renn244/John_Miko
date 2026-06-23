@@ -9,12 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import {
   useClosedMaintenanceMutation,
   useGetMaintenancesQuery,
   useStartMaintnenanceMutation,
@@ -53,21 +47,6 @@ const MaintenanceKanbanBoard = () => {
   const tickets = sortMaintenanceByRelevantDate(
     (data?.data ?? []).filter((ticket) => ticket.status !== "Closed"),
   );
-
-  if (tickets.length === 0) {
-    return (
-      <div className="rounded-xl border bg-background p-6">
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>No tickets to show</EmptyTitle>
-            <EmptyDescription>
-              Closed tickets are excluded from this board.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </div>
-    );
-  }
 
   const ticketsByStatus = ACTIVE_MAINTENANCE_STATUSES.reduce(
     (acc, status) => {

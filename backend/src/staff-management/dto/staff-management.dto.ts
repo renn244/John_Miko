@@ -11,7 +11,6 @@ export class CreateStaffDto {
     @IsEmail({}, { message: 'invalid email!' })
     email!: string;
 
-    // add later proper phone number regex validator
     @IsNotEmpty({ message: 'contactNo is required!' })
     @IsNumberString()
     contactNo!: string;
