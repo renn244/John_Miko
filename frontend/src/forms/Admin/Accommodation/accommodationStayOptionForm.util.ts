@@ -23,16 +23,6 @@ const generateStayOptionCode = (label: string, fallbackIndex: number) => {
     return normalized || `CUSTOM_STAY_OPTION_${fallbackIndex + 1}`;
 };
 
-export const createEmptyStayOption = (index: number): AccommodationFormValues["stayOptions"][number] => ({
-    code: "",
-    label: "",
-    durationHours: undefined,
-    startTime: "",
-    endTime: "",
-    sortOrder: index,
-    isActive: true,
-});
-
 const normalizePresetStayOptions = (stayOptions: CreateAccommodationDto["stayOptions"]): AccommodationFormValues["stayOptions"] =>
     stayOptions.map((stayOption, index) => ({
         ...stayOption,
@@ -48,8 +38,6 @@ export const getPresetStayOptions = (presetMode: AccommodationStayOptionPresetMo
             return normalizePresetStayOptions(TWENTY_TWO_HOURS_PRESET);
         case ACCOMMODATION_STAY_OPTION_PRESET_MODE.TWELVE_HOURS_FLEXIBLE:
             return normalizePresetStayOptions(TWELVE_HOURS_FLEXIBLE_PRESET);
-        case ACCOMMODATION_STAY_OPTION_PRESET_MODE.CUSTOM:
-            return [];
         case ACCOMMODATION_STAY_OPTION_PRESET_MODE.DAYSTAY_OVERNIGHT:
         default:
             return normalizePresetStayOptions(DAYSTAY_OVERNIGHT_PRESET);

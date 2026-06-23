@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
+import { doBookingStayWindowsOverlap } from 'src/lib/utils/booking-stay.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/services.dto';
@@ -42,18 +43,67 @@ export class ServicesService {
     }
 
     async getServicesAvailableForBooking(query: { bookingDate: Date, stayOptionId: string }) {
-        const services = await this.prisma.addOnService.findMany()
+        const requestedStayOption = await this.prisma.accommodationStayOption.findFirst({
+            where: {
+                id: query.stayOptionId,
+                isActive: true,
+            },
+        });
+
+        if (!requestedStayOption) {
+            throw new NotFoundException('Stay option not found');
+        }
+
+        const services = await this.prisma.addOnService.findMany({
+            where: { isActive: true },
+        });
+        const previousDate = new Date(query.bookingDate);
+        previousDate.setUTCDate(previousDate.getUTCDate() - 1);
+        const nextDate = new Date(query.bookingDate);
+        nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+
         const bookedServices = await this.prisma.bookingAddOn.findMany({
             where: {
                 booking: {
-                    bookingDate: query.bookingDate,
-                    stayOptionId: query.stayOptionId,
+                    bookingDate: {
+                        gte: previousDate,
+                        lte: nextDate,
+                    },
                     status: { notIn: ["Cancelled"] }
                 },
-            }
+            },
+            include: {
+                booking: {
+                    select: {
+                        bookingDate: true,
+                        stayOptionId: true,
+                        stayOption: {
+                            select: {
+                                startTime: true,
+                                endTime: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
 
-        const serviceIdToBookedQuantityMap = bookedServices.reduce<Record<string, number>>((acc, bookedService) => {
+        const overlappingBookedServices = bookedServices.filter((bookedService) =>
+            doBookingStayWindowsOverlap(
+                {
+                    bookingDate: query.bookingDate,
+                    startTime: requestedStayOption.startTime,
+                    endTime: requestedStayOption.endTime,
+                },
+                {
+                    bookingDate: bookedService.booking.bookingDate,
+                    startTime: bookedService.booking.stayOption?.startTime,
+                    endTime: bookedService.booking.stayOption?.endTime,
+                },
+            ),
+        );
+
+        const serviceIdToBookedQuantityMap = overlappingBookedServices.reduce<Record<string, number>>((acc, bookedService) => {
             const serviceId = bookedService.addOnServiceId;
             const quantity = bookedService.quantity;
 
@@ -113,6 +163,15 @@ export class ServicesService {
             where: { id: serviceId },
             data: body
         })
+
+        return service;
+    }
+
+    async updateServiceAvailability(serviceId: string, isActive: boolean) {
+        const service = await this.prisma.addOnService.update({
+            where: { id: serviceId },
+            data: { isActive },
+        });
 
         return service;
     }

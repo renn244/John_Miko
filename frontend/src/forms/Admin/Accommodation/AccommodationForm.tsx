@@ -5,7 +5,6 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { InputTags } from "@/components/ui/tag-input";
 import { Textarea } from "@/components/ui/textarea";
 import { getErrorMessages } from "@/lib/getErrorMessages";
@@ -196,37 +195,6 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                                 {fieldState.invalid && (
                                     <FieldError errors={getErrorMessages(fieldState.error)} />
                                 )}
-                            </Field>
-                        )}
-                        />
-
-                        <Controller
-                        name="isGuestFeeWaived"
-                        control={control}
-                        render={({ field }) => (
-                            <Field className="rounded-lg border bg-muted/20 px-4 py-4">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="space-y-1">
-                                        <FieldLabel htmlFor="guest-fee-waived">
-                                            Guest fees included in price
-                                        </FieldLabel>
-                                        <FieldDescription>
-                                            Enable this when guest entrance fees are already bundled into the accommodation price.
-                                        </FieldDescription>
-                                    </div>
-
-                                    {isUpdate ? (
-                                        <span className="text-sm font-medium text-muted-foreground">
-                                            {field.value ? "Included" : "Charged separately"}
-                                        </span>
-                                    ) : (
-                                        <Switch
-                                        id="guest-fee-waived"
-                                        checked={field.value}
-                                        onCheckedChange={field.onChange}
-                                        />
-                                    )}
-                                </div>
                             </Field>
                         )}
                         />

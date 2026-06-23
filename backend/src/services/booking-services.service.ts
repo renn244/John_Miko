@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { AddOnService, Prisma } from "src/generated/prisma/client";
+import { doBookingStayWindowsOverlap } from "src/lib/utils/booking-stay.util";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
@@ -14,12 +15,79 @@ export class BookingServicesService {
         tx: Prisma.TransactionClient = this.prisma
     ) {
         const addOnServicesId = addOnServices.map(service => service.addOnServiceId);
-        const addOnServicesInfo = await tx.addOnService.findMany({ where: { id: { in: addOnServicesId } } }); // need this for avaialble max quantity
+        const [addOnServicesInfo, booking] = await Promise.all([
+            tx.addOnService.findMany({ where: { id: { in: addOnServicesId } } }),
+            tx.booking.findFirst({
+                where: { id: bookingId },
+                select: {
+                    id: true,
+                    bookingDate: true,
+                    stayOption: {
+                        select: {
+                            startTime: true,
+                            endTime: true,
+                        },
+                    },
+                },
+            }),
+        ]);
+
+        if (!booking) {
+            throw new BadRequestException('Booking not found for add-on reservation');
+        }
+
+        const previousDate = new Date(booking.bookingDate);
+        previousDate.setUTCDate(previousDate.getUTCDate() - 1);
+        const nextDate = new Date(booking.bookingDate);
+        nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+
+        const overlappingBookedAddOns = await tx.bookingAddOn.findMany({
+            where: {
+                addOnServiceId: { in: addOnServicesId },
+                booking: {
+                    id: { not: bookingId },
+                    bookingDate: {
+                        gte: previousDate,
+                        lte: nextDate,
+                    },
+                    status: { notIn: ['Cancelled'] },
+                },
+            },
+            include: {
+                booking: {
+                    select: {
+                        bookingDate: true,
+                        stayOption: {
+                            select: {
+                                startTime: true,
+                                endTime: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
         
         this.assertAllServicesExist(addOnServicesInfo, addOnServicesId);
         this.assertRequestedDoesNotExceedStock(addOnServices, addOnServicesInfo);
-        // asserts everything is avaialbel before creating any add on bookings to avoid partial creation
-        // this.assertAllServicesAvailble(addOnServices, existingBookingAddOn, addOnServicesInfo);
+        await this.assertAllServicesAvailble(
+            addOnServices,
+            overlappingBookedAddOns.filter((existingBookingAddOn) =>
+                doBookingStayWindowsOverlap(
+                    {
+                        bookingDate: booking.bookingDate,
+                        startTime: booking.stayOption?.startTime,
+                        endTime: booking.stayOption?.endTime,
+                    },
+                    {
+                        bookingDate: existingBookingAddOn.booking.bookingDate,
+                        startTime: existingBookingAddOn.booking.stayOption?.startTime,
+                        endTime: existingBookingAddOn.booking.stayOption?.endTime,
+                    },
+                ),
+            ),
+            addOnServicesInfo,
+        );
         
         const [total, BookingAddOnService] = await Promise.all([
             this.calculateServicesTotal(addOnServices, addOnServicesInfo),
@@ -76,12 +144,34 @@ export class BookingServicesService {
         return;
     }
 
-    private  async assertAllServicesAvailble(
+    private async assertAllServicesAvailble(
         addOnServices: { addOnServiceId: string, quantity: number }[], 
         existingBookingAddOn: { addOnServiceId: string, quantity: number }[],
         addOnServiceInfo: AddOnService[]
     ) {
+        const bookedQuantityMap = existingBookingAddOn.reduce<Record<string, number>>((acc, current) => {
+            if(!acc[current.addOnServiceId]) {
+                acc[current.addOnServiceId] = 0;
+            }
 
+            acc[current.addOnServiceId] += current.quantity;
+            return acc;
+        }, {});
+
+        const serviceMap = new Map(addOnServiceInfo.map(service => [service.id, service]));
+
+        for (const item of addOnServices) {
+            const service = serviceMap.get(item.addOnServiceId);
+
+            if (!service) continue;
+
+            const overlappingBookedQuantity = bookedQuantityMap[item.addOnServiceId] || 0;
+            const remainingQuantity = Math.max(service.quantity - overlappingBookedQuantity, 0);
+
+            if (item.quantity > remainingQuantity) {
+                throw new BadRequestException(`Requested quantity exceeds available stock for ${service.name}`);
+            }
+        }
     }
 
     async calculateServicesTotal(addOnServices: { addOnServiceId: string, quantity: number }[], addOnServiceInfo: AddOnService[]) {

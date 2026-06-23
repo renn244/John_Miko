@@ -1,5 +1,5 @@
 import { addOnServiceApi } from "@/api/admin/add-on-service.api";
-import type { GetAddOnServicesQuery } from "@/types/admin/add-on-service.type";
+import type { GetAddOnServicesQuery, UpdateAddOnServiceAvailabilityDto } from "@/types/admin/add-on-service.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
@@ -70,6 +70,21 @@ export const useDeleteAddOnServiceMutation = (id: string) => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["add-on-service", "list"] });
             queryClient.invalidateQueries({ queryKey: ["add-on-service", "stats"] });
+        },
+    });
+};
+
+export const useUpdateAddOnServiceAvailabilityMutation = (id: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ["add-on-service", "availability", id],
+        mutationFn: (data: UpdateAddOnServiceAvailabilityDto) => addOnServiceApi.updateAddOnServiceAvailability(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["add-on-service", "list"] });
+            queryClient.invalidateQueries({ queryKey: ["add-on-service", "byId", id] });
+            queryClient.invalidateQueries({ queryKey: ["add-on-service", "stats"] });
+            queryClient.invalidateQueries({ queryKey: ["add-on-service", "available"] });
         },
     });
 };
