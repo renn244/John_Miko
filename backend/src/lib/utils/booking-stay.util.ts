@@ -42,3 +42,16 @@ export const isBookingStayActive = (
     const { checkIn, checkOut } = getBookingStayWindow(input);
     return now >= checkIn && now <= checkOut;
 };
+
+export const doBookingStayWindowsOverlap = (
+    first: BookingStayWindowInput,
+    second: BookingStayWindowInput,
+) => {
+    const firstWindow = getBookingStayWindow(first);
+    const secondWindow = getBookingStayWindow(second);
+
+    return (
+        firstWindow.checkIn < secondWindow.checkOut &&
+        secondWindow.checkIn < firstWindow.checkOut
+    );
+};
