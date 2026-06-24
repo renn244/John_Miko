@@ -1,4 +1,4 @@
-import AssignedMaintenanceListScreen from "@/components/pageComponents/MaintenanceStaff/AssignedMaintenanceListScreen";
+import AssignedMaintenanceListScreen from "@/components/pageComponents/MaintenanceStaff/AssignedMaintenanceListScreen/AssignedMaintenanceListScreen";
 
 export default function MaintenanceStaffHistoryScreen() {
   return (
