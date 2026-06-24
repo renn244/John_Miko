@@ -100,7 +100,7 @@ const getTimelineRows = (maintenance: AssignedMaintenanceDetail) => [
   {
     label: "Resolved",
     value: maintenance.resolvedAt ? formatDateTime(maintenance.resolvedAt) : "Not resolved yet",
-    state: maintenance.resolvedAt ? ("active" as const) : ("muted" as const),
+    state: maintenance.resolvedAt ? ("done" as const) : ("muted" as const),
   },
   {
     label: "Closed",
@@ -479,14 +479,12 @@ function TimelineCard({ maintenance }: { maintenance: AssignedMaintenanceDetail 
       <SectionTitle title="Timeline" />
       <View>
         {rows.map((row, index) => (
-          <View key={row.label} className="flex-row gap-3">
+          <View key={row.label} className="flex-row gap-3 items-baseline">
             <View className="items-center">
               <View
-                className={`mt-1 h-2.5 w-2.5 rounded-full ${
-                  row.state === "active"
-                    ? "bg-primary"
-                    : row.state === "done"
-                      ? "bg-secondary-green-dark"
+                className={`-mt-1 h-2.5 w-2.5 rounded-full ${
+                    row.state === "done"
+                      ? "bg-primary"
                       : "bg-neutral-soft-grey-1"
                 }`}
               />
@@ -495,7 +493,7 @@ function TimelineCard({ maintenance }: { maintenance: AssignedMaintenanceDetail 
               ) : null}
             </View>
             <Text
-              className={`flex-1 font-sans-semibold text-sm ${
+              className={`flex-1 font-sans-semibold text-base ${
                 row.state === "muted" ? "text-neutral-grey-1" : "text-neutral-dark-1"
               }`}
             >

@@ -6,7 +6,7 @@ import { Image } from 'expo-image';
 import { PanResponder, Pressable, Text, View } from 'react-native';
 
 import { router } from 'expo-router';
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Animated, {
     Easing,
     FadeOut,
@@ -71,7 +71,7 @@ const Onboarding = () => {
         const timer = setTimeout(() => {
             setDirection('next');
             setSlideIndex((prevIndex) => (prevIndex + 1) % slides.length);
-        }, 4500);
+        }, 2500);
 
         return () => clearTimeout(timer);
     }, [slideIndex, isChecking])

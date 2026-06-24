@@ -1,7 +1,7 @@
 import type { PaginationParams } from "@/types/pagination.type";
 
 export type BookingStatus = "Pending" | "Confirmed" | "Cancelled" | "Completed";
-export type BookingTimeSlot = "DayStay" | "OverNight";
+export type BookingTimeSlot = "Day Stay" | "Over night" | "22 Hours Stay" | "12 Hours";
 export type PaymentType = "Partial" | "Full";
 
 export type Booking = {
