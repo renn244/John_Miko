@@ -1,0 +1,42 @@
+import OperationalCard from "@/components/ui/operational-card";
+import { Image } from "expo-image";
+import { ImageIcon } from "lucide-react-native";
+import { Text, View } from "react-native";
+
+type ProofImagesCardProps = {
+  proofImages: string[];
+};
+
+export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
+  return (
+    <OperationalCard contentClassName="gap-3 px-5 py-4">
+      <View className="flex-row items-center gap-2">
+        <ImageIcon size={18} color="#0E33F3" />
+        <Text className="font-sans-bold text-lg text-neutral-dark-1">
+          Proof photos
+        </Text>
+        <Text className="text-base text-neutral-grey-1">
+          ({proofImages.length} photos)
+        </Text>
+      </View>
+
+      <View className="flex-row flex-wrap gap-3">
+        {proofImages.map((imageUrl, index) => (
+          <View
+            key={`${imageUrl}-${index}`}
+            className="overflow-hidden rounded-md bg-neutral-soft-grey-2"
+            style={{ width: "47%", aspectRatio: 1 }}
+          >
+            <Image
+              source={imageUrl}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={150}
+              style={{ width: "100%", height: "100%" }}
+            />
+          </View>
+        ))}
+      </View>
+    </OperationalCard>
+  );
+}

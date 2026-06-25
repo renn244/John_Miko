@@ -21,7 +21,7 @@ export const DAYSTAY_OVERNIGHT_PRESET: CreateAccommodationDto["stayOptions"] = [
     },
     {
         code: "OVERNIGHT",
-        label: "Overnight",
+        label: "Over night",
         durationHours: 10,
         startTime: "19:00:00",
         endTime: "05:00:00",
@@ -45,7 +45,7 @@ export const TWENTY_TWO_HOURS_PRESET: CreateAccommodationDto["stayOptions"] = [
 export const TWELVE_HOURS_FLEXIBLE_PRESET: CreateAccommodationDto["stayOptions"] = [
     {
         code: "TWELVE_HOURS_FLEXIBLE",
-        label: "12 Hours Flexible",
+        label: "12 Hours",
         durationHours: 12,
         startTime: "08:00:00",
         endTime: "20:00:00",

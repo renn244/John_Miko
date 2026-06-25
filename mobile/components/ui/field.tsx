@@ -63,7 +63,7 @@ const FieldDescription = ({ className, ...props }: ComponentProps<typeof Text>) 
 };
 
 type FieldErrorProps = ComponentProps<typeof Text> & {
-  errors?: Array<{ message?: string } | undefined>;
+  errors?: { message?: string }[];
 };
 
 const FieldError = ({ className, children, errors, ...props }: FieldErrorProps) => {
@@ -100,10 +100,10 @@ const FieldSeparator = ({ className, ...props }: ComponentProps<typeof View>) =>
 };
 
 export {
-    Field, FieldContent, FieldDescription,
-    FieldError,
-    FieldGroup, FieldLabel, FieldLegend,
-    FieldSeparator,
-    FieldSet, FieldTitle
+  Field, FieldContent, FieldDescription,
+  FieldError,
+  FieldGroup, FieldLabel, FieldLegend,
+  FieldSeparator,
+  FieldSet, FieldTitle
 };
 

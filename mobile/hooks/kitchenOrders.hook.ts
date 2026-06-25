@@ -7,7 +7,7 @@ type PreOrderListResponse = {
   bookingId: string;
   guestName: string;
   bookingDate: string;
-  timeSlot?: "DayStay" | "OverNight";
+  timeSlot?: "Day Stay" | "Over night" | "22 Hours Stay" | "12 Hours";
   startTime?: string | null;
   endTime?: string | null;
   kitchenStatus?: KitchenOrderStatus;
@@ -20,7 +20,7 @@ type PreOrderDetailsResponse = {
   email?: string;
   contactNo?: string;
   bookingDate: string;
-  timeSlot?: "DayStay" | "OverNight";
+  timeSlot?: "Day Stay" | "Over night" | "22 Hours Stay" | "12 Hours";
   startTime?: string | null;
   endTime?: string | null;
   kitchenStatus?: KitchenOrderStatus;
@@ -48,6 +48,13 @@ const mapItems = (items?: { id: string; name: string; quantity: number; status?:
   }));
 };
 
+const getKitchenStatus = (items: KitchenOrderItem[]): KitchenOrderStatus => {
+  return items?.length > 0 &&
+    items.every((item) => item.status === "Completed")
+      ? "Completed"
+      : "Pending";
+};
+
 const fetchKitchenOrders = async (query?: GetKitchenOrdersQuery) => {
   const response = await apiClient.get("/pre-order", {
     params: {
@@ -68,7 +75,7 @@ const fetchKitchenOrders = async (query?: GetKitchenOrdersQuery) => {
       guestName: booking.guestName,
       bookingDate: booking.bookingDate,
       timeSlot: booking.timeSlot,
-      kitchenStatus: booking.kitchenStatus,
+      kitchenStatus: getKitchenStatus(mapItems(booking.preOrders)),
       items: mapItems(booking.preOrders),
     })
   );
@@ -96,7 +103,7 @@ const fetchKitchenOrderDetails = async (bookingId: string) => {
     timeSlot: data.timeSlot,
     startTime: data.startTime,
     endTime: data.endTime,
-    kitchenStatus: data.kitchenStatus,
+    kitchenStatus: getKitchenStatus(mapItems(data.preOrders)),
     numberOfGuests: data.numberOfGuests,
     notes: data.specialRequests ?? undefined,
     items: mapItems(data.preOrders),

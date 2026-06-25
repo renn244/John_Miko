@@ -1,3 +1,4 @@
+import { StatusChipTone } from "@/components/ui/status-chip";
 import type {
   ReportSeverity,
   ReportStatus,
@@ -20,4 +21,11 @@ export const reportSeverityClasses: Record<ReportSeverity, string> = {
   Low: "bg-blue-100 text-blue-700",
   Medium: "bg-amber-100 text-amber-700",
   High: "bg-red-100 text-red-700",
+};
+
+
+export const severityTone: Record<ReportSeverity, StatusChipTone> = {
+  Low: "low",
+  Medium: "medium",
+  High: "high",
 };
