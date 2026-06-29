@@ -6,7 +6,6 @@ import PasswordInput from "@/components/ui/passwordInput";
 import { useSignUpGuestMutation } from "@/hooks/auth.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { UserPlus } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import z from "zod";
 
@@ -60,12 +59,12 @@ const SignUpGuestForm = () => {
                 <Field data-invalid={fieldState.invalid} className="grid gap-2">
 
                     <FieldLabel htmlFor={field.name}>
-                        Name
+                        Full Name
                     </FieldLabel>
 
                     <Input
                     id={field.name}
-                    placeholder="Enter your name"
+                    placeholder="e.g. Jane Doe"
                     aria-invalid={fieldState.invalid}
                     {...field}
                     />
@@ -90,7 +89,7 @@ const SignUpGuestForm = () => {
 
                     <Input
                     id={field.name}
-                    placeholder="Enter your email"
+                    placeholder="jane@example.com"
                     aria-invalid={fieldState.invalid}
                     {...field}
                     />
@@ -110,12 +109,13 @@ const SignUpGuestForm = () => {
                 <Field data-invalid={fieldState.invalid} className="grid gap-2">
 
                     <FieldLabel htmlFor={field.name}>
-                        Contact No.
+                        Contact Number
                     </FieldLabel>
 
                     <Input
                     id={field.name}
                     aria-invalid={fieldState.invalid}
+                    placeholder="+63 912 345 6789"
                     type="text"
                     {...field}
                     />
@@ -180,10 +180,7 @@ const SignUpGuestForm = () => {
                 {isPending ? (
                     <LoadingSpinner />
                 ) : (
-                    <>
-                        <UserPlus className="w-5 h-5" />
-                        Sign Up
-                    </>
+                    "Create Account"
                 )}
             </Button>
         </form>

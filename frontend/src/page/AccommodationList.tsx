@@ -1,6 +1,15 @@
-import NavBar from "@/components/common/NavBar"
-import AccommodationCardView from "@/components/pageComponents/Accommodation/AccommodationCardView"
-import { Button } from "@/components/ui/button"
+import Footer from "@/components/common/Footer";
+import NavBar from "@/components/common/NavBar";
+import {
+    GuestCard,
+    GuestContainer,
+    GuestInfoChip,
+    GuestPageHeader,
+    GuestPageShell,
+} from "@/components/guest";
+import AccommodationCardView from "@/components/pageComponents/Accommodation/AccommodationCardView";
+import Chatbot from "@/components/pageComponents/Chatbot";
+import { Button } from "@/components/ui/button";
 import {
     Empty,
     EmptyContent,
@@ -8,18 +17,35 @@ import {
     EmptyHeader,
     EmptyMedia,
     EmptyTitle,
-} from "@/components/ui/empty"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook"
-import type { Accommodation } from "@/types/admin/accommodation.type"
-import { AlertTriangle, BedDouble, RefreshCcw } from "lucide-react"
-import { useState } from "react"
-import { useNavigate } from "react-router"
+} from "@/components/ui/empty";
+import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
+import type { Accommodation } from "@/types/admin/accommodation.type";
+import {
+    AlertTriangle,
+    BedDouble,
+    CalendarDays,
+    Home,
+    PartyPopper,
+    RefreshCcw,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
+
+type StayFilter = "All" | "DayStay" | "Overnight" | "22 Hours" | "12 Hours";
+
+const typeOptions: Array<{ value: Accommodation["type"] | "All"; label: string }> = [
+    { value: "All", label: "All" },
+    { value: "Room", label: "Room" },
+    { value: "Cottage", label: "Cottage" },
+    { value: "EventHall", label: "Event Hall" },
+];
+
+const stayOptions: StayFilter[] = ["All", "DayStay", "Overnight", "22 Hours", "12 Hours"];
 
 const AccommodationList = () => {
-    const [selectedType, setSelectedType] = useState<Accommodation['type'] | "All">("All")
-
-    const navigate = useNavigate()
+    const [selectedType, setSelectedType] = useState<Accommodation["type"] | "All">("All");
+    const [selectedStay, setSelectedStay] = useState<StayFilter>("All");
+    const navigate = useNavigate();
 
     const {
         data,
@@ -29,56 +55,129 @@ const AccommodationList = () => {
         refetch,
     } = useGetAccommodationsQuery({
         type: selectedType === "All" ? undefined : selectedType,
-        page: 1, limit: 100
-    })
+        page: 1,
+        limit: 100,
+    });
 
-    const accommodations = data?.data ?? []
+    const { data: allAccommodationData } = useGetAccommodationsQuery({
+        page: 1,
+        limit: 100,
+    });
 
-    const typeOptions: Array<{ value: Accommodation['type'] | "All"; label: string }> = [
-        { value: "All", label: "All" },
-        { value: "Room", label: "Room" },
-        { value: "Cottage", label: "Cottage" },
-        { value: "EventHall", label: "Event Hall" },
-    ]
+    const accommodations = useMemo(() => {
+        if (selectedStay === "All") return data?.data ?? [];
+
+        const normalizedSelected = selectedStay.toLowerCase().replace(/\s/g, "");
+
+        return (data?.data ?? []).filter((accommodation) =>
+            accommodation.stayOptions?.some((option) =>
+                `${option.label} ${option.code} ${option.durationHours ?? ""}`
+                    .toLowerCase()
+                    .replace(/\s/g, "")
+                    .includes(normalizedSelected)
+            )
+        );
+    }, [data?.data, selectedStay]);
+
+    const allAccommodations = allAccommodationData?.data ?? data?.data ?? [];
+    const roomCount = allAccommodations.filter((item) => item.type === "Room").length;
+    const cottageCount = allAccommodations.filter((item) => item.type === "Cottage").length;
+    const eventHallCount = allAccommodations.filter((item) => item.type === "EventHall").length;
+    const hasFilters = selectedType !== "All" || selectedStay !== "All";
+
+    const clearFilters = () => {
+        setSelectedType("All");
+        setSelectedStay("All");
+    };
 
     return (
-        <div className="min-h-screen bg-muted/30">
+        <GuestPageShell>
             <NavBar />
 
-            <main className="max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-6">
-                <header className="space-y-2">
-                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight">
-                        Our Accommodations
-                    </h1>
-                    <p className="text-lg md:text-xl max-w-3xl font-medium text-muted-foreground">
-                        Discover your perfect home away from home at John Miko's Place Resort
-                    </p>
-                </header>
+            <GuestContainer className="pb-12">
+                <GuestPageHeader
+                    title="Our Accommodations"
+                />
 
-                <Tabs
-                value={selectedType}
-                onValueChange={(value) => setSelectedType(value as Accommodation['type'] | "All")}
-                className="w-full sm:w-auto"
-                >
-                    <TabsList className="w-full sm:w-auto h-auto flex-wrap justify-start">
-                        {typeOptions.map((t) => (
-                            <TabsTrigger key={t.value} value={t.value} className="px-3">
-                                {t.label}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
+                <div className="mb-6 flex flex-wrap gap-3">
+                    <GuestInfoChip>
+                        <BedDouble className="size-3.5" />
+                        {roomCount} Rooms
+                    </GuestInfoChip>
+                    <GuestInfoChip>
+                        <Home className="size-3.5" />
+                        {cottageCount} Cottages
+                    </GuestInfoChip>
+                    <GuestInfoChip>
+                        <PartyPopper className="size-3.5" />
+                        {eventHallCount} Event Halls
+                    </GuestInfoChip>
+                </div>
+
+                <div className="mb-7 border-y py-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                        <Button variant="outline" className="justify-start lg:w-auto" disabled>
+                            <CalendarDays className="size-4" />
+                            Select Date
+                        </Button>
+
+                        <div className="hidden h-7 w-px bg-border lg:block" />
+
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                            {stayOptions.map((option) => (
+                                <Button
+                                    key={option}
+                                    type="button"
+                                    size="sm"
+                                    variant={selectedStay === option ? "default" : "outline"}
+                                    className="shrink-0"
+                                    onClick={() => setSelectedStay(option)}
+                                >
+                                    {option === "All" ? "All Stays" : option}
+                                </Button>
+                            ))}
+                        </div>
+
+                        <div className="hidden h-7 w-px bg-border lg:block" />
+
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                            {typeOptions.map((option) => (
+                                <Button
+                                    key={option.value}
+                                    type="button"
+                                    size="sm"
+                                    variant={selectedType === option.value ? "default" : "outline"}
+                                    className="shrink-0"
+                                    onClick={() => setSelectedType(option.value)}
+                                >
+                                    {option.label}
+                                </Button>
+                            ))}
+                        </div>
+
+                        <Button
+                            type="button"
+                            variant="link"
+                            size="sm"
+                            className="ml-0 px-0 lg:ml-auto"
+                            disabled={!hasFilters}
+                            onClick={clearFilters}
+                        >
+                            Clear Filters
+                        </Button>
+                    </div>
+                </div>
 
                 {isError ? (
-                    <div className="rounded-xl border bg-background p-6">
+                    <GuestCard>
                         <Empty>
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
                                     <AlertTriangle className="h-5 w-5" />
                                 </EmptyMedia>
-                                <EmptyTitle>Something went wrong</EmptyTitle>
+                                <EmptyTitle>Unable to load accommodations</EmptyTitle>
                                 <EmptyDescription>
-                                    {(error as Error)?.message || "We couldn’t load accommodations right now."}
+                                    {(error as Error)?.message || "We couldn't load accommodations right now."}
                                 </EmptyDescription>
                             </EmptyHeader>
                             <EmptyContent>
@@ -88,57 +187,55 @@ const AccommodationList = () => {
                                 </Button>
                             </EmptyContent>
                         </Empty>
-                    </div>
+                    </GuestCard>
                 ) : isLoading && !data ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {Array.from({ length: 6 }).map((_, index) => (
-                            <div
-                                key={index}
-                                className="overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm animate-pulse"
-                            >
-                                <div className="aspect-16/10 bg-muted" />
-                                <div className="p-6 space-y-3">
+                            <GuestCard key={index} padded={false} className="overflow-hidden shadow-none">
+                                <div className="aspect-[16/10] animate-pulse bg-muted" />
+                                <div className="space-y-3 p-5">
                                     <div className="h-5 w-2/3 rounded bg-muted" />
                                     <div className="h-4 w-full rounded bg-muted" />
                                     <div className="h-4 w-5/6 rounded bg-muted" />
                                     <div className="h-9 w-full rounded bg-muted" />
                                 </div>
-                            </div>
+                            </GuestCard>
                         ))}
                     </div>
                 ) : accommodations.length === 0 ? (
-                    <div className="rounded-xl border bg-background p-6">
+                    <GuestCard>
                         <Empty>
                             <EmptyHeader>
                                 <EmptyMedia variant="icon">
                                     <BedDouble className="h-5 w-5" />
                                 </EmptyMedia>
-                                <EmptyTitle>No accommodations found</EmptyTitle>
+                                <EmptyTitle>No stays found</EmptyTitle>
                                 <EmptyDescription>
-                                    Try selecting a different type.
+                                    Try changing the stay type or accommodation type filter.
                                 </EmptyDescription>
                             </EmptyHeader>
+                            <EmptyContent>
+                                <Button onClick={clearFilters}>Clear Filters</Button>
+                            </EmptyContent>
                         </Empty>
-                    </div>
+                    </GuestCard>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {accommodations.map((accommodation) => (
                             <AccommodationCardView
-                            key={accommodation.id}
-                            name={accommodation.name}
-                            imageUrl={accommodation.imageUrl}
-                            type={accommodation.type}
-                            price={accommodation.price}
-                            description={accommodation.description}
-                            capacity={accommodation.capacity}
-                            viewDetailsClick={() => navigate(`/accommodation/${accommodation.id}`)}
+                                key={accommodation.id}
+                                accommodation={accommodation}
+                                viewDetailsClick={() => navigate(`/accommodation/${accommodation.id}`)}
                             />
                         ))}
                     </div>
                 )}
-            </main>
-        </div>
-    )
-}
+            </GuestContainer>
 
-export default AccommodationList
+            <Footer />
+            <Chatbot />
+        </GuestPageShell>
+    );
+};
+
+export default AccommodationList;

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLoginMutation } from "@/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Lock, LogIn, User } from "lucide-react"
+import { useState } from "react"
 import { Controller, useForm, type FieldError as HookFormFieldError } from "react-hook-form"
 import { Link } from "react-router"
 import z from "zod"
@@ -25,10 +25,12 @@ const LoginSchema = z.object({
 type loginSchema = z.infer<typeof LoginSchema>
 
 const LoginForm = () => {
+    const [showStaffLogin, setShowStaffLogin] = useState(false);
     const {
         handleSubmit,
         control,
         setError,
+        setValue,
         formState: { errors },
     } = useForm<loginSchema>({
         resolver: zodResolver(LoginSchema),
@@ -45,46 +47,79 @@ const LoginForm = () => {
     const rootError = errors.root as HookFormFieldError | undefined;
     
     const onSubmit = async (data: loginSchema) => {
-        await mutateAsync(data)
+        await mutateAsync(showStaffLogin ? data : { ...data, userRole: "guest" })
+    }
+
+    const handleStaffLoginToggle = () => {
+        const nextValue = !showStaffLogin;
+        setShowStaffLogin(nextValue);
+        setValue("userRole", nextValue ? "admin" : "guest", {
+            shouldDirty: true,
+            shouldValidate: true,
+        });
     }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                
-            <Controller
-            name="userRole"
-            control={control}
-            render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                    <FieldLabel htmlFor={field.name}>Login As</FieldLabel>
-
-                    <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
+            <div className="rounded-lg border bg-muted/20 p-3">
+                <div className="flex items-center justify-between gap-3">
+                    <div>
+                        <p className="text-sm font-semibold text-foreground">
+                            {showStaffLogin ? "Admin / Staff Login" : "Guest Login"}
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                            {showStaffLogin
+                                ? "Use your staff account credentials."
+                                : "Use your guest account credentials."}
+                        </p>
+                    </div>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleStaffLoginToggle}
                     >
-                        <SelectTrigger id={field.name} aria-invalid={fieldState.invalid} className="w-full">
-                            <SelectValue placeholder="Select user type" />
-                        </SelectTrigger>
+                        {showStaffLogin ? "Use Guest" : "Admin / Staff"}
+                    </Button>
+                </div>
 
-                        <SelectContent>
-                            <SelectItem value="guest">
-                                <User className="w-4 h-4" style={{ color: "#1E73BE" }} />
-                                Guest
-                            </SelectItem>
+                {showStaffLogin ? (
+                    <div className="mt-3 border-t pt-3">
+                        <Controller
+                        name="userRole"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                                <FieldLabel htmlFor={field.name}>Login As</FieldLabel>
 
-                            <SelectItem value="admin">
-                                <Lock className="w-4 h-4" style={{ color: "#1E73BE" }} />
-                                Administrator
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
+                                <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                >
+                                    <SelectTrigger id={field.name} aria-invalid={fieldState.invalid} className="w-full">
+                                        <SelectValue placeholder="Select user type" />
+                                    </SelectTrigger>
 
-                    {fieldState.invalid && (
-                        <FieldError errors={getErrorMessages(fieldState.error)} />
-                    )}
-                </Field>
-            )}
-            />
+                                    <SelectContent>
+                                        <SelectItem value="admin">
+                                            Administrator
+                                        </SelectItem>
+
+                                        <SelectItem value="staff">
+                                            Staff
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+
+                                {fieldState.invalid && (
+                                    <FieldError errors={getErrorMessages(fieldState.error)} />
+                                )}
+                            </Field>
+                        )}
+                        />
+                    </div>
+                ) : null}
+            </div>
 
             <Controller 
             name="email"
@@ -158,10 +193,7 @@ const LoginForm = () => {
                 {isPending ? (
                     <LoadingSpinner />
                 ) : (
-                    <>
-                        <LogIn className="w-5 h-5" />
-                        Sign In
-                    </>
+                    "Sign In"
                 )}
             </Button>
         </form>

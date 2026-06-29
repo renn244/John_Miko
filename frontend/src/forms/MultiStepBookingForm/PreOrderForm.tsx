@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useGetMenuItemCategoriesQuery, useGetMenuItemsQuery } from "@/hooks/admin/menu-item.hook";
+import { formatPeso } from "@/lib/utils";
 import type { MenuItem } from "@/types/admin/menu-item.type";
 import { ArrowRight, Minus, Plus, ShoppingCart, X } from "lucide-react";
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
@@ -84,17 +85,23 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
     }, [fields, menuItemCache]);
 
     return (
-        <div className="space-y-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
 
-            <div>
-                <div className="flex items-center mb-2">
-                    <h3 className="font-bold text-lg">
-                        Select Items
-                    </h3>
+            <div className="space-y-4">
+                <div className="flex items-center">
+                    <div>
+                        <h3 className="text-xl font-bold tracking-normal">
+                            Pre-order Dining
+                        </h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Pick food items now so they can be prepared for your stay.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-3">
+                <div className="flex flex-wrap gap-2">
                     <Button
+                    type="button"
                     onClick={() => setSelectedCategory(null)}
                     variant={selectedCategory === null ? "default" : "secondary"}
                     >
@@ -103,6 +110,7 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                     {categories?.map((category) => (
                         <Button
                         key={category}
+                        type="button"
                         onClick={() => setSelectedCategory(category)}
                         variant={selectedCategory === category ? "default" : "secondary"}
                         >
@@ -111,13 +119,13 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-150 overflow-y-auto  [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-2">
+                <div className="grid max-h-[34rem] grid-cols-1 gap-4 overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] sm:grid-cols-2 [&::-webkit-scrollbar]:hidden">
                     {menuItems?.map((item) => {
                         const cartEntry = fields.find((f) => f.menuItemId === item.id);
                         return (
                             <div
                             key={item.id}
-                            className="border-2 rounded-xl overflow-hidden hover:shadow-md transition-all"
+                            className="overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md"
                             style={{ borderColor: cartEntry ? '#1E73BE' : '#E5E7EB' }}
                             >
                                 <img src={item.imageUrl} alt={item.name} className="w-full h-32 object-cover" />
@@ -135,6 +143,7 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                                         {cartEntry ? (
                                             <div className="flex items-center gap-2">
                                                 <button
+                                                    type="button"
                                                     onClick={() => {
                                                         const index = fields.findIndex(f => f.menuItemId === item.id);
                                                         updateQuantity(index, cartEntry.quantity - 1);
@@ -148,6 +157,7 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                                                     {cartEntry.quantity}
                                                 </span>
                                                 <button
+                                                    type="button"
                                                     onClick={() => {
                                                         const index = fields.findIndex(f => f.menuItemId === item.id);
                                                         updateQuantity(index, cartEntry.quantity + 1);
@@ -159,7 +169,7 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                                                 </button>
                                             </div>
                                         ) : (
-                                            <Button size="sm" onClick={() => addToPreorder(item)}>
+                                            <Button size="sm" type="button" onClick={() => addToPreorder(item)}>
                                                 <Plus className="w-4 h-4" /> Add
                                             </Button>
                                         )}
@@ -171,83 +181,98 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                 </div>
             </div>
 
-            {fields.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 shadow-sm border-2">
-                    <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <aside className="space-y-3 lg:sticky lg:top-6 lg:self-start">
+                <div className="rounded-xl border bg-card p-4 shadow-sm">
+                    <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
                         <ShoppingCart className="w-5 h-5" />
                         Pre-ordered Items
                         <span className="ml-auto text-sm font-normal text-muted-foreground">
                             {fields.length} {fields.length === 1 ? 'item' : 'items'}
                         </span>
                     </h3>
+                    {fields.length === 0 ? (
+                        <div className="rounded-lg bg-muted/50 p-4">
+                            <p className="text-sm font-semibold">No food selected yet</p>
+                            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                Choose menu items or continue without pre-orders.
+                            </p>
+                        </div>
+                    ) : (
                     <div className="space-y-3">
                         {fields.map((field, index) => {
                             const menuItem = menuItemCache[field.menuItemId];
                             if (!menuItem) return null;
                             return (
-                                <div
-                                key={field.id}
-                                className="flex items-center gap-4 p-3 rounded-lg bg-muted"
-                                >
-                                    <img
-                                    src={menuItem.imageUrl}
-                                    alt={menuItem.name}
-                                    className="w-16 h-16 rounded-lg object-cover"
-                                    />
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-sm">
-                                            {menuItem.name}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            ₱{menuItem.price.toLocaleString()} × {field.quantity}
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
+                                <div key={field.id} className="rounded-lg bg-muted/60 p-3">
+                                    <div className="flex gap-3">
+                                        <img
+                                        src={menuItem.imageUrl}
+                                        alt={menuItem.name}
+                                        className="size-12 rounded-md object-cover"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm font-semibold">
+                                                {menuItem.name}
+                                            </p>
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                {formatPeso(menuItem.price)} × {field.quantity}
+                                            </p>
+                                        </div>
                                         <Button
-                                        onClick={() => updateQuantity(index, field.quantity - 1)}
-                                        variant="outline" size="icon-sm"
+                                        type="button"
+                                        onClick={() => removeFromPreorder(index)}
+                                        variant="ghost"
+                                        size="icon-xs"
                                         >
-                                            <Minus className="w-4 h-4" />
-                                        </Button>
-                                        <span className="w-8 text-center font-bold" style={{ color: '#1F2937' }}>
-                                            {field.quantity}
-                                        </span>
-                                        <Button
-                                        onClick={() => updateQuantity(index, field.quantity + 1)}
-                                        variant="outline" size="icon-sm"
-                                        >
-                                            <Plus className="w-4 h-4" />
+                                            <X className="size-3.5 text-destructive" />
                                         </Button>
                                     </div>
-                                    <p className="font-bold w-20 text-right" style={{ color: '#1E73BE' }}>
-                                        ₱{(menuItem.price * field.quantity).toLocaleString()}
-                                    </p>
-                                    <Button
-                                    onClick={() => removeFromPreorder(index)}
-                                    variant="ghost"
-                                    size="icon-sm"
-                                    >
-                                        <X className="w-5 h-5 text-destructive" />
-                                    </Button>
+
+                                    <div className="mt-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-1.5">
+                                            <Button
+                                            type="button"
+                                            onClick={() => updateQuantity(index, field.quantity - 1)}
+                                            variant="outline" size="icon-xs"
+                                            >
+                                                <Minus className="size-3" />
+                                            </Button>
+                                            <span className="w-6 text-center text-sm font-bold text-foreground">
+                                                {field.quantity}
+                                            </span>
+                                            <Button
+                                            type="button"
+                                            onClick={() => updateQuantity(index, field.quantity + 1)}
+                                            variant="outline" size="icon-xs"
+                                            >
+                                                <Plus className="size-3" />
+                                            </Button>
+                                        </div>
+
+                                        <p className="text-sm font-bold text-primary">
+                                            {formatPeso(menuItem.price * field.quantity)}
+                                        </p>
+                                    </div>
                                 </div>
                             );
                         })}
                     </div>
-                    <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                    )}
+                    <div className="mt-4 flex items-center justify-between border-t pt-4">
                         <span className="font-bold">Pre Order Total:</span>
-                        <span className="text-xl font-bold">₱{preOrderTotal.toLocaleString()}</span>
+                        <span className="text-xl font-bold">{formatPeso(preOrderTotal)}</span>
                     </div>
                 </div>
-            )}
 
-            <div className="space-y-2   mt-">
-                <Button className="w-full" onClick={handleContinue}>
+            <div className="space-y-2">
+                <Button className="w-full" type="button" onClick={handleContinue}>
                     {fields.length > 0  ? "Continue to Review" : "Skip to Review"} <ArrowRight className="w-5 h-5" />
                 </Button>
-                <Button variant="outline" className="w-full" onClick={() => setBookingStep('add-on')}>
+                <Button variant="outline" className="w-full" type="button" onClick={() => setBookingStep('add-on')}>
                     Back to Add-ons
                 </Button>
             </div>
+            </aside>
         </div>
     );
 };

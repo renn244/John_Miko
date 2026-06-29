@@ -38,6 +38,11 @@ const NavBar = () => {
                             }>
                                 Accommodation
                             </NavLink>
+                            <NavLink to="/menu" className={({ isActive }) =>
+                                `font-medium text-sm border-b-2 pb-1 ${isActive ? 'border-primary text-primary' : 'border-transparent'}`
+                            }>
+                                Menu
+                            </NavLink>
                             <NavLink to="/about" className={({ isActive }) =>
                                 `font-medium text-sm border-b-2 pb-1 ${isActive ? 'border-primary text-primary' : 'border-transparent'}`
                             }>
@@ -107,6 +112,14 @@ const NavBar = () => {
                         className="font-medium"
                     >
                         Accommodation
+                    </NavLink>
+
+                    <NavLink 
+                        to="/menu" 
+                        onClick={() => setIsOpen(false)}
+                        className="font-medium"
+                    >
+                        Menu
                     </NavLink>
 
                     <NavLink 

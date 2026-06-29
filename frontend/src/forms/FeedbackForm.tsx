@@ -53,7 +53,6 @@ const FeedbackForm = ({
     const onSubmit = async (data: feedbackSchema) => {
         setIsLoading(true);
         try {
-            console.log(data)
             await onsubmit(data);
         } catch (error: any) {
             if(error instanceof ValidationError) {
@@ -69,41 +68,54 @@ const FeedbackForm = ({
 
     return (
         <form 
-        className={cn("bg-white rounded-xl shadow-sm border overflow-hidden", className)}
+        className={cn("overflow-hidden rounded-xl border bg-card shadow-sm", className)}
         onSubmit={handleSubmit(onSubmit)}
         >
-            <div className="p-6 md:p-8 space-y-6">
+            <div className="border-b bg-muted/30 p-4 md:p-5">
 
                 {children}
+            </div>
+
+            <div className="space-y-6 p-4 md:p-6">
 
                 <Controller 
                 name="rating"                
                 control={control}
                 render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
+                    <Field data-invalid={fieldState.invalid} className="gap-3">
                         <FieldLabel htmlFor={field.name}>
-                            Rating <span className="text-red-700">*</span>
+                            Overall Rating <span className="text-destructive">*</span>
                         </FieldLabel>
 
-                        <div className="flex gap-2">
-                            {Array.from({ length: 5 }, (_, i) => i + 1).map((star) => (
-                                <button
-                                key={star}
-                                type="button"
-                                onClick={() => field.onChange(star)}
-                                >
-                                    <Star 
-                                    className={`
-                                        w-10 h-10 
-                                        ${field.value >= star ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/50"}    
-                                    `}
-                                    />
-                                </button>     
-                            ))}
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex gap-1.5">
+                                {Array.from({ length: 5 }, (_, i) => i + 1).map((star) => (
+                                    <button
+                                    key={star}
+                                    type="button"
+                                    className="rounded-md outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    onClick={() => field.onChange(star)}
+                                    >
+                                        <Star 
+                                        className={cn(
+                                            "size-7 transition-colors",
+                                            field.value >= star
+                                                ? "fill-yellow-500 text-yellow-500"
+                                                : "text-muted-foreground/45"
+                                        )}
+                                        />
+                                    </button>     
+                                ))}
+                            </div>
+                            {field.value > 0 ? (
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    {field.value} / 5
+                                </span>
+                            ) : null}
                         </div>
 
                         <FieldDescription>
-                            Please provide a rating between 1 and 5.
+                            How would you rate your experience?
                         </FieldDescription>
 
                         {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
@@ -115,18 +127,18 @@ const FeedbackForm = ({
                 name="comment"
                 control={control}
                 render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
+                    <Field data-invalid={fieldState.invalid} className="gap-3">
                         <FieldLabel htmlFor={field.name}>
-                            Comment
+                            Detailed Feedback <span className="font-normal text-muted-foreground">(Optional)</span>
                         </FieldLabel>
                         
                         <Textarea 
                         {...field}
-                        rows={3}
+                        rows={5}
                         id={field.name}
                         aria-invalid={fieldState.invalid}
-                        placeholder="E.g, the service is good!"
-                        className="max-h-40"
+                        placeholder="Share what you liked or what could be improved."
+                        className="min-h-28 max-h-48 resize-y"
                         />
 
                         <FieldDescription>
@@ -140,17 +152,17 @@ const FeedbackForm = ({
 
             </div>
 
-            <div className="px-6 md:px-8 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
+            <div className="flex flex-col items-start justify-between gap-4 border-t bg-muted/30 px-4 py-4 sm:flex-row sm:items-center md:px-6">
                 <p className="text-sm text-muted-foreground">
-                    <span className="text-red-700">*</span> Required fields
+                    <span className="text-destructive">*</span> Required fields
                 </p>
 
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <Button type="button" variant="outline" onClick={oncancel}>
+                <div className="flex w-full items-center gap-3 sm:w-auto">
+                    <Button type="button" variant="outline" className="flex-1 sm:flex-none" onClick={oncancel}>
                         Cancel
                     </Button>
                     
-                    <Button disabled={isLoading} type="submit">
+                    <Button disabled={isLoading} type="submit" className="flex-1 sm:flex-none">
                         {isLoading ? <LoadingSpinner /> : `${buttonText} Feedback`}
                     </Button>
                 </div>

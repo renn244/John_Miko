@@ -54,20 +54,20 @@ const CreateFeedback = () => {
     }
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-muted/30">
             <NavBar />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-                <div  className="flex items-center gap-4">
+            <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+                <div  className="flex items-start gap-4">
                     <Link to='/my-bookings'>
                         <Button size="icon" variant="outline">
                             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-semibold">
+                        <h1 className="text-3xl font-bold tracking-normal">
                             Create Feedback
                         </h1>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                             Share your experience and help us improve our services by providing feedback for your recent stay.
                         </p>
                     </div>
@@ -82,7 +82,7 @@ const CreateFeedback = () => {
                 >
                     <BookingCard 
                     variant="compact"
-                    className="p-0 px-1 border-0"
+                    className="border-0 p-0 shadow-none"
                     booking={booking}
                     />
                 </FeedbackForm>

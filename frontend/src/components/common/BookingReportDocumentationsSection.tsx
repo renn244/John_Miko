@@ -2,6 +2,7 @@ import BookingReportViewDialog from "@/components/common/BookingReportViewDialog
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import type { BookingReportDocumentation } from "@/types/booking.types";
 import { CalendarDays, Eye, FileText, User2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -24,11 +25,14 @@ const BookingReportDocumentationsSection = ({
 
     return (
         <>
-            <Card className={`gap-0 border-2 ${compact ? "p-4" : "p-5"}`}>
-                <div className="mb-4 flex items-center justify-between gap-3">
+            <Card className={cn(
+                "gap-0 shadow-none",
+                compact ? "border-0 bg-transparent p-0" : "border-2 p-5"
+            )}>
+                <div className={cn("flex items-center justify-between gap-3", compact ? "mb-3" : "mb-4")}>
                     <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-primary" />
-                        <h2 className={`${compact ? "text-lg" : "text-xl"} font-bold`}>
+                        <FileText className={cn("text-primary", compact ? "size-4" : "h-5 w-5")} />
+                        <h2 className={`${compact ? "text-base" : "text-xl"} font-bold`}>
                             Report Documentations
                         </h2>
                     </div>
@@ -39,20 +43,31 @@ const BookingReportDocumentationsSection = ({
                 </div>
 
                 {reports.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed bg-muted/25 p-6 text-sm text-muted-foreground">
+                    <div className={cn(
+                        "border border-dashed bg-muted/25 text-sm text-muted-foreground",
+                        compact ? "rounded-lg px-4 py-3" : "rounded-2xl p-6"
+                    )}>
                         No check-in or check-out reports for this booking.
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className={cn(compact ? "space-y-2" : "space-y-4")}>
                         {reports.map((report) => {
                             const previewImage = report.proofImages[0];
 
                             return (
                                 <div
                                     key={report.id}
-                                    className="flex flex-col gap-4 rounded-2xl border bg-white p-4 md:flex-row md:items-start"
+                                    className={cn(
+                                        "flex flex-col bg-white md:flex-row md:items-start",
+                                        compact
+                                            ? "gap-3 rounded-lg border border-border/70 p-3"
+                                            : "gap-4 rounded-2xl border p-4"
+                                    )}
                                 >
-                                    <div className="h-24 w-full overflow-hidden rounded-2xl bg-muted md:w-28 md:shrink-0">
+                                    <div className={cn(
+                                        "w-full overflow-hidden bg-muted md:shrink-0",
+                                        compact ? "h-20 rounded-md md:w-24" : "h-24 rounded-2xl md:w-28"
+                                    )}>
                                         {previewImage ? (
                                             <img
                                                 src={previewImage}
@@ -66,7 +81,7 @@ const BookingReportDocumentationsSection = ({
                                         )}
                                     </div>
 
-                                    <div className="min-w-0 flex-1 space-y-3">
+                                    <div className={cn("min-w-0 flex-1", compact ? "space-y-2" : "space-y-3")}>
                                         <div className="flex flex-wrap items-start justify-between gap-3">
                                             <div className="space-y-2">
                                                 <div className="flex flex-wrap gap-2">
@@ -85,10 +100,11 @@ const BookingReportDocumentationsSection = ({
 
                                             <Button
                                                 variant="outline"
+                                                size={compact ? "sm" : "default"}
                                                 className="gap-2"
                                                 onClick={() => setSelectedReportId(report.id)}
                                             >
-                                                <Eye className="h-4 w-4" />
+                                                <Eye className="size-4" />
                                                 View Report
                                             </Button>
                                         </div>

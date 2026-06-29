@@ -1,430 +1,634 @@
-import Footer from "@/components/common/Footer"
-import NavBar from "@/components/common/NavBar"
-import Chatbot from "@/components/pageComponents/Chatbot"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
-import { RESORT_OPERATIONAL_INFO } from "@/lib/constant/RESORT_OPERATIONAL_INFO.constant"
+import Footer from "@/components/common/Footer";
+import NavBar from "@/components/common/NavBar";
 import {
-    Calendar as CalendarIcon,
-    CheckCircle,
+    GuestCard,
+    GuestContainer,
+    GuestDivider,
+    GuestInfoChip,
+    GuestPageShell,
+    GuestSection,
+} from "@/components/guest";
+import Chatbot from "@/components/pageComponents/Chatbot";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
+import { RESORT_OPERATIONAL_INFO } from "@/lib/constant/RESORT_OPERATIONAL_INFO.constant";
+import { formatPeso } from "@/lib/utils";
+import type { Accommodation } from "@/types/admin/accommodation.type";
+import {
+    CalendarDays,
+    CheckCircle2,
     ChevronRight,
+    CircleDollarSign,
     Clock,
     CreditCard,
-    Shield,
+    HandPlatter,
+    Info,
+    ShieldCheck,
     Sparkles,
     Star,
-    Utensils
-} from "lucide-react"
-import { Link } from "react-router"
+    TicketCheck,
+    Users,
+    Utensils,
+    Waves,
+} from "lucide-react";
+import { Link } from "react-router";
+
+const heroImage =
+    "https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1600";
+
+const foodItems = [
+    {
+        name: "Sinigang na Baboy",
+        description: "Classic tamarind soup.",
+        price: 450,
+        imageUrl:
+            "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=300&q=80",
+    },
+    {
+        name: "Lechon Kawali",
+        description: "Crispy pork belly strips.",
+        price: 380,
+        imageUrl:
+            "https://images.unsplash.com/photo-1617093727343-374698b1b08d?auto=format&fit=crop&w=300&q=80",
+    },
+    {
+        name: "Halo-Halo Special",
+        description: "Refreshing mixed dessert.",
+        price: 180,
+        imageUrl:
+            "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=300&q=80",
+    },
+];
+
+const whyCards = [
+    {
+        title: "Easy Online Booking",
+        description: "Reserve your preferred date and accommodation in just a few clicks.",
+        icon: TicketCheck,
+    },
+    {
+        title: "Clear Pricing & Policies",
+        description: "No hidden fees. Upfront payment terms and clear house rules.",
+        icon: ShieldCheck,
+    },
+    {
+        title: "Family-Friendly Resort",
+        description: "Safe, clean pools and amenities suitable for all age groups.",
+        icon: Users,
+    },
+    {
+        title: "Flexible Stay Options",
+        description: "DayStay, overnight, 22-hour, and 12-hour options depending on availability.",
+        icon: Clock,
+    },
+];
+
+const bookingSteps = [
+    { label: "Guest Information", icon: Users },
+    { label: "Add-on Services", icon: Sparkles },
+    { label: "Pre-order Items", icon: Utensils },
+    { label: "Review Booking", icon: CheckCircle2 },
+    { label: "Payment", icon: CreditCard },
+];
+
+const policies = [
+    {
+        title: "Check-in & Check-out",
+        description: "DayStay and overnight schedules are shown before booking confirmation.",
+        icon: Clock,
+    },
+    {
+        title: "50% Down Payment",
+        description: "Required to secure your reservation. Balance is due upon arrival.",
+        icon: CreditCard,
+    },
+    {
+        title: "Corkage Policy",
+        description: "Outside food is allowed. Standard corkage fees apply for alcoholic beverages.",
+        icon: HandPlatter,
+    },
+    {
+        title: "Reservation Policy",
+        description: "Weekend and holiday bookings are best reserved ahead of time.",
+        icon: CalendarDays,
+    },
+    {
+        title: "Capacity Limits",
+        description: "Maximum capacity is enforced per accommodation for guest safety.",
+        icon: Users,
+    },
+    {
+        title: "Pool Safety",
+        description: "Proper swimwear is required. Children must be supervised at all times.",
+        icon: Waves,
+    },
+];
+
+const faqs = [
+    {
+        question: "What are the details for overnight stays?",
+        answer: "Overnight schedule and available time slots are shown during accommodation selection and booking.",
+    },
+    {
+        question: "How much are the corkage fees?",
+        answer: "Outside food is allowed. Standard corkage fees apply for alcoholic beverages brought onto the premises.",
+    },
+    {
+        question: "What payment methods do you accept?",
+        answer: "Available payment methods are shown during checkout. A 50% down payment is required to confirm a booking.",
+    },
+    {
+        question: "Can I reserve for the weekend?",
+        answer: "Yes. Weekend and holiday bookings are encouraged to be made early because availability can fill quickly.",
+    },
+    {
+        question: "Are there capacity limits per accommodation?",
+        answer: "Yes. Each accommodation has its own maximum capacity, and the booking flow follows that limit.",
+    },
+    {
+        question: "What are the pool rules?",
+        answer: "Proper swimwear is required, children must be supervised, and posted resort safety rules should be followed.",
+    },
+];
+
+const getStayLabels = (accommodation: Pick<Accommodation, "stayOptions">) =>
+    accommodation.stayOptions?.filter((option) => option.isActive).map((option) => option.label) ?? [];
 
 const Home = () => {
-    const [dayUseHours, overnightHours] = RESORT_OPERATIONAL_INFO.operatingHours
-    const bookingOptionTypes = RESORT_OPERATIONAL_INFO.bookingOptionTypes.join(", ")
+    const [dayUseHours, overnightHours] = RESORT_OPERATIONAL_INFO.operatingHours;
+    const { data: accommodationsResponse } = useGetAccommodationsQuery({ page: 1, limit: 3 });
+    const accommodations = accommodationsResponse?.data?.length
+        ? accommodationsResponse.data.slice(0, 3)
+        : [];
 
-    const faqs = [
-        {
-            question: "Is overnight stay allowed?",
-            answer: "Yes! Day use: 8 AM - 6 PM. Overnight: Check-in 2 PM, Check-out 12 PM.",
-        },
-        {
-            question: "Is corkage allowed?",
-            answer: "Yes. Corkage: ₱200 per dish, ₱150 per bottle. Pre-ordering from our restaurant is encouraged.",
-        },
-        {
-            question: "What payment methods do you accept?",
-            answer: "Cash, Bank Transfer, GCash, Maya, and cash on-site. 50% down payment required.",
-        },
-        {
-            question: "Is reservation required on weekends?",
-            answer: "Yes, advance reservation is highly recommended for weekends, holidays, and peak season.",
-        },
-        {
-            question: "Can I bring additional guests beyond capacity?",
-            answer: "No. Each accommodation has a maximum capacity for safety. Please book multiple units if needed.",
-        },
-        {
-            question: "What are your pool rules?",
-            answer: "Free pool access for all guests. Children must be supervised. Swimming attire required. No glass containers.",
-        },
-    ]
+    const featuredAccommodation = accommodations[0];
+    const sideAccommodations = accommodations.slice(1, 3);
 
     return (
-        <div className="min-h-screen relative bg-background text-foreground">
+        <GuestPageShell>
             <NavBar />
 
-            <section className="relative h-175 overflow-hidden">
-                <img
-                src="https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="John Miko's Place Resort"
-                className="w-full h-full object-cover"
-                loading="eager"
-                fetchPriority="high"
-                />
-        
-                <div className="absolute inset-0 bg-linear-to-b from-black/55 via-black/45 to-black/75" />
-        
-                <div className="absolute inset-0">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-                        <div className="w-full text-white">
-                            <div className="max-w-3xl">
-
-                                <h1 className="mt-5 text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05]">
-                                    John Miko&apos;s Place Resort
-                                </h1>
-                                <p className="mt-5 text-lg sm:text-xl md:text-2xl text-white/90 font-light">
-                                    Book a DayStay or Overnight getaway in minutes.
-                                </p>
-                                <p className="mt-4 text-sm sm:text-base text-white/80 max-w-2xl">
-                                    Comfortable accommodations, clear policies, and a simple booking flow—perfect for staycations, family bonding, and small celebrations.
-                                </p>
-
-                                <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                    <Link to="/accommodation" className="w-full sm:w-auto">
-                                        <Button size="lg" className="w-full sm:w-auto">
-                                            Browse Accommodations
-                                            <ChevronRight className="w-6 h-6" />
-                                        </Button>
+            <GuestContainer className="py-4 md:py-6">
+                <section className="relative min-h-[460px] overflow-hidden rounded-xl border shadow-sm md:min-h-[560px]">
+                    <img
+                        src={heroImage}
+                        alt="John Miko's Place Resort pool and cabanas"
+                        className="absolute inset-0 size-full object-cover"
+                        loading="eager"
+                        fetchPriority="high"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/45 to-black/10" />
+                    <div className="relative z-10 flex min-h-[460px] items-end p-5 md:min-h-[560px] md:p-10">
+                        <div className="max-w-3xl text-white">
+                            <div className="mb-4 flex flex-wrap gap-2">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
+                                    <Clock className="size-3.5" />
+                                    DayStay {dayUseHours.checkIn} - {dayUseHours.checkOut}
+                                </span>
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
+                                    <CalendarDays className="size-3.5" />
+                                    Overnight {overnightHours.checkIn} - {overnightHours.checkOut}
+                                </span>
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                                    <CircleDollarSign className="size-3.5" />
+                                    50% Down Payment
+                                </span>
+                            </div>
+                            <h1 className="text-4xl font-extrabold tracking-normal md:text-6xl">
+                                John Miko&apos;s Place Resort
+                            </h1>
+                            <p className="mt-3 max-w-2xl text-sm leading-6 text-white/90 md:text-base">
+                                Book a DayStay or Overnight getaway in minutes. Experience modern comfort
+                                and authentic Filipino hospitality in a tranquil resort setting.
+                            </p>
+                            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                                <Button asChild size="lg" className="w-full sm:w-auto">
+                                    <Link to="/accommodation">
+                                        Browse Accommodations
+                                        <ChevronRight className="size-4" />
                                     </Link>
-                                    <Link to="/amenities" className="w-full sm:w-auto">
-                                        <Button
-                                        size="lg"
-                                        variant="secondary"
-                                        >
-                                            View Amenities
-                                            <Sparkles className="w-6 h-6" />
-                                        </Button>
-                                    </Link>
-                                </div>
-
-                                <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 text-white">
-                                    <div className="rounded-2xl border border-white/15 bg-black/20 backdrop-blur-sm px-4 py-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className="mt-0.5 w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                                                <Clock className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold">DayStay hours</p>
-                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {dayUseHours.checkIn} • Check-out {dayUseHours.checkOut}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="rounded-2xl border border-white/15 bg-black/20 backdrop-blur-sm px-4 py-3">
-                                        <div className="flex items-start gap-3">
-                                            <div className="mt-0.5 w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                                                <CalendarIcon className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold">Overnight</p>
-                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">Check-in {overnightHours.checkIn} • Check-out {overnightHours.checkOut}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="rounded-2xl border border-white/15 bg-black/20 backdrop-blur-sm px-4 py-3 h-min">
-                                        <div className="flex items-start gap-3">
-                                            <div className="mt-0.5 w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                                                <CreditCard className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-[11px] uppercase tracking-wide text-white/70 font-semibold">Payment</p>
-                                                <p className="text-sm sm:text-[15px] font-semibold leading-snug">50% down to confirm</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                </Button>
+                                <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto">
+                                    <Link to="/amenities">View Amenities</Link>
+                                </Button>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </GuestContainer>
 
-            <section className="bg-background">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <div className="rounded-3xl border bg-muted/20 p-6 md:p-8">
-                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <GuestContainer>
+                <GuestSection compact className="grid gap-8 md:grid-cols-[1fr_1.35fr] md:items-center">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-normal">Why John Miko&apos;s Place Resort?</h2>
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+                            Escape the city hustle without the long travel. We provide a seamless booking
+                            experience and a pristine, family-friendly environment while keeping the
+                            authentic warmth of Filipino hospitality.
+                        </p>
+                        <Button asChild variant="link" className="mt-3 h-auto px-0">
+                            <Link to="/about">
+                                Learn More About Us
+                                <ChevronRight className="size-4" />
+                            </Link>
+                        </Button>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        {whyCards.map(({ title, description, icon: Icon }) => (
+                            <GuestCard key={title} className="p-4">
+                                <Icon className="mb-3 size-5 text-primary" />
+                                <h3 className="text-sm font-semibold">{title}</h3>
+                                <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+                            </GuestCard>
+                        ))}
+                    </div>
+                </GuestSection>
+
+                <GuestSection
+                    compact
+                    title="Guest Rates & Entrance Fees"
+                    description="Standard entrance fees for resort access."
+                >
+                    <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+                        <GuestCard className="bg-primary p-5 text-primary-foreground md:p-6">
+                            <GuestInfoChip className="border-white/20 bg-white/15 text-white">
+                                Entrance
+                            </GuestInfoChip>
+                            <div className="mt-6 flex items-start justify-between gap-4">
+                                <div>
+                                    <h3 className="text-2xl font-bold">Adults</h3>
+                                    <p className="mt-1 text-sm text-white/80">Standard entrance fee</p>
+                                </div>
+                                <Users className="size-7 text-white/80" />
+                            </div>
+                            <p className="mt-6 text-3xl font-extrabold">{formatPeso(150)}</p>
+                        </GuestCard>
+                        <div className="grid gap-3">
+                            <GuestCard className="flex items-center justify-between gap-4 p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <Users className="size-4" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold">Children & Kids</p>
+                                        <p className="text-xs text-muted-foreground">Ages 3-12</p>
+                                    </div>
+                                </div>
+                                <p className="font-bold text-primary">{formatPeso(100)}</p>
+                            </GuestCard>
+                            <GuestCard className="flex items-center justify-between gap-4 p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <Star className="size-4" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold">Senior Citizens</p>
+                                        <p className="text-xs text-muted-foreground">With valid ID</p>
+                                    </div>
+                                </div>
+                                <p className="font-bold text-primary">{formatPeso(120)}</p>
+                            </GuestCard>
+                            <p className="text-center text-xs italic text-muted-foreground">
+                                Bring a valid ID for senior citizen rate.
+                            </p>
+                        </div>
+                    </div>
+                    <p className="mt-4 text-center text-xs italic text-muted-foreground">
+                        Rates may vary depending on stay type, accommodation, date, and resort policies.
+                        Final pricing is shown during booking.
+                    </p>
+                </GuestSection>
+
+                <GuestSection
+                    compact
+                    title="Accommodations"
+                    description="Select the perfect space for your group. From intimate suites to expansive villas."
+                    actions={
+                        <Button asChild variant="outline" size="sm">
+                            <Link to="/accommodation">View All</Link>
+                        </Button>
+                    }
+                >
+                    <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+                        <AccommodationPreviewCard accommodation={featuredAccommodation} featured />
+                        <div className="grid gap-4">
+                            {sideAccommodations.map((accommodation, index) => (
+                                <AccommodationPreviewCard
+                                    key={accommodation.id}
+                                    accommodation={accommodation}
+                                    highlighted={index === 0}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </GuestSection>
+            </GuestContainer>
+
+            <div className="bg-muted/45">
+                <GuestContainer>
+                    <GuestSection
+                        compact
+                        title="Pre-Order Filipino Favorites"
+                        description="Skip the wait. Pre-order our signature dishes prepared fresh for your arrival."
+                    >
+                        <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
+                            <div className="relative min-h-[300px] overflow-hidden rounded-xl border shadow-sm">
+                                <img
+                                    src="https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?auto=format&fit=crop&w=1200&q=80"
+                                    alt="Filipino feast platter"
+                                    className="absolute inset-0 size-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/35 to-transparent" />
+                                <div className="relative z-10 flex min-h-[300px] flex-col justify-end p-5 text-white">
+                                    <GuestInfoChip className="w-fit border-primary bg-primary text-primary-foreground">
+                                        Chef&apos;s Special Combo
+                                    </GuestInfoChip>
+                                    <h3 className="mt-3 text-2xl font-bold">Feast Platter</h3>
+                                    <p className="mt-1 max-w-md text-sm text-white/85">
+                                        A generous serving of crispy pata, kare-kare, and adobo. Perfect for
+                                        sharing with the group.
+                                    </p>
+                                    <div className="mt-4 flex items-center gap-3">
+                                        <p className="font-bold">{formatPeso(1850)}</p>
+                                        <Button asChild size="sm" variant="secondary">
+                                            <Link to="/accommodation">Add to Stay</Link>
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid gap-3">
+                                {foodItems.map((item) => (
+                                    <GuestCard key={item.name} className="flex items-center gap-4 p-3">
+                                        <img
+                                            src={item.imageUrl}
+                                            alt={item.name}
+                                            className="size-20 rounded-md object-cover"
+                                            loading="lazy"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="text-sm font-semibold">{item.name}</h3>
+                                            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                                                {item.description}
+                                            </p>
+                                            <p className="mt-2 text-sm font-bold">{formatPeso(item.price)}</p>
+                                        </div>
+                                        <Info className="size-4 text-primary" />
+                                    </GuestCard>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="mt-4 grid gap-3 md:grid-cols-2">
+                            <GuestCard className="flex items-start gap-3 p-4">
+                                <Info className="mt-0.5 size-4 text-primary" />
+                                <div>
+                                    <h3 className="text-sm font-semibold">Outside Food & Corkage</h3>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Bringing outside food is allowed. A standard corkage fee applies for
+                                        alcoholic beverages.
+                                    </p>
+                                </div>
+                            </GuestCard>
+                            <GuestCard className="flex items-start gap-3 p-4">
+                                <Clock className="mt-0.5 size-4 text-primary" />
+                                <div>
+                                    <h3 className="text-sm font-semibold">Pre-Order Timing</h3>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Please finalize food pre-orders at least 24 hours before check-in to
+                                        ensure availability.
+                                    </p>
+                                </div>
+                            </GuestCard>
+                        </div>
+                    </GuestSection>
+                </GuestContainer>
+            </div>
+
+            <GuestContainer>
+                <GuestSection
+                    compact
+                    title="Simple Booking Process"
+                    description="After choosing your accommodation, the booking flow guides you through the exact details needed to confirm."
+                >
+                    <GuestCard className="overflow-hidden rounded-lg border-border/80 p-0 shadow-none">
+                        <div className="flex flex-col gap-1.5 border-b bg-background/80 px-4 py-3 md:flex-row md:items-center md:justify-between md:px-5">
                             <div>
-                                <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Booking</p>
-                                <h3 className="mt-1 text-2xl md:text-3xl font-bold tracking-tight">At a glance</h3>
-                                <p className="mt-1 text-sm md:text-base text-muted-foreground">
-                                    Clear time slots, payment expectations, and the quick steps to confirm.
+                                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                                    Booking Flow Preview
                                 </p>
+                                <h3 className="text-base font-bold">Complete Your Booking</h3>
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground">Step 3 of 5</p>
+                        </div>
+                        <div className="px-4 py-4 md:px-5 md:py-5">
+                            <div className="relative">
+                                <div className="absolute left-0 right-0 top-4 hidden h-1 rounded-full bg-muted md:block" />
+                                <div className="booking-flow-preview-progress absolute left-0 top-4 hidden h-1 rounded-full bg-primary md:block" />
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-5 md:gap-3">
+                                    {bookingSteps.map(({ label, icon: Icon }, index) => {
+                                        const stepNumber = index + 1;
+                                        const isComplete = stepNumber < 3;
+                                        const isCurrent = stepNumber === 3;
+
+                                        return (
+                                            <div
+                                                key={label}
+                                                className="relative flex items-center gap-3 md:flex-col md:gap-2 md:text-center"
+                                            >
+                                                <div
+                                                    className={
+                                                        isComplete || isCurrent
+                                                            ? "relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground shadow-sm"
+                                                            : "relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border bg-background text-sm font-bold text-muted-foreground"
+                                                    }
+                                                >
+                                                    {isComplete ? (
+                                                        <CheckCircle2 className="size-5" />
+                                                    ) : (
+                                                        stepNumber
+                                                    )}
+                                                    {isCurrent ? (
+                                                        <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-primary/25" />
+                                                    ) : null}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <Icon
+                                                        className={
+                                                            isComplete || isCurrent
+                                                                ? "hidden size-4 text-primary md:mx-auto md:block"
+                                                                : "hidden size-4 text-muted-foreground md:mx-auto md:block"
+                                                        }
+                                                    />
+                                                    <p
+                                                        className={
+                                                            isCurrent
+                                                                ? "text-sm font-semibold text-primary md:text-xs"
+                                                                : "text-sm font-medium text-foreground md:text-xs"
+                                                        }
+                                                    >
+                                                        {label}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </div>
+                    </GuestCard>
+                </GuestSection>
 
-                        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="rounded-2xl border bg-card p-5 transition-colors hover:bg-muted/30">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/15 shrink-0">
-                                        <Clock className="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Time Slots</p>
-                                        <p className="mt-1 font-semibold leading-snug">{bookingOptionTypes}</p>
-                                        <p className="mt-1 text-sm text-muted-foreground">
-                                            Day use {dayUseHours.checkIn} – {dayUseHours.checkOut} <br/> 
-                                            Overnight {overnightHours.checkIn} – {overnightHours.checkOut}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="rounded-2xl border bg-card p-5 transition-colors hover:bg-muted/30">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/15 shrink-0">
-                                        <CreditCard className="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Payment</p>
-                                        <p className="mt-1 font-semibold leading-snug">50% down to confirm</p>
-                                        <p className="mt-1 text-sm text-muted-foreground">Supported: Cash, Bank, GCash, Maya, Cash on-site</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="rounded-2xl border bg-card p-5 transition-colors hover:bg-muted/30">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/15 shrink-0">
-                                        <CalendarIcon className="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Quick Steps</p>
-                                        <p className="mt-1 font-semibold leading-snug">Select • Pick • Book</p>
-                                        <p className="mt-1 text-sm text-muted-foreground">Choose a unit, pick a date, then select stay type.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <GuestSection compact title="Important Policies" description="Key information to know before you book.">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {policies.map(({ title, description, icon: Icon }) => (
+                            <GuestCard key={title} accent className="p-4">
+                                <Icon className="mb-3 size-5 text-primary" />
+                                <h3 className="text-sm font-semibold">{title}</h3>
+                                <p className="mt-1 text-xs leading-5 text-muted-foreground">{description}</p>
+                            </GuestCard>
+                        ))}
                     </div>
-                </div>
-            </section>
+                </GuestSection>
 
-            <section className="py-20 relative overflow-hidden">
-                <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute -top-28 -right-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="absolute -bottom-28 -left-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-                </div>
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-                        <div className="lg:col-span-7">
-                            <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Experience</p>
-                            <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Your Coastal Getaway Awaits</h2>
-                            <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                                John Miko's Place Resort is a public space made for staycations, family bonding, and small celebrations.
-                                With comfortable accommodations and guest-friendly policies, planning your visit is simple and stress-free.
-                            </p>
-
-                            <div className="mt-8 flex flex-wrap items-center gap-2">
-                                <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
-                                    <CheckCircle className="w-4 h-4 text-primary" />
-                                    Simple booking flow
-                                </span>
-                                <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
-                                    <Shield className="w-4 h-4 text-primary" />
-                                    Clear policies
-                                </span>
-                                <span className="inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-sm">
-                                    <Star className="w-4 h-4 text-primary" />
-                                    Guest-first experience
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-5">
-                            <div className="rounded-3xl border bg-muted/20 p-5 md:p-6">
-                                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
-                                    <div className="rounded-2xl border bg-card p-5">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/15 shrink-0">
-                                                <Star className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Quality</p>
-                                                <p className="mt-1 font-semibold leading-snug">Premium comfort</p>
-                                                <p className="mt-1 text-sm text-muted-foreground">Clean spaces designed for rest and bonding.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="rounded-2xl border bg-card p-5">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/15 shrink-0">
-                                                <CheckCircle className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Trust</p>
-                                                <p className="mt-1 font-semibold leading-snug">Verified resort</p>
-                                                <p className="mt-1 text-sm text-muted-foreground">Straightforward booking expectations and rules.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="rounded-2xl border bg-card p-5">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-primary/15 shrink-0">
-                                                <Shield className="w-5 h-5 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Safety</p>
-                                                <p className="mt-1 font-semibold leading-snug">Safe & secure</p>
-                                                <p className="mt-1 text-sm text-muted-foreground">Capacity rules and guest safety come first.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-20 bg-muted/20 relative overflow-hidden">
-                <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-linear-to-b from-transparent via-primary/5 to-transparent" />
-                </div>
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                        <div className="lg:col-span-4">
-                            <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Before You Book</p>
-                            <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Important Policies</h2>
-                            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                                Please review these quick guidelines so your booking is smooth and stress-free.
-                            </p>
-
-                            <div className="mt-6 rounded-3xl border bg-card p-5">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                                        <Shield className="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold">Quick note</p>
-                                        <p className="mt-1 text-sm text-muted-foreground">
-                                            Weekend and holiday bookings are best made early.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-8">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div className="rounded-3xl p-6 md:p-7 border bg-card transition-colors hover:bg-muted/30">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
-                                            <Clock className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">Check-in & Check-out</h3>
-                                            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                                                <li>• Day Use: <br />
-                                                    Check-in {dayUseHours.checkIn} - 
-                                                    Check-out {dayUseHours.checkOut}
-                                                </li>
-                                                <li>• Overnight: <br />
-                                                    Check-in {overnightHours.checkIn} - 
-                                                    Check-out {overnightHours.checkOut}
-                                                </li>
-                                                <li>• Early check-in subject to availability</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-3xl p-6 md:p-7 border bg-card transition-colors hover:bg-muted/30">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
-                                            <CreditCard className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">Payment Methods</h3>
-                                            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                                                <li>• Cash, Bank Transfer, GCash, Maya, Cash on-site</li>
-                                                <li>• 50% down payment required to confirm booking</li>
-                                                <li>• Balance payable upon check-in</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-3xl p-6 md:p-7 border bg-card transition-colors hover:bg-muted/30">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
-                                            <Utensils className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">Corkage Policy</h3>
-                                            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                                                <li>• Outside food allowed: ₱200 per dish/viand</li>
-                                                <li>• Outside drinks allowed: ₱150 per bottle</li>
-                                                <li>• Pre-order from our restaurant recommended</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="rounded-3xl p-6 md:p-7 border bg-card transition-colors hover:bg-muted/30">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-primary/15">
-                                            <CalendarIcon className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-lg">Reservation Policy</h3>
-                                            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                                                <li>• Advanced booking required for weekends/holidays</li>
-                                                <li>• Walk-ins subject to availability</li>
-                                                <li>• Capacity limits strictly enforced for safety</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-20 relative overflow-hidden">
-                <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute -top-28 -left-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-                </div>
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-                        <div className="lg:col-span-4">
-                            <p className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Help Center</p>
-                            <h2 className="mt-2 text-4xl md:text-5xl font-bold tracking-tight">Frequently Asked Questions</h2>
-                            <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                                Quick answers to common questions about booking, payment, and policies.
-                            </p>
-                        </div>
-
-                        <div className="lg:col-span-8">
-                            <div className="bg-card rounded-3xl border p-2 sm:p-3">
-                                <Accordion type="single" collapsible className="w-full">
-                                    {faqs.map((faq, index) => (
-                                        <AccordionItem
-                                            key={index}
-                                            value={`item-${index}`}
-                                            className="border-0 border-b last:border-b-0"
-                                        >
-                                            <AccordionTrigger className="px-5 sm:px-6 py-4 hover:no-underline hover:bg-muted/60 rounded-2xl transition-colors">
-                                                <span className="font-semibold text-left">{faq.question}</span>
-                                            </AccordionTrigger>
-                                            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-                                                <p className="text-muted-foreground">{faq.answer}</p>
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    ))}
-                                </Accordion>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                <GuestSection compact title="Frequently Asked Questions" className="pb-12">
+                    <GuestCard className="mx-auto max-w-3xl p-2">
+                        <Accordion type="single" collapsible>
+                            {faqs.map((faq, index) => (
+                                <AccordionItem
+                                    key={faq.question}
+                                    value={`faq-${index}`}
+                                    className="border-b last:border-b-0"
+                                >
+                                    <AccordionTrigger className="rounded-md px-4 py-3 text-left text-sm font-medium hover:bg-muted/60 hover:no-underline">
+                                        {faq.question}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-4 pb-4 text-sm text-muted-foreground">
+                                        {faq.answer}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </GuestCard>
+                </GuestSection>
+            </GuestContainer>
 
             <Footer />
             <Chatbot />
-        </div>
-    )
-}
+        </GuestPageShell>
+    );
+};
 
-export default Home
+type AccommodationPreviewCardProps = {
+    accommodation: Pick<
+        Accommodation,
+        "id" | "name" | "description" | "imageUrl" | "type" | "capacity" | "price" | "amenities" | "stayOptions"
+    >;
+    featured?: boolean;
+    highlighted?: boolean;
+};
+
+const AccommodationPreviewCard = ({
+    accommodation,
+    featured = false,
+    highlighted = false,
+}: AccommodationPreviewCardProps) => {
+    const stayLabels = getStayLabels(accommodation);
+
+    return (
+        <GuestCard
+            padded={false}
+            className={
+                highlighted
+                    ? "overflow-hidden bg-primary text-primary-foreground"
+                    : featured
+                      ? "h-full overflow-hidden"
+                      : "overflow-hidden"
+            }
+        >
+            <div className={featured ? "flex h-full flex-col" : undefined}>
+                <div className={featured ? "relative min-h-72 flex-1" : "relative min-h-52"}>
+                    <img
+                        src={accommodation.imageUrl}
+                        alt={accommodation.name}
+                        className="absolute inset-0 size-full object-cover"
+                        loading="lazy"
+                    />
+                    <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+                        {stayLabels.slice(0, 2).map((label) => (
+                            <GuestInfoChip
+                                key={label}
+                                className={
+                                    highlighted
+                                        ? "border-white/20 bg-white text-primary"
+                                        : "bg-background/90 backdrop-blur"
+                                }
+                            >
+                                {label}
+                            </GuestInfoChip>
+                        ))}
+                    </div>
+                </div>
+                <div className={featured ? "flex min-h-64 flex-col p-4 md:p-5" : "flex flex-col p-4"}>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                        <span className={highlighted ? "text-white/80" : "text-muted-foreground"}>
+                            {accommodation.type === "EventHall" ? "Event Hall" : accommodation.type}
+                        </span>
+                        <span className={highlighted ? "text-white/80" : "text-muted-foreground"}>
+                            Up to {accommodation.capacity} guests
+                        </span>
+                    </div>
+                    <h3 className="mt-2 text-lg font-bold">{accommodation.name}</h3>
+                    <p
+                        className={
+                            highlighted
+                                ? "mt-2 line-clamp-3 text-sm leading-6 text-white/85"
+                                : "mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground"
+                        }
+                    >
+                        {accommodation.description}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {accommodation.amenities.slice(0, featured ? 3 : 2).map((amenity) => (
+                            <GuestInfoChip
+                                key={amenity}
+                                className={
+                                    highlighted
+                                        ? "border-white/20 bg-white/15 text-white"
+                                        : "border bg-background"
+                                }
+                            >
+                                {amenity}
+                            </GuestInfoChip>
+                        ))}
+                    </div>
+                    <GuestDivider className={highlighted ? "my-4 border-white/20" : "my-4"} />
+                    <div className="mt-auto flex items-end justify-between gap-4">
+                        <div>
+                            <p className={highlighted ? "text-xs text-white/75" : "text-xs text-muted-foreground"}>
+                                Starting from
+                            </p>
+                            <p className="text-xl font-extrabold">
+                                {formatPeso(accommodation.price)}
+                                <span className={highlighted ? "ml-1 text-xs font-normal text-white/75" : "ml-1 text-xs font-normal text-muted-foreground"}>
+                                    /{accommodation.type === "EventHall" ? "day" : "stay"}
+                                </span>
+                            </p>
+                        </div>
+                        <Button asChild size="sm" variant={highlighted ? "secondary" : "outline"}>
+                            <Link to={`/accommodation/${accommodation.id}`}>
+                                {featured ? "Details" : "Book"}
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </GuestCard>
+    );
+};
+
+export default Home;

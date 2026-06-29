@@ -1,13 +1,23 @@
-import { Progress } from "@/components/ui/progress";
+import { GuestContainer, GuestPageShell } from "@/components/guest";
 import MultiStepBookingForm from "@/forms/MultiStepBookingForm/MultiStepBookingForm";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
-import { CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+
+const bookingSteps = [
+    "Guest Information",
+    "Add-on Services",
+    "Pre-order Items",
+    "Review Booking",
+    "Payment",
+];
 
 const Booking = () => {
     const [currentStep, setCurrentStep] = useState<number>(1);
     const { accommodationId } = useParams<{ accommodationId: string }>();
+    const navigate = useNavigate();
 
     const { data: accommodation, isLoading } = useGetAccommodationByIdQuery(accommodationId)
 
@@ -16,49 +26,71 @@ const Booking = () => {
     if(!accommodation) return null; // return 404 page
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center">
-            {/** Booking steps updated to include Add-on Services before Pre-order */}
-            {/** Steps: Guest Info -> Add-ons -> Pre-order -> Review -> Payment */}
-            {/** Total steps: 5 */}
-
-            <div className="w-full border-b-2">
-                <header className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <h1 className="text-xl font-bold">
-                            Complete Your Booking
-                        </h1>
+        <GuestPageShell className="flex min-h-screen flex-col">
+            <header className="border-b bg-background">
+                <GuestContainer className="py-3">
+                    <div className="flex items-center justify-between">
+                        <button
+                            type="button"
+                            onClick={() => navigate(`/accommodation/${accommodation.id}`)}
+                            className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+                        >
+                            <ArrowLeft className="size-4" />
+                            Booking Flow
+                        </button>
 
                         <span className="text-sm font-medium text-muted-foreground">
-                            Step {currentStep} of 5
+                            Step {currentStep} of {bookingSteps.length}
                         </span>
                     </div>
 
-                    <div className="relative">
-                        <Progress className="w-full mt-1" value={20 * currentStep} />
+                    <div className="mt-5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                        <div className="flex min-w-max items-center">
+                            {bookingSteps.map((step, index) => {
+                                const stepNumber = index + 1;
+                                const isCompleted = stepNumber < currentStep;
+                                const isCurrent = stepNumber === currentStep;
 
-                        <div className="flex items-center justify-between  mt-4">
-                            {['Guest Information', 'Add-on Services', 'Pre-order Items', 'Review Booking', 'Payment'].map((step, index) => (
-                                <div key={step} className="flex flex-col items-center w-1/5">
-                                    <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold transition-all  ${
-                                        index + 1 <= currentStep ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-                                    }`}>
-                                        {index + 1 < currentStep ? <CheckCircle className="w-5 h-5" /> : index + 1}
+                                return (
+                                    <div key={step} className="flex items-center">
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className={cn(
+                                                    "flex size-7 items-center justify-center rounded-full border text-xs font-bold transition-colors",
+                                                    isCompleted && "border-primary bg-primary text-primary-foreground",
+                                                    isCurrent && "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                                                    !isCompleted && !isCurrent && "border-border bg-muted/60 text-muted-foreground"
+                                                )}
+                                            >
+                                                {isCompleted ? <Check className="size-4" /> : stepNumber}
+                                            </span>
+                                            <span
+                                                className={cn(
+                                                    "text-xs font-semibold",
+                                                    isCompleted || isCurrent ? "text-foreground" : "text-muted-foreground"
+                                                )}
+                                            >
+                                                {step}
+                                            </span>
+                                        </div>
+
+                                        {index < bookingSteps.length - 1 ? (
+                                            <span
+                                                className={cn(
+                                                    "mx-3 h-px w-10 bg-border md:w-16",
+                                                    stepNumber < currentStep && "bg-primary"
+                                                )}
+                                            />
+                                        ) : null}
                                     </div>
-                                    <span
-                                    className={`text-xs mt-2 tex-center font-medium hidden sm:block ${
-                                        index + 1 === currentStep ? 'text-primary' : 'text-muted-foreground'
-                                    }`}
-                                    >
-                                        {step}
-                                    </span>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
-                </header>
-            </div>
+                </GuestContainer>
+            </header>
 
-            <main className="w-full max-w-4xl flex-1">
+            <GuestContainer className="flex-1 py-5 md:py-6">
                 <MultiStepBookingForm 
                 accommodation={accommodation}
                 bookingStep={
@@ -88,8 +120,8 @@ const Booking = () => {
                     }
                 }}
                 />
-            </main>
-        </div>
+            </GuestContainer>
+        </GuestPageShell>
     )
 }
 

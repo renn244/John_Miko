@@ -41,6 +41,7 @@ import EditFeedback from './page/Guest/EditFeedback';
 import MyBookings from './page/Guest/MyBookings';
 import Home from "./page/Home";
 import Login from "./page/Login";
+import Menu from './page/Menu';
 import ResetPassword from "./page/ResetPassword";
 import Settings from './page/Settings';
 import SignUpGuest from "./page/SignUpGuest";
@@ -57,6 +58,10 @@ const router = createBrowserRouter([
   {
     path: '/about',
     element: <About />
+  },
+  {
+    path: '/menu',
+    element: <Menu />
   },
   {
     path: "/login",

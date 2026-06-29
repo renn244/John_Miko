@@ -1,41 +1,105 @@
+import { GuestCard, GuestDivider } from "@/components/guest";
 import { Button } from "@/components/ui/button";
 import { useGetMenuItemsBulkQuery } from "@/hooks/admin/menu-item.hook";
+import { formatPeso } from "@/lib/utils";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import type { MenuItem } from "@/types/admin/menu-item.type";
 import { ArrowRight } from "lucide-react";
-import { useMemo, type Dispatch, type SetStateAction } from "react";
+import { useMemo, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type ReviewFormProps = {
-    accommodation: Accommodation,
-    setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
-    stayType: string,
-    checkIn: Date,
-    checkOut: Date,
-    accommodationSubtotal: number,
-    addOnSubTotal: number,
-    preOrderSubTotal: number,
-    guestFeeSubTotal: number,
-    total: number,
-}
+    accommodation: Accommodation;
+    setBookingStep: Dispatch<SetStateAction<"form" | "add-on" | "review" | "pre-order" | "payment">>;
+    stayType: string;
+    checkIn: Date;
+    checkOut: Date;
+    accommodationSubtotal: number;
+    addOnSubTotal: number;
+    preOrderSubTotal: number;
+    guestFeeSubTotal: number;
+    total: number;
+};
 
-const ReviewForm = ({ 
-    accommodation, stayType, checkIn, checkOut, accommodationSubtotal, addOnSubTotal, guestFeeSubTotal, preOrderSubTotal, total, setBookingStep 
+type ReviewSectionProps = {
+    title: string;
+    action?: ReactNode;
+    children: ReactNode;
+    stretch?: boolean;
+};
+
+const formatDateTime = (date: Date) =>
+    date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+    });
+
+const getAccommodationTypeLabel = (type: Accommodation["type"]) =>
+    type === "EventHall" ? "Event Hall" : type;
+
+const ReviewSection = ({ title, action, children, stretch = false }: ReviewSectionProps) => (
+    <GuestCard className={stretch ? "flex h-full flex-col p-4 md:p-5" : "p-4 md:p-5"}>
+        <div className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="text-base font-bold tracking-normal">{title}</h3>
+            {action}
+        </div>
+        {stretch ? <div className="flex flex-1 flex-col">{children}</div> : children}
+    </GuestCard>
+);
+
+const SummaryLine = ({
+    label,
+    value,
+    emphasize = false,
+}: {
+    label: string;
+    value: string;
+    emphasize?: boolean;
+}) => (
+    <div className="flex items-center justify-between gap-4 text-sm">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={emphasize ? "font-bold text-primary" : "font-semibold"}>
+            {value}
+        </span>
+    </div>
+);
+
+const ReviewForm = ({
+    accommodation,
+    stayType,
+    checkIn,
+    checkOut,
+    accommodationSubtotal,
+    addOnSubTotal,
+    guestFeeSubTotal,
+    preOrderSubTotal,
+    total,
+    setBookingStep,
 }: ReviewFormProps) => {
     const { watch } = useFormContext<multiStepBookingFormSchema>();
 
-    const preOrderItems = watch('preOrderItems') || [];
-    const addOnServices = watch('addOnServices') || [];
+    const preOrderItems = watch("preOrderItems") || [];
+    const addOnServices = watch("addOnServices") || [];
+    const adultGuests = watch("adultGuests") || 0;
+    const seniorGuests = watch("seniorGuests") || 0;
+    const kidGuests = watch("kidGuests") || 0;
+    const totalGuests = watch("numberOfGuests");
+    const specialRequest = watch("specialRequest");
     const { data: menuItems } = useGetMenuItemsBulkQuery(preOrderItems.map((item) => item.menuItemId));
 
     const preOrders = useMemo(() => {
-        if(!menuItems) return [];
+        if (!menuItems) return [];
+
         const preOrderData: (MenuItem & { quantity: number })[] = [];
 
         preOrderItems.forEach((item) => {
             const menuItem = menuItems.find((menu) => menu.id === item.menuItemId);
-            if(!menuItem) return undefined;
+            if (!menuItem) return;
 
             preOrderData.push({
                 ...menuItem,
@@ -44,251 +108,288 @@ const ReviewForm = ({
         });
 
         return preOrderData;
-    }, [preOrderItems, menuItems])
+    }, [preOrderItems, menuItems]);
 
     return (
-        <div className="space-y-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="space-y-4">
-
-                <h3 className="font-bold text-lg">
-                    Booking Summary
-                </h3>
-
-                <div className="p-3 rounded-xl border-2">
-                    <div className="flex gap-4">
+                <ReviewSection
+                    title="Accommodation"
+                    action={
+                        <Button
+                            type="button"
+                            variant="link"
+                            className="h-auto p-0 text-xs"
+                            onClick={() => setBookingStep("form")}
+                        >
+                            Edit
+                        </Button>
+                    }
+                >
+                    <div className="flex flex-col gap-4 sm:flex-row">
                         <img
-                        src={'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=1200'}
-                        alt={accommodation.name}
-                        className="w-20 h-20 rounded-md object-cover"
+                            src={accommodation.imageUrl}
+                            alt={accommodation.name}
+                            className="h-32 w-full rounded-lg object-cover sm:h-32 sm:w-44"
                         />
-                        <div className="flex-1">
-                            <h4 className="font-bold mb-1">
+                        <div className="min-w-0 flex-1 self-center">
+                            <h4 className="text-xl font-bold tracking-normal">
                                 {accommodation.name}
                             </h4>
-                            <p className="text-sm mb-2 text-muted-foreground">
-                                {accommodation.type}
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                {getAccommodationTypeLabel(accommodation.type)} | {stayType} | Up to {accommodation.capacity} guests
                             </p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <span>{accommodation.capacity} Guests</span>
-                                <span>{accommodation.type} Type</span>
+                            <div className="mt-5 grid gap-4 border-t pt-4 text-sm sm:grid-cols-2">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                        Check-in
+                                    </p>
+                                    <p className="mt-1 font-semibold">{formatDateTime(checkIn)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                        Check-out
+                                    </p>
+                                    <p className="mt-1 font-semibold">{formatDateTime(checkOut)}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </ReviewSection>
 
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">
-                        <span className="text-muted-foreground text-sm">Stay Type:</span>
-                        <span className="font-medium text-sm">
-                            {stayType}
-                        </span>
-                    </div>
-                    <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">
-                        <span className="text-muted-foreground text-sm">Check-in:</span>
-                        <span className="font-medium text-sm">
-                            {checkIn.toLocaleString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                minute: '2-digit',
-                                hour: '2-digit',
-                                hour12: true,
-                            })}
-                        </span>
-                    </div>
-                    <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">
-                        <span className="text-muted-foreground text-sm">Check-out:</span>
-                        <span className="font-medium text-sm">
-                            {checkOut.toLocaleString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                minute: '2-digit',
-                                hour: '2-digit',
-                                hour12: true,
-                            })}
-                        </span>
-                    </div>
-                    <div className="flex items-center justify-between p-2 px-3 rounded-md bg-muted">
-                        <span className="text-muted-foreground text-sm">Number of Guests:</span>
-                        <span className="font-medium text-sm">
-                            {watch('numberOfGuests')} {watch('numberOfGuests') === 1 ? 'Guest' : 'Guests'}
-                        </span>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 className="font-bold mb-2">
-                        Guest Information
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Name:</span>
-                            <span className="font-semibold">
-                                {watch('firstName')} {watch('lastName')}
-                            </span>
+                <ReviewSection
+                    title="Guest Details"
+                    action={
+                        <Button
+                            type="button"
+                            variant="link"
+                            className="h-auto p-0 text-xs"
+                            onClick={() => setBookingStep("form")}
+                        >
+                            Edit
+                        </Button>
+                    }
+                >
+                    <div className="grid gap-5 text-sm md:grid-cols-2">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Primary guest
+                            </p>
+                            <p className="mt-1 font-semibold">
+                                {watch("firstName")} {watch("lastName")}
+                            </p>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Email:</span>
-                            <span className="font-semibold">
-                                {watch('email')}
-                            </span>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Contact email
+                            </p>
+                            <p className="mt-1 break-words font-semibold">{watch("email")}</p>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Phone:</span>
-                            <span className="font-semibold">
-                                {watch('contactNo')}
-                            </span>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Phone number
+                            </p>
+                            <p className="mt-1 font-semibold">{watch("contactNo")}</p>
                         </div>
-                        {watch('specialRequest') && (
-                            <div className="pt-2 border-t">
-                                <span className="block mb-1 text-muted-foreground">
-                                    Special Request:
-                                </span>
-                                <span className="font-medium">
-                                    {watch('specialRequest')}
-                                </span>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Guest breakdown
+                            </p>
+                            <p className="mt-1 font-semibold">
+                                {adultGuests} adults, {seniorGuests} seniors, {kidGuests} children
+                            </p>
+                        </div>
+                    </div>
+                    {specialRequest ? (
+                        <>
+                            <GuestDivider className="my-4" />
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    Special request
+                                </p>
+                                <p className="mt-2 rounded-lg bg-muted/50 p-3 text-sm leading-6">
+                                    {specialRequest}
+                                </p>
                             </div>
-                        )}
-                    </div>
-                </div>
+                        </>
+                    ) : null}
+                </ReviewSection>
 
-                <div>
-                    <h4 className="font-bold mb-2">
-                        Add-on Services 
-                        ({addOnServices.length} {addOnServices.length === 1 ? 'Service' : 'Services'})
-                    </h4>
-                    <div className="space-y-3">
-                        {addOnServices.map((item) => (
-                            <div
-                            key={item.addOnServiceId}
-                            className="flex items-center gap-4 p-4 rounded-lg bg-muted"
+                <div className="grid gap-4 xl:grid-cols-2">
+                    <ReviewSection
+                        title="Add-on Services"
+                        stretch
+                        action={
+                            <Button
+                                type="button"
+                                variant="link"
+                                className="h-auto p-0 text-xs"
+                                onClick={() => setBookingStep("add-on")}
                             >
-                                {item.imageUrl ? (
-                                    <img
-                                    src={item.imageUrl}
-                                    alt={item.name || 'Service'}
-                                    className="w-16 h-16 rounded-lg object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-16 h-16 rounded-lg bg-gray-200" />
-                                )}
+                                Edit
+                            </Button>
+                        }
+                    >
+                        {addOnServices.length > 0 ? (
+                            <div className="flex flex-1 flex-col">
+                                <div className="space-y-2">
+                                    {addOnServices.map((item) => {
+                                        const price = item.price || 0;
+                                        const lineTotal = price * item.quantity;
 
-                                <div className="flex-1">
-                                    <p className="font-bold mb-1">
-                                        {item.name || 'Service'}
-                                    </p>
-                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                        ₱{(item.price || 0).toLocaleString()} × {item.quantity}
-                                    </div>
+                                        return (
+                                            <div
+                                                key={item.addOnServiceId}
+                                                className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 p-3"
+                                            >
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-semibold">
+                                                        {item.name || "Add-on service"}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {formatPeso(price)} x {item.quantity}
+                                                    </p>
+                                                </div>
+                                                <p className="shrink-0 text-sm font-bold text-primary">
+                                                    {formatPeso(lineTotal)}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-primary">
-                                        ₱{(((item.price || 0) * item.quantity) || 0).toLocaleString()}
-                                    </p>
-                                </div>
+                                <GuestDivider className="mb-3 mt-auto pt-4" />
+                                <SummaryLine label="Add-on subtotal" value={formatPeso(addOnSubTotal)} />
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        ) : (
+                            <div className="flex flex-1 flex-col">
+                                <div className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">
+                                    No add-ons selected.
+                                </div>
+                                <GuestDivider className="mb-3 mt-auto pt-4" />
+                                <SummaryLine label="Add-on subtotal" value={formatPeso(addOnSubTotal)} />
+                            </div>
+                        )}
+                    </ReviewSection>
 
-                <div>
-                    <h4 className="font-bold mb-2">
-                        Pre Order Items 
-                        ({preOrders.length} {preOrders.length === 1 ? 'Item' : 'Items'})
-                    </h4>
-                    <div className="space-y-3">
-                        {preOrders.map((item) => (
-                            <div
-                            key={item.id}
-                            className="flex items-center gap-4 p-4 rounded-lg bg-muted"
+                    <ReviewSection
+                        title="Pre-orders"
+                        stretch
+                        action={
+                            <Button
+                                type="button"
+                                variant="link"
+                                className="h-auto p-0 text-xs"
+                                onClick={() => setBookingStep("pre-order")}
                             >
-                                <img
-                                src={item.imageUrl}
-                                alt={item.name}
-                                className="w-16 h-16 rounded-lg object-cover"
-                                />
-                                <div className="flex-1">
-                                    <p className="font-bold mb-1">
-                                        {item.name}
-                                    </p>
-                                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                        ₱{item.price.toLocaleString()} × {item.quantity}
-                                    </div>
+                                Edit
+                            </Button>
+                        }
+                    >
+                        {preOrderItems.length > 0 && !menuItems ? (
+                            <div className="flex flex-1 flex-col">
+                                <div className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">
+                                    Loading pre-ordered items...
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-primary">
-                                        ₱{(item.price * item.quantity).toLocaleString()}
-                                    </p>
-                                </div>
+                                <GuestDivider className="mb-3 mt-auto pt-4" />
+                                <SummaryLine label="Pre-order subtotal" value={formatPeso(preOrderSubTotal)} />
                             </div>
-                        ))}
-                    </div>
+                        ) : preOrders.length > 0 ? (
+                            <div className="flex flex-1 flex-col">
+                                <div className="space-y-2">
+                                    {preOrders.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 p-3"
+                                        >
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-semibold">{item.name}</p>
+                                                <p className="mt-1 text-xs text-muted-foreground">
+                                                    {formatPeso(item.price)} x {item.quantity}
+                                                </p>
+                                            </div>
+                                            <p className="shrink-0 text-sm font-bold text-primary">
+                                                {formatPeso(item.price * item.quantity)}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <GuestDivider className="mb-3 mt-auto pt-4" />
+                                <SummaryLine label="Pre-order subtotal" value={formatPeso(preOrderSubTotal)} />
+                            </div>
+                        ) : (
+                            <div className="flex flex-1 flex-col">
+                                <div className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">
+                                    No pre-orders selected.
+                                </div>
+                                <GuestDivider className="mb-3 mt-auto pt-4" />
+                                <SummaryLine label="Pre-order subtotal" value={formatPeso(preOrderSubTotal)} />
+                            </div>
+                        )}
+                    </ReviewSection>
                 </div>
 
-                <div className="p-4 rounded-xl border-2 border-primary/75 bg-primary/5">
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                                Accommodation Subtotal
-                            </span>
-                            <span className="font-semibold">
-                                ₱{accommodationSubtotal.toLocaleString()}
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                            <span  className="text-muted-foreground">
-                                {accommodation.isGuestFeeWaived ? "Guest fees included in price" : "Guest Fee Subtotal"}
-                            </span>
-                            <span className="font-semibold">
-                                ₱{guestFeeSubTotal.toLocaleString()}
-                            </span>
-                        </div>
-                        {addOnSubTotal > 0 && (
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Add-on Subtotal</span>
-                                <span className="font-semibold">
-                                    ₱{addOnSubTotal.toLocaleString()}
-                                </span>
-                            </div>
-                        )}
-                        {preOrderSubTotal > 0 && (
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Pre-Order Subtotal</span>
-                                <span className="font-semibold">
-                                    ₱{preOrderSubTotal.toLocaleString()}
-                                </span>
-                            </div>
-                        )}
-                        <div className="pt-2 border-t flex justify-between">
-                            <span className="font-bold text-lg">
-                                Total
-                            </span>
-                            <span className="font-bold text-lg text-primary">
-                                ₱ {total.toLocaleString()}
-                            </span>
-                        </div>
+                <ReviewSection title="Price Breakdown">
+                    <div className="space-y-3">
+                        <SummaryLine label="Accommodation" value={formatPeso(accommodationSubtotal)} />
+                        <SummaryLine
+                            label={accommodation.isGuestFeeWaived ? "Guest fees included" : "Guest fees"}
+                            value={formatPeso(guestFeeSubTotal)}
+                        />
+                        <SummaryLine label="Add-ons" value={formatPeso(addOnSubTotal)} />
+                        <SummaryLine label="Pre-orders" value={formatPeso(preOrderSubTotal)} />
+                        <GuestDivider className="my-3" />
+                        <SummaryLine label="Total" value={formatPeso(total)} emphasize />
                     </div>
-                </div>
+                </ReviewSection>
             </div>
 
-            <div className="space-y-2">
-                <Button
-                type="button"
-                className="w-full"
-                onClick={() => setBookingStep('payment')}
-                >
-                    Proceed to Payment
-                    <ArrowRight className="w-6 h-6" />
-                </Button>
-                <Button type="button" variant="outline" className="w-full"
-                onClick={() => setBookingStep('pre-order')}
-                >
-                    Back to Pre-order
-                </Button>
-            </div>
+            <aside className="lg:sticky lg:top-4 lg:self-start">
+                <GuestCard accent className="p-4 md:p-5">
+                    <h3 className="text-lg font-bold tracking-normal">Final Summary</h3>
+                    <GuestDivider className="my-4" />
+                    <div className="space-y-3">
+                        <SummaryLine label="Stay" value={stayType} />
+                        <SummaryLine
+                            label="Guests"
+                            value={`${totalGuests} ${totalGuests === 1 ? "guest" : "guests"}`}
+                        />
+                        <SummaryLine label="Add-ons" value={formatPeso(addOnSubTotal)} />
+                        <SummaryLine label="Pre-orders" value={formatPeso(preOrderSubTotal)} />
+                    </div>
+                    <GuestDivider className="my-4" />
+                    <div className="flex items-end justify-between gap-4">
+                        <div>
+                            <p className="text-sm text-muted-foreground">Total due</p>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Payment method and proof are next.
+                            </p>
+                        </div>
+                        <p className="text-2xl font-extrabold text-primary">
+                            {formatPeso(total)}
+                        </p>
+                    </div>
+                    <div className="mt-5 space-y-2">
+                        <Button
+                            type="button"
+                            className="w-full"
+                            onClick={() => setBookingStep("payment")}
+                        >
+                            Proceed to Payment
+                            <ArrowRight className="size-4" />
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => setBookingStep("pre-order")}
+                        >
+                            Back to Pre-order
+                        </Button>
+                    </div>
+                </GuestCard>
+            </aside>
         </div>
-    )
-}
+    );
+};
 
 export default ReviewForm;
