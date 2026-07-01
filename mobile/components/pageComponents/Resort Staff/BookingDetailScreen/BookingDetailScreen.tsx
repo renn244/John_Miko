@@ -1,6 +1,7 @@
 import { reportTypeLabels } from "@/components/pageComponents/Resort Staff/reportDisplay";
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
+import DetailPageHeader from "@/components/ui/detail-page-header";
 import ScreenState from "@/components/ui/screen-state";
 import { useStaffBookingById } from "@/hooks/staffBookings.hook";
 import { useMyStaffReports } from "@/hooks/staffReports.hook";
@@ -11,7 +12,6 @@ import { AlertTriangle } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { AccommodationDetailsCard } from "./AccommodationDetailsCard";
-import { BookingHeader } from "./BookingHeader";
 import { GuestDetailsCard } from "./GuestDetailsCard";
 import { LinkedReportActionsCard } from "./LinkedReportActionsCard";
 import { LinkedReportsCard } from "./LinkedReportsCard";
@@ -25,7 +25,27 @@ const reportStatusTone: Record<ReportStatus, "pending" | "approved" | "rejected"
   Rejected: "rejected",
 };
 
-export default function BookingDetailScreen() {
+type ResortBookingsFallbackHref = "/resort-staff/(bookings)/index";
+
+type BookingDetailScreenProps = {
+  fallbackHref: ResortBookingsFallbackHref;
+};
+
+const navigateBackToBookings = (
+  router: ReturnType<typeof useRouter>,
+  fallbackHref: ResortBookingsFallbackHref,
+) => {
+  if (router.canGoBack()) {
+    router.back();
+    return;
+  }
+
+  router.replace(fallbackHref);
+};
+
+export default function BookingDetailScreen({
+  fallbackHref,
+}: BookingDetailScreenProps) {
   const router = useRouter();
   const [now, setNow] = useState(() => Date.now());
   const params = useLocalSearchParams<{ bookingId?: string }>();
@@ -42,7 +62,7 @@ export default function BookingDetailScreen() {
   const createLinkedReport = (type: ReportType) => {
     if (!bookingId) return;
     router.push({
-      pathname: "/resort-staff/booking-report",
+      pathname: "/resort-staff/(bookings)/booking-report",
       params: { bookingId, type },
     });
   };
@@ -50,7 +70,11 @@ export default function BookingDetailScreen() {
   if (bookingQuery.isLoading) {
     return (
       <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-        <View className="flex-1 items-center justify-center gap-3">
+        <DetailPageHeader
+          onBack={() => navigateBackToBookings(router, fallbackHref)}
+          title="Booking details"
+        />
+        <View className="flex-1 items-center justify-center gap-3 px-6">
           <ActivityIndicator size="large" />
           <Text className="text-base text-neutral-grey-1">
             Loading booking details...
@@ -65,6 +89,7 @@ export default function BookingDetailScreen() {
       <BookingNotAvailableState
         bookingId={bookingId}
         refetch={bookingQuery.refetch}
+        fallbackHref={fallbackHref}
       />
     );
   }
@@ -80,21 +105,22 @@ export default function BookingDetailScreen() {
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
+      <DetailPageHeader
+        onBack={() => navigateBackToBookings(router, fallbackHref)}
+        title="Booking details"
+        metadata={`Reference: #${booking.id.slice(-8).toUpperCase()}`}
+      />
+
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingHorizontal: 12,
-          paddingTop: 10,
+          paddingHorizontal: 16,
+          paddingTop: 16,
           paddingBottom: 28,
           gap: 10,
         }}
       >
-        <BookingHeader
-          onBack={() => router.back()}
-          reference={`#${booking.id.slice(-8).toUpperCase()}`}
-        />
-
         <GuestDetailsCard booking={booking} />
 
         <ReservationTimelineCard checkIn={checkIn} checkOut={checkOut} />
@@ -122,7 +148,7 @@ export default function BookingDetailScreen() {
           onLoadMore={() => reportsQuery.fetchNextPage()}
           onOpenReport={(reportId) =>
             router.push({
-              pathname: "/resort-staff/reports/[reportId]",
+              pathname: "/resort-staff/(reports)/[reportId]",
               params: { reportId },
             })
           }
@@ -137,16 +163,23 @@ export default function BookingDetailScreen() {
 type BookingNotAvailableStateProps = {
   bookingId?: string;
   refetch: () => void;
+  fallbackHref: ResortBookingsFallbackHref;
 };
 
 function BookingNotAvailableState({
   bookingId,
   refetch,
+  fallbackHref,
 }: BookingNotAvailableStateProps) {
   const router = useRouter();
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3 px-6">
+      <DetailPageHeader
+        onBack={() => navigateBackToBookings(router, fallbackHref)}
+        title="Booking details"
+        className="-mx-6"
+      />
       <View className="flex-1 items-center justify-center">
         <ScreenState
           icon={<AlertTriangle size={24} color="#AB091E" />}
@@ -156,7 +189,11 @@ function BookingNotAvailableState({
           actionLabel={bookingId ? "Retry" : undefined}
           onAction={bookingId ? () => refetch() : undefined}
         />
-        <Button variant="ghost" onPress={() => router.back()} className="mt-2">
+        <Button
+          variant="ghost"
+          onPress={() => navigateBackToBookings(router, fallbackHref)}
+          className="mt-2"
+        >
           <Text className="font-sans-semibold text-base text-neutral-dark-1">
             Go back
           </Text>

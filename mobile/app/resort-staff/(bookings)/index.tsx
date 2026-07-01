@@ -33,7 +33,6 @@ const getManilaDateKey = () => {
 
 export default function ResortStaffBookingsScreen() {
   const search = useStaffReportsBookingFilterStore((state) => state.search);
-  const setSearch = useStaffReportsBookingFilterStore((state) => state.setSearch); 
 
   const query = useStaffBookings(search);
 
@@ -156,7 +155,7 @@ const NotFoundState = ({
 }: NotFoundStateProps) => {
   return (
     <ScreenState 
-    icon={<SearchX size={24} color="" />}
+    icon={<SearchX size={24} color="#0E33F3" />}
     tone="info"
     title={hasSearch ? "No bookings found" : "No confirmed upcoming bookings"}
     description={

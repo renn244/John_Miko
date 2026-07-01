@@ -94,7 +94,7 @@ const ReportsList = () => {
                 report={item}
                 onPress={() =>
                     router.push({
-                        pathname: "/resort-staff/reports/[reportId]",
+                        pathname: "/resort-staff/(reports)/[reportId]",
                         params: { reportId: item.id },
                     })
                 }

@@ -1,10 +1,10 @@
 import OperationalCard from '@/components/ui/operational-card';
+import { StaffBookingSummary } from '@/types/staffBooking.type';
+import { format, parseISO } from 'date-fns';
+import { useRouter } from 'expo-router';
 import { CalendarDays, Users } from 'lucide-react-native';
 import React from 'react';
 import { Text, View } from 'react-native';
-import { format, parseISO } from 'date-fns';
-import { StaffBookingSummary } from '@/types/staffBooking.type';
-import { useRouter } from '@/.expo/types/router';
 
 const getDateKey = (value: string) => value.slice(0, 10);
 
@@ -29,7 +29,7 @@ const BookingCard = ({
         <OperationalCard
           onPress={() =>
             router.push({
-              pathname: "/resort-staff/booking/[bookingId]",
+              pathname: "/resort-staff/(bookings)/booking/[bookingId]",
               params: { bookingId: item.id },
             })
           }

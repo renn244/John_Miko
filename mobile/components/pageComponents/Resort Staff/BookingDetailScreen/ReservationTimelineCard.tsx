@@ -1,7 +1,7 @@
 import OperationalCard from "@/components/ui/operational-card";
+import SectionTitle from "@/components/ui/section-title";
 import { format } from "date-fns";
 import { Text, View } from "react-native";
-import { SectionTitle } from "./SectionTitle";
 
 type ReservationTimelineCardProps = {
   checkIn: Date;

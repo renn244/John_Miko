@@ -1,8 +1,8 @@
 import OperationalCard from "@/components/ui/operational-card";
+import SectionTitle from "@/components/ui/section-title";
 import StatusChip from "@/components/ui/status-chip";
 import type { StaffBookingAddOn, StaffBookingDetails, StaffBookingPreOrder } from "@/types/staffBooking.type";
 import { Text, View } from "react-native";
-import { SectionTitle } from "./SectionTitle";
 
 type ServicesOrdersCardProps = {
   booking: StaffBookingDetails;

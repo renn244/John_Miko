@@ -2,6 +2,7 @@ import { CloudinaryPreview } from '@/components/common/CloudinaryPreview';
 import { CloudinaryUpload } from '@/components/common/CloudinaryUpload';
 import { Button } from '@/components/ui/Button';
 import CustomSafeAreaView from '@/components/ui/CustomSafeAreaView';
+import DetailPageHeader from '@/components/ui/detail-page-header';
 import OperationalCard from '@/components/ui/operational-card';
 import ScreenState from '@/components/ui/screen-state';
 import StatusChip, { type StatusChipTone } from '@/components/ui/status-chip';
@@ -18,7 +19,6 @@ import { AlertTriangle, SearchX } from 'lucide-react-native';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TextInput, View } from 'react-native';
 import { ChevronStepper } from './ChevronStepper';
-import { DetailHeader } from './DetailHeader';
 import { MaintenanceSkeletonCard, MaintenanceSkeletonTimeline } from './MaintenanceDetailSkeleton';
 import { ResolutionDetails } from './ResolutionDetails';
 import { TimelineCard } from './TimelineCard';
@@ -56,7 +56,27 @@ const statusStepIndex: Record<MaintenanceStatus, number> = {
   Closed: 3,
 };
 
-export default function MaintenanceDetailScreen() {
+type MaintenanceRootHref = "/maintenance-staff/(assigned)" | "/maintenance-staff/(history)";
+
+type MaintenanceDetailScreenProps = {
+  fallbackHref: MaintenanceRootHref;
+};
+
+const navigateBackToList = (
+  router: ReturnType<typeof useRouter>,
+  fallbackHref: MaintenanceRootHref,
+) => {
+  if (router.canGoBack()) {
+    router.back();
+    return;
+  }
+
+  router.replace(fallbackHref);
+};
+
+export default function MaintenanceDetailScreen({
+  fallbackHref,
+}: MaintenanceDetailScreenProps) {
   const router = useRouter();
   const { maintenanceId } = useLocalSearchParams<{ maintenanceId: string }>();
   const maintenanceIdParam = Array.isArray(maintenanceId) ? maintenanceId[0] : maintenanceId;
@@ -86,13 +106,13 @@ export default function MaintenanceDetailScreen() {
 
   if (!maintenanceIdParam) {
     return (
-      <NotFoundState router={router} />
+      <NotFoundState router={router} fallbackHref={fallbackHref} />
     );
   }
 
   if (detailQuery.isLoading) {
     return (
-      <LoadingState router={router} />
+      <LoadingState router={router} fallbackHref={fallbackHref} />
     );
   }
 
@@ -101,13 +121,14 @@ export default function MaintenanceDetailScreen() {
       <ErrorState 
       router={router}
       refetch={detailQuery.refetch}
+      fallbackHref={fallbackHref}
       />
     );
   }
 
   if (!detailQuery.data) {
     return (
-      <NotFoundState router={router} />
+      <NotFoundState router={router} fallbackHref={fallbackHref} />
     );
   }
 
@@ -116,10 +137,10 @@ export default function MaintenanceDetailScreen() {
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-      <DetailHeader
-        onBack={() => router.back()}
-        title="Ticket Details"
-        badge={`ID: ${maintenance.id}`}
+      <DetailPageHeader
+        onBack={() => navigateBackToList(router, fallbackHref)}
+        title="Ticket details"
+        metadata={`Ticket ID: ${maintenance.id}`}
       />
 
       <ScrollView
@@ -312,13 +333,18 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 const NotFoundState = ({
-    router
+    router,
+    fallbackHref,
 }: {
     router: ReturnType<typeof useRouter>
+    fallbackHref: MaintenanceRootHref;
 }) => {
     return (
         <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-            <DetailHeader onBack={() => router.back()} title="Ticket Details" />
+            <DetailPageHeader
+                onBack={() => navigateBackToList(router, fallbackHref)}
+                title="Ticket details"
+            />
             <View className="flex-1 justify-center px-6">
                 <ScreenState
                     icon={<SearchX size={24} color="#6B7280" />}
@@ -326,7 +352,7 @@ const NotFoundState = ({
                     title="Maintenance ticket not found"
                     description="This ticket may no longer be assigned to you."
                     actionLabel="Go back"
-                    onAction={() => router.back()}
+                    onAction={() => navigateBackToList(router, fallbackHref)}
                 />
             </View>
       </CustomSafeAreaView>
@@ -335,14 +361,19 @@ const NotFoundState = ({
 
 const ErrorState = ({
     router,
-    refetch
+    refetch,
+    fallbackHref,
 } : {
     router: ReturnType<typeof useRouter>
     refetch: () => void
+    fallbackHref: MaintenanceRootHref;
 }) => {
     return (
         <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-            <DetailHeader onBack={() => router.back()} title="Ticket Details" />
+            <DetailPageHeader
+                onBack={() => navigateBackToList(router, fallbackHref)}
+                title="Ticket details"
+            />
             <View className="flex-1 justify-center px-6">
                 <ScreenState
                     icon={<AlertTriangle size={24} color="#AB091E" />}
@@ -352,7 +383,7 @@ const ErrorState = ({
                     actionLabel="Retry"
                     onAction={() => refetch()}
                 />
-                <Button variant="outline" onPress={() => router.back()} className="mt-2">
+                <Button variant="outline" onPress={() => navigateBackToList(router, fallbackHref)} className="mt-2">
                     <Text className="font-sans-semibold text-base text-primary">
                         Go back
                     </Text>
@@ -363,13 +394,18 @@ const ErrorState = ({
 }
 
 const LoadingState = ({
-    router
+    router,
+    fallbackHref,
 }: {
     router: ReturnType<typeof useRouter>
+    fallbackHref: MaintenanceRootHref;
 }) => {
     return (
         <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-            <DetailHeader onBack={() => router.back()} title="Ticket Details" />
+            <DetailPageHeader
+                onBack={() => navigateBackToList(router, fallbackHref)}
+                title="Ticket details"
+            />
             <View className="gap-4 px-5 pt-4">
                 <MaintenanceSkeletonCard />
                 <MaintenanceSkeletonTimeline />

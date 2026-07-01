@@ -5,13 +5,12 @@ import {
     Plus,
     Settings2Icon,
 } from "lucide-react-native";
-import { View } from "react-native";
 
 export default function ResortStaffTabLayout() {
     return (
         <Tabs screenOptions={{ tabBarShowLabel: false }}>
             <Tabs.Screen
-                name="index"
+                name="(bookings)"
                 options={{
                     headerShown: false,
                     title: "Dashboard",
@@ -26,20 +25,14 @@ export default function ResortStaffTabLayout() {
                 options={{
                     headerShown: false,
                     title: "New Report",
-                    tabBarIcon: ({ focused }) => (
-                        <View
-                            className={`h-14 w-14 items-center justify-center rounded-full ${
-                                focused ? "bg-primary-dark" : "bg-primary"
-                            }`}
-                        >
-                            <Plus size={28} color="#FFFFFF" />
-                        </View>
+                    tabBarIcon: ({ color, size }) => (
+                        <Plus size={size} color={color} />
                     ),
                 }}
             />
 
             <Tabs.Screen
-                name="reports/index"
+                name="(reports)"
                 options={{
                     headerShown: false,
                     title: "My Reports",
@@ -57,30 +50,6 @@ export default function ResortStaffTabLayout() {
                     tabBarIcon: ({ color, size }) => (
                         <Settings2Icon size={size} color={color} />
                     ),
-                }}
-            />
-
-            <Tabs.Screen
-                name="reports/[reportId]"
-                options={{
-                    href: null,
-                    headerShown: false,
-                }}
-            />
-
-            <Tabs.Screen
-                name="booking/[bookingId]"
-                options={{
-                    href: null,
-                    headerShown: false,
-                }}
-            />
-
-            <Tabs.Screen
-                name="booking-report"
-                options={{
-                    href: null,
-                    headerShown: false,
                 }}
             />
         </Tabs>

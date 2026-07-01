@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/Button";
 import OperationalCard from "@/components/ui/operational-card";
+import SectionTitle from "@/components/ui/section-title";
 import type { ReportType } from "@/types/staffReport.type";
 import { format } from "date-fns";
-import { LogIn, LogOut, Wrench } from "lucide-react-native";
-import type { ReactNode } from "react";
 import { Text, View } from "react-native";
-import { SectionTitle } from "./SectionTitle";
 
 type LinkedReportActionsCardProps = {
   checkIn: Date;
@@ -39,19 +37,16 @@ export function LinkedReportActionsCard({
       <View className="gap-2 pt-1">
         <ReportAction
           disabled={!reportingOpen}
-          icon={<LogIn size={15} color="#FFFFFF" />}
           label="Check-in Report"
           onPress={() => onCreateReport("checkIn")}
         />
         <ReportAction
           disabled={!reportingOpen}
-          icon={<LogOut size={15} color="#FFFFFF" />}
           label="Check-out Report"
           onPress={() => onCreateReport("checkOut")}
         />
         <ReportAction
           disabled={!reportingOpen}
-          icon={<Wrench size={15} color="#FFFFFF" />}
           label="Maintenance Report"
           onPress={() => onCreateReport("maintenance")}
         />
@@ -62,18 +57,15 @@ export function LinkedReportActionsCard({
 
 function ReportAction({
   disabled,
-  icon,
   label,
   onPress,
 }: {
   disabled: boolean;
-  icon: ReactNode;
   label: string;
   onPress: () => void;
 }) {
   return (
-    <Button disabled={disabled} onPress={onPress} className="h-10 rounded-sm">
-      {icon}
+    <Button size="sm" disabled={disabled} onPress={onPress} className="rounded-sm">
       <Text className="font-sans-semibold text-base text-white">
         {label}
       </Text>

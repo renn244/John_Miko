@@ -23,22 +23,17 @@ const BookingListFilter = ({
 
     useEffect(() => {
         setSearch(debounceSearch)
-    }, [debounceSearch])
+    }, [debounceSearch, setSearch])
 
     return (
         <View className="gap-4 px-5 pb-3 pt-4">
-            <View className="gap-3">
-                <Text className="font-sans-bold text-2xl text-primary">
-                    John Miko&apos;s
+            <View className="gap-1">
+                <Text className="font-sans-bold text-2xl text-neutral-dark-1">
+                    Upcoming bookings
                 </Text>
-                <View className="gap-1">
-                    <Text className="font-sans-bold text-2xl text-neutral-dark-1">
-                        Upcoming bookings
-                    </Text>
-                    <Text className="text-base leading-5 text-neutral-grey-1">
-                        Verify guests and prepare for confirmed reservations.
-                    </Text>
-                </View>
+                <Text className="text-base leading-5 text-neutral-grey-1">
+                    Verify guests and prepare for confirmed reservations.
+                </Text>
             </View>
 
             <View className="flex-row flex-wrap gap-2">
@@ -49,11 +44,12 @@ const BookingListFilter = ({
 
             <View className="relative">
                 <Input
+                    size="sm"
                     value={searchInput}
                     onChangeText={setSearchInput}
                     placeholder="Search guest, contact, or booking ID"
                     surface="white"
-                    leftIcon={<Search size={19} color="#6B7580" />}
+                    leftIcon={<Search size={18} color="#9FA8B1" />}
                 />
             </View>
       </View>

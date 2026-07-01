@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { useStaffReportsFilterStore } from "@/store/staffReportsFilter.store";
 import { ReportSeverity, ReportStatus, ReportType } from "@/types/staffReport.type";
-import { RotateCcw, X } from "lucide-react-native";
+import { X } from "lucide-react-native";
 import { Modal, Pressable, Text, View } from "react-native";
 
 type FilterOption<T extends string> = {
@@ -94,7 +94,6 @@ function ReportListFilterSheet({
                             className="flex-1"
                             onPress={onReset}
                         >
-                            <RotateCcw size={16} color="#1F2933" />
                             <Text className="font-sans-semibold text-base text-neutral-dark-1">
                                 Reset
                             </Text>

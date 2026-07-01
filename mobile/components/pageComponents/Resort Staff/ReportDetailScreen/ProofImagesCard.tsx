@@ -1,6 +1,5 @@
 import OperationalCard from "@/components/ui/operational-card";
 import { Image } from "expo-image";
-import { ImageIcon } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 type ProofImagesCardProps = {
@@ -10,8 +9,7 @@ type ProofImagesCardProps = {
 export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
   return (
     <OperationalCard contentClassName="gap-3 px-5 py-4">
-      <View className="flex-row items-center gap-2">
-        <ImageIcon size={18} color="#0E33F3" />
+      <View className="flex-row items-baseline gap-2">
         <Text className="font-sans-bold text-lg text-neutral-dark-1">
           Proof photos
         </Text>

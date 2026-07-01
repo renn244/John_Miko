@@ -5,6 +5,7 @@ import BookingTimeline from "@/components/pageComponents/Kitchen Staff/PreOrderD
 import PreOrderItemList from "@/components/pageComponents/Kitchen Staff/PreOrderDetail/PreOrderList";
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
+import DetailPageHeader from "@/components/ui/detail-page-header";
 import ScreenState from "@/components/ui/screen-state";
 import {
   useKitchenOrderById
@@ -12,16 +13,23 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   AlertTriangle,
-  ArrowLeft,
   ClipboardList
 } from "lucide-react-native";
 import {
   ActivityIndicator,
-  Pressable,
   ScrollView,
   Text,
   View
 } from "react-native";
+
+const navigateBackToQueue = (router: ReturnType<typeof useRouter>) => {
+  if (router.canGoBack()) {
+    router.back();
+    return;
+  }
+
+  router.replace("/kitchen-staff");
+};
 
 export default function KitchenOrderDetailsScreen() {
   const router = useRouter();
@@ -33,7 +41,7 @@ export default function KitchenOrderDetailsScreen() {
 
   if (isLoading) {
     return (
-      <LoadingState />
+      <LoadingState router={router} />
     );
   }
 
@@ -51,28 +59,22 @@ export default function KitchenOrderDetailsScreen() {
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
+      <DetailPageHeader
+        onBack={() => navigateBackToQueue(router)}
+        title="Kitchen order"
+        metadata={`Booking ID: ${order.bookingId}`}
+      />
+
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 10,
+          paddingTop: 16,
           paddingBottom: 28,
           gap: 12,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-row items-center gap-3">
-          <Pressable
-            onPress={() => router.back()}
-            className="h-9 w-9 items-center justify-center rounded-full"
-          >
-            <ArrowLeft size={21} color="#1F2937" />
-          </Pressable>
-          <Text className="font-sans-bold text-xl text-neutral-dark-1">
-            Kitchen order
-          </Text>
-        </View>
-
         <BookingInfo order={order} />
 
         {order.notes?.trim() ? (
@@ -90,9 +92,17 @@ export default function KitchenOrderDetailsScreen() {
   );
 }
 
-const LoadingState = () => {
+const LoadingState = ({
+  router,
+}: {
+  router: ReturnType<typeof useRouter>;
+}) => {
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
+      <DetailPageHeader
+        onBack={() => navigateBackToQueue(router)}
+        title="Kitchen order"
+      />
       <View className="flex-1 items-center justify-center gap-3 px-6">
         <ActivityIndicator />
         <Text className="text-center text-base text-neutral-grey-1">
@@ -110,6 +120,11 @@ const NotFoundState = ({
 }) => {
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3 px-6">
+      <DetailPageHeader
+        onBack={() => navigateBackToQueue(router)}
+        title="Kitchen order"
+        className="-mx-6"
+      />
       <View className="flex-1 items-center justify-center">
         <ScreenState
           icon={<ClipboardList size={24} color="#0E33F3" />}
@@ -117,7 +132,7 @@ const NotFoundState = ({
           title="Missing order ID"
           description="This order link is incomplete."
           actionLabel="Go back"
-          onAction={() => router.back()}
+          onAction={() => navigateBackToQueue(router)}
         />
       </View>
     </CustomSafeAreaView>
@@ -135,6 +150,11 @@ const ErrorState = ({
 }) => {
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3 px-6">
+      <DetailPageHeader
+        onBack={() => navigateBackToQueue(router)}
+        title="Kitchen order"
+        className="-mx-6"
+      />
       <View className="flex-1 items-center justify-center">
         <ScreenState
           icon={<AlertTriangle size={24} color="#AB091E" />}
@@ -144,7 +164,7 @@ const ErrorState = ({
           actionLabel={isRefetching ? "Retrying..." : "Retry"}
           onAction={() => refetch()}
         />
-        <Button variant="outline" onPress={() => router.back()} className="mt-2 w-full">
+        <Button variant="outline" onPress={() => navigateBackToQueue(router)} className="mt-2 w-full">
           <Text className="font-sans-semibold text-base text-primary">
             Go back
           </Text>

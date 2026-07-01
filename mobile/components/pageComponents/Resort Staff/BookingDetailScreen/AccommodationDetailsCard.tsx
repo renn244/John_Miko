@@ -1,7 +1,7 @@
 import OperationalCard from "@/components/ui/operational-card";
+import SectionTitle from "@/components/ui/section-title";
 import type { StaffBookingDetails } from "@/types/staffBooking.type";
 import { Text, View } from "react-native";
-import { SectionTitle } from "./SectionTitle";
 
 type AccommodationDetailsCardProps = {
   booking: StaffBookingDetails;
