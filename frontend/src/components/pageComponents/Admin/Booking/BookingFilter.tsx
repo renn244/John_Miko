@@ -108,7 +108,7 @@ const SearchBookingFilter = () => {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="pl-8"
-            placeholder="Search by guest name or booking ID..."
+            placeholder="Search by guest name or booking reference..."
             />
         </div>
     )

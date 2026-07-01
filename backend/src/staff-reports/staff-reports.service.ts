@@ -21,6 +21,7 @@ const reportInclude = {
   booking: {
     select: {
       id: true,
+      referenceCode: true,
       guestName: true,
       bookingDate: true,
       accommodation: {
@@ -143,6 +144,7 @@ export class StaffReportsService {
               { id: { contains: search, mode: 'insensitive' } },
               { title: { contains: search, mode: 'insensitive' } },
               { bookingId: { contains: search, mode: 'insensitive' } },
+              { booking: { referenceCode: { contains: search, mode: 'insensitive' } } },
               { user: { name: { contains: search, mode: 'insensitive' } } },
               { user: { email: { contains: search, mode: 'insensitive' } } },
               { user: { contactNo: { contains: search, mode: 'insensitive' } } },

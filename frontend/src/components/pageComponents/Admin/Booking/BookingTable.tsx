@@ -61,7 +61,7 @@ const BookingTable = () => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Booking ID</TableHead>
+                        <TableHead>Booking Reference</TableHead>
                         <TableHead>Guest Name</TableHead>
                         <TableHead>Accommodation</TableHead>
                         <TableHead>Check In</TableHead>
@@ -75,7 +75,7 @@ const BookingTable = () => {
                 <TableBody>
                     {bookings?.map((booking) => (
                         <TableRow key={booking.id}>
-                            <TableCell>{booking.id}</TableCell>
+                            <TableCell>{booking.referenceCode ?? "—"}</TableCell>
                             <TableCell>{booking.guestName}</TableCell>
                             <TableCell>{booking.accommodation.name}</TableCell>
                             <TableCell>{format(new Date(booking.bookingDate), "MMM dd, yyyy")}</TableCell>

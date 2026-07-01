@@ -47,7 +47,7 @@ const BookingListFilter = ({
                     size="sm"
                     value={searchInput}
                     onChangeText={setSearchInput}
-                    placeholder="Search guest, contact, or booking ID"
+                    placeholder="Search guest, contact, or booking reference"
                     surface="white"
                     leftIcon={<Search size={18} color="#9FA8B1" />}
                 />

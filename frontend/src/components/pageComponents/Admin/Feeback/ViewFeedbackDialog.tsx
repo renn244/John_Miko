@@ -90,7 +90,7 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                                 <Hash className="w-4 h-4 text-muted-foreground" />
                                 <span className="text-muted-foreground">Booking Reference:</span>
                                 <span className=" font-semibold text-primary">
-                                    {feedback.bookingId}
+                                    {feedback.booking?.referenceCode ?? "—"}
                                 </span>
                             </div>
                         )}

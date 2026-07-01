@@ -33,6 +33,7 @@ export type StaffReportReviewer = {
 
 export type StaffReportBookingSummary = {
     id: string;
+    referenceCode: string | null;
     guestName: string;
     bookingDate: string;
     accommodation: {

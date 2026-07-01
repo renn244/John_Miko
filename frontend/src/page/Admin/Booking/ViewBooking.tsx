@@ -115,7 +115,7 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                             <Badge variant="outline">{booking.paymentType} Payment</Badge>
                         </div>
                     </div>
-                    <p className="text-sm mt-1 text-muted-foreground break-all">{booking.id}</p>
+                    <p className="text-sm mt-1 text-muted-foreground break-all">{booking.referenceCode ?? "—"}</p>
                 </div>
             </div>
 

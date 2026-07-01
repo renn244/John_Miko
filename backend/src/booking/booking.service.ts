@@ -37,6 +37,27 @@ export class BookingService {
         return adultTotal + seniorTotal + kidsTotal
     }
 
+    private buildBookingReferenceCode(bookingId: string, stayDate: Date) {
+        const year = stayDate.getUTCFullYear();
+        const month = String(stayDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(stayDate.getUTCDate()).padStart(2, '0');
+        const suffix = bookingId.slice(-5).toUpperCase();
+
+        return `BK-${year}${month}${day}-${suffix}`;
+    }
+
+    private async attachReferenceCode(
+        booking: { id: string; bookingDate: Date },
+        tx: Prisma.TransactionClient,
+    ) {
+        return tx.booking.update({
+            where: { id: booking.id },
+            data: {
+                referenceCode: this.buildBookingReferenceCode(booking.id, booking.bookingDate),
+            },
+        });
+    }
+
     private async findStayOptionOrThrow(accommodationId: string, stayOptionId: string, tx: Prisma.TransactionClient = this.prisma) {
         const stayOption = await tx.accommodationStayOption.findFirst({
             where: {
@@ -100,7 +121,8 @@ export class BookingService {
             const stayOption = await this.findStayOptionOrThrow(body.accommodationId, body.stayOptionId, txprisma);
             await this.ensureBookingSlotAvailable(body.accommodationId, body.checkIn, body.stayOptionId, txprisma);
 
-            const newBooking = await this.createBooking(body, user.id, stayOption, accommodation.isGuestFeeWaived, txprisma);
+            const createdBooking = await this.createBooking(body, user.id, stayOption, accommodation.isGuestFeeWaived, txprisma);
+            const newBooking = await this.attachReferenceCode(createdBooking, txprisma);
 
             const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(newBooking.id, body.preOrderItems || [], txprisma);
             const guestFeeTotal = accommodation.isGuestFeeWaived
@@ -178,7 +200,7 @@ export class BookingService {
                 seniorGuests: 0,
             };
 
-            const newBooking = await this.createBooking(
+            const createdBooking = await this.createBooking(
                 bookingPayload,
                 null,
                 stayOption,
@@ -186,6 +208,7 @@ export class BookingService {
                 txprisma,
                 'Confirmed'
             );
+            const newBooking = await this.attachReferenceCode(createdBooking, txprisma);
 
             const guestFeeTotal = accommodation.isGuestFeeWaived
                 ? 0
@@ -269,6 +292,7 @@ export class BookingService {
         const searchFilter = search ? {
             OR: [
                 { id: { contains: search, mode: 'insensitive' as const } },
+                { referenceCode: { contains: search, mode: 'insensitive' as const } },
                 { guestName: { contains: search, mode: 'insensitive' as const } },
             ]
         } : {}
@@ -334,6 +358,7 @@ export class BookingService {
             ...(search ? {
                 OR: [
                     { id: { contains: search, mode: 'insensitive' } },
+                    { referenceCode: { contains: search, mode: 'insensitive' } },
                     { guestName: { contains: search, mode: 'insensitive' } },
                     { contactNo: { contains: search, mode: 'insensitive' } },
                 ]
@@ -345,6 +370,7 @@ export class BookingService {
                 where,
                 select: {
                     id: true,
+                    referenceCode: true,
                     guestName: true,
                     contactNo: true,
                     bookingDate: true,
@@ -394,6 +420,7 @@ export class BookingService {
             },
             select: {
                 id: true,
+                referenceCode: true,
                 guestName: true,
                 email: true,
                 contactNo: true,
@@ -712,7 +739,7 @@ export class BookingService {
         })
 
         await this.bookingEmailService.sendRescheduledEmail({
-            bookingId: updatedBooking.id,
+            bookingReference: updatedBooking.referenceCode ?? updatedBooking.id,
             guestName: updatedBooking.guestName,
             email: updatedBooking.email,
             accommodationName: booking.accommodation.name,
@@ -749,7 +776,7 @@ export class BookingService {
 
         if (updatedBooking.status === BookingStatus.Cancelled) {
             await this.bookingEmailService.sendCancelledEmail({
-                bookingId: updatedBooking.id,
+                bookingReference: updatedBooking.referenceCode ?? updatedBooking.id,
                 guestName: updatedBooking.guestName,
                 email: updatedBooking.email,
                 accommodationName: booking.accommodation.name,
@@ -759,7 +786,7 @@ export class BookingService {
             });
         } else {
             await this.bookingEmailService.sendStatusUpdatedEmail({
-                bookingId: updatedBooking.id,
+                bookingReference: updatedBooking.referenceCode ?? updatedBooking.id,
                 guestName: updatedBooking.guestName,
                 email: updatedBooking.email,
                 accommodationName: booking.accommodation.name,

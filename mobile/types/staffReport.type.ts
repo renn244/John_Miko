@@ -6,6 +6,7 @@ export type ReportSeverity = "Low" | "Medium" | "High";
 
 export type StaffReportBooking = {
   id: string;
+  referenceCode: string;
   guestName: string;
   bookingDate: string;
   accommodation: {

@@ -43,7 +43,7 @@ export default function PreOrderFilters() {
           <Input
             size="sm"
             surface="white"
-            placeholder="Search guest or booking ID"
+            placeholder="Search guest or booking reference"
             value={search}
             onChangeText={setSearch}
             autoCapitalize="none"

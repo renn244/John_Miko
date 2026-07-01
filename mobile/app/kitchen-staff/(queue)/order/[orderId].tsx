@@ -62,7 +62,7 @@ export default function KitchenOrderDetailsScreen() {
       <DetailPageHeader
         onBack={() => navigateBackToQueue(router)}
         title="Kitchen order"
-        metadata={`Booking ID: ${order.bookingId}`}
+        metadata={`Reference: ${order.referenceCode}`}
       />
 
       <ScrollView

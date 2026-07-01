@@ -242,6 +242,7 @@ export class MaintenanceService {
                         booking: {
                             select: {
                                 id: true,
+                                referenceCode: true,
                                 guestName: true,
                                 bookingDate: true,
                                 accommodation: {

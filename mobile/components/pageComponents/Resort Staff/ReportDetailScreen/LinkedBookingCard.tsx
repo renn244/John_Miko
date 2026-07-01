@@ -8,8 +8,6 @@ type LinkedBookingCardProps = {
   formatDate: (value?: string | null) => string;
 };
 
-const bookingReferenceLabel = (id: string) => `#BKG-${id.slice(-4).toUpperCase()}`;
-
 export function LinkedBookingCard({ booking, formatDate }: LinkedBookingCardProps) {
   return (
     <OperationalCard contentClassName="gap-3 px-5 py-4">
@@ -29,7 +27,7 @@ export function LinkedBookingCard({ booking, formatDate }: LinkedBookingCardProp
           </Text>
         </View>
         <StatusChip
-          label={bookingReferenceLabel(booking.id)}
+          label={booking.referenceCode}
           tone="primary"
           size="sm"
         />

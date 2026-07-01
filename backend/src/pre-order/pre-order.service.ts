@@ -82,13 +82,15 @@ export class PreOrderService {
                 ...(query.search ? {
                     OR: [
                         { guestName: { contains: query.search, mode: 'insensitive' } },
-                        { id: { contains: query.search, mode: 'insensitive' } }
+                        { id: { contains: query.search, mode: 'insensitive' } },
+                        { referenceCode: { contains: query.search, mode: 'insensitive' } },
                     ]
                 } : {}),
                 ...(query.date ? { bookingDate: query.date } : {})
             },
             select: {
                 id: true,
+                referenceCode: true,
                 guestName: true,
                 bookingDate: true,
                 stayOptionLabelSnapshot: true,
@@ -106,6 +108,7 @@ export class PreOrderService {
 
         return bookings.map((booking) => ({
             bookingId: booking.id,
+            referenceCode: booking.referenceCode,
             guestName: booking.guestName,
             bookingDate: booking.bookingDate,
             timeSlot: booking.stayOptionLabelSnapshot,
@@ -118,6 +121,7 @@ export class PreOrderService {
             where: { id: bookingId },
             select: {
                 id: true,
+                referenceCode: true,
                 guestName: true,
                 email: true,
                 contactNo: true,
@@ -151,6 +155,7 @@ export class PreOrderService {
 
         return {
             bookingId: booking.id,
+            referenceCode: booking.referenceCode,
             guestName: booking.guestName,
             email: booking.email,
             contactNo: booking.contactNo,

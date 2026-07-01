@@ -36,7 +36,7 @@ const SearchStaffReportsFilter = () => {
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 className="pl-10"
-                placeholder="Search by title, reporter, report ID, or booking ID..."
+                placeholder="Search by title, reporter, report ID, or booking reference..."
             />
         </div>
     );

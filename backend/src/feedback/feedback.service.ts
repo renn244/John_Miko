@@ -55,6 +55,11 @@ export class FeedbackService {
             this.prisma.feedback.findMany({
                 where: where,
                 include: {
+                    booking: {
+                        select: {
+                            referenceCode: true,
+                        }
+                    },
                     user: {
                         select: {
                             id: true,
@@ -155,6 +160,11 @@ export class FeedbackService {
         const feedback = await this.prisma.feedback.findUnique({
             where: { id },
             include: {
+                booking: {
+                    select: {
+                        referenceCode: true,
+                    }
+                },
                 user: {
                     select: {
                         id: true,

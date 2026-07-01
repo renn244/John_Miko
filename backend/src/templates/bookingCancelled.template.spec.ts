@@ -13,7 +13,7 @@ describe('bookingCancelled email template', () => {
     const rendered = template(previewData);
 
     expect(rendered).toContain('<table role="presentation"');
-    expect(rendered).toContain('Booking ID');
+    expect(rendered).toContain('Booking Reference');
     expect(rendered).not.toContain('display: flex');
     expect(rendered).not.toContain('justify-content: space-between');
   });

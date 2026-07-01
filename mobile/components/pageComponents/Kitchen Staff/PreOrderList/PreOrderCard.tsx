@@ -10,8 +10,8 @@ type PreOrderCardProps = {
   item: KitchenOrder;
 }
 
-const formatBookingReference = (bookingId: string) =>
-  `Booking ID: ${bookingId}`;
+const formatBookingReference = (referenceCode: string) =>
+  `Booking reference: ${referenceCode}`;
 
 const getItemPreview = (order: KitchenOrder) => {
   const items = order.items ?? [];
@@ -53,7 +53,7 @@ const PreOrderCard = ({ item }: PreOrderCardProps) => {
             {item.guestName}
           </Text>
           <Text className="mt-1 text-sm text-neutral-grey-1">
-            {formatBookingReference(item.bookingId)}
+            {formatBookingReference(item.referenceCode)}
           </Text>
         </View>
         <StatusChip

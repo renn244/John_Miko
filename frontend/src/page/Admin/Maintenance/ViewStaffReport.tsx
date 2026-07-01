@@ -150,7 +150,7 @@ const ViewStaffReportContent = ({ reportId }: { reportId: string }) => {
 
                             <div className="rounded-2xl border bg-primary/5 p-5">
                                 <div className="mb-4">
-                                    <p className="font-semibold text-primary">{booking.id}</p>
+                                    <p className="font-semibold text-primary">{booking.referenceCode ?? "—"}</p>
                                     <p className="text-sm text-muted-foreground">
                                         {booking.guestName}
                                     </p>

@@ -17,6 +17,9 @@ export type FeedbackWithUser = {
         name: string;
         email: string;
     }
+    booking?: {
+        referenceCode: string | null;
+    } | null
 } & Feedback
 
 export type GetFeedbackAnalyticsQuery = {

@@ -76,7 +76,7 @@ const StaffReportTable = () => {
                             <TableCell>
                                 {report.booking ? (
                                     <div className="space-y-1">
-                                        <p className="font-medium text-primary">{report.booking.id}</p>
+                                        <p className="font-medium text-primary">{report.booking.referenceCode ?? "—"}</p>
                                         <p className="text-xs text-muted-foreground">{report.booking.guestName}</p>
                                     </div>
                                 ) : (

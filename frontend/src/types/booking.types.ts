@@ -24,6 +24,7 @@ export type BookingReportDocumentation = {
 
 export type Booking = {
     id: string;
+    referenceCode: string | null;
 
     userId: string | null;
     accommodationId: string;

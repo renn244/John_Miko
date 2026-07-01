@@ -61,7 +61,7 @@ export class PaymentEmailService {
             template: 'paymentApproved',
             context: {
                 guestName: payment.booking.guestName,
-                bookingId: payment.booking.id,
+                bookingReference: payment.booking.referenceCode ?? payment.booking.id,
                 bookingDate: formatBookingDateManila(payment.booking.bookingDate),
                 stayOptionLabel: payment.booking.stayOptionLabelSnapshot,
                 accommodationName: payment.booking.accommodation.name,
@@ -105,7 +105,7 @@ export class PaymentEmailService {
             template: 'paymentRejected',
             context: {
                 guestName: payment.booking.guestName,
-                bookingId: payment.booking.id,
+                bookingReference: payment.booking.referenceCode ?? payment.booking.id,
                 bookingDate: formatBookingDateManila(payment.booking.bookingDate),
                 stayOptionLabel: payment.booking.stayOptionLabelSnapshot,
                 accommodationName: payment.booking.accommodation.name,
