@@ -143,7 +143,9 @@ export default function Login() {
                                 )}
                             />
                             <FieldError errors={getErrorMessages(errors.password)} />
-                            <FieldError errors={getErrorMessages(errors.root)} />
+                            <FieldError>
+                                {typeof errors.root?.message === "string" ? errors.root.message : undefined}
+                            </FieldError>
 
 
                             <View className="items-end">

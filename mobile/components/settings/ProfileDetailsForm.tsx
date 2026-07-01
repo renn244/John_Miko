@@ -11,7 +11,7 @@ import { useUpdateProfileMutation } from "@/hooks/profile.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import type { ProfileResponse } from "@/types/auth.type";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Phone, Save, UserRound } from "lucide-react-native";
+import { Mail, Phone, UserRound } from "lucide-react-native";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -86,7 +86,7 @@ const ProfileDetailsForm = ({ user }: ProfileDetailsFormProps) => {
                 onBlur={field.onBlur}
                 invalid={Boolean(fieldState.error)}
                 surface="white"
-                leftIcon={<UserRound size={17} color="#9FA8B1" />}
+                leftIcon={<UserRound size={18} color="#6B7580" />}
               />
               <FieldError errors={getErrorMessages(fieldState.error)} />
             </Field>
@@ -109,7 +109,7 @@ const ProfileDetailsForm = ({ user }: ProfileDetailsFormProps) => {
                 onBlur={field.onBlur}
                 invalid={Boolean(fieldState.error)}
                 surface="white"
-                leftIcon={<Mail size={17} color="#9FA8B1" />}
+                leftIcon={<Mail size={18} color="#6B7580" />}
               />
               <FieldDescription>
                 This email stays tied to your staff login.
@@ -133,7 +133,7 @@ const ProfileDetailsForm = ({ user }: ProfileDetailsFormProps) => {
                 onBlur={field.onBlur}
                 invalid={Boolean(fieldState.error)}
                 surface="white"
-                leftIcon={<Phone size={17} color="#9FA8B1" />}
+                leftIcon={<Phone size={18} color="#6B7580" />}
               />
               <FieldError errors={getErrorMessages(fieldState.error)} />
             </Field>
@@ -148,12 +148,9 @@ const ProfileDetailsForm = ({ user }: ProfileDetailsFormProps) => {
           {isSavingProfile ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <>
-              <Save color="#FFFFFF" size={18} />
-              <Text className="font-sans-semibold text-base text-white">
-                Save Changes
-              </Text>
-            </>
+            <Text className="font-sans-semibold text-base text-white">
+              Save Changes
+            </Text>
           )}
         </Button>
       </View>

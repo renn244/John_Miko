@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text } from "react-native";
 
 function SectionTitle({
   title,
@@ -6,9 +6,9 @@ function SectionTitle({
   title: string;
 }) {
   return (
-    <View className="flex-row items-center gap-2">
-      <Text className="font-sans-bold text-lg text-neutral-dark-1">{title}</Text>
-    </View>
+    <Text className="font-sans-semibold text-base text-neutral-dark-1">
+      {title}
+    </Text>
   );
 }
 

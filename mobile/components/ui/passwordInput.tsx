@@ -30,7 +30,7 @@ const PasswordInput = forwardRef<
 
       <Pressable
         onPress={() => setShowPassword((prev) => !prev)}
-        className="absolute right-3 top-3.5"
+        className="absolute bottom-0 right-3 top-0 justify-center"
         hitSlop={8}
       >
         {showPassword ? (

@@ -6,7 +6,7 @@ import { useResetPasswordMutation } from "@/hooks/auth.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { AlertTriangle, ArrowRight, CheckCircle2, LockKeyhole, Mail, ShieldCheck } from "lucide-react-native";
+import { AlertTriangle, CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
@@ -131,7 +131,6 @@ export default function ResetPassword() {
             >
                 <View className="gap-4">
                     <Button onPress={() => router.replace('./forgot-password')}>
-                        <Mail color="#FFFFFF" height={16} width={16} />
                         <Text className="text-white font-sans-semibold text-lg">
                             Request New Link
                         </Text>
@@ -309,7 +308,6 @@ export default function ResetPassword() {
                                     <Text className="text-white font-sans-semibold text-lg">
                                         Go to Login
                                     </Text>
-                                    <ArrowRight color="#FFFFFF" height={16} width={16} />
                                 </Button>
 
                                 <Text className="text-center text-neutral-grey-1 text-sm">

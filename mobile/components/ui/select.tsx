@@ -63,6 +63,24 @@ const triggerStyles = tv({
   },
 });
 
+const valueTextStyles = tv({
+  base: "text-neutral-dark-1",
+  variants: {
+    size: {
+      default: "text-xl",
+      sm: "text-lg",
+    },
+    placeholder: {
+      true: "text-neutral-grey-2",
+      false: "",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+    placeholder: false,
+  },
+});
+
 const ringStyles = tv({
   base: "border-2 border-transparent",
   variants: {
@@ -154,6 +172,7 @@ type SelectTriggerProps = ComponentProps<typeof Pressable> & {
 const SelectTrigger = ({ className, leftIcon, ...props }: SelectTriggerProps) => {
   const { open, setOpen, size, invalid, surface } = useSelect();
   const state = invalid ? "invalid" : open ? "focused" : "default";
+  const chevronSize = size === "sm" ? 18 : 20;
 
   return (
     <View className={ringStyles({ state, size })}>
@@ -167,7 +186,7 @@ const SelectTrigger = ({ className, leftIcon, ...props }: SelectTriggerProps) =>
             {leftIcon}
             <SelectValue />
           </View>
-          <ChevronDown width={20} height={20} color="#9FA8B1" />
+          <ChevronDown width={chevronSize} height={chevronSize} color="#9FA8B1" />
         </View>
       </Pressable>
     </View>
@@ -179,13 +198,13 @@ type SelectValueProps = {
 };
 
 const SelectValue = ({ placeholder }: SelectValueProps) => {
-  const { value, labelMap, placeholder: contextPlaceholder } = useSelect();
+  const { value, labelMap, placeholder: contextPlaceholder, size } = useSelect();
   const label = value ? labelMap.get(value) : undefined;
   const display = label ?? placeholder ?? contextPlaceholder;
   const isPlaceholder = !label;
 
   return (
-    <Text className={twMerge("text-lg", isPlaceholder ? "text-neutral-grey-2" : "text-neutral-dark-1")}>
+    <Text className={valueTextStyles({ size, placeholder: isPlaceholder })}>
       {display}
     </Text>
   );

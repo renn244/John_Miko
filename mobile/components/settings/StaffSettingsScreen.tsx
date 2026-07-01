@@ -8,8 +8,7 @@ import { deleteAccessToken } from "@/lib/tokenStorage";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import {
-  AlertTriangle,
-  LogOut
+  AlertTriangle
 } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import ProfileCard from "./ProfileCard";
@@ -70,7 +69,6 @@ const StaffSettingsScreen = () => {
           onPress={handleLogout}
           className="rounded-md border-system-red/30 bg-system-red/10"
         >
-          <LogOut color="#AB091E" size={18} />
           <Text className="font-sans-semibold text-base text-system-red">
             Log Out
           </Text>
@@ -112,7 +110,6 @@ const ErrorState = ({
           onAction={() => refetch()}
         />
         <Button variant="outline" onPress={handleLogout} className="mt-2 w-full">
-          <LogOut color="#0E33F3" size={18} />
           <Text className="font-sans-semibold text-base text-primary">
             Back to Login
           </Text>
