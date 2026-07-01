@@ -73,18 +73,19 @@ const getRelevantDate = (ticket: AssignedMaintenance) => {
     }
 };
 
-type TicketCard = {
+type TicketCardProps = {
   item: AssignedMaintenance
+  detailHref: string;
 }
 
-const TicketCard = ({ item }: TicketCard) => {
+const TicketCard = ({ item, detailHref }: TicketCardProps) => {
     const router = useRouter()
 
     const relevantDate = getRelevantDate(item);
 
     return (
         <OperationalCard
-            onPress={() => router.push(`/maintenance-staff/${item.id}` as any)}
+            onPress={() => router.push(detailHref as any)}
             leftAccentClassName={priorityAccentClassName[item.priority]}
             contentClassName="gap-3 px-4 py-4"
             className="mx-5 mb-3"

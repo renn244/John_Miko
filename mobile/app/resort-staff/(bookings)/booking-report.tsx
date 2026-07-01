@@ -61,7 +61,7 @@ export default function BookingLinkedReportScreen() {
           initialType={initialType}
           onCreated={(reportId) =>
             router.replace({
-              pathname: "/resort-staff/reports/[reportId]",
+              pathname: "/resort-staff/(reports)/[reportId]",
               params: { reportId },
             })
           }

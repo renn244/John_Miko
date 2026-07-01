@@ -49,7 +49,7 @@ export default function PreOrderFilters() {
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
-            leftIcon={<Search size={17} color="#9FA8B1" />}
+            leftIcon={<Search size={18} color="#9FA8B1" />}
           />
         </View>
         <Pressable
@@ -128,7 +128,7 @@ export default function PreOrderFilters() {
                 autoCapitalize="none"
                 autoCorrect={false}
                 invalid={dateInvalid}
-                leftIcon={<CalendarDays size={17} color="#9FA8B1" />}
+                leftIcon={<CalendarDays size={18} color="#9FA8B1" />}
               />
               <Text className={dateInvalid ? "text-sm text-system-red" : "text-sm text-neutral-grey-1"}>
                 {dateInvalid ? "Use YYYY-MM-DD" : "Leave blank to show all dates."}

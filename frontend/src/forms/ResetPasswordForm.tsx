@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
 import PasswordInput from "@/components/ui/passwordInput"
 import { useResetPasswordMutation } from "@/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Lock } from "lucide-react"
 import { Controller, useForm } from "react-hook-form"
 import z from "zod"
 
@@ -76,6 +75,7 @@ const ResetPasswordForm = ({ token, onSuccess }: ResetPasswordFormProps) => {
                         aria-invalid={fieldState.invalid}
                         {...field}
                         />
+                        <FieldDescription>Use a different password from your previous one.</FieldDescription>
 
                         {fieldState.invalid ? (
                             <FieldError errors={getErrorMessages(fieldState.error)} />
@@ -119,10 +119,7 @@ const ResetPasswordForm = ({ token, onSuccess }: ResetPasswordFormProps) => {
                 {isPending ? (
                     <LoadingSpinner />
                 ) : (
-                    <>
-                        <Lock className="w-5 h-5" />
-                        Reset Password
-                    </>
+                    "Reset Password"
                 )}
             </Button>
         </form>

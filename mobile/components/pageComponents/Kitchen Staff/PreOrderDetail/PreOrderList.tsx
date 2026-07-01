@@ -4,9 +4,9 @@ import StatusChip from '@/components/ui/status-chip';
 import { useCompleteAllKitchenItemsMutation, useUpdateKitchenItemStatusMutation } from '@/hooks/kitchenOrders.hook';
 import { KitchenOrder, KitchenOrderStatus } from '@/types/kitchenOrder.type';
 import { useRouter } from 'expo-router';
-import { CheckCheck, UtensilsCrossed } from 'lucide-react-native';
+import { UtensilsCrossed } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Text, View } from 'react-native';
 
 type PreOrderListProps = {
     order: KitchenOrder
@@ -99,29 +99,21 @@ const PreOrderItemList = ({
             </View>
 
             {hasItems ? (
-                <Pressable
+                <Button
+                    size="sm"
+                    variant="outline"
                     onPress={handleCompleteAll}
                     disabled={
                         isCompletingAllItems ||
                         isUpdatingItemStatus ||
                         orderSummary.allCompleted
                     }
-                    className="self-start flex-row items-center gap-2"
-                    style={({ pressed }) => ({
-                        opacity:
-                        pressed ||
-                            isCompletingAllItems ||
-                            isUpdatingItemStatus ||
-                                orderSummary.allCompleted
-                                    ? 0.55
-                                    : 1,
-                    })}
+                    className="self-start"
                 >
-                <CheckCheck size={15} color="#4B5563" />
-                    <Text className="font-sans-semibold text-base text-neutral-grey-1">
+                    <Text className="font-sans-semibold text-base text-neutral-dark-1">
                         Mark all done
                     </Text>
-                </Pressable>
+                </Button>
             ) : null}
 
             {hasItems ? (

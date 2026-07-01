@@ -1,4 +1,10 @@
+import Footer from "@/components/common/Footer"
 import NavBar from "@/components/common/NavBar"
+import {
+    GuestContainer,
+    GuestPageHeader,
+    GuestPageShell,
+} from "@/components/guest"
 import MyBookingsList from "@/components/pageComponents/Guest/MyBookings/MyBookingsList"
 import MyBookingStatusFilter from "@/components/pageComponents/Guest/MyBookings/MyBookingStatusFilter"
 import type { StateSelectedStatus } from "@/types/booking.types"
@@ -8,19 +14,14 @@ const MyBookings = () => {
     const [selectedStatus, setSelectedStatus] = useState<StateSelectedStatus>("pending");
 
     return (
-        <div className="min-h-screen">
+        <GuestPageShell>
             <NavBar />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-                <div className="mb-4">
-                    <h1 className="text-4xl font-bold mb-2">
-                        My Bookings
-                    </h1>
-                    <p className="text-muted-foreground">
-                        View and review all your bookings
-                    </p>
-                </div>
+            <GuestContainer className="pb-10">
+                <GuestPageHeader
+                    title="My Bookings"
+                    description="View your reservations, payment status, and stay details."
+                />
 
                 <MyBookingStatusFilter 
                 selectedStatus={selectedStatus}
@@ -30,8 +31,10 @@ const MyBookings = () => {
                 <MyBookingsList 
                 selectedStatus={selectedStatus}
                 />
-            </div>
-        </div>
+            </GuestContainer>
+
+            <Footer />
+        </GuestPageShell>
     )
 }
 

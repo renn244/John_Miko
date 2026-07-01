@@ -206,7 +206,7 @@ const MultiStepBookingForm = ({
 
     return (  
         <FormProvider {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 overflow-y-auto">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="pb-8">
                 {bookingStep === 'form' && (
                     <GuestForm
                     accommodation={accommodation}

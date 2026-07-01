@@ -1,4 +1,4 @@
-import Logo from "@/assets/app/logo/logo.svg";
+import BrandWordmark from "@/components/branding/BrandWordmark";
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import { hasSeenIntro, setSeenIntro } from "@/lib/introStorage";
@@ -60,12 +60,7 @@ export default function Index() {
 
       <View className="flex-1 justify-between px-6 pt-8 pb-10">
         <View className="items-center gap-3">
-          <View className="flex-row items-center gap-3">
-            <Logo height={48} width={48} />
-            <Text className="font-sans-bold text-2xl text-neutral-dark-1">
-              John Miko's
-            </Text>
-          </View>
+          <BrandWordmark size="lg" />
           <Text className="text-center text-neutral-grey-1 text-base">
             Internal resort management for staff operations.
           </Text>
@@ -104,7 +99,7 @@ export default function Index() {
           className="w-full"
           >
             <Text className="font-sans-semibold text-white text-lg">
-              LET'S GO
+              LET&apos;S GO
             </Text>
           </Button>
 

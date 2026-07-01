@@ -49,7 +49,7 @@ export default function NewStaffReportScreen() {
           key={`general-${formInstanceKey}`}
           onCreated={(reportId) =>
             router.replace({
-              pathname: "/resort-staff/reports/[reportId]",
+              pathname: "/resort-staff/(reports)/[reportId]",
               params: { reportId },
             })
           }

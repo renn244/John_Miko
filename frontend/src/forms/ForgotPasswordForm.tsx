@@ -5,7 +5,6 @@ import LoadingSpinner from "@/components/ui/loadingSpinner"
 import { useForgotPasswordMutation } from "@/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Send } from "lucide-react"
 import { Controller, useForm } from "react-hook-form"
 import z from "zod"
 
@@ -70,10 +69,7 @@ const ForgotPasswordForm = ({ handleChangeSendEmail }: ForgotPasswordFormProps) 
                 {isPending ? (
                     <LoadingSpinner />
                 ) : (
-                    <>
-                        <Send className="w-5 h-5" />
-                        Send Reset Link
-                    </>
+                    "Send Reset Link"
                 )}
             </Button>
 

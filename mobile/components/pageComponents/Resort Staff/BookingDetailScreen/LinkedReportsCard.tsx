@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/Button";
 import OperationalCard from "@/components/ui/operational-card";
+import SectionTitle from "@/components/ui/section-title";
 import StatusChip, { type StatusChipTone } from "@/components/ui/status-chip";
 import type { StaffReport, ReportType, ReportStatus } from "@/types/staffReport.type";
-import { ClipboardCheck, ClipboardList, RefreshCw } from "lucide-react-native";
+import { ClipboardList } from "lucide-react-native";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
-import { SectionTitle } from "./SectionTitle";
 
 type LinkedReportsCardProps = {
   reports: StaffReport[];
@@ -33,10 +33,7 @@ export function LinkedReportsCard({
 }: LinkedReportsCardProps) {
   return (
     <OperationalCard contentClassName="gap-3 px-3 py-3">
-      <View className="flex-row items-center gap-2">
-        <ClipboardCheck size={17} color="#0E33F3" />
-        <SectionTitle title="My linked reports" />
-      </View>
+      <SectionTitle title="My linked reports" />
 
       {isLoading ? (
         <ActivityIndicator className="py-3" />
@@ -46,7 +43,6 @@ export function LinkedReportsCard({
             Could not load reports linked to this booking.
           </Text>
           <Button variant="outline" onPress={onRetry}>
-            <RefreshCw size={16} color="#0E33F3" />
             <Text className="font-sans-semibold text-base text-primary">
               Retry reports
             </Text>

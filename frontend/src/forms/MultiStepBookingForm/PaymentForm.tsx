@@ -1,307 +1,363 @@
 import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
+import { GuestCard, GuestDivider } from "@/components/guest";
 import { Button } from "@/components/ui/button";
-import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field";
+import {
+    Field,
+    FieldDescription,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
+    FieldLegend,
+    FieldSet,
+} from "@/components/ui/field";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useGetActivePaymentMethodsQuery } from "@/hooks/payment-methods.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
-import { cn } from "@/lib/utils";
+import { cn, formatPeso } from "@/lib/utils";
 import { CheckCircle } from "lucide-react";
 import { type Dispatch, type SetStateAction } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type PaymentFormProps = {
-    setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
+    setBookingStep: Dispatch<SetStateAction<"form" | "add-on" | "review" | "pre-order" | "payment">>;
     total: number;
     isLoading: boolean;
-}
+};
+
+const PaymentSummaryLine = ({
+    label,
+    value,
+    emphasize = false,
+}: {
+    label: string;
+    value: string;
+    emphasize?: boolean;
+}) => (
+    <div className="flex items-center justify-between gap-4 text-sm">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={emphasize ? "font-bold text-primary" : "font-semibold"}>
+            {value}
+        </span>
+    </div>
+);
 
 const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => {
     const { control, watch } = useFormContext<multiStepBookingFormSchema>();
     const { data: paymentMethods, isLoading: isLoadingMethods } = useGetActivePaymentMethodsQuery();
 
+    const paymentType = watch("paymentType");
+    const paymentMethodId = watch("paymentMethodId");
+    const proofImageUrl = watch("proofImageUrl");
     const partial = Math.round(total / 2);
-    const amountToPayNow = watch('paymentType') && (watch('paymentType') === 'Full' ? total : partial);
-    const amountToPayLater = watch('paymentType') && (watch('paymentType') === 'Full' ? 0 : total - partial);
-    const selectedMethod = paymentMethods?.find((method) => method.id === watch('paymentMethodId'));
+    const amountToPayNow = paymentType && (paymentType === "Full" ? total : partial);
+    const amountToPayLater = paymentType && (paymentType === "Full" ? 0 : total - partial);
+    const selectedMethod = paymentMethods?.find((method) => method.id === paymentMethodId);
 
     return (
-        <div className="flex flex-col justify-between min-h-[754px]">
-
-            <div className="space-y-6">
-                <FieldGroup>
-                    <Controller 
-                    name="paymentType"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <FieldSet aria-invalid={fieldState.invalid}>
-                            <FieldLegend className="gap-1">
-                                Payment Type <span className="text-red-700">*</span>
-                            </FieldLegend>
-                            <RadioGroup
-                            disabled={isLoading}
-                            name={field.name}
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            aria-invalid={fieldState.invalid}
-                            >
-                                <FieldLabel htmlFor="full-payment">
-                                    <Field data-invalid={fieldState.invalid} orientation="horizontal">
-                                        <FieldContent>
-                                            <FieldTitle>Full Payment</FieldTitle>
-                                            <FieldDescription>
-                                                Pay the full amount now. <br />
-                                            </FieldDescription>
-                                        </FieldContent>
-                                        <div className="flex-col justify-between">
-                                            <span className="font-semibold text-base text-primary">
-                                                ₱{total.toLocaleString()}
-                                            </span>
-
-                                            <div className="flex justify-end">
-                                                <RadioGroupItem 
-                                                value="Full" 
-                                                id="full-payment"
-                                                aria-invalid={fieldState.invalid}
-                                                />
-                                            </div>
-                                        </div>
-                                    </Field>
-                                </FieldLabel>
-                                <FieldLabel htmlFor="partial-payment">
-                                    <Field data-invalid={fieldState.invalid} orientation="horizontal">
-                                        <FieldContent>
-                                            <FieldTitle>50% Downpayment</FieldTitle>
-                                            <FieldDescription>
-                                                Pay 50% now, remaining balance on check-in. <br />
-                                            </FieldDescription>
-                                        </FieldContent>
-                                        <div className="flex-col justify-between">
-                                            <span className="font-semibold text-base text-primary">
-                                                ₱{partial.toLocaleString()}
-                                            </span>
-
-                                            <div className="flex justify-end">
-                                                <RadioGroupItem 
-                                                value="Partial" 
-                                                id="partial-payment"
-                                                aria-invalid={fieldState.invalid}
-                                                />
-                                            </div>
-                                        </div>
-                                    </Field>
-                                </FieldLabel>
-                            </RadioGroup>
-
-                            {fieldState.invalid && (
-                                <FieldError errors={getErrorMessages(fieldState.error)} />
-                            )}
-                        </FieldSet>
-                    )}
-                    />
-                </FieldGroup>
-
-                <FieldGroup>
-                    <Controller
-                    name="paymentMethodId"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <FieldSet aria-invalid={fieldState.invalid}>
-                            <FieldLegend className="gap-1">
-                                Payment Method <span className="text-red-700">*</span>
-                            </FieldLegend>
-
-                            {isLoadingMethods && (
-                                <p className="text-sm text-muted-foreground">Loading payment methods...</p>
-                            )}
-
-                            {!isLoadingMethods && (!paymentMethods || paymentMethods.length === 0) && (
-                                <p className="text-sm text-muted-foreground">
-                                    No active payment methods are available right now.
-                                </p>
-                            )}
-
-                            {paymentMethods && paymentMethods.length > 0 && (
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    {paymentMethods.map((method) => {
-                                        const isSelected = field.value === method.id;
-
-                                        return (
-                                            <button
-                                                key={method.id}
-                                                type="button"
-                                                onClick={() => field.onChange(method.id)}
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="space-y-4">
+                <GuestCard className="p-4 md:p-5">
+                    <FieldGroup>
+                        <Controller
+                            name="paymentType"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <FieldSet aria-invalid={fieldState.invalid}>
+                                    <FieldLegend className="gap-1 text-base font-bold">
+                                        Payment Type <span className="text-red-700">*</span>
+                                    </FieldLegend>
+                                    <RadioGroup
+                                        disabled={isLoading}
+                                        name={field.name}
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        aria-invalid={fieldState.invalid}
+                                        className="mt-3 flex gap-3"
+                                    >
+                                        <FieldLabel htmlFor="full-payment" className="block h-full">
+                                            <div
                                                 className={cn(
-                                                    "rounded-xl border p-4 text-left transition-all",
-                                                    isSelected
+                                                    "flex h-full cursor-pointer items-start justify-between gap-4 rounded-lg border bg-background p-4 transition",
+                                                    field.value === "Full"
                                                         ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                                                        : "border-gray-200 hover:border-gray-300 hover:bg-muted/30"
+                                                        : "hover:border-primary/40"
                                                 )}
                                             >
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <div>
-                                                        <p className="font-semibold">{method.name}</p>
-                                                        <p className="text-xs text-muted-foreground">{method.type}</p>
-                                                    </div>
-                                                    {isSelected && (
-                                                        <CheckCircle className="w-5 h-5 text-primary" />
-                                                    )}
-                                                </div>
-                                                {(method.accountName || method.accountNumber) && (
-                                                    <p className="mt-2 text-xs text-muted-foreground">
-                                                        {method.accountName ? `${method.accountName}` : ""}
-                                                        {method.accountName && method.accountNumber ? " • " : ""}
-                                                        {method.accountNumber ?? ""}
+                                                <div>
+                                                    <p className="font-semibold">Full Payment</p>
+                                                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                                        Pay the full amount now.
                                                     </p>
+                                                    <p className="mt-3 text-sm font-bold text-primary">
+                                                        {formatPeso(total)}
+                                                    </p>
+                                                </div>
+                                                <RadioGroupItem
+                                                    value="Full"
+                                                    id="full-payment"
+                                                    aria-invalid={fieldState.invalid}
+                                                />
+                                            </div>
+                                        </FieldLabel>
+                                        <FieldLabel htmlFor="partial-payment" className="block h-full">
+                                            <div
+                                                className={cn(
+                                                    "flex h-full cursor-pointer items-start justify-between gap-4 rounded-lg border bg-background p-4 transition",
+                                                    field.value === "Partial"
+                                                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                                                        : "hover:border-primary/40"
                                                 )}
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            )}
+                                            >
+                                                <div>
+                                                    <p className="font-semibold">50% Downpayment</p>
+                                                    <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                                        Pay half now, balance on check-in.
+                                                    </p>
+                                                    <p className="mt-3 text-sm font-bold text-primary">
+                                                        {formatPeso(partial)}
+                                                    </p>
+                                                </div>
+                                                <RadioGroupItem
+                                                    value="Partial"
+                                                    id="partial-payment"
+                                                    aria-invalid={fieldState.invalid}
+                                                />
+                                            </div>
+                                        </FieldLabel>
+                                    </RadioGroup>
 
-                            {fieldState.invalid && (
-                                <FieldError errors={getErrorMessages(fieldState.error)} />
+                                    {fieldState.invalid && (
+                                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                                    )}
+                                </FieldSet>
                             )}
-                        </FieldSet>
-                    )}
-                    />
-                </FieldGroup>
+                        />
+                    </FieldGroup>
+                </GuestCard>
+
+                <GuestCard className="p-4 md:p-5">
+                    <FieldGroup>
+                        <Controller
+                            name="paymentMethodId"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <FieldSet aria-invalid={fieldState.invalid}>
+                                    <FieldLegend className="gap-1 text-base font-bold">
+                                        Payment Method <span className="text-red-700">*</span>
+                                    </FieldLegend>
+
+                                    {isLoadingMethods && (
+                                        <p className="mt-3 text-sm text-muted-foreground">
+                                            Loading payment methods...
+                                        </p>
+                                    )}
+
+                                    {!isLoadingMethods && (!paymentMethods || paymentMethods.length === 0) && (
+                                        <p className="mt-3 text-sm text-muted-foreground">
+                                            No active payment methods are available right now.
+                                        </p>
+                                    )}
+
+                                    {paymentMethods && paymentMethods.length > 0 && (
+                                        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                                            {paymentMethods.map((method) => {
+                                                const isSelected = field.value === method.id;
+
+                                                return (
+                                                    <button
+                                                        key={method.id}
+                                                        type="button"
+                                                        disabled={isLoading}
+                                                        onClick={() => field.onChange(method.id)}
+                                                        className={cn(
+                                                            "rounded-lg border px-3 py-2 text-left text-sm transition",
+                                                            isSelected
+                                                                ? "border-primary bg-primary text-primary-foreground"
+                                                                : "bg-background hover:border-primary/40"
+                                                        )}
+                                                    >
+                                                        <span className="font-semibold">{method.name}</span>
+                                                        <span
+                                                            className={cn(
+                                                                "mt-0.5 block text-xs",
+                                                                isSelected
+                                                                    ? "text-primary-foreground/80"
+                                                                    : "text-muted-foreground"
+                                                            )}
+                                                        >
+                                                            {method.type}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {fieldState.invalid && (
+                                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                                    )}
+                                </FieldSet>
+                            )}
+                        />
+                    </FieldGroup>
+                </GuestCard>
 
                 {selectedMethod && (
-                    <div className="rounded-xl border border-gray-200 bg-muted/30 p-4">
-                        <div className="grid gap-4 md:grid-cols-[160px_1fr]">
-                            <div className="rounded-lg border bg-white p-2">
+                    <GuestCard className="p-4 md:p-5">
+                        <h3 className="text-base font-bold tracking-normal">Transfer Details</h3>
+                        <div className="mt-4 grid items-start gap-4 md:grid-cols-[150px_minmax(0,1fr)]">
+                            <div className="self-start rounded-lg border bg-background p-2">
                                 {selectedMethod.qrCodeUrl ? (
                                     <ViewPhotoDialog imageUrl={selectedMethod.qrCodeUrl}>
                                         <img
-                                        src={selectedMethod.qrCodeUrl}
-                                        alt={`${selectedMethod.name} QR code`}
-                                        className="w-full"
+                                            src={selectedMethod.qrCodeUrl}
+                                            alt={`${selectedMethod.name} QR code`}
+                                            className="w-full rounded-md"
                                         />
                                     </ViewPhotoDialog>
                                 ) : (
-                                    <div className="h-36 flex items-center justify-center text-xs text-muted-foreground">
+                                    <div className="flex h-32 items-center justify-center text-center text-xs text-muted-foreground">
                                         QR code not provided
                                     </div>
                                 )}
                             </div>
-                            <div className="space-y-2 text-sm">
+                            <div className="space-y-4 text-sm">
                                 <div>
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Account Details</p>
-                                    <p className="font-semibold">{selectedMethod.accountName || "—"}</p>
-                                    <p className="font-medium">{selectedMethod.accountNumber || "—"}</p>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                        Account name
+                                    </p>
+                                    <p className="mt-1 font-semibold">
+                                        {selectedMethod.accountName || "-"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                        Account number
+                                    </p>
+                                    <p className="mt-1 font-semibold">
+                                        {selectedMethod.accountNumber || "-"}
+                                    </p>
                                 </div>
                                 {selectedMethod.instructions && (
                                     <div>
-                                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Instructions</p>
-                                        <p className="whitespace-pre-line text-sm">{selectedMethod.instructions}</p>
+                                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                            Instructions
+                                        </p>
+                                        <p className="mt-1 whitespace-pre-line leading-6 text-muted-foreground">
+                                            {selectedMethod.instructions}
+                                        </p>
                                     </div>
                                 )}
                             </div>
                         </div>
-                    </div>
+                    </GuestCard>
                 )}
 
-                <FieldGroup>
-                    <Controller
-                    name="proofImageUrl"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <Field data-invalid={fieldState.invalid}>
-                            <FieldLabel className="gap-1">
-                                Proof of Payment <span className="text-red-700">*</span>
-                            </FieldLabel>
+                <GuestCard className="p-4 md:p-5">
+                    <FieldGroup>
+                        <Controller
+                            name="proofImageUrl"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel className="gap-1 text-base font-bold">
+                                        Proof of Payment <span className="text-red-700">*</span>
+                                    </FieldLabel>
 
-                            {!field.value && (
-                                <CloudinaryUpload
-                                    onSuccess={(url) => field.onChange(url)}
-                                />
+                                    <div className="mt-3">
+                                        {!field.value && (
+                                            <CloudinaryUpload
+                                                onSuccess={(url) => field.onChange(url)}
+                                            />
+                                        )}
+
+                                        {field.value && (
+                                            <CloudinaryPreview
+                                                images={[{ url: field.value }]}
+                                                onRemove={() => field.onChange("")}
+                                            />
+                                        )}
+                                    </div>
+
+                                    <FieldDescription>
+                                        Upload your receipt or payment screenshot. We will verify your payment before confirming.
+                                    </FieldDescription>
+
+                                    {fieldState.invalid && (
+                                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                                    )}
+                                </Field>
                             )}
+                        />
+                    </FieldGroup>
+                </GuestCard>
+            </div>
 
-                            {field.value && (
-                                <CloudinaryPreview
-                                    images={[{ url: field.value }]}
-                                    onRemove={() => field.onChange("")}
-                                />
-                            )}
+            <aside className="lg:sticky lg:top-4 lg:self-start">
+                <GuestCard accent className="p-4 md:p-5">
+                    <h3 className="text-lg font-bold tracking-normal">Payment Summary</h3>
+                    <GuestDivider className="my-4" />
 
-                            <FieldDescription>
-                                Upload your receipt or payment screenshot. We will verify your payment before confirming.
-                            </FieldDescription>
-
-                            {fieldState.invalid && (
-                                <FieldError errors={getErrorMessages(fieldState.error)} />
-                            )}
-                        </Field>
-                    )}
-                    />
-                </FieldGroup>
-
-                {amountToPayNow && (
-                    <div className="rounded-xl overflow-hidden border border-gray-100 mb-5 shadow-sm">
-                        <div className="bg-primary flex justify-between px-5 pt-4">
-                            <div>
-                                <p className="text-xs text-white uppercase mb-1">Amount to pay now</p>
-                                <p className="text-xl font-semibold text-white tracking-tight mb-3">₱{amountToPayNow.toLocaleString()}</p>
-                            </div>
-                            <div className="flex gap-2">
-                                <div className="bg-white/15 h-min rounded-lg px-3 py-1.5">
-                                    <p className="text-xs text-blue-200 mb-0.5">Due</p>
-                                    <p className="text-xs font-semibold text-white">Right now</p>
-                                </div>
-                            </div>
-                        </div>
-                    
-                        <div className="bg-white px-5 py-3 flex justify-between items-center border-t border-gray-100">
-                            <div>
-                                <p className="text-xs text-muted-foreground uppercase mb-1">Amount to pay later</p>
-                                <p className="text-xl font-semibold text-gray-900 tracking-tight">₱{amountToPayLater.toLocaleString()}</p>
-                            </div>
-                            <div className="bg-muted rounded-lg px-3 py-1.5 text-right">
-                                <p className="text-xs text-gray-400 mb-0.5 text-start">Due at</p>
-                                <p className="text-xs font-semibold text-gray-600">Check-in</p>
-                            </div>
-                        </div>
-                    
-                        <div className="bg-gray-50 px-5 py-3 flex justify-between items-center border-t border-gray-100">
-                            <span className="text-sm text-gray-400 flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
-                                Total booking value
-                            </span>
-                            <span className="text-sm font-semibold text-gray-700">₱{total.toLocaleString()}</span>
-                        </div>
+                    <div className="space-y-3">
+                        <PaymentSummaryLine label="Payment type" value={paymentType || "Not selected"} />
+                        <PaymentSummaryLine label="Method" value={selectedMethod?.name || "Not selected"} />
+                        <PaymentSummaryLine label="Total booking value" value={formatPeso(total)} />
                     </div>
-                )}
-            </div>
 
-            <div className="space-y-2 mt-auto">
-                <Button 
-                disabled={!watch('paymentType') || !watch('paymentMethodId') || !watch('proofImageUrl') || isLoading}
-                type="submit" className="w-full">
-                    {isLoading ? (
-                        <LoadingSpinner />
-                    ) : (
-                        <>
-                            Submit Payment Proof
-                            <CheckCircle className="w-6 h-6" />
-                        </>
-                    )}
-                </Button>
-                <Button
-                disabled={isLoading}
-                type="button"
-                onClick={() => setBookingStep('review')}
-                variant="outline" className="w-full"
-                >
-                    Back to Review
-                </Button>
-            </div>
+                    <GuestDivider className="my-4" />
+
+                    <div className="rounded-lg bg-primary/10 p-3">
+                        <PaymentSummaryLine
+                            label="Amount to pay now"
+                            value={amountToPayNow ? formatPeso(amountToPayNow) : formatPeso(0)}
+                            emphasize
+                        />
+                    </div>
+
+                    <div className="mt-3 rounded-lg bg-muted/40 p-3">
+                        <PaymentSummaryLine
+                            label="Amount to pay later"
+                            value={amountToPayLater ? formatPeso(amountToPayLater) : formatPeso(0)}
+                        />
+                    </div>
+
+                    <p className="mt-4 text-xs leading-5 text-muted-foreground">
+                        Submit your proof after transferring the amount. Staff will verify the payment before confirming your booking.
+                    </p>
+
+                    <div className="mt-5 space-y-2">
+                        <Button
+                            disabled={!paymentType || !paymentMethodId || !proofImageUrl || isLoading}
+                            type="submit"
+                            className="w-full"
+                        >
+                            {isLoading ? (
+                                <LoadingSpinner />
+                            ) : (
+                                <>
+                                    Submit Payment Proof
+                                    <CheckCircle className="size-4" />
+                                </>
+                            )}
+                        </Button>
+                        <Button
+                            disabled={isLoading}
+                            type="button"
+                            onClick={() => setBookingStep("review")}
+                            variant="outline"
+                            className="w-full"
+                        >
+                            Back to Review
+                        </Button>
+                    </div>
+                </GuestCard>
+            </aside>
         </div>
-    )
-}
+    );
+};
 
 export default PaymentForm;

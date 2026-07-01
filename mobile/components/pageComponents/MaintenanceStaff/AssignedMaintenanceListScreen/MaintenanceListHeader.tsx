@@ -1,5 +1,5 @@
 import { Input } from '@/components/ui/input'
-import { StatusChipTone } from '@/components/ui/status-chip'
+import StatusChip from '@/components/ui/status-chip'
 import useDebouncedValue from '@/lib/useDebounce'
 import { useMaintenanceTicketsFilterStore } from '@/store/maintenanceTicketsFilter.store'
 import { AssignedMaintenance } from '@/types/maintenance.type'
@@ -36,7 +36,7 @@ const MaintenanceListHeader = ({
 
     useEffect(() => {
         setSearch(debouncedSearch);
-    }, [debouncedSearch]);
+    }, [debouncedSearch, setSearch]);
 
     return (
         <View className="gap-4 px-5 pb-3 pt-4">
@@ -46,9 +46,9 @@ const MaintenanceListHeader = ({
             </View>
 
             <Input
-                leftIcon={<Search size={20} color="#6B7280" />}
+                size="sm"
+                leftIcon={<Search size={18} color="#9FA8B1" />}
                 surface="white"
-                className="text-base"
                 placeholder="Search ticket ID or title"
                 value={searchInput}
                 onChangeText={setSearchInput}
@@ -60,60 +60,25 @@ const MaintenanceListHeader = ({
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ gap: 10, paddingRight: 20 }}
                 >
-                    <SummaryPill
-                        label="Pending"
-                        value={summary.pending}
-                        tone="info"
+                    <StatusChip
+                        label={`Pending ${summary.pending}`}
+                        tone="pending"
+                        size="sm"
                     />
-                    <SummaryPill
-                        label="In Progress"
-                        value={summary.inProgress}
-                        tone="info"
+                    <StatusChip
+                        label={`In Progress ${summary.inProgress}`}
+                        tone="inProgress"
+                        size="sm"
                     />
-                    <SummaryPill
-                        label="High Priority"
-                        value={summary.high}
+                    <StatusChip
+                        label={`High Priority ${summary.high}`}
                         tone="high"
+                        size="sm"
                     />
                 </ScrollView>
             ) : null}
         </View>
     )
-}
-
-const SummaryPill = ({
-    label,
-    value,
-    tone,
-}: {
-    label: string;
-    value: number;
-    tone: StatusChipTone;
-}) => {
-    return (
-        <View
-        className={`flex-row items-center gap-2 rounded-full border px-4 py-2 ${
-            tone === "high"
-                ? "border-system-red/20 bg-system-red/10"
-                : "border-secondary-blue-light bg-secondary-blue-light"
-        }`}
-        >
-            <Text
-                className={`font-sans-semibold text-base ${
-                    tone === "high" ? "text-secondary-red-dark" : "text-neutral-dark-1"
-                }`}
-            >
-                {label}
-            </Text>
-            <Text
-                className={`font-sans-semibold text-base ${
-                    tone === "high" ? "text-secondary-red-dark" : "text-neutral-dark-1"
-                }`}
-            >
-                {value}
-            </Text>
-        </View>
-    );
 }
 
 export default MaintenanceListHeader

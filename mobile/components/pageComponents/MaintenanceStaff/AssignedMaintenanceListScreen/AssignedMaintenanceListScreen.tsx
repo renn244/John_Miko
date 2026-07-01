@@ -47,6 +47,10 @@ export default function AssignedMaintenanceListScreen({
     await query.refetch();
   }, [query]);
 
+  const detailHrefBase =
+    scope === "active"
+      ? "/maintenance-staff/(assigned)/ticket"
+      : "/maintenance-staff/(history)/ticket";
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
@@ -62,7 +66,12 @@ export default function AssignedMaintenanceListScreen({
         <FlatList
           data={tickets}
           keyExtractor={(item) => item.id}
-          renderItem={(data) => <TicketCard item={data.item} />}
+          renderItem={(data) => (
+            <TicketCard
+              item={data.item}
+              detailHref={`${detailHrefBase}/${data.item.id}`}
+            />
+          )}
           ListHeaderComponent={() => <MaintenanceListHeader tickets={tickets} scope={scope} title={title} description={description} />}
           contentContainerStyle={{ paddingBottom: 24 }}
           refreshControl={

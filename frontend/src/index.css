@@ -136,6 +136,11 @@
       animation: dash 1.5s ease-in-out infinite;
     }
 
+    .booking-flow-preview-progress {
+      width: 50%;
+      animation: booking-flow-preview 5s ease-in-out infinite;
+    }
+
     @keyframes rotate {
       100% {
         transform: rotate(360deg);
@@ -154,6 +159,15 @@
       100% {
         stroke-dasharray: 90, 150;
         stroke-dashoffset: -124;
+      }
+    }
+
+    @keyframes booking-flow-preview {
+      0%, 100% {
+        width: 42%;
+      }
+      50% {
+        width: 58%;
       }
     }
   } 

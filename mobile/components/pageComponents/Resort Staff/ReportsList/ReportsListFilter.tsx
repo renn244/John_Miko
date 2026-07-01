@@ -99,13 +99,13 @@ function ActiveFilterChip({
   return (
     <Pressable
       onPress={onClear}
-      className="flex-row items-center gap-1 rounded-full"
+      className="rounded-full"
     >
       <StatusChip
         label={label}
         tone={tone}
-        size="md"
-        icon={<X size={13} color="#4D5963" />}
+        size="sm"
+        icon={<X size={11} color="#4D5963" />}
       />
     </Pressable>
   );

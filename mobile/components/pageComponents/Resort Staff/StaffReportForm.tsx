@@ -17,7 +17,7 @@ import type {
   ReportType,
 } from "@/types/staffReport.type";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Camera, CheckCircle2, Info, TriangleAlert } from "lucide-react-native";
+import { Camera, CheckCircle2, TriangleAlert } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -130,20 +130,15 @@ export default function StaffReportForm({
 
   return (
     <View className="gap-4">
-      <View className="flex-row items-start gap-3 rounded-md border border-primary/20 bg-secondary-blue-light px-4 py-3">
-        <View className="mt-0.5 h-6 w-6 items-center justify-center rounded-full bg-white">
-          <Info size={16} color="#0E33F3" />
-        </View>
-        <View className="flex-1">
-          <Text className="font-sans-semibold text-base text-neutral-dark-1">
-            {isTypeLocked ? `${typeLabel} report` : "General maintenance report"}
-          </Text>
-          <Text className="mt-1 text-base leading-5 text-neutral-grey-1">
-            {isTypeLocked
-              ? `This report is linked to booking ${bookingId}.`
-              : "This report is not linked to a guest booking."}
-          </Text>
-        </View>
+      <View className="rounded-md border border-primary/20 bg-secondary-blue-light px-4 py-3">
+        <Text className="font-sans-semibold text-base text-neutral-dark-1">
+          {isTypeLocked ? `${typeLabel} report` : "General maintenance report"}
+        </Text>
+        <Text className="mt-1 text-base leading-5 text-neutral-grey-1">
+          {isTypeLocked
+            ? `This report is linked to booking ${bookingId}.`
+            : "This report is not linked to a guest booking."}
+        </Text>
       </View>
 
       <OperationalCard contentClassName="gap-4 px-4 py-4">
@@ -323,7 +318,6 @@ export default function StaffReportForm({
       </OperationalCard>
 
       <Button
-        size="lg"
         disabled={isSubmitting}
         onPress={handleSubmit(submit)}
         className="rounded-md shadow-sm"
@@ -331,12 +325,12 @@ export default function StaffReportForm({
         {isSubmitting ? (
           <>
             <ActivityIndicator color="#FFFFFF" />
-            <Text className="font-sans-semibold text-lg text-white">
+            <Text className="font-sans-semibold text-base text-white">
               Submitting...
             </Text>
           </>
         ) : (
-          <Text className="font-sans-semibold text-lg text-white">
+          <Text className="font-sans-semibold text-base text-white">
             Submit report
           </Text>
         )}

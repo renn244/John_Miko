@@ -76,7 +76,7 @@ const ChangePasswordForm = () => {
                 onBlur={field.onBlur}
                 invalid={Boolean(fieldState.error)}
                 surface="white"
-                leftIcon={<LockKeyhole size={17} color="#9FA8B1" />}
+                leftIcon={<LockKeyhole size={18} color="#6B7580" />}
               />
               <FieldError errors={getErrorMessages(fieldState.error)} />
             </Field>
@@ -98,7 +98,7 @@ const ChangePasswordForm = () => {
                 onBlur={field.onBlur}
                 invalid={Boolean(fieldState.error)}
                 surface="white"
-                leftIcon={<ShieldCheck size={17} color="#9FA8B1" />}
+                leftIcon={<ShieldCheck size={18} color="#6B7580" />}
               />
               <FieldError errors={getErrorMessages(fieldState.error)} />
             </Field>
@@ -120,7 +120,7 @@ const ChangePasswordForm = () => {
                 onBlur={field.onBlur}
                 invalid={Boolean(fieldState.error)}
                 surface="white"
-                leftIcon={<ShieldCheck size={17} color="#9FA8B1" />}
+                leftIcon={<ShieldCheck size={18} color="#6B7580" />}
               />
               <FieldError errors={getErrorMessages(fieldState.error)} />
             </Field>
@@ -135,12 +135,9 @@ const ChangePasswordForm = () => {
           {isChangingPassword ? (
             <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <>
-              <LockKeyhole color="#FFFFFF" size={18} />
-              <Text className="font-sans-semibold text-base text-white">
-                Update Password
-              </Text>
-            </>
+            <Text className="font-sans-semibold text-base text-white">
+              Update Password
+            </Text>
           )}
         </Button>
       </View>

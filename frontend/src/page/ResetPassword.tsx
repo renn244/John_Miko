@@ -1,75 +1,86 @@
+import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import ResetPasswordForm from "@/forms/ResetPasswordForm";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
+
+const recoveryBackgroundImage =
+    "https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1600";
 
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const token = searchParams.get('token');
+    const token = searchParams.get("token");
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#F1F5F9' }}>
-            <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <RecoveryShell>
+            {!isSubmitted ? (
+                <div className="space-y-3">
+                    <AuthHeader
+                        title="Reset Password"
+                        description="Create a new password for your John Miko's Place account."
+                    />
 
-                <HeaderImage />
+                    <ResetPasswordForm
+                        token={token || ""}
+                        onSuccess={() => setIsSubmitted(true)}
+                    />
 
-                <div className="p-6">
-                    {!isSubmitted ? (
-                        <div>
-                            <div className="text-center mb-6">
-                                <h2 className="text-2xl font-bold mb-2">
-                                    Reset Your Password
-                                </h2>
-                                <p className="text-sm text-muted-foreground">
-                                    Create a strong password for your account
-                                </p>
-                            </div>
-
-                            <ResetPasswordForm 
-                            token={token || ""} 
-                            onSuccess={() => setIsSubmitted(true)}
-                            />
-
-                            <div className="mt-3 text-center">
-                                <Link to="/login" className="text-sm text-primary font-medium hover:underline inline-flex items-center gap-1">
-                                    <ArrowLeft className="w-4 h-4" />
-                                    Back to Login
-                                </Link>
-                            </div>
-                        </div>
-                    ) : (
-                        <ChangedPasswordMessage />
-                    )}
+                    <BackToLogin />
                 </div>
-            </div>
-        </div>
+            ) : (
+                <ChangedPasswordMessage />
+            )}
+        </RecoveryShell>
     );
-}
+};
 
-const HeaderImage = () => {
-    return (
-        <div className="relative h-40 overflow-hidden">
-            <img
-            src="https://images.unsplash.com/photo-1559827260-dc66d52bef19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiZWFjaCUyMHN1bnNldCUyMG9jZWFufGVufDF8fHx8MTczMzA5ODAwOXww&ixlib=rb-4.1.0&q=80&w=1080"
-            alt="Beach Sunset"
-            className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/60" />
-            
-            <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold text-white mb-1">
-                        John Miko's Place
-                    </h1>   
-                    <p className="text-sm text-white/90">Public Resort</p>
-                </div>
-            </div>
-        </div>
-    );
-}
+type RecoveryShellProps = {
+    children: ReactNode;
+};
+
+const RecoveryShell = ({ children }: RecoveryShellProps) => (
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted/30 p-4 text-foreground md:p-6">
+        <img
+            src={recoveryBackgroundImage}
+            alt="Poolside resort background"
+            className="absolute inset-0 size-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
+
+        <section className="relative w-full max-w-md rounded-xl border bg-card p-5 shadow-sm sm:p-7">
+            {children}
+        </section>
+    </main>
+);
+
+type AuthHeaderProps = {
+    title: string;
+    description: string;
+};
+
+const AuthHeader = ({ title, description }: AuthHeaderProps) => (
+    <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            John Miko&apos;s Place
+        </p>
+        <h1 className="mt-2 text-3xl font-bold tracking-normal text-foreground">
+            {title}
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {description}
+        </p>
+    </div>
+);
+
+const BackToLogin = () => (
+    <Button asChild variant="outline" className="w-full">
+        <Link to="/login">Back to Login</Link>
+    </Button>
+);
 
 const ChangedPasswordMessage = () => {
     const navigate = useNavigate();
@@ -77,49 +88,43 @@ const ChangedPasswordMessage = () => {
 
     useEffect(() => {
         const countdown = setInterval(() => {
-            setTimer(prev => prev - 1);
+            setTimer((prev) => prev - 1);
         }, 1000);
-        const timer = setTimeout(() => {
+        const redirectTimer = setTimeout(() => {
             navigate("/login");
         }, 3000);
 
         return () => {
             clearInterval(countdown);
-            clearTimeout(timer);
+            clearTimeout(redirectTimer);
         };
-    }, [])
+    }, [navigate]);
 
     return (
         <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 bg-green-100">
-                <CheckCircle className="w-10 h-10 text-green-600"  />
+            <div className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-full bg-green-100">
+                <CheckCircle className="size-7 text-green-600" />
             </div>
 
-            <h2 className="text-2xl font-bold mb-2">
-                Password Reset Successfully
-            </h2>
-            <p className="text-sm text-muted-foreground mb-6">
-                Your password has been changed. You can now log in with your new password.
+            <h1 className="text-2xl font-bold tracking-normal text-foreground">
+                Password Updated
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Your password has been reset. You can now sign in with your new password.
             </p>
 
-            <div className="space-y-3">
+            <div className="mt-6 space-y-3">
                 {timer > 0 ? (
                     <p className="text-sm text-muted-foreground">
-                        Redirecting to login in {timer} second{timer > 1 ? 's' : ''}...
+                        Redirecting to login in {timer} second{timer > 1 ? "s" : ""}...
                     </p>
                 ) : (
-                    <LoadingSpinner className="w-5 h-5" />
+                    <LoadingSpinner className="mx-auto size-5" />
                 )}
-                <Link 
-                to="/login"
-                className="text-sm text-blue-600 font-medium hover:underline inline-flex items-center gap-1"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Go to Login
-                </Link>
+                <BackToLogin />
             </div>
         </div>
     );
-}
+};
 
-export default ResetPassword
+export default ResetPassword;

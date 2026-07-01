@@ -1,6 +1,7 @@
 import { reportTypeLabels } from "@/components/pageComponents/Resort Staff/reportDisplay";
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
+import DetailPageHeader from "@/components/ui/detail-page-header";
 import ScreenState from "@/components/ui/screen-state";
 import { type StatusChipTone } from "@/components/ui/status-chip";
 import { useStaffReportById } from "@/hooks/staffReports.hook";
@@ -12,13 +13,11 @@ import type {
 } from "@/types/staffReport.type";
 import { format, isToday, parseISO } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { AlertTriangle, ClipboardCheck } from "lucide-react-native";
+import { AlertTriangle } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
-import type { ReactNode } from "react";
 import { LinkedBookingCard } from "./LinkedBookingCard";
 import { MeaningRow } from "./MeaningRow";
 import { ProofImagesCard } from "./ProofImagesCard";
-import { ReportHeader } from "./ReportHeader";
 import { ReportSummaryCard } from "./ReportSummaryCard";
 import OperationalCard from "@/components/ui/operational-card";
 
@@ -81,7 +80,27 @@ const formatDate = (value?: string | null) => {
 
 const referenceLabel = (id: string) => `RPT-${id.slice(-4).toUpperCase()}`;
 
-export default function ReportDetailScreen() {
+type ResortReportsFallbackHref = "/resort-staff/(reports)/index";
+
+type ReportDetailScreenProps = {
+  fallbackHref: ResortReportsFallbackHref;
+};
+
+const navigateBackToReports = (
+  router: ReturnType<typeof useRouter>,
+  fallbackHref: ResortReportsFallbackHref,
+) => {
+  if (router.canGoBack()) {
+    router.back();
+    return;
+  }
+
+  router.replace(fallbackHref);
+};
+
+export default function ReportDetailScreen({
+  fallbackHref,
+}: ReportDetailScreenProps) {
   const router = useRouter();
   const params = useLocalSearchParams<{ reportId?: string }>();
   const reportId = typeof params.reportId === "string" ? params.reportId : undefined;
@@ -90,7 +109,11 @@ export default function ReportDetailScreen() {
   if (query.isLoading) {
     return (
       <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-        <View className="flex-1 items-center justify-center gap-3">
+        <DetailPageHeader
+          onBack={() => navigateBackToReports(router, fallbackHref)}
+          title="Report details"
+        />
+        <View className="flex-1 items-center justify-center gap-3 px-6">
           <ActivityIndicator size="large" />
           <Text className="text-base text-neutral-grey-1">Loading report...</Text>
         </View>
@@ -101,6 +124,11 @@ export default function ReportDetailScreen() {
   if (!reportId || query.error || !query.data) {
     return (
       <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3 px-6">
+        <DetailPageHeader
+          onBack={() => navigateBackToReports(router, fallbackHref)}
+          title="Report details"
+          className="-mx-6"
+        />
         <View className="flex-1 items-center justify-center">
           <ScreenState
             tone="danger"
@@ -110,7 +138,11 @@ export default function ReportDetailScreen() {
             actionLabel={reportId ? "Retry" : undefined}
             onAction={reportId ? () => query.refetch() : undefined}
           />
-          <Button variant="ghost" onPress={() => router.back()} className="mt-2">
+          <Button
+            variant="ghost"
+            onPress={() => navigateBackToReports(router, fallbackHref)}
+            className="mt-2"
+          >
             <Text className="font-sans-semibold text-base text-neutral-dark-1">
               Go back
             </Text>
@@ -125,7 +157,11 @@ export default function ReportDetailScreen() {
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-      <ReportHeader onBack={() => router.back()} reference={reference} />
+      <DetailPageHeader
+        onBack={() => navigateBackToReports(router, fallbackHref)}
+        title="Report details"
+        metadata={`Reference: ${reference}`}
+      />
 
       <ScrollView
         className="flex-1"
@@ -224,7 +260,6 @@ function ReviewOutcomeCard({
 function GeneralReportCard() {
   return (
     <CustomReportCard
-      icon={<ClipboardCheck size={18} color="#0E33F3" />}
       title="General resort report"
       description="This report is not connected to a guest booking."
     />
@@ -234,13 +269,11 @@ function GeneralReportCard() {
 function CustomReportCard({
   title,
   description,
-  icon,
   leftAccentClassName,
   className,
 }: {
   title: string;
   description: string;
-  icon?: ReactNode;
   leftAccentClassName?: string;
   className?: string;
 }) {
@@ -250,18 +283,9 @@ function CustomReportCard({
       leftAccentClassName={leftAccentClassName}
       contentClassName="gap-2 px-5 py-4"
     >
-      {icon ? (
-        <View className="flex-row items-center gap-2">
-          {icon}
-          <Text className="font-sans-bold text-lg text-neutral-dark-1">
-            {title}
-          </Text>
-        </View>
-      ) : (
-        <Text className="font-sans-bold text-lg text-neutral-dark-1">
-          {title}
-        </Text>
-      )}
+      <Text className="font-sans-bold text-lg text-neutral-dark-1">
+        {title}
+      </Text>
       <Text className="text-base leading-5 text-neutral-grey-1">
         {description}
       </Text>

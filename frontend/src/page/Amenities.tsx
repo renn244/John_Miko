@@ -1,237 +1,257 @@
-import Footer from "@/components/common/Footer"
-import NavBar from "@/components/common/NavBar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BadgeCheck, Calendar, Car, ChevronRight, Coffee, ConciergeBell, Droplets, Fence, Info, MapPin, ShieldCheck, Users } from "lucide-react"
-import { Link } from "react-router"
+import Footer from "@/components/common/Footer";
+import NavBar from "@/components/common/NavBar";
+import {
+    GuestCard,
+    GuestContainer,
+    GuestInfoChip,
+    GuestPageShell,
+} from "@/components/guest";
+import {
+    Car,
+    CheckCircle2,
+    ConciergeBell,
+    ShieldCheck,
+    Utensils,
+    Waves,
+} from "lucide-react";
+
+const heroHighlights = [
+    {
+        icon: Waves,
+        title: "Pool Access",
+        description: "Crystal clear pools for all guests.",
+    },
+    {
+        icon: Utensils,
+        title: "Food Pre-orders",
+        description: "Delicious meals ready on arrival.",
+    },
+    {
+        icon: Car,
+        title: "Parking",
+        description: "Secure on-site slots for guests.",
+    },
+    {
+        icon: ConciergeBell,
+        title: "Family Friendly",
+        description: "Perfect for groups and reunions.",
+    },
+];
+
+const amenityTiles = [
+    {
+        title: "Swimming Pool",
+        description: "Clean, refreshing pool access for day tours and overnight guests.",
+        image: "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?auto=format&fit=crop&w=1200&q=80",
+        className: "md:col-span-2 md:row-span-2",
+    },
+    {
+        title: "Food Options",
+        description: "Pre-order meals during booking or bring food with corkage.",
+        image: "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=900&q=80",
+    },
+    {
+        title: "Accommodations",
+        description: "Rooms, cottages, and event spaces for different group sizes.",
+        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80",
+    },
+    {
+        title: "Parking",
+        description: "On-site parking subject to available space.",
+        image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
+    },
+    {
+        title: "Events & Gatherings",
+        description: "Great for birthdays, reunions, and small celebrations.",
+        image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=900&q=80",
+    },
+];
+
+const safetyRules = [
+    "Children must be supervised at all times.",
+    "Follow staff instructions and signage.",
+    "No glassware near the pool area.",
+    "Adhere to maximum capacity limits.",
+];
+
+const arrivalTips = [
+    "Bring swimwear, towels, and extra clothes for pool use.",
+    "Prepare a valid ID for check-in and booking confirmation.",
+    "Book early for weekends, holidays, and larger groups.",
+    "Review corkage, capacity, and pool rules before arrival.",
+];
 
 const Amenities = () => {
     return (
-        <div className="min-h-screen">
+        <GuestPageShell>
             <NavBar />
 
-            <section className="relative h-72 md:h-96 overflow-hidden">
-                <img
-                src="https://images.unsplash.com/photo-1501117716987-c8e2a8e8b1c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcml2YXRlJTIwcmVzb3J0JTIwcG9vbHxlbnwxfHx8fDE3NzY3NzQ0NTZ8MA&ixlib=rb-4.1.0&q=80&w=1600"
-                alt="Amenities at John Miko's Place Resort"
-                className="w-full h-full object-cover"
-                loading="eager"
-                fetchPriority="high"
-                />
-
-                <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/45 to-black/70">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center">
-                        <div className="max-w-2xl text-white">
-                            <h1 className="text-4xl md:text-5xl font-bold mb-3">Amenities</h1>
-                            <p className="text-base md:text-lg text-white/90">
-                                Everything you need for a relaxing staycation—whether you’re here for a day tour, overnight stay, or a special celebration.
+            <section className="relative border-b bg-background pt-4">
+                <GuestContainer>
+                    <div className="relative min-h-[320px] overflow-hidden rounded-xl border bg-muted md:min-h-[380px]">
+                        <img
+                            src="https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1600"
+                            alt="Resort amenities at John Miko's Place"
+                            className="absolute inset-0 size-full object-cover"
+                            loading="eager"
+                            fetchPriority="high"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-r from-black/75 via-black/40 to-black/15" />
+                        <div className="relative z-10 flex min-h-[320px] max-w-2xl flex-col justify-end p-5 text-white md:min-h-[380px] md:p-8">
+                            <div className="mb-4 flex flex-wrap gap-2">
+                                <GuestInfoChip className="border-white/25 bg-white/15 text-white backdrop-blur">
+                                    Pool access
+                                </GuestInfoChip>
+                                <GuestInfoChip className="border-white/25 bg-white/15 text-white backdrop-blur">
+                                    Food pre-orders
+                                </GuestInfoChip>
+                            </div>
+                            <h1 className="text-4xl font-bold tracking-normal md:text-5xl">
+                                Amenities
+                            </h1>
+                            <p className="mt-3 max-w-xl text-sm leading-6 text-white/90 md:text-base">
+                                Everything you need for a relaxing day tour, overnight stay, or small celebration.
                             </p>
-                            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                                <Link to="/accommodation">
-                                    <Button size="lg">
-                                        Browse Accommodations
-                                        <ChevronRight className="w-5 h-5" />
-                                    </Button>
-                                </Link>
-                                <Link to="/about">
-                                    <Button
-                                    size="lg"
-                                    variant="secondary"
-                                    >
-                                        Learn About Us <Info className="h-6 w-6" />
-                                    </Button>
-                                </Link>
-                            </div>
                         </div>
                     </div>
-                </div>
+                </GuestContainer>
+
+                <GuestContainer className="-mt-10 pb-4">
+                    <div className="relative z-10 mx-2 grid gap-3 md:mx-4 md:grid-cols-4">
+                        {heroHighlights.map(({ icon: Icon, title, description }) => (
+                            <GuestCard key={title} className="p-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                                        <Icon className="size-4 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-sm font-semibold">{title}</h2>
+                                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                            {description}
+                                        </p>
+                                    </div>
+                                </div>
+                            </GuestCard>
+                        ))}
+                    </div>
+                </GuestContainer>
             </section>
 
-            <section className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                                <Droplets className="w-6 h-6 text-primary" />
-                            </div>
-                            <div>
-                                <p className="font-semibold">Pool Access</p>
-                                <p className="text-sm text-muted-foreground">Enjoy a refreshing swim during your stay.</p>
-                            </div>
+            <GuestContainer className="py-9 md:py-12">
+                <div className="space-y-12 md:space-y-14">
+                    <section>
+                        <div className="mb-5">
+                            <h2 className="text-3xl font-bold tracking-normal">What You Can Enjoy</h2>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                Curated facilities designed for your comfort and enjoyment.
+                            </p>
                         </div>
 
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                                <ConciergeBell className="w-6 h-6 text-primary" />
-                            </div>
-                            <div>
-                                <p className="font-semibold">Guest-Friendly Service</p>
-                                <p className="text-sm text-muted-foreground">Support for bookings, questions, and policies.</p>
-                            </div>
+                        <div className="grid gap-4 md:grid-cols-4 md:auto-rows-[170px]">
+                            {amenityTiles.map(({ title, description, image, className }) => (
+                                <article
+                                    key={title}
+                                    className={`group relative min-h-[190px] overflow-hidden rounded-lg border bg-muted ${className ?? ""}`}
+                                >
+                                    <img
+                                        src={image}
+                                        alt={title}
+                                        className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        loading="lazy"
+                                    />
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/20 to-black/5" />
+                                    <div className="absolute inset-x-0 bottom-0 p-4 text-white">
+                                        <h3 className="text-base font-bold">{title}</h3>
+                                        <p className="mt-1 max-w-md text-xs leading-5 text-white/90">
+                                            {description}
+                                        </p>
+                                    </div>
+                                </article>
+                            ))}
                         </div>
+                    </section>
 
-                        <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                                <ShieldCheck className="w-6 h-6 text-primary" />
-                            </div>
-                            <div>
-                                <p className="font-semibold">Safety & Cleanliness</p>
-                                <p className="text-sm text-muted-foreground">Facilities maintained for a comfortable stay.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-14 bg-muted/40">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="max-w-3xl">
-                        <h2 className="text-3xl md:text-4xl font-bold">What you can enjoy</h2>
-                        <p className="mt-3 text-base md:text-lg text-muted-foreground">
-                            A simple list of the essentials guests ask about most—so you can plan your day tour or overnight stay with confidence.
-                        </p>
-                    </div>
-
-                    <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Droplets className="w-5 h-5 text-primary" />
-                                    Pools
-                                </CardTitle>
-                                <CardDescription>Swim time for families and groups.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Free pool access for guests</li>
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Family-friendly swimming rules</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Coffee className="w-5 h-5 text-primary" />
-                                    Food Options
-                                </CardTitle>
-                                <CardDescription>Pre-order or bring your favorites.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Pre-ordering from our restaurant is encouraged</li>
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Outside food/drinks allowed with corkage</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Car className="w-5 h-5 text-primary" />
-                                    Parking
-                                </CardTitle>
-                                <CardDescription>Convenient arrival and unloading.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />On-site parking (subject to space)</li>
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Ask staff for help with large group arrivals</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Fence className="w-5 h-5 text-primary" />
-                                    Privacy
-                                </CardTitle>
-                                <CardDescription>Ideal for staycations and celebrations.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Private resort atmosphere</li>
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Great for family time and reunions</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Users className="w-5 h-5 text-primary" />
-                                    Events
-                                </CardTitle>
-                                <CardDescription>Celebrate birthdays and milestones.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Group-friendly accommodations</li>
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Capacity limits enforced for safety</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Calendar className="w-5 h-5 text-primary" />
-                                    Day Tour & Overnight
-                                </CardTitle>
-                                <CardDescription>Two time slots for flexible plans.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2 text-sm text-muted-foreground">
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Day use: 8:00 AM – 6:00 PM (cottages)</li>
-                                    <li className="flex gap-2"><BadgeCheck className="w-4 h-4 text-primary mt-0.5" />Overnight: Check-in 2:00 PM, Check-out 12:00 PM</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-16 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <section className="grid gap-5 lg:grid-cols-[1fr_430px] lg:items-center">
                         <div>
-                            <h2 className="text-3xl md:text-4xl font-bold">Planning your visit?</h2>
-                            <p className="mt-3 text-base md:text-lg text-muted-foreground">
-                                For weekends, holidays, and peak season, advance reservation is strongly recommended.
-                                Browse accommodations and check availability to lock in your dates.
-                            </p>
-                            <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                                <Link to="/accommodation">
-                                    <Button size="lg">
-                                        Check Availability
-                                        <Calendar className="w-5 h-5" />
-                                    </Button>
-                                </Link>
-                                <Link to="/about">
-                                    <Button size="lg" variant="outline">
-                                        Contact & Location
-                                        <MapPin className="w-5 h-5" />
-                                    </Button>
-                                </Link>
+                            <h2 className="text-2xl font-bold tracking-normal">Dining at John Miko&apos;s Place</h2>
+                            <div className="mt-3 max-w-2xl space-y-3 text-sm leading-6 text-muted-foreground">
+                                <p>
+                                    We want your meals to be as delightful as your stay. You can pre-order Filipino
+                                    dishes during booking so they are ready when you arrive.
+                                </p>
+                                <p>
+                                    Outside food and drinks are allowed, with corkage fees applied to help maintain
+                                    resort cleanliness and service quality.
+                                </p>
                             </div>
                         </div>
 
-                        <div className="rounded-2xl overflow-hidden border">
-                            <img
-                            src="https://images.unsplash.com/photo-1519046904884-53103b34b206?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdGF5Y2F0aW9uJTIwcmVzb3J0fGVufDF8fHx8MTc3Njc3NDU0M3ww&ixlib=rb-4.1.0&q=80&w=1600"
-                            alt="Relaxing staycation vibe"
-                            className="w-full h-72 md:h-96 object-cover"
-                            loading="lazy"
-                            />
+                        <GuestCard className="p-5">
+                            <h3 className="text-base font-bold text-primary">Corkage Fees</h3>
+                            <div className="mt-4 space-y-3 text-sm">
+                                <div className="flex items-center justify-between gap-4 border-b pb-3">
+                                    <span className="text-muted-foreground">Outside food</span>
+                                    <span className="font-bold">P200<span className="text-xs font-normal text-muted-foreground"> /dish</span></span>
+                                </div>
+                                <div className="flex items-center justify-between gap-4">
+                                    <span className="text-muted-foreground">Outside drinks</span>
+                                    <span className="font-bold">P150<span className="text-xs font-normal text-muted-foreground"> /bottle</span></span>
+                                </div>
+                            </div>
+                        </GuestCard>
+                    </section>
+
+                    <GuestCard accent className="p-5">
+                        <div className="grid gap-4 md:grid-cols-[220px_1fr] md:items-start">
+                            <div className="flex items-center gap-3">
+                                <ShieldCheck className="size-6 text-primary" />
+                                <h2 className="text-lg font-bold tracking-normal">
+                                    Pool & Safety Guidelines
+                                </h2>
+                            </div>
+                            <div>
+                                <p className="text-sm text-muted-foreground">
+                                    To ensure everyone has a safe and enjoyable time, please observe the following:
+                                </p>
+                                <div className="mt-3 grid gap-2 text-sm text-muted-foreground md:grid-cols-2">
+                                    {safetyRules.map((rule) => (
+                                        <div key={rule} className="flex items-start gap-2">
+                                            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
+                                            <span>{rule}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </GuestCard>
+
+                    <section>
+                        <div className="mb-5">
+                            <h2 className="text-2xl font-bold tracking-normal">Before You Arrive</h2>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                A few quick reminders to help your visit feel smooth from the start.
+                            </p>
+                        </div>
+
+                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                            {arrivalTips.map((tip) => (
+                                <GuestCard key={tip} className="p-4">
+                                    <div className="flex items-start gap-3">
+                                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
+                                        <p className="text-sm leading-6 text-muted-foreground">
+                                            {tip}
+                                        </p>
+                                    </div>
+                                </GuestCard>
+                            ))}
+                        </div>
+                    </section>
                 </div>
-            </section>
+            </GuestContainer>
 
             <Footer />
-        </div>
-    )
-}
+        </GuestPageShell>
+    );
+};
 
-export default Amenities
+export default Amenities;

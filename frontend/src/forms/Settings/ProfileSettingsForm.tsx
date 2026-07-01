@@ -56,6 +56,7 @@ const ProfileSettingsForm = ({ user }: ProfileSettingsFormProps) => {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
             <Controller
                 name="name"
                 control={control}
@@ -68,27 +69,6 @@ const ProfileSettingsForm = ({ user }: ProfileSettingsFormProps) => {
                             aria-invalid={fieldState.invalid}
                             {...field}
                         />
-                        {fieldState.invalid && (
-                            <FieldError errors={getErrorMessages(fieldState.error)} />
-                        )}
-                    </Field>
-                )}
-            />
-
-            <Controller
-                name="email"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                        <Input
-                            id={field.name}
-                            type="email"
-                            placeholder="your@email.com"
-                            aria-invalid={fieldState.invalid}
-                            {...field}
-                        />
-                        <FieldDescription>This email will be used for account access and booking updates.</FieldDescription>
                         {fieldState.invalid && (
                             <FieldError errors={getErrorMessages(fieldState.error)} />
                         )}
@@ -114,9 +94,31 @@ const ProfileSettingsForm = ({ user }: ProfileSettingsFormProps) => {
                     </Field>
                 )}
             />
+            </div>
+
+            <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                        <Input
+                            id={field.name}
+                            type="email"
+                            placeholder="your@email.com"
+                            aria-invalid={fieldState.invalid}
+                            {...field}
+                        />
+                        <FieldDescription>This email will be used for account access and booking updates.</FieldDescription>
+                        {fieldState.invalid && (
+                            <FieldError errors={getErrorMessages(fieldState.error)} />
+                        )}
+                    </Field>
+                )}
+            />
 
             <div className="flex justify-end">
-                <Button type="submit" disabled={isPending || !isDirty}>
+                <Button type="submit" disabled={isPending || !isDirty} className="w-full sm:w-auto">
                     {isPending ? (
                         <LoadingSpinner />
                     ) : (

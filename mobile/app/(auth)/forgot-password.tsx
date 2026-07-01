@@ -186,12 +186,9 @@ export default function ForgotPassword() {
                                     {isResending ? (
                                         <ActivityIndicator color="#FFFFFF" />
                                     ) : (
-                                        <>
-                                            <Mail color="#FFFFFF" height={14} width={14} />
-                                            <Text className="text-white font-sans-semibold text-base">
-                                                Resend Email
-                                            </Text>
-                                        </>
+                                        <Text className="text-white font-sans-semibold text-base">
+                                            Resend Email
+                                        </Text>
                                     )}
                                 </Button>
                             ) : (

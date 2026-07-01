@@ -5,7 +5,7 @@ export default function MaintenanceStaffTabLayout() {
   return (
     <Tabs screenOptions={{ tabBarShowLabel: false }}>
       <Tabs.Screen
-        name="index"
+        name="(assigned)"
         options={{
           headerShown: false,
           title: "Assigned",
@@ -16,7 +16,7 @@ export default function MaintenanceStaffTabLayout() {
       />
 
       <Tabs.Screen
-        name="history"
+        name="(history)"
         options={{
           headerShown: false,
           title: "History",
@@ -34,14 +34,6 @@ export default function MaintenanceStaffTabLayout() {
           tabBarIcon: ({ color, size }) => (
             <Settings2Icon size={size} color={color} />
           ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="[maintenanceId]"
-        options={{
-          href: null,
-          headerShown: false,
         }}
       />
     </Tabs>

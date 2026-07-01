@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useGetAvailableServicesForBookingQuery } from "@/hooks/add-on-service.hook";
 import { toDateOnly } from "@/lib/date.util";
+import { formatPeso } from "@/lib/utils";
 import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import type { AddOnService } from "@/types/admin/add-on-service.type";
 import { ArrowRight, Minus, Package, Plus, ShoppingCart, X } from "lucide-react";
@@ -105,13 +106,18 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
     }, [fields, serviceCache]);
 
     return (
-        <div className="space-y-6">
-            <div>
-                <div className="flex items-center mb-2">
-                    <h3 className="font-bold text-lg">Select Add-on Services</h3>
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="space-y-4">
+                <div className="flex items-center">
+                    <div>
+                        <h3 className="text-xl font-bold tracking-normal">Enhance your stay</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Select optional services for your booking. You can also skip this step.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-150 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-2">
+                <div className="grid max-h-[34rem] grid-cols-1 gap-4 overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] sm:grid-cols-2 [&::-webkit-scrollbar]:hidden">
                     {isLoading
                         ? null
                         : services?.map((service) => {
@@ -121,7 +127,7 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                               return (
                                   <div
                                       key={service.id}
-                                      className="border-2 rounded-xl overflow-hidden hover:shadow-md transition-all"
+                                      className="overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md"
                                       style={{ borderColor: isSelected ? "#1E73BE" : "#E5E7EB" }}
                                   >
                                       <img
@@ -218,9 +224,9 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                 )}
             </div>
 
-            {fields.length > 0 && (
-                <div className="bg-white rounded-2xl p-6 shadow-sm border-2">
-                    <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <aside className="space-y-3 lg:sticky lg:top-6 lg:self-start">
+                <div className="rounded-xl border bg-card p-4 shadow-sm">
+                    <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
                         <ShoppingCart className="w-5 h-5" />
                         Selected Services
                         <span className="ml-auto text-sm font-normal text-muted-foreground">
@@ -228,6 +234,14 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                         </span>
                     </h3>
 
+                    {fields.length === 0 ? (
+                        <div className="rounded-lg bg-muted/50 p-4">
+                            <p className="text-sm font-semibold">No add-ons selected yet</p>
+                            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                                Choose services from the list or skip this step.
+                            </p>
+                        </div>
+                    ) : (
                     <div className="space-y-3">
                         {fields.map((field, index) => {
                             const service = serviceCache[field.addOnServiceId];
@@ -238,64 +252,68 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                             if (!name) return null;
 
                             return (
-                                <div key={field.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted">
-                                    {imageUrl ? (
-                                        <img
-                                            src={imageUrl}
-                                            alt={name}
-                                            className="w-16 h-16 rounded-lg object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-16 h-16 rounded-lg bg-gray-200" />
-                                    )}
+                                <div key={field.id} className="rounded-lg bg-muted/60 p-3">
+                                    <div className="flex gap-3">
+                                        {imageUrl ? (
+                                            <img
+                                                src={imageUrl}
+                                                alt={name}
+                                                className="size-12 rounded-md object-cover"
+                                            />
+                                        ) : (
+                                            <div className="size-12 rounded-md bg-gray-200" />
+                                        )}
 
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-sm">{name}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            ₱{price.toLocaleString()} × {field.quantity}
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm font-semibold">{name}</p>
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                {formatPeso(price)} × {field.quantity}
+                                            </p>
+                                        </div>
+
+                                        <Button type="button" onClick={() => removeFromSelection(index)} variant="ghost" size="icon-xs">
+                                            <X className="size-3.5 text-destructive" />
+                                        </Button>
+                                    </div>
+
+                                    <div className="mt-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-1.5">
+                                            <Button
+                                                type="button"
+                                                onClick={() => updateQuantity(index, field.quantity - 1)}
+                                                variant="outline"
+                                                size="icon-xs"
+                                            >
+                                                <Minus className="size-3" />
+                                            </Button>
+                                            <span className="w-6 text-center text-sm font-bold text-foreground">
+                                                {field.quantity}
+                                            </span>
+                                            <Button
+                                                type="button"
+                                                onClick={() => updateQuantity(index, field.quantity + 1)}
+                                                variant="outline"
+                                                size="icon-xs"
+                                            >
+                                                <Plus className="size-3" />
+                                            </Button>
+                                        </div>
+
+                                        <p className="text-sm font-bold text-primary">
+                                            {formatPeso(price * field.quantity)}
                                         </p>
                                     </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            type="button"
-                                            onClick={() => updateQuantity(index, field.quantity - 1)}
-                                            variant="outline"
-                                            size="icon-sm"
-                                        >
-                                            <Minus className="w-4 h-4" />
-                                        </Button>
-                                        <span className="w-8 text-center font-bold" style={{ color: "#1F2937" }}>
-                                            {field.quantity}
-                                        </span>
-                                        <Button
-                                            type="button"
-                                            onClick={() => updateQuantity(index, field.quantity + 1)}
-                                            variant="outline"
-                                            size="icon-sm"
-                                        >
-                                            <Plus className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-
-                                    <p className="font-bold w-20 text-right" style={{ color: "#1E73BE" }}>
-                                        ₱{(price * field.quantity).toLocaleString()}
-                                    </p>
-
-                                    <Button type="button" onClick={() => removeFromSelection(index)} variant="ghost" size="icon-sm">
-                                        <X className="w-5 h-5 text-destructive" />
-                                    </Button>
                                 </div>
                             );
                         })}
                     </div>
+                    )}
 
-                    <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                    <div className="mt-4 flex items-center justify-between border-t pt-4">
                         <span className="font-bold">Add-on Subtotal:</span>
-                        <span className="text-xl font-bold">₱{addOnTotal.toLocaleString()}</span>
+                        <span className="text-xl font-bold">{formatPeso(addOnTotal)}</span>
                     </div>
                 </div>
-            )}
 
             <div className="space-y-2">
                 <Button className="w-full" type="button" onClick={handleContinue}>
@@ -307,6 +325,7 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                     Back to Form
                 </Button>
             </div>
+            </aside>
         </div>
     );
 };

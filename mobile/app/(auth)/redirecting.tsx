@@ -1,3 +1,4 @@
+import BrandWordmark from "@/components/branding/BrandWordmark";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import apiClient from "@/lib/apiClient";
 import { getAccessToken } from "@/lib/tokenStorage";
@@ -114,9 +115,7 @@ function Redirecting() {
         <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
             <View className="flex-1 items-center justify-center px-6">
                 <View className="w-full max-w-sm items-center gap-4">
-                    <Text className="font-sans-bold text-xl text-primary">
-                        John Miko&apos;s
-                    </Text>
+                    <BrandWordmark size="md" />
 
                     <View className="items-center gap-1">
                         <Text className="text-center font-sans-bold text-xl text-neutral-dark-1">
