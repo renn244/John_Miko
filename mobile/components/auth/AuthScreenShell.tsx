@@ -1,4 +1,4 @@
-import Logo from "@/assets/app/logo/logo.svg";
+import BrandWordmark from "@/components/branding/BrandWordmark";
 import CustomSafeArea from "@/components/ui/CustomSafeAreaView";
 import type { PropsWithChildren, ReactNode } from "react";
 import { Text, View } from "react-native";
@@ -11,7 +11,6 @@ type AuthScreenShellProps = PropsWithChildren<{
   cue?: string;
   cueIcon?: ReactNode;
   cueTone?: "neutral" | "success" | "info" | "warning" | "danger";
-  brand?: string;
   headerSlot?: ReactNode;
   showHeader?: boolean;
   contentClassName?: string;
@@ -24,7 +23,6 @@ export default function AuthScreenShell({
   cue,
   cueIcon,
   cueTone = "neutral",
-  brand = "John Miko's",
   headerSlot,
   showHeader = true,
   contentClassName,
@@ -75,12 +73,7 @@ export default function AuthScreenShell({
             <View className="gap-8">
               {showHeader ? (
                 <View className="gap-5">
-                  <View className="flex-row items-center gap-2">
-                    <Logo height={18} width={18} />
-                    <Text className="font-sans-bold text-xl text-primary">
-                      {brand}
-                    </Text>
-                  </View>
+                  <BrandWordmark size="md" />
 
                   <View className="gap-3">
                     {cue ? (

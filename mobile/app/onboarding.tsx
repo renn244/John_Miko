@@ -1,4 +1,4 @@
-import Logo from '@/assets/app/logo/logo.svg';
+import BrandWordmark from '@/components/branding/BrandWordmark';
 import { Button } from '@/components/ui/Button';
 import CustomSafeAreaView from '@/components/ui/CustomSafeAreaView';
 import { hasSeenIntro, setSeenIntro } from '@/lib/introStorage';
@@ -124,10 +124,7 @@ const Onboarding = () => {
         <CustomSafeAreaView className='bg-neutral-soft-grey-3 px-6'>
             <View className='flex-1 items-center pb-5 pt-8'>
 
-                <View className='flex-row justify-center items-center gap-2'>
-                    <Logo height={20} width={20}  />
-                    <Text className='font-sans-bold text-xl text-primary'>John Miko&apos;s</Text>
-                </View>
+                <BrandWordmark size='md' />
 
                 <View className='w-full flex-1 items-center justify-between pt-8'>
                     <View
