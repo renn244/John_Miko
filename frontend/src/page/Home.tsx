@@ -42,6 +42,82 @@ import { Link } from "react-router";
 const heroImage =
     "https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1600";
 
+const fallbackAccommodations: Pick<
+    Accommodation,
+    "id" | "name" | "description" | "imageUrl" | "type" | "capacity" | "price" | "amenities" | "stayOptions"
+>[] = [
+    {
+        id: "deluxe-villa",
+        name: "Deluxe Villa",
+        description:
+            "Our premium offering featuring spacious living areas, a private terrace, and modern amenities designed for groups seeking a comfortable, elevated stay.",
+        imageUrl:
+            "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+        type: "Cottage",
+        capacity: 8,
+        price: 12500,
+        amenities: ["Pool Access", "Kitchen", "Aircon"],
+        stayOptions: [
+            {
+                id: "overnight",
+                accommodationId: "deluxe-villa",
+                code: "OVERNIGHT",
+                label: "Overnight",
+                sortOrder: 1,
+                isActive: true,
+                createdAt: "",
+                updatedAt: "",
+            },
+        ],
+    },
+    {
+        id: "poolside-cottage",
+        name: "Poolside Cottage",
+        description: "Perfect for quick getaways with direct access to the main resort pool area.",
+        imageUrl:
+            "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1000&q=80",
+        type: "Cottage",
+        capacity: 4,
+        price: 4500,
+        amenities: ["Pool Access", "Outdoor Seating"],
+        stayOptions: [
+            {
+                id: "daystay",
+                accommodationId: "poolside-cottage",
+                code: "DAYSTAY",
+                label: "DayStay",
+                sortOrder: 1,
+                isActive: true,
+                createdAt: "",
+                updatedAt: "",
+            },
+        ],
+    },
+    {
+        id: "private-suite",
+        name: "Private Suite",
+        description: "An intimate, elegantly designed space ideal for couples seeking a quiet retreat.",
+        imageUrl:
+            "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1000&q=80",
+        type: "Room",
+        capacity: 2,
+        price: 6000,
+        amenities: ["WiFi", "Aircon", "Private Bath"],
+        stayOptions: [
+            {
+                id: "overnight-suite",
+                accommodationId: "private-suite",
+                code: "OVERNIGHT",
+                label: "Overnight",
+                sortOrder: 1,
+                isActive: true,
+                createdAt: "",
+                updatedAt: "",
+            },
+        ],
+    },
+];
+
 const foodItems = [
     {
         name: "Sinigang na Baboy",
@@ -165,7 +241,7 @@ const Home = () => {
     const { data: accommodationsResponse } = useGetAccommodationsQuery({ page: 1, limit: 3 });
     const accommodations = accommodationsResponse?.data?.length
         ? accommodationsResponse.data.slice(0, 3)
-        : [];
+        : fallbackAccommodations;
 
     const featuredAccommodation = accommodations[0];
     const sideAccommodations = accommodations.slice(1, 3);
