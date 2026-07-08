@@ -12,28 +12,36 @@ const AccommodationStatistics = () => {
             <StatisticCards 
             title="Total"
             stat={stats?.total || 0}
-            Icon={<Home className="w-5 h-5 text-blue-600" />}
+            Icon={<Home />}
+            accentClassName="border-l-blue-500"
+            iconContainerClassName="bg-blue-500"
             isLoading={statLoading}
             />
             
             <StatisticCards 
             title="Rooms"
             stat={stats?.room || 0}
-            Icon={<BedDouble className="w-5 h-5 text-green-600" />}
+            Icon={<BedDouble />}
+            accentClassName="border-l-emerald-500"
+            iconContainerClassName="bg-emerald-500"
             isLoading={statLoading}
             />
             
             <StatisticCards 
             title="Cottages"
             stat={stats?.cottage || 0}
-            Icon={<LandPlot className="w-5 h-5 text-red-600" />}
+            Icon={<LandPlot />}
+            accentClassName="border-l-amber-500"
+            iconContainerClassName="bg-amber-500"
             isLoading={statLoading}
             />
 
             <StatisticCards 
             title="Event Halls"
             stat={stats?.eventhall || 0}
-            Icon={<Warehouse className="w-5 h-5 text-yellow-600" />}
+            Icon={<Warehouse />}
+            accentClassName="border-l-violet-500"
+            iconContainerClassName="bg-violet-500"
             isLoading={statLoading}
             />
       

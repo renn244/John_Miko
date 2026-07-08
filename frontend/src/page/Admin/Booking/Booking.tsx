@@ -10,28 +10,29 @@ import { Link } from "react-router";
 const Booking = () => {
 
     return (
-        <div className="space-y-6">
+        <div className="flex min-h-0 flex-1 flex-col gap-5">
 
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">
-                        Booking Management
+                    <h1 className="text-2xl font-semibold tracking-tight">
+                        Bookings
                     </h1>
-                    <p className="text-sm mt-1 text-muted-foreground">
-                        Manage and monitor all confirmed reservations
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Manage reservations, schedules, payment type, and booking actions.
                     </p>
                 </div>
                 <Link to="/admin/booking/add">
                     <Button>
                         Add Booking
-                        <Plus className="w-5 h-5 text-white" />
+                        <Plus className="size-4" />
                     </Button>
                 </Link>
             </div>
 
-            <BookingFilter />
-
-            <BookingTable />
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
+                <BookingFilter />
+                <BookingTable />
+            </div>
 
             <ReschedulingDialog />
 

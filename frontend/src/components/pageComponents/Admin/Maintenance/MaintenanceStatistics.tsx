@@ -10,35 +10,45 @@ const MaintenanceStatistics = () => {
             <StatisticCards 
             title="Total Tickets"
             className="col-span-2 md:col-span-1"
-            Icon={<Wrench className="w-5 h-5 text-primary" />}
+            Icon={<Wrench />}
+            accentClassName="border-l-blue-500"
+            iconContainerClassName="bg-blue-500"
             stat={stats?.total || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="Pending"
-            Icon={<AlertCircle className="w-5 h-5 text-amber-500" />}
+            Icon={<AlertCircle />}
+            accentClassName="border-l-amber-500"
+            iconContainerClassName="bg-amber-500"
             stat={stats?.Pending || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="In Progress"
-            Icon={<Clock className="w-5 h-5 text-blue-600" />}
+            Icon={<Clock />}
+            accentClassName="border-l-blue-500"
+            iconContainerClassName="bg-blue-500"
             stat={stats?.InProgress || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="Completed"
-            Icon={<CheckCircle className="w-5 h-5 text-emerald-700" />}
+            Icon={<CheckCircle />}
+            accentClassName="border-l-emerald-500"
+            iconContainerClassName="bg-emerald-500"
             stat={stats?.Completed || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="Closed"
-            Icon={<CheckCircle className="w-5 h-5 text-red-700" />}
+            Icon={<CheckCircle />}
+            accentClassName="border-l-rose-500"
+            iconContainerClassName="bg-rose-500"
             stat={stats?.Closed || 0}
             isLoading={isLoading}
             />

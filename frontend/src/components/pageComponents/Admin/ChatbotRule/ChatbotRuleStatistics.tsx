@@ -10,21 +10,27 @@ const ChatbotRuleStatistics = () => {
             <StatisticCards 
             className="col-span-2 md:col-span-1"
             title="Total Rules"
-            Icon={<MessageCircle className="w-5 h-5 text-primary" />}
+            Icon={<MessageCircle />}
+            accentClassName="border-l-blue-500"
+            iconContainerClassName="bg-blue-500"
             stat={statistics?.total || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="Active Rules"
-            Icon={<CheckCircle className="w-5 h-5 text-emerald-500" />}
+            Icon={<CheckCircle />}
+            accentClassName="border-l-emerald-500"
+            iconContainerClassName="bg-emerald-500"
             stat={statistics?.active || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="Inactive Rules"
-            Icon={<AlertCircle className="w-5 h-5 text-amber-500" />}
+            Icon={<AlertCircle />}
+            accentClassName="border-l-amber-500"
+            iconContainerClassName="bg-amber-500"
             stat={statistics?.inactive || 0}
             isLoading={isLoading}
             />

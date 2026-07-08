@@ -6,13 +6,29 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const StaffReportFilter = () => {
+    const { search, status, type, severity, clearFilters } = useStaffReportSearch();
+    const hasActiveFilters = Boolean(search || status || type || severity);
+
     return (
-        <div className="rounded-xl border-2 bg-white p-4 shadow-sm">
-            <div className="flex flex-col gap-4 xl:flex-row">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 flex-1">
                 <SearchStaffReportsFilter />
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-nowrap lg:items-center">
                 <SelectStaffReportStatus />
                 <SelectStaffReportType />
                 <SelectStaffReportSeverity />
+
+                {hasActiveFilters ? (
+                    <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="text-sm font-medium text-primary transition hover:text-primary/80"
+                    >
+                        Clear Filters
+                    </button>
+                ) : null}
             </div>
         </div>
     )
@@ -31,11 +47,11 @@ const SearchStaffReportsFilter = () => {
 
     return (
         <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                className="pl-10"
+                className="pl-9"
                 placeholder="Search by title, reporter, report ID, or booking reference..."
             />
         </div>
@@ -47,7 +63,7 @@ const SelectStaffReportStatus = () => {
 
     return (
         <Select value={status ?? "all"} onValueChange={updateStatus}>
-            <SelectTrigger className="xl:w-44">
+            <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -68,7 +84,7 @@ const SelectStaffReportType = () => {
 
     return (
         <Select value={type ?? "all"} onValueChange={updateType}>
-            <SelectTrigger className="xl:w-44">
+            <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -89,7 +105,7 @@ const SelectStaffReportSeverity = () => {
 
     return (
         <Select value={severity ?? "all"} onValueChange={updateSeverity}>
-            <SelectTrigger className="xl:w-44">
+            <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="All Severity" />
             </SelectTrigger>
             <SelectContent>

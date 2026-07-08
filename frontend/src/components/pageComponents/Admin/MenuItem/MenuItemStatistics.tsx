@@ -7,25 +7,31 @@ const MenuItemStatistics = () => {
     const { data: stats, isLoading } = useGetMenuItemStatsQuery();
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
             <StatisticCards 
             className="col-span-2 md:col-span-1"
             title="Total Items"
-            Icon={<UtensilsCrossed className="w-5 h-5 text-primary" />}
+            Icon={<UtensilsCrossed />}
+            accentClassName="border-l-blue-500"
+            iconContainerClassName="bg-blue-500"
             stat={stats?.total || 0}
             isLoading={isLoading}
             />
             
             <StatisticCards 
             title="Available"
-            Icon={<CheckCircle className="w-5 h-5 text-green-600" />}
+            Icon={<CheckCircle />}
+            accentClassName="border-l-emerald-500"
+            iconContainerClassName="bg-emerald-500"
             stat={stats?.available || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards 
             title="Unavailable"
-            Icon={<XCircle className="w-5 h-5 text-red-600" />}
+            Icon={<XCircle />}
+            accentClassName="border-l-rose-500"
+            iconContainerClassName="bg-rose-500"
             stat={stats?.unavailable || 0}
             isLoading={isLoading}
             />
