@@ -2,7 +2,6 @@ import MaintenanceKanbanBoard from "@/components/pageComponents/Admin/Maintenanc
 import MaintenanceSearchDialog from "@/components/pageComponents/Admin/Maintenance/MaintenanceSearchDialog";
 import MarkCompleteDialog from "@/components/pageComponents/Admin/Maintenance/MarkCompleteDialog";
 import StaffReportsTab from "@/components/pageComponents/Admin/Maintenance/StaffReportsTab";
-import ViewMaintenanceDialog from "@/components/pageComponents/Admin/Maintenance/ViewMaintenanceDialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { updateSearchParams } from "@/lib/updateSearchParams";
@@ -16,7 +15,7 @@ const Maintenance = () => {
   const setIsSearchOpen = useMaintenanceStore((state) => state.setIsSearchOpen);
 
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-6">
       <Tabs
         value={activeTab}
         onValueChange={(value) =>
@@ -24,7 +23,7 @@ const Maintenance = () => {
             tab: value === "board" ? undefined : value,
           })
         }
-        className="space-y-6"
+        className="flex min-h-0 flex-1 flex-col gap-6"
       >
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="space-y-4">
@@ -68,13 +67,12 @@ const Maintenance = () => {
           <MaintenanceKanbanBoard />
         </TabsContent>
 
-        <TabsContent value="staff-reports" className="space-y-6">
+        <TabsContent value="staff-reports" className="flex min-h-0 flex-1 flex-col">
           <StaffReportsTab />
         </TabsContent>
       </Tabs>
 
       <MaintenanceSearchDialog />
-      <ViewMaintenanceDialog />
       <MarkCompleteDialog />
     </div>
   );
