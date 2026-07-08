@@ -210,6 +210,46 @@ export class StaffReportsService {
     };
   }
 
+  async getOverview(date?: Date) {
+    const { gte, lte } = getSingleDayRange(date);
+
+    const [
+      totalToday,
+      checkInReportToday,
+      checkOutReportToday,
+      maintenanceReportToday,
+      pendingReviewCount,
+      pendingReports,
+    ] = await Promise.all([
+      this.prisma.report.count({ where: { createdAt: { gte, lte } } }),
+      this.prisma.report.count({
+        where: { createdAt: { gte, lte }, type: 'checkIn' },
+      }),
+      this.prisma.report.count({
+        where: { createdAt: { gte, lte }, type: 'checkOut' },
+      }),
+      this.prisma.report.count({
+        where: { createdAt: { gte, lte }, type: 'maintenance' },
+      }),
+      this.prisma.report.count({ where: { status: 'Pending' } }),
+      this.prisma.report.findMany({
+        where: { status: 'Pending' },
+        include: reportInclude,
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return {
+      totalToday,
+      checkInReportToday,
+      checkOutReportToday,
+      maintenanceReportToday,
+      pendingReviewCount,
+      pendingReports,
+    };
+  }
+
   async viewReportsByUserId(user: UserSession, query: GetStaffReportsQuery) {
     return this.getPaginatedReports(query, user.id);
   }

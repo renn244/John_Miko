@@ -156,6 +156,68 @@ export class FeedbackService {
         }
     }
 
+    async getOverview(date?: Date) {
+        const { gte, lte } = getSingleDayRange(date);
+        const feedbackSummaryInclude = {
+            booking: {
+                select: {
+                    id: true,
+                    referenceCode: true,
+                    guestName: true,
+                    bookingDate: true,
+                    accommodation: {
+                        select: {
+                            id: true,
+                            name: true,
+                            type: true,
+                        },
+                    },
+                },
+            },
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+        } satisfies Prisma.FeedbackInclude;
+
+        const [stats, receivedToday, recentFeedback, lowRatingFeedback] =
+            await Promise.all([
+                this.prisma.feedback.aggregate({
+                    _count: true,
+                    _avg: { rating: true },
+                    _min: { rating: true },
+                    _max: { rating: true },
+                }),
+                this.prisma.feedback.count({
+                    where: { createdAt: { gte, lte } },
+                }),
+                this.prisma.feedback.findMany({
+                    include: feedbackSummaryInclude,
+                    take: 5,
+                    orderBy: { createdAt: 'desc' },
+                }),
+                this.prisma.feedback.findMany({
+                    where: { rating: { lte: 3 } },
+                    include: feedbackSummaryInclude,
+                    take: 5,
+                    orderBy: { createdAt: 'desc' },
+                }),
+            ]);
+
+        return {
+            total: stats._count,
+            averageRating: stats._avg.rating || 0,
+            minRating: stats._min.rating || 0,
+            maxRating: stats._max.rating || 0,
+            receivedToday,
+            recentFeedback,
+            lowRatingFeedback,
+        };
+    }
+
     async getFeedbackById(id: string, user: UserSession) {
         const feedback = await this.prisma.feedback.findUnique({
             where: { id },

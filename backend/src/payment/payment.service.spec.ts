@@ -3,6 +3,7 @@ import { PaymentService } from './payment.service';
 describe('PaymentService', () => {
   const prisma = {
     payment: {
+      count: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
       create: jest.fn(),
@@ -118,5 +119,48 @@ describe('PaymentService', () => {
         privateclosurerevenueamount: 35000,
       },
     ]);
+  });
+
+  it('returns payment overview with pending reviews and today revenue', async () => {
+    prisma.payment.findMany
+      .mockResolvedValueOnce([
+        {
+          accommodationAmount: 1000,
+          preOrderAmount: 200,
+          addOnAmount: 300,
+          guestFeeAmount: 500,
+        },
+      ])
+      .mockResolvedValueOnce([{ id: 'payment-1', status: 'Pending' }]);
+    prisma.closure.findMany.mockResolvedValue([
+      {
+        id: 'closure-1',
+        accommodationId: null,
+        type: 'Private',
+        date: new Date('2026-07-06T00:00:00.000Z'),
+      },
+    ]);
+    prisma.payment.count.mockResolvedValue(1);
+
+    const result = await service.getPaymentOverview(
+      new Date('2026-07-06T00:00:00.000Z'),
+    );
+
+    expect(prisma.payment.count).toHaveBeenCalledWith({
+      where: { status: 'Pending' },
+    });
+    expect(result).toEqual({
+      todayRevenue: 37000,
+      pendingReviewCount: 1,
+      pendingPayments: [{ id: 'payment-1', status: 'Pending' }],
+      revenueBreakdown: {
+        accommodationFee: 1000,
+        preOrderFee: 200,
+        addOnServiceFee: 300,
+        guestFee: 500,
+        privateClosureRevenue: 35000,
+        totalRevenue: 37000,
+      },
+    });
   });
 });

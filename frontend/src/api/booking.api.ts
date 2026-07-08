@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Booking, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrderAndPayment, BookingWithPaymentInfo, GetBookingsQuery } from "@/types/booking.types";
+import type { Booking, BookingOverview, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrderAndPayment, BookingWithPaymentInfo, GetBookingsQuery } from "@/types/booking.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export type CreateManualBookingDto = {
@@ -56,6 +56,17 @@ export const bookingApi = {
         }
 
         return response.data as PaginatedResponse<BookingWithAccommodation>;
+    },
+    getBookingOverview: async (date?: string) => {
+        const response = await apiClient.get('/booking/overview', {
+            params: { date },
+        });
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'Failed to fetch booking overview');
+        }
+
+        return response.data as BookingOverview;
     },
     getBookingsByAccommodation: async (accommodationId: string) => {
         const response = await apiClient.get(`/booking/byAccommodation/${accommodationId}`)

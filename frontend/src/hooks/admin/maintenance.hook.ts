@@ -44,6 +44,14 @@ export const useGetMaintenanceStatsQuery = () => {
     })
 }
 
+export const useGetMaintenanceOverviewQuery = (date?: string) => {
+    return useQuery({
+        queryKey: ['maintenance', 'overview', date],
+        queryFn: () => maintenanceApi.getMaintenanceOverview(date),
+        refetchOnWindowFocus: false,
+    })
+}
+
 export const useGetMaintenancebyId = (id: string | undefined | null) => {
     return useQuery({
         queryKey: ['maintenance', 'byId', id],

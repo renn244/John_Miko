@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Role } from 'src/generated/prisma/enums';
 import { Public } from 'src/lib/decorators/Public.decorator';
+import { DateReportQueryDto } from 'src/lib/dto/date-report.query';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
@@ -33,6 +34,12 @@ export class BookingController {
     @Roles(Role.ADMIN)
     async GetBookings(@Query() query: GetBookingsQuery) {
         return this.bookingService.getBookings(query)
+    }
+
+    @Get('overview')
+    @Roles(Role.ADMIN)
+    async getBookingOverview(@Query() query: DateReportQueryDto) {
+        return this.bookingService.getBookingOverview(query.date);
     }
 
     @Get('staff')

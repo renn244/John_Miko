@@ -1,488 +1,898 @@
-
 import RevenueBreakdownCard from "@/components/pageComponents/Admin/Revenue/RevenueBreakdownCard";
-import RevenueLineChart, { type RevenueLineChartPoint } from "@/components/pageComponents/Admin/Revenue/RevenueLineChart";
+import RevenueLineChart, {
+    type RevenueLineChartPoint,
+} from "@/components/pageComponents/Admin/Revenue/RevenueLineChart";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import StatisticCards from "@/components/ui/StatisticCards";
-import { useGetAccommodationStatsQuery } from "@/hooks/admin/accommodation.hook";
-import { useGetBookingDetailsBulkQuery, useGetOverviewBookingsQuery } from "@/hooks/admin/booking.hook";
-import { useGetFeedbackStatsQuery, useGetRecentFeedbacksQuery } from "@/hooks/admin/feedback.hook";
-import { useGetPaymentReports, useGetRevenueAnalyticsQuery } from "@/hooks/admin/payment.hook";
-import { useGetStaffReportReportsQuery } from "@/hooks/admin/staff-report.hook";
-import { formatToSmartDate } from "@/lib/date.util";
+import { useGetBookingOverviewQuery } from "@/hooks/admin/booking.hook";
+import { useGetFeedbackOverviewQuery } from "@/hooks/admin/feedback.hook";
+import { useGetMaintenanceOverviewQuery } from "@/hooks/admin/maintenance.hook";
+import {
+    useGetPaymentOverviewQuery,
+    useGetRevenueAnalyticsQuery,
+} from "@/hooks/admin/payment.hook";
+import { useGetStaffReportOverviewQuery } from "@/hooks/admin/staff-report.hook";
+import { formatToSmartDate, removeTimeFromDate } from "@/lib/date.util";
+import { cn, formatPeso } from "@/lib/utils";
 import type { RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
+import type { BookingOverviewSummary } from "@/types/booking.types";
+import type { FeedbackOverviewItem } from "@/types/feedback.types";
 import { format } from "date-fns";
-import { BookMarked, CalendarCheck, ClipboardList, DollarSign, Home, Mails, MessageSquare, MessageSquareWarning, ShoppingBag, Star } from "lucide-react";
+import {
+    ArrowRight,
+    CalendarCheck,
+    CheckCircle2,
+    CreditCard,
+    DollarSign,
+    Star,
+    Ticket,
+    Wrench,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Link, type To } from "react-router";
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Confirmed":
-      return { bg: "#DBEAFE", text: "#1E73BE", border: "#1E73BE" };
-    case "Completed":
-      return { bg: "#D1FAE5", text: "#059669", border: "#059669" };
-    case "Cancelled":
-      return { bg: "#FEE2E2", text: "#DC2626", border: "#DC2626" };
-    default:
-      return { bg: "#F3F4F6", text: "#6B7280", border: "#6B7280" };
-  }
+const surfaceClassName =
+    "rounded-xl border border-border/70 bg-card shadow-sm";
+
+const statusToneClassName: Record<string, string> = {
+    Pending: "border-amber-200 bg-amber-50 text-amber-700",
+    Confirmed: "border-blue-200 bg-blue-50 text-blue-700",
+    Completed: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    Approved: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    Rejected: "border-rose-200 bg-rose-50 text-rose-700",
+    Cancelled: "border-rose-200 bg-rose-50 text-rose-700",
+    InProgress: "border-blue-200 bg-blue-50 text-blue-700",
+    Closed: "border-slate-200 bg-slate-50 text-slate-700",
+    High: "border-rose-200 bg-rose-50 text-rose-700",
+    Medium: "border-amber-200 bg-amber-50 text-amber-700",
+    Low: "border-slate-200 bg-slate-50 text-slate-700",
 };
 
-const normalizeRevenueRow = (row: RevenueAnalyticsApiItem): RevenueLineChartPoint => ({
-  month: row.month,
-  count: Number(row.count) || 0,
-  totalAmount: Number(row.totalamount) || 0,
-  accommodationAmount: Number(row.accommodationamount) || 0,
-  preOrderAmount: Number(row.preorderamount) || 0,
-  addOnAmount: Number(row.addonamount) || 0,
-  guestFeeAmount: Number(row.guestfeeamount) || 0,
-  privateClosureRevenueAmount: Number(row.privateclosurerevenueamount) || 0,
+const getBookingRowAccent = (status?: string | null) => {
+    switch (status) {
+        case "Pending":
+            return "#F59E0B";
+        case "Confirmed":
+            return "#1E73BE";
+        case "Completed":
+            return "#059669";
+        case "Cancelled":
+            return "#DC2626";
+        default:
+            return "#D1D5DB";
+    }
+};
+
+const getOverviewFeedbackTone = (rating: number) => {
+    switch (true) {
+        case rating >= 5:
+            return {
+                accentClassName: "bg-emerald-500",
+                containerClassName: "border-border/70 bg-background hover:bg-muted/30",
+                avatarClassName:
+                    "border-emerald-200 bg-emerald-100 text-emerald-700",
+                ratingClassName: "text-emerald-700",
+                commentClassName: "text-foreground/85",
+            };
+        case rating >= 4:
+            return {
+                accentClassName: "bg-lime-500",
+                containerClassName: "border-border/70 bg-background hover:bg-muted/30",
+                avatarClassName: "border-lime-200 bg-lime-100 text-lime-700",
+                ratingClassName: "text-lime-700",
+                commentClassName: "text-foreground/85",
+            };
+        case rating >= 3:
+            return {
+                accentClassName: "bg-amber-500",
+                containerClassName: "border-border/70 bg-background hover:bg-muted/30",
+                avatarClassName:
+                    "border-amber-200 bg-amber-100 text-amber-700",
+                ratingClassName: "text-amber-700",
+                commentClassName: "text-foreground/85",
+            };
+        default:
+            return {
+                accentClassName: "bg-rose-500",
+                containerClassName: "border-border/70 bg-background hover:bg-muted/30",
+                avatarClassName: "border-rose-200 bg-rose-100 text-rose-700",
+                ratingClassName: "text-rose-700",
+                commentClassName: "text-foreground/85",
+            };
+    }
+};
+
+const normalizeRevenueRow = (
+    row: RevenueAnalyticsApiItem,
+): RevenueLineChartPoint => ({
+    month: row.month,
+    count: Number(row.count) || 0,
+    totalAmount: Number(row.totalamount) || 0,
+    accommodationAmount: Number(row.accommodationamount) || 0,
+    preOrderAmount: Number(row.preorderamount) || 0,
+    addOnAmount: Number(row.addonamount) || 0,
+    guestFeeAmount: Number(row.guestfeeamount) || 0,
+    privateClosureRevenueAmount: Number(row.privateclosurerevenueamount) || 0,
 });
 
 const toMonthKey = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
 };
 
 const monthKeyToDate = (monthKey: string) => {
-  const [y, m] = monthKey.split("-");
-  const year = Number(y);
-  const monthIndex = Number(m) - 1;
-  return new Date(year, monthIndex, 1);
+    const [year, month] = monthKey.split("-");
+    return new Date(Number(year), Number(month) - 1, 1);
 };
 
 const addMonths = (date: Date, delta: number) =>
-  new Date(date.getFullYear(), date.getMonth() + delta, 1);
+    new Date(date.getFullYear(), date.getMonth() + delta, 1);
 
 const buildLastMonthsSeries = (
-  rows: RevenueLineChartPoint[],
-  months: number,
-  endMonthKey: string
+    rows: RevenueLineChartPoint[],
+    months: number,
+    endMonthKey: string,
 ): RevenueLineChartPoint[] => {
-  const existingByMonth = new Map<string, RevenueLineChartPoint>();
-  rows.forEach((r) => existingByMonth.set(r.month, r));
+    const existingByMonth = new Map<string, RevenueLineChartPoint>();
+    rows.forEach((row) => existingByMonth.set(row.month, row));
 
-  const endDate = monthKeyToDate(endMonthKey);
-  const series: RevenueLineChartPoint[] = [];
+    const endDate = monthKeyToDate(endMonthKey);
+    const series: RevenueLineChartPoint[] = [];
 
-  for (let i = months - 1; i >= 0; i -= 1) {
-    const key = toMonthKey(addMonths(endDate, -i));
-    const existing = existingByMonth.get(key);
-    series.push(
-      existing ?? {
-        month: key,
-        count: 0,
-        totalAmount: 0,
-        accommodationAmount: 0,
-        preOrderAmount: 0,
-        addOnAmount: 0,
-        guestFeeAmount: 0,
-        privateClosureRevenueAmount: 0,
-      }
-    );
-  }
+    for (let i = months - 1; i >= 0; i -= 1) {
+        const key = toMonthKey(addMonths(endDate, -i));
+        series.push(
+            existingByMonth.get(key) ?? {
+                month: key,
+                count: 0,
+                totalAmount: 0,
+                accommodationAmount: 0,
+                preOrderAmount: 0,
+                addOnAmount: 0,
+                guestFeeAmount: 0,
+                privateClosureRevenueAmount: 0,
+            },
+        );
+    }
 
-  return series;
+    return series;
+};
+
+type SectionHeaderProps = {
+    title: string;
+    linkTo?: To;
+    linkLabel?: string;
+};
+
+const SectionHeader = ({ title, linkTo, linkLabel }: SectionHeaderProps) => (
+    <div className="flex items-center justify-between gap-4">
+        <h2 className="text-base font-semibold text-foreground">{title}</h2>
+        {linkTo && linkLabel ? (
+            <Link
+                to={linkTo}
+                className="text-xs font-semibold text-primary hover:underline"
+            >
+                {linkLabel}
+            </Link>
+        ) : null}
+    </div>
+);
+
+const EmptyState = ({ message }: { message: string }) => (
+    <div className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
+        {message}
+    </div>
+);
+
+const formatBadgeLabel = (value?: string | null) =>
+    value ? value.replace(/([a-z])([A-Z])/g, "$1 $2") : "Unknown";
+
+const StatusBadge = ({ value }: { value?: string | null }) => (
+    <Badge
+        variant="outline"
+        className={cn(
+            value
+                ? statusToneClassName[value] ?? "border-border text-muted-foreground"
+                : "border-border text-muted-foreground",
+        )}
+    >
+        {formatBadgeLabel(value)}
+    </Badge>
+);
+
+const formatDate = (value: string) => format(new Date(value), "MMM dd, yyyy");
+
+const attentionToneClassName: Record<
+    "payment" | "maintenance" | "report" | "feedback",
+    {
+        accent: string;
+        badge: string;
+    }
+> = {
+    payment: {
+        accent: "bg-amber-500",
+        badge: "border-amber-200 bg-amber-50 text-amber-700",
+    },
+    maintenance: {
+        accent: "bg-rose-500",
+        badge: "border-rose-200 bg-rose-50 text-rose-700",
+    },
+    report: {
+        accent: "bg-blue-500",
+        badge: "border-blue-200 bg-blue-50 text-blue-700",
+    },
+    feedback: {
+        accent: "bg-orange-500",
+        badge: "border-orange-200 bg-orange-50 text-orange-700",
+    },
 };
 
 const Overview = () => {
-  const { data: accommodationStats, isLoading: accommodationLoading } = useGetAccommodationStatsQuery();
-  const { data: feedbackStats, isLoading: feedbackStatsLoading } = useGetFeedbackStatsQuery();
-  const { data: paymentReport, isLoading: paymentLoading } = useGetPaymentReports();
-  const revenueQuery = useGetRevenueAnalyticsQuery();
-  const [selectedRevenueMonth, setSelectedRevenueMonth] = useState<string | null>(null);
-  const { data: bookingSummary, isLoading: bookingsLoading } = useGetOverviewBookingsQuery(20);
-  const { data: recentFeedbacks, isLoading: recentFeedbackLoading } = useGetRecentFeedbacksQuery(5);
-  const { data: staffReport, isLoading: staffReportLoading } = useGetStaffReportReportsQuery();
+    const todayInputValue = removeTimeFromDate(new Date());
+    const selectedDate = todayInputValue;
+    const [selectedRevenueMonth, setSelectedRevenueMonth] = useState<string | null>(
+        () => toMonthKey(new Date()),
+    );
 
-  const totalRevenue = paymentReport
-    ? paymentReport.totalRevenue + paymentReport.privateClosureRevenue
-    : 0;
-  const totalBookings = bookingSummary?.meta.total || 0;
-  const bookings = bookingSummary?.data || [];
-  const feedbacks = recentFeedbacks?.data || [];
+    const bookingOverview = useGetBookingOverviewQuery(selectedDate);
+    const paymentOverview = useGetPaymentOverviewQuery(selectedDate);
+    const maintenanceOverview = useGetMaintenanceOverviewQuery(selectedDate);
+    const staffReportOverview = useGetStaffReportOverviewQuery(selectedDate);
+    const feedbackOverview = useGetFeedbackOverviewQuery(selectedDate);
+    const revenueQuery = useGetRevenueAnalyticsQuery();
 
-  const revenueData = useMemo(() => {
-    if (revenueQuery.isError) return [];
-    const rows = (revenueQuery.data ?? []).map(normalizeRevenueRow);
-    return buildLastMonthsSeries(rows, 12, toMonthKey(new Date()));
-  }, [revenueQuery.data, revenueQuery.isError]);
+    const revenueData = useMemo(() => {
+        if (revenueQuery.isError) return [];
+        const rows = (revenueQuery.data ?? []).map(normalizeRevenueRow);
+        return buildLastMonthsSeries(rows, 12, toMonthKey(new Date()));
+    }, [revenueQuery.data, revenueQuery.isError]);
 
-  useEffect(() => {
-    if (!selectedRevenueMonth) return;
-    if (revenueData.some((d) => d.month === selectedRevenueMonth)) return;
-    setSelectedRevenueMonth(null);
-  }, [revenueData, selectedRevenueMonth]);
+    useEffect(() => {
+        if (!selectedRevenueMonth) return;
+        if (revenueData.some((row) => row.month === selectedRevenueMonth)) return;
+        setSelectedRevenueMonth(null);
+    }, [revenueData, selectedRevenueMonth]);
 
-  const selectedRevenue = useMemo(
-    () => revenueData.find((d) => d.month === selectedRevenueMonth) ?? null,
-    [revenueData, selectedRevenueMonth]
-  );
+    const selectedRevenue = useMemo(
+        () => revenueData.find((row) => row.month === selectedRevenueMonth) ?? null,
+        [revenueData, selectedRevenueMonth],
+    );
 
-  const today = new Date();
-  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const attentionItems = useMemo(() => {
+        const pendingPayments =
+            paymentOverview.data?.pendingPayments.map((payment) => ({
+                id: `payment-${payment.id}`,
+                kind: "payment" as const,
+                title: payment.booking.guestName,
+                context: `Payment - ${payment.booking.accommodation.name}`,
+                meta: `${formatPeso(payment.amountPaid)} paid`,
+                badgeLabel: "Pending",
+                to: `/admin/booking/${payment.booking.id}`,
+            })) ?? [];
 
-  const upcomingBookings = bookings
-    .filter((booking) => {
-      const bookingDate = new Date(booking.bookingDate);
-      const bookingDateOnly = new Date(
-        bookingDate.getFullYear(),
-        bookingDate.getMonth(),
-        bookingDate.getDate()
-      );
+        const highPriorityMaintenance =
+            maintenanceOverview.data?.highPriorityTickets.map((ticket) => ({
+                id: `maintenance-${ticket.id}`,
+                kind: "maintenance" as const,
+                title: ticket.title,
+                context: `Maintenance - ${ticket.expertise}`,
+                meta: ticket.assignedTo?.name || "Unassigned",
+                badgeLabel: formatBadgeLabel(ticket.priority),
+                to: `/admin/maintenance/${ticket.id}`,
+            })) ?? [];
 
-      return (
-        bookingDateOnly >= todayDate &&
-        (booking.status === "Confirmed" || booking.status === "Pending")
-      );
-    })
-    .sort((a, b) => new Date(a.bookingDate).getTime() - new Date(b.bookingDate).getTime())
-    .slice(0, 5);
+        const pendingReports =
+            staffReportOverview.data?.pendingReports.map((report) => ({
+                id: `report-${report.id}`,
+                kind: "report" as const,
+                title: report.title,
+                context: `Staff Report - ${report.booking?.referenceCode || report.type}`,
+                meta: report.user.name || report.user.email,
+                badgeLabel: formatBadgeLabel(report.severity),
+                to: `/admin/maintenance/reports/${report.id}`,
+            })) ?? [];
 
-  const recentBookings = [...bookings]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+        const lowRatings =
+            feedbackOverview.data?.lowRatingFeedback.map((feedback) => ({
+                id: `feedback-${feedback.id}`,
+                kind: "feedback" as const,
+                title: feedback.user.name,
+                context: `Feedback - ${feedback.comment || "No comment provided."}`,
+                meta: `${feedback.rating}/5 rating`,
+                badgeLabel: `${feedback.rating}/5`,
+                to: "/admin/feedback",
+            })) ?? [];
 
-  const recentBookingIds = recentBookings.map((booking) => booking.id);
-  const { data: recentBookingDetails, isLoading: bookingDetailsLoading } =
-    useGetBookingDetailsBulkQuery(recentBookingIds);
+        return [
+            ...pendingPayments,
+            ...highPriorityMaintenance,
+            ...pendingReports,
+            ...lowRatings,
+        ].slice(0, 8);
+    }, [
+        feedbackOverview.data,
+        maintenanceOverview.data,
+        paymentOverview.data,
+        staffReportOverview.data,
+    ]);
 
-  const recentPreOrders = recentBookingDetails
-    .filter((booking) => (booking?.preOrders?.length || 0) > 0)
-    .map((booking) => {
-      const totalItems = (booking.preOrders || []).reduce(
-        (total, item) => total + item.quantity,
-        0
-      );
+    const overviewDateLabel = format(
+        new Date(`${selectedDate}T00:00:00`),
+        "MMMM d, yyyy",
+    );
 
-      return {
-        booking,
-        totalItems,
-        amount: booking.payment?.preOrderAmount || 0,
-      };
-    })
-    .sort((a, b) => new Date(b.booking.createdAt).getTime() - new Date(a.booking.createdAt).getTime())
-    .slice(0, 5);
+    return (
+        <div className="space-y-5">
+            <header className="space-y-1">
+                <div className="space-y-1">
+                    <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+                        Overview
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Operational snapshot for {overviewDateLabel}.
+                    </p>
+                </div>
+            </header>
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Overview</h1>
-          <p className="text-sm mt-1 text-muted-foreground">
-            Get a quick snapshot of restaurant performance and key metrics
-          </p>
-        </div>
-      </div>
+            <section className="grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
+                <StatisticCards
+                    title="Today's Bookings"
+                    stat={bookingOverview.data?.todayCount ?? 0}
+                    Icon={<CalendarCheck />}
+                    accentClassName="border-l-blue-500"
+                    iconContainerClassName="bg-blue-500"
+                    isLoading={bookingOverview.isLoading}
+                />
+                <StatisticCards
+                    title="Pending Payments"
+                    stat={paymentOverview.data?.pendingReviewCount ?? 0}
+                    Icon={<CreditCard />}
+                    accentClassName="border-l-amber-500"
+                    iconContainerClassName="bg-amber-500"
+                    isLoading={paymentOverview.isLoading}
+                />
+                <StatisticCards
+                    title="Open Maintenance"
+                    stat={maintenanceOverview.data?.openMaintenance ?? 0}
+                    Icon={<Wrench />}
+                    accentClassName="border-l-rose-500"
+                    iconContainerClassName="bg-rose-500"
+                    isLoading={maintenanceOverview.isLoading}
+                />
+                <StatisticCards
+                    title="Today Revenue"
+                    stat={paymentOverview.data?.todayRevenue ?? 0}
+                    format={(value) => formatPeso(value)}
+                    Icon={<DollarSign />}
+                    accentClassName="border-l-emerald-500"
+                    iconContainerClassName="bg-emerald-500"
+                    isLoading={paymentOverview.isLoading}
+                />
+            </section>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatisticCards
-          title="Total Accommodations"
-          Icon={<Home className="w-5 h-5 text-blue-600" />}
-          stat={accommodationStats?.total || 0}
-          isLoading={accommodationLoading}
-        />
+            {revenueQuery.isError ? (
+                <div className={cn(surfaceClassName, "p-4")}>
+                    <EmptyState message="Failed to load revenue analytics." />
+                </div>
+            ) : null}
 
-        <StatisticCards
-          title="Total Bookings"
-          Icon={<CalendarCheck className="w-5 h-5 text-emerald-600" />}
-          stat={totalBookings}
-          isLoading={bookingsLoading}
-        />
+            <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+                <RevenueLineChart
+                    data={revenueData}
+                    isLoading={revenueQuery.isLoading}
+                    selectedMonth={selectedRevenueMonth}
+                    onSelectMonth={(month) => setSelectedRevenueMonth(month || null)}
+                />
+                <RevenueBreakdownCard selected={selectedRevenue} />
+            </section>
 
-        <StatisticCards
-          title="Total Feedback"
-          Icon={<MessageSquare className="w-5 h-5 text-amber-600" />}
-          stat={feedbackStats?.total || 0}
-          isLoading={feedbackStatsLoading}
-        />
-
-        <StatisticCards
-          title="Total Revenue"
-          Icon={<DollarSign className="w-5 h-5 text-primary" />}
-          stat={totalRevenue}
-          format={(value) => `₱${value.toLocaleString()}`}
-          isLoading={paymentLoading}
-        />
-      </div>
-
-      {revenueQuery.isError ? (
-        <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-          <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-destructive">
-            Failed to load revenue analytics.
-          </div>
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <RevenueLineChart
-            data={revenueData}
-            isLoading={revenueQuery.isLoading}
-            selectedMonth={selectedRevenueMonth}
-            onSelectMonth={(month) => setSelectedRevenueMonth(month)}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <RevenueBreakdownCard selected={selectedRevenue} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        <div className="xl:col-span-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="lg:col-span-2 bg-card rounded-xl p-6 shadow-sm border border-border">
-          <div className="flex items-start justify-between mb-5 gap-4">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
-                <BookMarked className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Upcoming Bookings</h3>
-                <p className="text-xs text-muted-foreground">
-                  Next confirmed and pending reservations
-                </p>
-              </div>
-            </div>
-            <Link to="/admin/booking" className="text-xs font-semibold text-primary">
-              View all
-            </Link>
-          </div>
-
-          {bookingsLoading ? (
-            <LoadingSpinner className="w-6 h-6" />
-          ) : upcomingBookings.length ? (
-            <div className="space-y-3">
-              {upcomingBookings.map((booking) => {
-                const statusColors = getStatusColor(booking.status);
-
-                return (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/40 p-3"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {booking.guestName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {booking.accommodation.name} · {format(new Date(booking.bookingDate), "MMM dd, yyyy")} · {booking.stayOption?.label ?? booking.stayOptionLabelSnapshot ?? booking.timeSlot ?? "Stay"}
-                      </p>
+            <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
+                <div className={cn(surfaceClassName, "overflow-hidden")}>
+                    <div className="border-b border-border/70 p-4">
+                        <SectionHeader
+                            title="Today's Schedule"
+                            linkTo={{
+                                pathname: "/admin/booking",
+                                search: `?bookingDate=${selectedDate}`,
+                            }}
+                            linkLabel="View bookings"
+                        />
                     </div>
-                    <Badge
-                      style={{
-                        backgroundColor: statusColors.bg,
-                        color: statusColors.text,
-                        borderColor: statusColors.border,
-                        borderWidth: "1px",
-                      }}
-                    >
-                      {booking.status}
-                    </Badge>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No upcoming bookings found
-            </div>
-          )}
-          </div>
-
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <div className="flex items-start justify-between mb-5 gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
-                  <Mails className="w-5 h-5" />
+                    <BookingScheduleList
+                        bookings={bookingOverview.data?.todaySchedule ?? []}
+                        isLoading={bookingOverview.isLoading}
+                    />
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">Recent Bookings</h3>
-                  <p className="text-xs text-muted-foreground">Latest reservations created</p>
-                </div>
-              </div>
-              <Link to="/admin/booking" className="text-xs font-semibold text-primary">
-                View all
-              </Link>
-            </div>
 
-            {bookingsLoading ? (
-              <LoadingSpinner className="w-6 h-6" />
-            ) : recentBookings.length ? (
-              <div className="space-y-3">
-                {recentBookings.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/40 p-3"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {booking.guestName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {booking.accommodation.name} · {format(new Date(booking.bookingDate), "MMM dd, yyyy")}
-                      </p>
+                <div className={cn(surfaceClassName, "p-4")}>
+                    <div className="mb-4 flex items-center gap-2">
+                        <SectionHeader title="Needs Attention" />
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {formatToSmartDate(booking.createdAt)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                No recent bookings created
-              </div>
-            )}
-          </div>
 
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <div className="flex items-start justify-between mb-5 gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
-                  <ShoppingBag className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">Recent Pre-orders</h3>
-                  <p className="text-xs text-muted-foreground">Pulled from latest bookings</p>
-                </div>
-              </div>
-              <Link to="/admin/booking" className="text-xs font-semibold text-primary">
-                View bookings
-              </Link>
-            </div>
+                    {paymentOverview.isLoading ||
+                    maintenanceOverview.isLoading ||
+                    staffReportOverview.isLoading ||
+                    feedbackOverview.isLoading ? (
+                        <LoadingSpinner
+                            className="size-5"
+                            containerClassName="justify-start"
+                        />
+                    ) : attentionItems.length ? (
+                        <div className="divide-y divide-border/70">
+                            {attentionItems.map((item) => (
+                                (() => {
+                                    const tone = attentionToneClassName[item.kind];
 
-            {bookingsLoading || bookingDetailsLoading ? (
-              <LoadingSpinner className="w-6 h-6" />
-            ) : recentPreOrders.length ? (
-              <div className="space-y-3">
-                {recentPreOrders.map(({ booking, totalItems, amount }) => (
-                  <div
-                    key={booking.id}
-                    className="flex items-start justify-between gap-4 rounded-lg border border-border bg-muted/40 p-3"
-                  >
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {booking.guestName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {booking.accommodation.name} · {totalItems} item{totalItems > 1 ? "s" : ""}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatToSmartDate(booking.createdAt)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-foreground">₱{amount.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">pre-order</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                No recent pre-orders found
-              </div>
-            )}
-          </div>
+                                    return (
+                                <Link
+                                    key={item.id}
+                                    to={item.to}
+                                    className="group relative block min-h-[88px] py-3 pl-4 pr-1 transition-colors last:pb-0 hover:bg-muted/20"
+                                >
+                                    <span
+                                        className={cn(
+                                            "absolute bottom-2 left-0 top-2 w-1 rounded-full",
+                                            tone.accent,
+                                        )}
+                                    />
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-sm font-medium text-foreground">
+                                                {item.title}
+                                            </p>
+                                            <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                                                {item.context}
+                                            </p>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {item.meta}
+                                            </p>
+                                        </div>
+                                        <div className="flex shrink-0 items-start gap-2">
+                                            <span
+                                                className={cn(
+                                                    "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+                                                    tone.badge,
+                                                )}
+                                            >
+                                                {item.badgeLabel}
+                                            </span>
+                                            <ArrowRight className="mt-1 size-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                                        </div>
+                                    </div>
+                                </Link>
+                                    );
+                                })()
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyState message="No urgent items need attention." />
+                    )}
+                </div>
+            </section>
+
+            <section className="grid gap-5 xl:grid-cols-3">
+                <MaintenancePressureCard
+                    data={maintenanceOverview.data}
+                    isLoading={maintenanceOverview.isLoading}
+                />
+                <RecentBookingsCard
+                    bookings={bookingOverview.data?.recentBookings ?? []}
+                    isLoading={bookingOverview.isLoading}
+                />
+                <RecentFeedbackCard
+                    feedback={feedbackOverview.data?.recentFeedback ?? []}
+                    averageRating={feedbackOverview.data?.averageRating ?? 0}
+                    isLoading={feedbackOverview.isLoading}
+                />
+            </section>
+
         </div>
-
-        <div className="xl:col-span-4 space-y-6">
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <div className="flex items-start justify-between mb-5 gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
-                  <ClipboardList className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">Staff Reports Today</h3>
-                  <p className="text-xs text-muted-foreground">Reports submitted on the selected day</p>
-                </div>
-              </div>
-              <Link to="/admin/report" className="text-xs font-semibold text-primary">
-                View reports
-              </Link>
-            </div>
-
-            {staffReportLoading ? (
-              <LoadingSpinner className="w-6 h-6" />
-            ) : staffReport ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg border border-border bg-muted/40">
-                    <div className="text-xs mb-1 text-muted-foreground">Check-in reports today</div>
-                    <div className="text-sm font-bold text-foreground">{staffReport.checkInReportToday}</div>
-                  </div>
-                  <div className="p-3 rounded-lg border border-border bg-muted/40">
-                    <div className="text-xs mb-1 text-muted-foreground">Check-out reports today</div>
-                    <div className="text-sm font-bold text-foreground">{staffReport.checkOutReportToday}</div>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-lg bg-muted">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Total today</span>
-                    <span className="text-sm font-bold text-foreground">
-                      {staffReport.totalToday} {staffReport.totalToday > 1 ? "reports" : "report"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                No staff reports found
-              </div>
-            )}
-          </div>
-
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <div className="flex items-start justify-between mb-5 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 text-primary">
-                  <MessageSquareWarning className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">Recent Feedback</h3>
-                  <p className="text-xs text-muted-foreground">Latest guest reviews</p>
-                </div>
-              </div>
-              <Link to="/admin/feedback" className="text-xs font-semibold text-primary">
-                View all
-              </Link>
-            </div>
-
-            {recentFeedbackLoading ? (
-              <LoadingSpinner className="w-6 h-6" />
-            ) : feedbacks.length ? (
-              <div className="space-y-3">
-                {feedbacks.map((feedback) => (
-                  <div
-                    key={feedback.id}
-                    className="rounded-lg border border-border bg-muted/40 p-3"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-foreground">{feedback.user.name}</p>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-amber-600">
-                        <Star className="w-3.5 h-3.5" fill="currentColor" />
-                        {feedback.rating}
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{formatToSmartDate(feedback.createdAt)}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{feedback.comment || "No comment provided."}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                No recent feedback available
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
+
+const BookingScheduleList = ({
+    bookings,
+    isLoading,
+}: {
+    bookings: BookingOverviewSummary[];
+    isLoading: boolean;
+}) => {
+    if (isLoading) {
+        return (
+            <div className="p-4">
+                <LoadingSpinner
+                    className="size-5"
+                    containerClassName="justify-start"
+                />
+            </div>
+        );
+    }
+
+    if (!bookings.length) {
+        return (
+            <div className="p-4">
+                <EmptyState message="No active bookings scheduled for this date." />
+            </div>
+        );
+    }
+
+    return (
+        <div className="divide-y divide-border/70">
+            <div className="hidden grid-cols-[1.15fr_1.35fr_1.3fr_1fr_0.9fr_0.9fr_0.6fr] gap-4 bg-muted/40 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground md:grid">
+                <span>Reference</span>
+                <span>Guest</span>
+                <span>Accommodation</span>
+                <span>Stay</span>
+                <span>Payment</span>
+                <span>Status</span>
+                <span className="text-right">Action</span>
+            </div>
+            {bookings.map((booking) => (
+                <div
+                    key={booking.id}
+                    className="grid gap-3 border-l-[3px] px-4 py-3 pl-[13px] text-sm transition-colors hover:bg-primary/[0.03] md:grid-cols-[1.15fr_1.35fr_1.3fr_1fr_0.9fr_0.9fr_0.6fr] md:items-center md:gap-4"
+                    style={{ borderLeftColor: getBookingRowAccent(booking.status) }}
+                >
+                    <div>
+                        <p className="font-medium text-foreground">
+                            {booking.referenceCode || booking.id}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground md:hidden">
+                            {formatDate(booking.bookingDate)}
+                        </p>
+                    </div>
+                    <p className="min-w-0 truncate text-foreground">{booking.guestName}</p>
+                    <div className="min-w-0">
+                        <p className="truncate text-foreground">
+                            {booking.accommodation.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                            {booking.accommodation.type}
+                        </p>
+                    </div>
+                    <p className="text-muted-foreground">
+                        {booking.stayOptionLabelSnapshot}
+                    </p>
+                    <StatusBadge value={booking.payment?.status} />
+                    <StatusBadge value={booking.status} />
+                    <Button
+                        asChild
+                        variant="link"
+                        size="sm"
+                        className="justify-start px-0 md:justify-end"
+                    >
+                        <Link to={`/admin/booking/${booking.id}`}>View</Link>
+                    </Button>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const MaintenancePressureCard = ({
+    data,
+    isLoading,
+}: {
+    data:
+        | {
+              statusCounts: {
+                  Pending: number;
+                  InProgress: number;
+                  Completed: number;
+                  Closed: number;
+              };
+              openMaintenance: number;
+              highPriorityOpen: number;
+              today: { newTickets: number; resolvedTickets: number };
+          }
+        | undefined;
+    isLoading: boolean;
+}) => {
+    const pendingCount = data?.statusCounts.Pending ?? 0;
+    const inProgressCount = data?.statusCounts.InProgress ?? 0;
+    const highPriorityCount = data?.highPriorityOpen ?? 0;
+    const totalPressure = pendingCount + inProgressCount + highPriorityCount;
+
+    const pressureSegments =
+        totalPressure > 0
+            ? [
+                  {
+                      label: "Pending",
+                      value: pendingCount,
+                      className: "bg-amber-400",
+                      width: (pendingCount / totalPressure) * 100,
+                  },
+                  {
+                      label: "In Progress",
+                      value: inProgressCount,
+                      className: "bg-blue-500",
+                      width: (inProgressCount / totalPressure) * 100,
+                  },
+                  {
+                      label: "High Priority",
+                      value: highPriorityCount,
+                      className: "bg-rose-500",
+                      width: (highPriorityCount / totalPressure) * 100,
+                  },
+              ].filter((segment) => segment.value > 0)
+            : [];
+
+    return (
+        <div className={cn(surfaceClassName, "p-4")}>
+            <SectionHeader
+                title="Maintenance Pressure"
+                linkTo="/admin/maintenance"
+                linkLabel="Open board"
+            />
+            {isLoading ? (
+                <LoadingSpinner
+                    className="mt-4 size-5"
+                    containerClassName="justify-start"
+                />
+            ) : (
+                <div className="mt-4 space-y-5">
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                Open Workload
+                            </p>
+                            <p className="text-sm font-semibold text-foreground">
+                                {data?.openMaintenance ?? 0} open
+                            </p>
+                        </div>
+
+                        <div className="h-3.5 overflow-hidden rounded-[2px] bg-muted">
+                            {pressureSegments.length ? (
+                                <div className="flex h-full w-full">
+                                    {pressureSegments.map((segment) => (
+                                        <div
+                                            key={segment.label}
+                                            className={segment.className}
+                                            style={{ width: `${segment.width}%` }}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="h-full w-full bg-muted" />
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                        {[
+                            {
+                                label: "Pending",
+                                value: pendingCount,
+                                dotClassName: "bg-amber-400",
+                            },
+                            {
+                                label: "In Progress",
+                                value: inProgressCount,
+                                dotClassName: "bg-blue-500",
+                            },
+                            {
+                                label: "High Priority",
+                                value: highPriorityCount,
+                                dotClassName: "bg-rose-500",
+                            },
+                        ].map((item) => (
+                            <div key={item.label} className="space-y-1.5">
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className={cn(
+                                            "size-2 rounded-full",
+                                            item.dotClassName,
+                                        )}
+                                    />
+                                    <span className="truncate text-xs text-muted-foreground">
+                                        {item.label}
+                                    </span>
+                                </div>
+                                <p className="text-lg font-semibold tracking-tight text-foreground">
+                                    {item.value}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="border-t border-border/70 pt-4">
+                        <p className="text-xs text-muted-foreground">
+                            Today
+                        </p>
+                        <div className="mt-3 grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-3 px-1 py-1">
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600">
+                                    <Ticket className="size-4" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs text-muted-foreground">
+                                        New Tickets
+                                    </p>
+                                    <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
+                                        {data?.today.newTickets ?? 0}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 px-1 py-1">
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600">
+                                    <CheckCircle2 className="size-4" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs text-muted-foreground">
+                                        Resolved
+                                    </p>
+                                    <p className="mt-1 text-lg font-semibold tracking-tight text-foreground">
+                                        {data?.today.resolvedTickets ?? 0}
+                                    </p>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+const RecentBookingsCard = ({
+    bookings,
+    isLoading,
+}: {
+    bookings: BookingOverviewSummary[];
+    isLoading: boolean;
+}) => (
+    <div className={cn(surfaceClassName, "p-4")}>
+        <SectionHeader title="Recent Bookings" linkTo="/admin/booking" linkLabel="View all" />
+        <div className="mt-4">
+            {isLoading ? (
+                <LoadingSpinner className="size-5" containerClassName="justify-start"                                      />
+            ) : bookings.length ? (
+                <div className="divide-y divide-border/70">
+                    {bookings.map((booking) => (
+                        <Link
+                            key={booking.id}
+                            to={`/admin/booking/${booking.id}`}
+                            className="group relative block min-h-[84px] py-3 pl-4 pr-1 transition-colors last:pb-0 hover:bg-muted/20"
+                        >
+                            <span
+                                className="absolute bottom-2 left-0 top-2 w-1 rounded-full"
+                                style={{ backgroundColor: getBookingRowAccent(booking.status) }}
+                            />
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium text-foreground">
+                                        {booking.guestName}
+                                    </p>
+                                    <p className="mt-1 truncate text-xs text-muted-foreground">
+                                        {booking.accommodation.name} - {formatDate(booking.bookingDate)}
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        {booking.referenceCode || booking.id}
+                                    </p>
+                                </div>
+                                <div className="flex shrink-0 items-start gap-2">
+                                    <div className="flex flex-col gap-4 justify-between items-end">
+                                        <span className="text-xs text-muted-foreground">
+                                            {formatToSmartDate(booking.createdAt)}
+                                        </span>
+                                        <StatusBadge value={booking.status} />
+                                    </div>
+                                    <ArrowRight className="mt-0.5 size-4 text-muted-foreground transition-colors group-hover:text-primary" />
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            ) : (
+                <EmptyState message="No recent bookings found." />
+            )}
+        </div>
+    </div>
+);
+
+const RecentFeedbackCard = ({
+    feedback,
+    averageRating,
+    isLoading,
+}: {
+    feedback: FeedbackOverviewItem[];
+    averageRating: number;
+    isLoading: boolean;
+}) => (
+    <div className={cn(surfaceClassName, "p-4")}>
+        <SectionHeader title="Recent Feedback" linkTo="/admin/feedback" linkLabel="View all" />
+        <div className="mt-3 flex items-center gap-1 text-sm font-semibold text-amber-600">
+            <Star className="size-4 fill-current" />
+            {averageRating.toFixed(1)} average
+        </div>
+        <div className="mt-4">
+            {isLoading ? (
+                <LoadingSpinner className="size-5" containerClassName="justify-start" />
+            ) : feedback.length ? (
+                <div className="space-y-2">
+                    {feedback.map((item) => (
+                        (() => {
+                            const tone = getOverviewFeedbackTone(item.rating);
+
+                            return (
+                                <Link
+                                    key={item.id}
+                                    to="/admin/feedback"
+                                    className={cn(
+                                        "relative block overflow-hidden rounded-lg border px-3 py-3 pl-4 transition-colors hover:shadow-sm",
+                                        tone.containerClassName,
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "absolute inset-y-0 left-0 w-1 rounded-l-lg",
+                                            tone.accentClassName,
+                                        )}
+                                    />
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex min-w-0 items-start gap-3">
+                                            <div
+                                                className={cn(
+                                                    "flex size-9 shrink-0 items-center justify-center rounded-full border text-sm font-semibold bg-primary text-white"
+                                                )}
+                                            >
+                                                {item.user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="truncate text-sm font-semibold text-foreground">
+                                                    {item.user.name}
+                                                </p>
+                                                <p
+                                                    className={cn(
+                                                        "mt-1 line-clamp-2 text-xs leading-5",
+                                                        tone.commentClassName,
+                                                    )}
+                                                >
+                                                    {item.comment || "No comment provided."}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex h-full shrink-0 flex-col items-end justify-between self-stretch text-right">
+                                            <div
+                                                className={cn(
+                                                    "flex items-center justify-end gap-1.5 text-xs font-semibold",
+                                                    tone.ratingClassName,
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-0.5">
+                                                    {[...Array(5)].map((_, index) => (
+                                                        <Star
+                                                            key={`${item.id}-overview-star-${index}`}
+                                                            className={cn(
+                                                                "size-3 fill-current",
+                                                                index < item.rating
+                                                                    ? tone.ratingClassName
+                                                                    : "text-muted-foreground/20",
+                                                            )}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                {item.rating}
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatToSmartDate(item.createdAt)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            );
+                        })()
+                        
+                    ))}
+                </div>
+            ) : (
+                <EmptyState message="No recent feedback available." />
+            )}
+        </div>
+    </div>
+);
 
 export default Overview;

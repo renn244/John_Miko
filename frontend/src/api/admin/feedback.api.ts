@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import type { FeedbackAnalytics, FeedbackCountPerRating, FeedbackReport, FeedbackStats, FeedbackWithUser, GetFeedbackAnalyticsQuery } from "@/types/feedback.types";
+import type { FeedbackAnalytics, FeedbackCountPerRating, FeedbackOverview, FeedbackReport, FeedbackStats, FeedbackWithUser, GetFeedbackAnalyticsQuery } from "@/types/feedback.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const feedbackApi = {
@@ -33,6 +33,17 @@ export const feedbackApi = {
         }
 
         return response.data as FeedbackStats;
+    },
+    getFeedbackOverview: async (date?: string) => {
+        const response = await apiClient.get('/feedback/overview', {
+            params: { date }
+        });
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while fetching feedback overview.');
+        }
+
+        return response.data as FeedbackOverview;
     },
     getFeedbackAnalytics: async (query: GetFeedbackAnalyticsQuery) => {
         const response = await apiClient.get('/feedback/analytics', { params: query });

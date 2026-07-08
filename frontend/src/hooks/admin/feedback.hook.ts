@@ -43,6 +43,14 @@ export const useGetFeedbackStatsQuery = () => {
     })
 }
 
+export const useGetFeedbackOverviewQuery = (date?: string) => {
+    return useQuery({
+        queryKey: ['feedbacks', 'overview', date],
+        queryFn: () => feedbackApi.getFeedbackOverview(date),
+        refetchOnWindowFocus: false
+    })
+}
+
 export const useGetFeedbackByIdQuery = (id: string | undefined | null) => {
     return useQuery({
         queryKey: ['feedback', 'byId', id],

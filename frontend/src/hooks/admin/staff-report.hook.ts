@@ -11,6 +11,14 @@ export const useGetStaffReportReportsQuery = (date?: string) => {
     })
 }
 
+export const useGetStaffReportOverviewQuery = (date?: string) => {
+    return useQuery({
+        queryKey: ['staff-report', 'overview', date],
+        queryFn: () => staffReportApi.getStaffReportOverview(date),
+        refetchOnWindowFocus: false
+    })
+}
+
 export const useGetStaffReportsQuery = (query: GetStaffReportsAdminQuery) => {
     return useQuery({
         queryKey: ['staff-report', 'list', query],

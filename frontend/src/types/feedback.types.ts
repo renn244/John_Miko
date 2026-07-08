@@ -22,6 +22,35 @@ export type FeedbackWithUser = {
     } | null
 } & Feedback
 
+export type FeedbackOverviewItem = {
+    user: {
+        id: string;
+        name: string;
+        email: string;
+    };
+    booking?: {
+        id: string;
+        referenceCode: string | null;
+        guestName: string;
+        bookingDate: string;
+        accommodation: {
+            id: string;
+            name: string;
+            type: string;
+        };
+    } | null;
+} & Feedback
+
+export type FeedbackOverview = {
+    total: number;
+    averageRating: number;
+    minRating: number;
+    maxRating: number;
+    receivedToday: number;
+    recentFeedback: FeedbackOverviewItem[];
+    lowRatingFeedback: FeedbackOverviewItem[];
+}
+
 export type GetFeedbackAnalyticsQuery = {
     interval: 'day' | 'week' | 'month' | 'year';
 }

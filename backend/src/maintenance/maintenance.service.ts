@@ -112,6 +112,83 @@ export class MaintenanceService {
         return { total, ...stats };
     }
 
+    async getMaintenanceOverview(date?: Date) {
+        const { gte, lte } = getSingleDayRange(date);
+        const activeStatuses: MaintenanceStatus[] = ['Pending', 'InProgress'];
+
+        const [
+            grouped,
+            openMaintenance,
+            highPriorityOpen,
+            highPriorityTickets,
+            newTicketsToday,
+            resolvedTicketsToday,
+        ] = await Promise.all([
+            this.prisma.maintenance.groupBy({
+                by: ['status'],
+                _count: { status: true },
+            }),
+            this.prisma.maintenance.count({
+                where: { status: { in: activeStatuses } },
+            }),
+            this.prisma.maintenance.count({
+                where: {
+                    status: { in: activeStatuses },
+                    priority: 'High',
+                },
+            }),
+            this.prisma.maintenance.findMany({
+                where: {
+                    status: { in: activeStatuses },
+                    priority: 'High',
+                },
+                include: {
+                    assignedTo: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            expertise: true,
+                        },
+                    },
+                },
+                take: 5,
+                orderBy: [
+                    { status: 'asc' },
+                    { createdAt: 'desc' },
+                ],
+            }),
+            this.prisma.maintenance.count({
+                where: { createdAt: { gte, lte } },
+            }),
+            this.prisma.maintenance.count({
+                where: { resolvedAt: { gte, lte } },
+            }),
+        ]);
+
+        const statusCounts = {
+            Pending: 0,
+            InProgress: 0,
+            Completed: 0,
+            Closed: 0,
+        };
+
+        grouped.forEach((item) => {
+            statusCounts[item.status] = item._count.status;
+        });
+
+        return {
+            statusCounts,
+            openMaintenance,
+            highPriorityOpen,
+            highPriorityTickets,
+            today: {
+                newTickets: newTicketsToday,
+                resolvedTickets: resolvedTicketsToday,
+            },
+        };
+    }
+
     async getMaintenanceById(id: string) {
         const maintenance = await this.prisma.maintenance.findUnique({
             where: { id },

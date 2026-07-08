@@ -40,6 +40,12 @@ export class MaintenanceController {
         return this.maintenanceService.getMaintenanceStats();
     }
 
+    @Get('overview')
+    @Roles(Role.ADMIN)
+    async getMaintenanceOverview(@Query() query: DateReportQueryDto) {
+        return this.maintenanceService.getMaintenanceOverview(query.date);
+    }
+
     @Get('assigned/active')
     @Roles(Role.MAINTENANCE_STAFF)
     async getAssignedActiveMaintenances(@User() user: UserSession, @Query() query: GetMaintenanceDto) {

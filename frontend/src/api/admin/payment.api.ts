@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import type { PaymentReportBreakdown, RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
+import type { PaymentOverview, PaymentReportBreakdown, RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
 import type { PaymentRecord } from "@/types/payment.type";
 
 export const paymentApi = {
@@ -55,6 +55,17 @@ export const paymentApi = {
         }
 
         return response.data as PaymentReportBreakdown;
+    },
+    getPaymentOverview: async (date?: string) => {
+        const response = await apiClient.get('/payment/overview', {
+            params: { date }
+        })
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occured while fetching the payment overview')
+        }
+
+        return response.data as PaymentOverview;
     },
     getRevenueAnalytics: async () => {
         const response = await apiClient.get('/payment/revenue-analytics')

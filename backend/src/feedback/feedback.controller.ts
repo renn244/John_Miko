@@ -53,6 +53,12 @@ export class FeedbackController {
         return this.feedbackService.getFeedbackStats();
     }
 
+    @Roles(Role.ADMIN)
+    @Get('overview')
+    async getOverview(@Query() query: DateReportQueryDto) {
+        return this.feedbackService.getOverview(query.date);
+    }
+
     @Roles(Role.GUEST, Role.ADMIN)
     @Get(':id')
     async getFeedbackById(@Param('id') id: string, @User() user: UserSession) {

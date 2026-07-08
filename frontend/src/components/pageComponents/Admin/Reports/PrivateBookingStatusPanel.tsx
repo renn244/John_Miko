@@ -79,24 +79,22 @@ const PrivateBookingStatusPanel = ({ selectedDate }: { selectedDate: Date }) => 
     const StatusIcon = status.icon;
 
     return (
-        <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
+        <div className="rounded-xl border border-border/70 bg-card p-5 shadow-sm">
             <div>
-                <div>
-                    <h3 className="text-lg font-bold text-foreground">
-                        Daily Resort Status
-                    </h3>
-                    <p className="text-sm mt-1 text-muted-foreground">
-                        Availability summary for the selected date.
-                    </p>
-                </div>
+                <h3 className="text-base font-semibold text-foreground">
+                    Daily Resort Status
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    Availability summary for the selected date.
+                </p>
             </div>
 
             {isLoading || isFetching ? (
-                <div className="mt-6 flex min-h-64 items-center justify-center rounded-xl border border-dashed border-border bg-muted/30">
+                <div className="mt-5 flex min-h-72 items-center justify-center rounded-lg border border-dashed border-border/70 bg-muted/20">
                     <LoadingSpinner />
                 </div>
             ) : error ? (
-                <div className="mt-6 rounded-xl border border-destructive/20 bg-destructive/5 p-5">
+                <div className="mt-5 rounded-lg border border-destructive/20 bg-destructive/5 p-5">
                     <div className="flex items-start gap-3">
                         <div className="mt-0.5 rounded-full bg-destructive/10 p-2">
                             <AlertCircle className="w-4 h-4 text-destructive" />
@@ -116,20 +114,22 @@ const PrivateBookingStatusPanel = ({ selectedDate }: { selectedDate: Date }) => 
                     </div>
                 </div>
             ) : (
-                <div className="mt-6 space-y-4">
-                    <div className="rounded-xl border border-border bg-muted/30 p-4">
+                <div className="mt-5 space-y-4">
+                    <div className="rounded-lg border border-border/70 bg-muted/20 p-4">
                         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div className="flex items-start gap-4">
-                                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${status.iconWrapperClassName}`}>
-                                    <StatusIcon className={`h-5 w-5 ${status.iconClassName}`} />
-                                </div>
-
-                                <div className="space-y-2">
+                                <div>
+                                     <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${status.iconWrapperClassName}`}>
+                                        <StatusIcon className={`h-5 w-5 ${status.iconClassName}`} />
+                                    </div>
                                     <Badge variant="outline" className={`px-2 py-0.5 text-[11px] font-semibold ${status.badgeClassName}`}>
                                         {status.badgeLabel}
                                     </Badge>
+                                </div>
+
+                                <div className="space-y-2">
                                     <div>
-                                        <h4 className="text-xl font-bold text-foreground">
+                                        <h4 className="text-xl font-bold tracking-tight text-foreground">
                                             {status.title}
                                         </h4>
                                         <p className="mt-1 text-sm text-muted-foreground">
@@ -139,8 +139,8 @@ const PrivateBookingStatusPanel = ({ selectedDate }: { selectedDate: Date }) => 
                                 </div>
                             </div>
 
-                            <div className="rounded-lg border border-border bg-background px-4 py-3">
-                                <div className="text-xs font-medium text-muted-foreground">
+                            <div className="rounded-lg border border-border/70 bg-background px-4 py-3">
+                                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                                     Date
                                 </div>
                                 <div className="mt-1 text-sm font-semibold text-foreground">
@@ -170,8 +170,8 @@ const PrivateBookingStatusPanel = ({ selectedDate }: { selectedDate: Date }) => 
                         )}
                     </div>
 
-                    <div className="rounded-xl border border-border bg-background p-4">
-                        <div className="text-xs font-medium text-muted-foreground">
+                    <div className="rounded-lg border border-border/70 bg-background p-4">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Details
                         </div>
                         <p className="mt-2 text-sm leading-6 text-foreground">
@@ -186,8 +186,8 @@ const PrivateBookingStatusPanel = ({ selectedDate }: { selectedDate: Date }) => 
 
 const DetailCard = ({ label, value, hint }: { label: string; value: string; hint: string }) => {
     return (
-        <div className="rounded-xl border border-border bg-background p-4">
-            <div className="text-xs font-medium text-muted-foreground">
+        <div className="rounded-lg border border-border/70 bg-background p-4">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {label}
             </div>
             <div className="mt-2 text-base font-semibold text-foreground">

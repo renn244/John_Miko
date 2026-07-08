@@ -3,6 +3,7 @@ import { AccommodationStayOption, Prisma } from 'src/generated/prisma/client';
 import { BookingStatus } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { ValidationException } from 'src/lib/exception/ValidationException';
+import { toDateOnly } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PaymentService } from 'src/payment/payment.service';
@@ -331,6 +332,80 @@ export class BookingService {
             data,
             meta: getPaginationMeta(total, page, limit)
         }
+    }
+
+    async getBookingOverview(date?: Date) {
+        const overviewDate = toDateOnly(date ?? new Date());
+        const bookingSummarySelect = {
+            id: true,
+            referenceCode: true,
+            guestName: true,
+            bookingDate: true,
+            stayOptionLabelSnapshot: true,
+            stayOptionCodeSnapshot: true,
+            paymentType: true,
+            status: true,
+            createdAt: true,
+            accommodation: {
+                select: {
+                    id: true,
+                    name: true,
+                    type: true,
+                    imageUrl: true,
+                },
+            },
+            payment: {
+                select: {
+                    id: true,
+                    status: true,
+                    amountPaid: true,
+                    amountToPaid: true,
+                    totalAmount: true,
+                },
+            },
+        } satisfies Prisma.BookingSelect;
+
+        const todayWhere: Prisma.BookingWhereInput = {
+            bookingDate: overviewDate,
+            status: { not: 'Cancelled' },
+        };
+
+        const [todayCount, todaySchedule, upcomingBookings, recentBookings] =
+            await Promise.all([
+                this.prisma.booking.count({ where: todayWhere }),
+                this.prisma.booking.findMany({
+                    where: todayWhere,
+                    select: bookingSummarySelect,
+                    orderBy: [
+                        { stayOption: { sortOrder: 'asc' } },
+                        { createdAt: 'asc' },
+                    ],
+                }),
+                this.prisma.booking.findMany({
+                    where: {
+                        bookingDate: { gte: overviewDate },
+                        status: { in: ['Pending', 'Confirmed'] },
+                    },
+                    select: bookingSummarySelect,
+                    take: 5,
+                    orderBy: [
+                        { bookingDate: 'asc' },
+                        { stayOption: { sortOrder: 'asc' } },
+                    ],
+                }),
+                this.prisma.booking.findMany({
+                    select: bookingSummarySelect,
+                    take: 5,
+                    orderBy: { createdAt: 'desc' },
+                }),
+            ]);
+
+        return {
+            todayCount,
+            todaySchedule,
+            upcomingBookings,
+            recentBookings,
+        };
     }
 
     private getManilaDateOnly() {

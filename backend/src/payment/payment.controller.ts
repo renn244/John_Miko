@@ -35,6 +35,12 @@ export class PaymentController {
         return this.paymentService.getPaymentReportBreakdown(query.date);
     }
 
+    @Get('overview')
+    @Roles(Role.ADMIN)
+    async getPaymentOverview(@Query() query: DateReportQueryDto) {
+        return this.paymentService.getPaymentOverview(query.date);
+    }
+
     @Get(':id')
     @Roles(Role.ADMIN)
     async getPaymentById(@Param('id') id: string) {

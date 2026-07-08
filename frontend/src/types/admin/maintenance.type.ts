@@ -59,3 +59,16 @@ export type MaintenanceReport = {
     newTickets: number;
     resolvedTickets: number;
 }
+
+export type MaintenanceOverview = {
+    statusCounts: {
+        Pending: number;
+        InProgress: number;
+        Completed: number;
+        Closed: number;
+    };
+    openMaintenance: number;
+    highPriorityOpen: number;
+    highPriorityTickets: Maintenance[];
+    today: MaintenanceReport;
+}

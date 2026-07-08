@@ -4,6 +4,10 @@ import { BookingService } from './booking.service';
 describe('BookingService', () => {
   const prisma = {
     accommodation: { findUnique: jest.fn() },
+    booking: {
+      count: jest.fn(),
+      findMany: jest.fn(),
+    },
     $transaction: jest.fn(),
   } as any;
   const preOrderService = { createBulkPreOrder: jest.fn() } as any;
@@ -63,6 +67,11 @@ describe('BookingService', () => {
         findFirst: jest.fn().mockResolvedValue(null),
         create: jest.fn().mockImplementation(async ({ data }) => ({
           id: 'booking-1',
+          ...data,
+        })),
+        update: jest.fn().mockImplementation(async ({ where, data }) => ({
+          id: where.id,
+          bookingDate: new Date('2026-06-25T00:00:00.000Z'),
           ...data,
         })),
       },
@@ -130,5 +139,36 @@ describe('BookingService', () => {
         { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
       ),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('returns booking overview data from booking-owned queries', async () => {
+    const overviewDate = new Date('2026-07-06T00:00:00.000Z');
+    const todaySchedule = [{ id: 'today-booking' }];
+    const upcomingBookings = [{ id: 'upcoming-booking' }];
+    const recentBookings = [{ id: 'recent-booking' }];
+
+    prisma.booking.count.mockResolvedValue(1);
+    prisma.booking.findMany
+      .mockResolvedValueOnce(todaySchedule)
+      .mockResolvedValueOnce(upcomingBookings)
+      .mockResolvedValueOnce(recentBookings);
+
+    const result = await service.getBookingOverview(overviewDate);
+
+    expect(prisma.booking.count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          bookingDate: overviewDate,
+          status: { not: 'Cancelled' },
+        }),
+      }),
+    );
+    expect(prisma.booking.findMany).toHaveBeenCalledTimes(3);
+    expect(result).toEqual({
+      todayCount: 1,
+      todaySchedule,
+      upcomingBookings,
+      recentBookings,
+    });
   });
 });
