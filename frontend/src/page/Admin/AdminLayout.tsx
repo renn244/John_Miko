@@ -82,26 +82,28 @@ const AdminLayout = () => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
-        <div className="min-h-screen flex bg-muted/20">
+        <div className="flex min-h-screen bg-muted/30">
             <aside
             className={cn(
-                "fixed lg:sticky top-0 h-screen z-40 border-r bg-white/96 backdrop-blur transition-all duration-200",
+                "fixed top-0 z-40 h-screen border-r border-border/70 bg-background/95 backdrop-blur transition-all duration-200 lg:sticky",
                 isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-                isCollapsed ? "w-[84px]" : "w-[276px]"
+                isCollapsed ? "w-[76px]" : "w-[260px]"
             )}
             >
                 <div className="flex h-full flex-col">
-                    <div className="flex h-16 items-center justify-between border-b border-border/70 px-3.5">
+                    <div className="flex h-15 items-center justify-between border-b border-border/60 px-3">
                         {!isCollapsed ? (
-                            <Link to="/" className="flex items-center gap-3 min-w-0">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/12 text-primary">
-                                    <Home className="h-4.5 w-4.5" />
-                                </div>
+                            <Link to="/" className="flex min-w-0 items-center gap-3">
+                                <img
+                                src="/logo/JMPort_Icon.png"
+                                alt="JMPort"
+                                className="size-9 rounded-lg object-cover shadow-sm"
+                                />
                                 <div className="min-w-0">
-                                    <h1 className="truncate text-sm font-semibold text-foreground">
+                                    <h1 className="truncate text-sm font-bold leading-5 text-foreground">
                                         John Miko&apos;s Place
                                     </h1>
-                                    <p className="text-[11px] text-muted-foreground">
+                                    <p className="text-[11px] font-medium text-muted-foreground">
                                         Admin Portal
                                     </p>
                                 </div>
@@ -110,36 +112,40 @@ const AdminLayout = () => {
                             <Link
                             to="/"
                             title="John Miko's Place"
-                            className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-primary/12 text-primary"
+                            className="mx-auto"
                             >
-                                <Home className="h-4.5 w-4.5" />
+                                <img
+                                src="/logo/JMPort_Icon.png"
+                                alt="JMPort"
+                                className="size-9 rounded-lg object-cover shadow-sm"
+                                />
                             </Link>
                         )}
 
                         <div className="flex items-center gap-1">
                             <button
                             onClick={() => setIsSidebarOpen(false)}
-                            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground lg:hidden"
+                            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
                             >
-                                <X className="h-5 w-5" />
+                                <X className="size-5" />
                             </button>
 
                             <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground lg:block"
+                            className="hidden rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:block"
                             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                             >
-                                <ChevronLeft className={cn("h-5 w-5 transition-transform", isCollapsed && "rotate-180")} />
+                                <ChevronLeft className={cn("size-5 transition-transform", isCollapsed && "rotate-180")} />
                             </button>
                         </div>
                     </div>
 
-                    <nav className="flex-1 overflow-y-auto px-3 py-4">
-                        <div className="space-y-5">
+                    <nav className="flex-1 overflow-y-auto px-2.5 py-3">
+                        <div className="space-y-4">
                             {ADMIN_NAV_GROUPS.map((group) => (
                                 <div key={group.label} className="space-y-1.5">
                                     {!isCollapsed && (
-                                        <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/80">
+                                        <p className="px-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground/75">
                                             {group.label}
                                         </p>
                                     )}
@@ -154,18 +160,22 @@ const AdminLayout = () => {
                                             onClick={() => setIsSidebarOpen(false)}
                                             className={({ isActive }) =>
                                                 cn(
-                                                    "group flex items-center rounded-xl text-sm transition-all",
+                                                    "group flex items-center rounded-lg text-sm transition-colors",
                                                     isCollapsed
-                                                        ? "justify-center px-0 py-0 h-11"
-                                                        : "gap-3 px-3 py-2.5",
+                                                        ? "h-10 justify-center px-0 py-0"
+                                                        : "h-10 gap-3 px-2.5",
                                                     isActive
                                                         ? "bg-primary/10 text-primary"
-                                                        : "text-muted-foreground hover:bg-muted/55 hover:text-foreground"
+                                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                                 )
                                             }
                                             >
-                                                <Icon className="h-4.5 w-4.5 shrink-0" />
-                                                {!isCollapsed && <span className="font-medium">{label}</span>}
+                                                {() => (
+                                                    <>
+                                                        <Icon className="size-4.5 shrink-0" />
+                                                        {!isCollapsed && <span className="font-medium">{label}</span>}
+                                                    </>
+                                                )}
                                             </NavLink>
                                         ))}
                                     </div>
@@ -174,16 +184,16 @@ const AdminLayout = () => {
                         </div>
                     </nav>
 
-                    <div className="border-t border-border/70 px-3 py-3">
+                    <div className="border-t border-border/60 px-2.5 py-3">
                         <button
                         onClick={handleLogout}
                         title="Logout"
                         className={cn(
-                            "flex w-full items-center rounded-xl text-sm text-muted-foreground transition-colors hover:bg-muted/55 hover:text-foreground",
-                            isCollapsed ? "justify-center h-11 px-0" : "gap-3 px-3 py-2.5"
+                            "flex h-10 w-full items-center rounded-lg text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive",
+                            isCollapsed ? "justify-center px-0" : "gap-3 px-2.5"
                         )}
                         >
-                            <LogOut className="h-4.5 w-4.5 shrink-0" />
+                            <LogOut className="size-4.5 shrink-0" />
                             {!isCollapsed && <span className="font-medium">Logout</span>}
                         </button>
                     </div>
@@ -191,26 +201,26 @@ const AdminLayout = () => {
             </aside>
 
             <div className="flex min-h-screen flex-1 flex-col">
-                <header className="sticky top-0 z-30 flex h-16.25 items-center justify-between border-b bg-white/96 px-4 backdrop-blur lg:px-6">
+                <header className="sticky top-0 z-30 flex h-15 items-center justify-between border-b border-border/70 bg-background/95 px-4 backdrop-blur lg:px-6">
                     <button
                     onClick={() => setIsSidebarOpen(true)}
-                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground lg:hidden"
+                    className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
                     >
-                        <Menu className="h-6 w-6" />
+                        <Menu className="size-5" />
                     </button>
 
                     <div className="flex-1 lg:flex-none">
-                        <h2 className="ml-2 text-lg font-semibold lg:ml-0">
+                        <h2 className="ml-2 text-base font-bold tracking-normal lg:ml-0">
                             Admin Dashboard
                         </h2>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                         <div className="hidden text-right sm:block">
-                            <p className="text-sm font-medium">
+                            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                                 Administrator
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="max-w-48 truncate text-sm font-medium text-foreground">
                                 {user!.email}
                             </p>
                         </div>
@@ -219,7 +229,7 @@ const AdminLayout = () => {
                     </div>
                 </header>
 
-                <main className="flex-1 p-4 lg:p-6">
+                <main className="flex min-h-0 flex-1 flex-col p-4 lg:p-6">
                     <Outlet />
                 </main>
             </div>

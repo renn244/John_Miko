@@ -15,10 +15,12 @@ export default function Login() {
         <div className="flex flex-col justify-center p-5 sm:p-7 md:p-10">
           <div className="mx-auto w-full max-w-sm">
             <div className="mb-6">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                John Miko&apos;s Place
-              </p>
-              <h1 className="mt-2 text-3xl font-bold tracking-normal text-foreground">
+              <img
+                src="/logo/JMPort_With_MarkDown.png"
+                alt="JMPort"
+                className="h-8 w-auto max-w-[132px] object-contain"
+              />
+              <h1 className="mt-4 text-3xl font-bold tracking-normal text-foreground">
                 Welcome Back
               </h1>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -27,6 +29,13 @@ export default function Login() {
             </div>
 
             <LoginForm />
+
+            <p className="mt-5 text-center text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link to="/signup-guest" className="text-blue-600 font-medium hover:underline">
+                Register as Guest
+              </Link>
+            </p>
 
             <div className="my-5 border-t" />
 

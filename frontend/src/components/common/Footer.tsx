@@ -7,9 +7,11 @@ const Footer = () => {
             <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div>
-                        <h3 className="mb-2 text-base font-bold text-primary">
-                            John Miko&apos;s Place
-                        </h3>
+                        <img
+                            src="/logo/JMPort_With_MarkDown.png"
+                            alt="JMPort"
+                            className="mb-3 h-8 w-auto max-w-[132px] object-contain"
+                        />
                         <p className="mb-3 max-w-xs text-sm leading-6 text-muted-foreground">
                             Your perfect coastal paradise for unforgettable memories.
                         </p>

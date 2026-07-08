@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
-import { TreePalm, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Link, NavLink } from "react-router";
 import { Button } from "../ui/button";
 import ProfileMenu from "./ProfileMenu";
@@ -16,14 +16,12 @@ const NavBar = () => {
                     <div className="flex justify-between items-center h-16">
 
                         {/* Logo */}
-                        <Link to='/' className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary">
-                                <TreePalm className="w-6 h-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="font-semibold text-lg">John Miko's Place</h1>
-                                <p className="text-xs">Public Resort</p>
-                            </div>
+                        <Link to='/' className="flex shrink-0 items-center">
+                            <img
+                                src="/logo/JMPort_With_MarkDown.png"
+                                alt="JMPort"
+                                className="h-6 w-auto max-w-[96px] object-contain sm:h-7 sm:max-w-[112px]"
+                            />
                         </Link>
 
                         {/* Desktop Nav */}
