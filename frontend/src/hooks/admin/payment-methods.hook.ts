@@ -55,15 +55,3 @@ export const useUpdatePaymentMethodAvailabilityMutation = (id: string) => {
         }
     })
 }
-
-export const useDeletePaymentMethodMutation = (id: string) => {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationKey: ['payment-methods', 'delete', id],
-        mutationFn: () => adminPaymentMethodsApi.deletePaymentMethod(id),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['payment-methods', 'admin'] });
-        }
-    })
-}

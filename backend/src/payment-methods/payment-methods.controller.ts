@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Role } from 'src/generated/prisma/enums';
 import { Public } from 'src/lib/decorators/Public.decorator';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
@@ -59,10 +59,4 @@ export class PaymentMethodsController {
         return this.paymentMethodsService.updatePaymentMethod(id, body);
     }
 
-    @Roles(Role.ADMIN)
-    @UseGuards(RolesGuard)
-    @Delete(':id')
-    async deletePaymentMethod(@Param('id') id: string) {
-        return this.paymentMethodsService.deletePaymentMethod(id);
-    }
 }

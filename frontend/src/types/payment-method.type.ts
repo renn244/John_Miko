@@ -20,7 +20,7 @@ export type CreatePaymentMethodDto = {
     accountName?: string;
     accountNumber?: string;
     instructions?: string;
-    qrCodeUrl?: string;
+    qrCodeUrl?: string | null;
     isActive?: boolean;
     sortOrder?: number;
 };

@@ -64,14 +64,5 @@ export const adminPaymentMethodsApi = {
         }
 
         return response.data as PaymentMethod;
-    },
-    deletePaymentMethod: async (id: string) => {
-        const response = await apiClient.delete(`/payment-methods/${id}`);
-
-        if(response.status >= 400) {
-            throw new Error(response.data.message || 'Failed to delete payment method');
-        }
-
-        return response.data as PaymentMethod;
     }
 }
