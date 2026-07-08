@@ -18,7 +18,7 @@ const EditMaintenance = () => {
     if(error) return null;
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="mx-auto max-w-7xl space-y-5">
             <div className="flex items-center gap-4">
                 <Link to="/admin/maintenance">
                     <Button size="icon" variant="outline">
@@ -26,10 +26,10 @@ const EditMaintenance = () => {
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">
+                    <h1 className="text-2xl font-semibold md:text-3xl">
                         Edit Maintenance
                     </h1>
-                    <p className="text-sm text-muted-foreground mt-1A">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Update the details below to modify the maintenance record
                     </p>
                 </div>

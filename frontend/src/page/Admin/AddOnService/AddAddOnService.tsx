@@ -9,7 +9,7 @@ const AddAddOnService = () => {
     const { mutateAsync: createService } = useCreateAddOnServiceMutation();
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
                 <Link to="/admin/add-on-service">
                     <Button size="icon" variant="outline">
@@ -17,8 +17,12 @@ const AddAddOnService = () => {
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-semibold">Add New Service</h1>
-                    <p className="text-sm text-muted-foreground mt-1">Fill in the details below to create a new add-on service</p>
+                    <h1 className="text-2xl md:text-3xl font-semibold">
+                        Add New Service
+                    </h1>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        Fill in the details below to create a new add-on service
+                    </p>
                 </div>
             </div>
 

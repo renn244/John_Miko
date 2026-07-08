@@ -1,3 +1,4 @@
+import FormSection from "@/components/common/FormSection";
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -47,12 +48,7 @@ const StayOptionsFormSection = ({ control, errors, setValue, isUpdate, existingS
 
     if (isUpdate) {
         return (
-            <div>
-                <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                    Stay Options
-                </h2>
-
-                <div className="space-y-3">
+            <FormSection title="Stay Options" contentClassName="space-y-3">
                     {existingStayOptions.length > 0 ? existingStayOptions.map((stayOption) => (
                         <div
                         key={stayOption.id}
@@ -78,18 +74,12 @@ const StayOptionsFormSection = ({ control, errors, setValue, isUpdate, existingS
                     <FieldDescription>
                         Existing stay options are read-only for now so connected bookings stay safe.
                     </FieldDescription>
-                </div>
-            </div>
+            </FormSection>
         );
     }
 
     return (
-        <div>
-            <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                Stay Options
-            </h2>
-
-            <div className="space-y-4">
+        <FormSection title="Stay Options" contentClassName="space-y-4">
                 <div className="space-y-1">
                     <p className="text-sm font-medium">Choose a starting model</p>
                     <p className="text-sm text-muted-foreground">Preset stay options are locked so booking logic stays consistent.</p>
@@ -157,8 +147,7 @@ const StayOptionsFormSection = ({ control, errors, setValue, isUpdate, existingS
                         <FieldError errors={[{ message: errors.stayOptions.message }]} />
                     )}
                 </div>
-            </div>
-        </div>
+        </FormSection>
     );
 };
 

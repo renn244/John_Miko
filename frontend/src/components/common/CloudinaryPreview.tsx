@@ -1,17 +1,24 @@
+import { cn } from "@/lib/utils"
+
 interface Props {
     images: { url: string }[]
     onRemove: (id: number) => void
+    className?: string
+    itemClassName?: string
 }
 
-export function CloudinaryPreview({ images,  onRemove }: Props) {
+export function CloudinaryPreview({ images, onRemove, className, itemClassName }: Props) {
     if (images.length === 0) return null
 
     return (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+        <div className={cn("grid grid-cols-3 gap-3 sm:grid-cols-4", className)}>
             {images.map((image, index) => (
                 <div
                     key={index}
-                    className="relative group aspect-square rounded-lg overflow-hidden bg-gray-100"
+                    className={cn(
+                        "relative group aspect-square overflow-hidden rounded-lg bg-gray-100",
+                        itemClassName
+                    )}
                 >
                     <img
                         src={image.url}

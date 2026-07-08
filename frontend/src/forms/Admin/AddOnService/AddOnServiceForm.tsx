@@ -1,19 +1,18 @@
 import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
-import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+import FormSection from "@/components/common/FormSection";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Textarea } from "@/components/ui/textarea";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Save } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
+import AddOnServicePreviewCard from "./AddOnServicePreviewCard";
 
 const AddOnServiceSchema = z.object({
     imageUrl: z.url()
@@ -55,7 +54,7 @@ const AddOnServiceForm = ({ onsubmit, oncancel, className, initialData, isUpdate
         criteriaMode: "all",
     });
 
-    const buttonText = isUpdate ? "Update Service" : "Add Service";
+    const buttonText = isUpdate ? "Save Service" : "Create Service";
 
     const onSubmit = async (data: AddOnServiceSchemaType) => {
         setIsLoading(true);
@@ -74,114 +73,106 @@ const AddOnServiceForm = ({ onsubmit, oncancel, className, initialData, isUpdate
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className={cn("bg-white rounded-xl shadow-sm border-2 overflow-hidden", className)}>
-            <div className="p-6 md:p-8 space-y-6">
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">Basic Information</h2>
-                    <div className="space-y-5">
-                        <Controller
-                            name="name"
-                            control={control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid}>
-                                    <FieldLabel htmlFor={field.name} className="gap-1">
-                                        Service Name <span className="text-red-700">*</span>
-                                    </FieldLabel>
-
-                                    <Input {...field} id={field.name} aria-invalid={fieldState.invalid} placeholder="e.g., Videoke Room" />
-
-                                    {fieldState.error && <FieldError errors={getErrorMessages(fieldState.error)} />}
-                                </Field>
-                            )}
-                        />
-
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <Controller
-                                name="price"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <Field>
-                                        <FieldLabel htmlFor={field.name} className="gap-1">
-                                            Price (₱) <span className="text-red-700">*</span>
-                                        </FieldLabel>
-
-                                        <Input
-                                            id={field.name}
-                                            type="number"
-                                            aria-invalid={fieldState.invalid}
-                                            {...field}
-                                            onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                                            placeholder="e.g., 1500"
-                                        />
-
-                                        {fieldState.error && <FieldError errors={getErrorMessages(fieldState.error)} />}
-                                    </Field>
-                                )}
-                            />
-
-                            <Controller
-                                name="quantity"
-                                control={control}
-                                render={({ field, fieldState }) => (
-                                    <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                                        <FieldLabel htmlFor={field.name} className="gap-1">
-                                            Quantity <span className="text-red-700">*</span>
-                                        </FieldLabel>
-
-                                        <Input
-                                        id={field.name}
-                                        type="number"
-                                        aria-invalid={fieldState.invalid}
-                                        {...field}
-                                        onChange={(e) => {
-                                            field.onChange(e.target.valueAsNumber)
-                                        }}
-                                        placeholder="e.g., 2"
-                                        />
-
-                                        {fieldState.error && <FieldError errors={getErrorMessages(fieldState.error)} />}
-                                    </Field>
-                                )}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">Description</h2>
+        <form
+        onSubmit={handleSubmit(onSubmit)}
+        className={cn("grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]", className)}
+        >
+            <div className="space-y-5">
+                <FormSection title="Basic Information" contentClassName="space-y-5">
                     <Controller
-                        name="description"
+                    name="name"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                            <FieldLabel htmlFor={field.name} className="gap-1">
+                                Name <span className="text-red-700">*</span>
+                            </FieldLabel>
+
+                            <Input
+                            {...field}
+                            id={field.name}
+                            aria-invalid={fieldState.invalid}
+                            placeholder="e.g., Videoke Room"
+                            />
+
+                            {fieldState.error && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                        </Field>
+                    )}
+                    />
+
+                    <Controller
+                    name="description"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                            <FieldLabel htmlFor={field.name}>Description</FieldLabel>
+
+                            <Textarea
+                            {...field}
+                            id={field.name}
+                            aria-invalid={fieldState.invalid}
+                            className="max-h-50 min-h-28"
+                            placeholder="Describe what the service includes..."
+                            />
+
+                            {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                        </Field>
+                    )}
+                    />
+                    <div className="grid gap-5 md:grid-cols-2">
+                        <Controller
+                        name="price"
                         control={control}
                         render={({ field, fieldState }) => (
-                            <Field>
-                                <FieldLabel htmlFor={field.name}>
-                                    Service Description
+                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                                <FieldLabel htmlFor={field.name} className="gap-1">
+                                    Price (PHP) <span className="text-red-700">*</span>
                                 </FieldLabel>
 
-                                <Textarea
-                                    {...field}
-                                    id={field.name}
-                                    aria-invalid={fieldState.invalid}
-                                    className="max-h-[200px]"
-                                    rows={3}
-                                    placeholder="Describe what the service includes..."
+                                <Input
+                                id={field.name}
+                                type="number"
+                                aria-invalid={fieldState.invalid}
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                                placeholder="e.g., 1500"
                                 />
 
-                                <FieldDescription>This will be shown to guests when browsing services</FieldDescription>
-
-                                {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                                {fieldState.error && <FieldError errors={getErrorMessages(fieldState.error)} />}
                             </Field>
                         )}
-                    />
-                </div>
+                        />
+                        <Controller
+                        name="quantity"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                                <FieldLabel htmlFor={field.name} className="gap-1">
+                                    Quantity <span className="text-red-700">*</span>
+                                </FieldLabel>
 
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">Media</h2>
-                    <Controller
+                                <Input
+                                id={field.name}
+                                type="number"
+                                aria-invalid={fieldState.invalid}
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                                placeholder="e.g., 12"
+                                />
+
+                                {fieldState.error && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                            </Field>
+                        )}
+                        />
+                    </div>
+                </FormSection>
+
+                <FormSection title="Media" contentClassName="px-5 py-5">
+                        <Controller
                         name="imageUrl"
                         control={control}
                         render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid}>
+                            <Field data-invalid={fieldState.invalid} className="grid gap-3">
                                 <FieldLabel className="gap-1">
                                     Image <span className="text-red-700">*</span>
                                 </FieldLabel>
@@ -193,35 +184,30 @@ const AddOnServiceForm = ({ onsubmit, oncancel, className, initialData, isUpdate
                                     />
                                 )}
 
-                                {field.value && <CloudinaryPreview images={[{ url: field.value }]} onRemove={() => field.onChange("")} />}
+                                {field.value && (
+                                    <div className="space-y-3">
+                                        <CloudinaryPreview
+                                            images={[{ url: field.value }]}
+                                            onRemove={() => field.onChange("")}
+                                            className="grid-cols-1"
+                                            itemClassName="aspect-[16/10]"
+                                        />w
+                                    </div>
+                                )}
 
                                 {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
                             </Field>
                         )}
-                    />
-                </div>
+                        />
+                </FormSection>
             </div>
 
-            <div className="px-6 md:px-8 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
-                <p className="text-sm text-muted-foreground">
-                    <span className="text-red-700">*</span> Required fields
-                </p>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <Button disabled={isLoading} onClick={oncancel} type="button" variant="outline">
-                        Cancel
-                    </Button>
-                    <Button disabled={isLoading} type="submit">
-                        {isLoading ? (
-                            <LoadingSpinner />
-                        ) : (
-                            <>
-                                <Save className="w-5 h-5" />
-                                {buttonText}
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </div>
+            <AddOnServicePreviewCard
+            control={control}
+            buttonText={buttonText}
+            isLoading={isLoading}
+            oncancel={oncancel}
+            />
         </form>
     );
 };
