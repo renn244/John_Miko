@@ -1,20 +1,38 @@
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGuestManagementSearch } from "@/hooks/admin/guest-management/guest-management.search";
 import useDebounce from "@/lib/useDebounce";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const GuestFilter = () => {
+    const { search, status, clearFilters } = useGuestManagementSearch();
+    const hasFilters = Boolean(search || status);
+
     return (
-        <div className="bg-white p-4 rounded-xl shadow-sm border-2">
-            <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="w-full xl:max-w-xl xl:flex-1">
                 <SearchGuestFilter />
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center xl:ml-4 xl:flex-nowrap xl:justify-end xl:gap-2 xl:self-start">
                 <SelectGuestStatus />
+
+                <Button
+                type="button"
+                variant="ghost"
+                onClick={clearFilters}
+                disabled={!hasFilters}
+                className="justify-start whitespace-nowrap px-0 text-primary hover:bg-transparent hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+                >
+                    <X className="size-4" />
+                    Clear Filters
+                </Button>
             </div>
         </div>
-    )
-}
+    );
+};
 
 const SearchGuestFilter = () => {
     const { search, updateSearch } = useGuestManagementSearch();
@@ -25,30 +43,30 @@ const SearchGuestFilter = () => {
         if(debounceValue !== search) {
             updateSearch(debounceValue);
         }
-    }, [debounceValue])
+    }, [debounceValue]);
 
     return (
-        <div className="flex-1 relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <div className="relative w-full xl:max-w-xl xl:flex-1">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-8"
+            className="pl-9"
             placeholder="Search by guest name, email, or ID..."
             />
         </div>
-    )
-}
+    );
+};
 
 const SelectGuestStatus = () => {
     const { status, updateStatus } = useGuestManagementSearch();
 
     return (
         <Select
-        value={status || ""}
+        value={status || "all"}
         onValueChange={(value) => updateStatus(value)}
         >
-            <SelectTrigger>
+            <SelectTrigger className="w-full sm:w-auto">
                 <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -60,7 +78,7 @@ const SelectGuestStatus = () => {
                 </SelectGroup>
             </SelectContent>
         </Select>
-    )
-}
+    );
+};
 
-export default GuestFilter
+export default GuestFilter;

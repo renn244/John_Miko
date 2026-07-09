@@ -11,8 +11,8 @@ const AddOnService = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">Add-on Service Management</h1>
-                    <p className="text-sm mt-1 text-muted-foreground">Manage add-on services, pricing, and stock quantity</p>
+                    <h1 className="text-2xl md:text-3xl font-bold">Add-on Services</h1>
+                    <p className="text-sm mt-1 text-muted-foreground">Manage optional guest services, pricing, and availability.</p>
                 </div>
 
                 <Link to="/admin/add-on-service/add">

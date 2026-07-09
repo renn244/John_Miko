@@ -1,28 +1,41 @@
-import { Input } from "@/components/ui/input"
-import LoadingSpinner from "@/components/ui/loadingSpinner"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useGetMenuItemCategoriesQuery } from "@/hooks/admin/menu-item.hook"
-import { useMenuItemSearch } from "@/hooks/admin/menu-item.search"
-import useDebounce from "@/lib/useDebounce"
-import { Search } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useGetMenuItemCategoriesQuery } from "@/hooks/admin/menu-item.hook";
+import { useMenuItemSearch } from "@/hooks/admin/menu-item.search";
+import useDebounce from "@/lib/useDebounce";
+import { Search, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const MenuItemFilter = () => {
-    
+    const { search, category, availability, clearFilters } = useMenuItemSearch();
+    const hasFilters = Boolean(search || category || availability);
+
     return (
-        <div className="bg-white p-4 rounded-xl shadow-sm border-2">
-            <div className="flex flex-col md:flex-row gap-4">
-
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="w-full xl:max-w-md">
                 <SearchMenuItemFilter />
+            </div>
 
-                <SelecteMenuItemCategories />
-
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center xl:ml-4 xl:flex-nowrap xl:justify-end xl:gap-2">
+                <SelectMenuItemCategories />
                 <SelectMenuItemAvailability />
 
+                <Button
+                type="button"
+                variant="ghost"
+                onClick={clearFilters}
+                disabled={!hasFilters}
+                className="h-auto px-0 text-sm font-medium text-primary hover:bg-transparent hover:text-primary/80 disabled:pointer-events-none disabled:opacity-40"
+                >
+                    <X className="h-4 w-4" />
+                    Clear Filters
+                </Button>
             </div>
         </div>
-    )
-}
+    );
+};
 
 const SearchMenuItemFilter = () => {
     const { search, updateSearch } = useMenuItemSearch();
@@ -30,78 +43,76 @@ const SearchMenuItemFilter = () => {
     const debounceValue = useDebounce(searchInput, 500);
 
     useEffect(() => {
-        if(debounceValue !== search) {
+        if (debounceValue !== search) {
             updateSearch(debounceValue);
-        }    
-    }, [debounceValue])
+        }
+    }, [debounceValue]);
 
     return (
-        <div className="flex-1 relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-8"
-            placeholder="Search by menu item name or ID..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-9"
+                placeholder="Search by menu item name or ID..."
             />
         </div>
-    )
-}
+    );
+};
 
-const SelecteMenuItemCategories = () => {
+const SelectMenuItemCategories = () => {
     const { data: categories, isLoading } = useGetMenuItemCategoriesQuery();
     const { category, updateCategory } = useMenuItemSearch();
 
     return (
-        <Select
-        value={category || ""}
-        onValueChange={(value) => updateCategory(value)}
-        >
-            <SelectTrigger>
-                <SelectValue placeholder="Category Type" />    
-            </SelectTrigger>
-            <SelectContent>
-                <SelectGroup>
-                    <SelectLabel>Category Type</SelectLabel>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {isLoading ? (
-                        <SelectItem value="loading" disabled>
-                            <LoadingSpinner />
-                        </SelectItem>
-                    ) : (
-                        categories?.map((category) => (
-                            <SelectItem key={category} value={category}>
-                                {category}
+        <div className="w-full sm:w-auto">
+            <Select value={category || "all"} onValueChange={updateCategory}>
+                <SelectTrigger className="w-full sm:w-auto">
+                    <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>Category</SelectLabel>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {isLoading ? (
+                            <SelectItem value="loading" disabled>
+                                <LoadingSpinner />
                             </SelectItem>
-                        ))
-                    )}
-                </SelectGroup>
-            </SelectContent>
-        </Select>
-    )
-}
+                        ) : (
+                            categories?.map((itemCategory) => (
+                                <SelectItem key={itemCategory} value={itemCategory}>
+                                    {itemCategory}
+                                </SelectItem>
+                            ))
+                        )}
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+        </div>
+    );
+};
 
 const SelectMenuItemAvailability = () => {
     const { availability, updateAvailability } = useMenuItemSearch();
 
     return (
-        <Select
-        value={availability || ""}
-        onValueChange={(value) => updateAvailability(value)}
-        >
-            <SelectTrigger>
-                <SelectValue placeholder="Availability Status" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectGroup>
-                    <SelectLabel>Availability Status</SelectLabel>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Available">Available</SelectItem>
-                    <SelectItem value="Unavailable">Unavailable</SelectItem>
-                </SelectGroup>
-            </SelectContent>
-        </Select>
-    )
-}
+        <div className="w-full sm:w-auto">
+            <Select value={availability || "all"} onValueChange={updateAvailability}>
+                <SelectTrigger className="w-full sm:w-auto">
+                    <SelectValue placeholder="Availability" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectGroup>
+                        <SelectLabel>Availability</SelectLabel>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="Available">Available</SelectItem>
+                        <SelectItem value="Unavailable">Unavailable</SelectItem>
+                    </SelectGroup>
+                </SelectContent>
+            </Select>
+        </div>
+    );
+};
 
-export default MenuItemFilter
+export default MenuItemFilter;

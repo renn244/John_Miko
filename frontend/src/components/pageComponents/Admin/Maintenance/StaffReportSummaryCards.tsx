@@ -6,22 +6,30 @@ const reportSummaryCards = [
     {
         key: "total",
         title: "Total Reports",
-        Icon: <FileText className="w-5 h-5 text-primary" />,
+        Icon: <FileText />,
+        accentClassName: "border-l-blue-500",
+        iconContainerClassName: "bg-blue-500",
     },
     {
         key: "pending",
         title: "Pending",
-        Icon: <Clock3 className="w-5 h-5 text-amber-500" />,
+        Icon: <Clock3 />,
+        accentClassName: "border-l-amber-500",
+        iconContainerClassName: "bg-amber-500",
     },
     {
         key: "approved",
         title: "Approved",
-        Icon: <CheckCircle2 className="w-5 h-5 text-emerald-700" />,
+        Icon: <CheckCircle2 />,
+        accentClassName: "border-l-emerald-500",
+        iconContainerClassName: "bg-emerald-500",
     },
     {
         key: "rejected",
         title: "Rejected",
-        Icon: <XCircle className="w-5 h-5 text-red-700" />,
+        Icon: <XCircle />,
+        accentClassName: "border-l-rose-500",
+        iconContainerClassName: "bg-rose-500",
     },
 ] as const;
 
@@ -30,11 +38,13 @@ const StaffReportSummaryCards = () => {
 
     return (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {reportSummaryCards.map(({ key, title, Icon }) => (
+            {reportSummaryCards.map(({ key, title, Icon, accentClassName, iconContainerClassName }) => (
                 <StatisticCards
                     key={key}
                     title={title}
                     Icon={Icon}
+                    accentClassName={accentClassName}
+                    iconContainerClassName={iconContainerClassName}
                     stat={data?.[key] ?? 0}
                     isLoading={isLoading}
                 />

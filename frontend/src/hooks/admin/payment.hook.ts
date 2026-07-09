@@ -10,6 +10,14 @@ export const useGetPaymentReports = (date?: string) => {
     })
 }
 
+export const useGetPaymentOverviewQuery = (date?: string) => {
+    return useQuery({
+        queryKey: ['payment', 'overview', date],
+        queryFn: () => paymentApi.getPaymentOverview(date),
+        refetchOnWindowFocus: false
+    })
+}
+
 export const useGetRevenueAnalyticsQuery = () => {
     return useQuery({
         queryKey: ['payment', 'revenue-analytics'],

@@ -99,13 +99,4 @@ export class PaymentMethodsService {
         return method;
     }
 
-    async deletePaymentMethod(id: string) {
-        await this.getPaymentMethodById(id);
-
-        const method = await this.prisma.paymentMethod.delete({
-            where: { id }
-        })
-
-        return method;
-    }
 }

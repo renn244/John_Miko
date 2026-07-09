@@ -44,6 +44,12 @@ export class StaffReportsController {
     return this.staffReportsService.ReportsReport(query.date);
   }
 
+  @Get('overview')
+  @Roles(Role.ADMIN)
+  async getOverview(@Query() query: DateReportQueryDto) {
+    return this.staffReportsService.getOverview(query.date);
+  }
+
   @Get('byUser')
   @Roles(Role.RESORT_STAFF)
   async viewReportByUserId(

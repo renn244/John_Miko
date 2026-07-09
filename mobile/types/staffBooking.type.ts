@@ -15,6 +15,7 @@ export type StaffBookingStayOption = {
 
 export type StaffBookingSummary = {
   id: string;
+  referenceCode: string;
   guestName: string;
   contactNo: string;
   bookingDate: string;

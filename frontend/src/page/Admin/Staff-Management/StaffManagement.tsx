@@ -1,7 +1,6 @@
 import ChangeStaffRoleDialog from "@/components/pageComponents/Admin/StaffManagement/ChangeStaffRoleDialog";
 import DeactivateStaffDialog from "@/components/pageComponents/Admin/StaffManagement/DeactivateStaffDialog";
 import ReactivateStaffDialog from "@/components/pageComponents/Admin/StaffManagement/ReactivateStaffDialog";
-import StaffFilter from "@/components/pageComponents/Admin/StaffManagement/StaffFilter";
 import StaffStatistics from "@/components/pageComponents/Admin/StaffManagement/StaffStatistics";
 import StaffTable from "@/components/pageComponents/Admin/StaffManagement/StaffTable";
 import { Button } from "@/components/ui/button";
@@ -10,27 +9,29 @@ import { Link } from "react-router";
 
 const StaffManagement = () => {
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">
+                    <h1 className="text-2xl font-bold md:text-3xl">
                         Staff Management
                     </h1>
-                    <p className="text-sm mt-1 text-muted-foreground">
-                        Manage staff accounts, roles, and active status
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Manage staff accounts, roles, expertise, and active status.
                     </p>
                 </div>
                 <Link to="/admin/staff-management/add">
-                    <Button>
+                    <Button className="gap-2">
                         Add Staff
-                        <Plus className="w-5 h-5 text-white" />
+                        <Plus className="h-4 w-4" />
                     </Button>
                 </Link>
             </div>
 
             <StaffStatistics />
-            <StaffFilter />
-            <StaffTable />
+
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
+                <StaffTable />
+            </div>
 
             <ChangeStaffRoleDialog />
             <DeactivateStaffDialog />

@@ -63,6 +63,7 @@ const BookingCard = ({ booking, className,  variant="default", style, ...props }
     const addOnItems = detailedBooking?.addOns ?? booking.addOns ?? [];
     const reports = detailedBooking?.reports ?? booking.reports;
     const payment = detailedBooking?.payment;
+    const bookingReference = booking.referenceCode ?? "—";
 
     const preOrderTotal = useMemo(() => {
         return preOrderItems.reduce((total, item) => total + item.quantity, 0);
@@ -145,7 +146,7 @@ const BookingCard = ({ booking, className,  variant="default", style, ...props }
                             "text-muted-foreground",
                             isCompact ? "text-xs" : "mb-4 text-sm"
                         )}>
-                            Booking ID: {booking.id}
+                            Booking Reference: {bookingReference}
                         </p>
                     </div>
 

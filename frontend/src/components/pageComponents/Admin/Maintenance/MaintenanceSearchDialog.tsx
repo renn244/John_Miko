@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -22,8 +21,9 @@ import { useGetMaintenancesQuery } from "@/hooks/admin/maintenance.hook";
 import { cn } from "@/lib/utils";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
-import { Search } from "lucide-react";
+import { History, Search, Wrench } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 
 const matchesTicket = (ticket: Maintenance, query: string) => {
   const normalizedQuery = query.trim().toLowerCase();
@@ -40,7 +40,7 @@ const matchesTicket = (ticket: Maintenance, query: string) => {
 const MaintenanceSearchDialog = () => {
   const isSearchOpen = useMaintenanceStore((state) => state.isSearchOpen);
   const setIsSearchOpen = useMaintenanceStore((state) => state.setIsSearchOpen);
-  const setViewId = useMaintenanceStore((state) => state.setViewId);
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
 
@@ -52,17 +52,16 @@ const MaintenanceSearchDialog = () => {
   const filteredTickets = useMemo(() => {
     const tickets = data?.data ?? [];
     return sortMaintenanceByRelevantDate(
-      tickets.filter((ticket) => matchesTicket(ticket, deferredSearch))
+      tickets.filter((ticket) => matchesTicket(ticket, deferredSearch)),
     );
   }, [data?.data, deferredSearch]);
 
   const activeTickets = filteredTickets.filter((ticket) => ticket.status !== "Closed");
-
   const historyTickets = filteredTickets.filter((ticket) => ticket.status === "Closed");
 
   const handleSelectTicket = (ticketId: string) => {
     setIsSearchOpen(false);
-    setViewId(ticketId);
+    navigate(`/admin/maintenance/${ticketId}`);
   };
 
   return (
@@ -75,25 +74,18 @@ const MaintenanceSearchDialog = () => {
         }
       }}
     >
-      <DialogContent className="max-h-[85vh] overflow-hidden p-0 sm:max-w-3xl" showCloseButton={false}>
-        <DialogHeader className="border-b px-6 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <DialogTitle className="text-xl">Find Ticket</DialogTitle>
-              <DialogDescription className="mt-1">
-                Search active maintenance work and browse closed history without using a table.
-              </DialogDescription>
-            </div>
-          </div>
+      <DialogContent className="max-h-[85vh] overflow-hidden p-0 sm:max-w-3xl gap-0" showCloseButton={false}>
+        <DialogHeader className="gap-0 border-b px-6 py-5">
+          <DialogTitle className="text-xl">Find Ticket</DialogTitle>
 
-          <div className="relative mt-4">
+          <div className="relative mt-2">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               autoFocus
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by ticket ID, title, or description..."
-              className="h-11 rounded-xl pl-9"
+              className="pl-9"
             />
           </div>
         </DialogHeader>
@@ -110,12 +102,13 @@ const MaintenanceSearchDialog = () => {
           ) : null}
 
           {!isLoading && !error ? (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {activeTickets.length > 0 ? (
                 <SearchSection
                   title="Active Tickets"
                   tickets={activeTickets}
                   onSelectTicket={handleSelectTicket}
+                  variant="active"
                 />
               ) : null}
 
@@ -124,6 +117,7 @@ const MaintenanceSearchDialog = () => {
                   title="History"
                   tickets={historyTickets}
                   onSelectTicket={handleSelectTicket}
+                  variant="history"
                 />
               ) : null}
 
@@ -144,21 +138,31 @@ const SearchSection = ({
   title,
   tickets,
   onSelectTicket,
+  variant,
 }: {
   title: string;
   tickets: Maintenance[];
   onSelectTicket: (ticketId: string) => void;
+  variant: "active" | "history";
 }) => {
+  const isHistory = variant === "history";
+
   return (
     <section className="space-y-3">
-      <div className="text-sm font-semibold text-foreground">
-        {title}
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        {isHistory ? (
+          <History className="size-4 text-muted-foreground" />
+        ) : (
+          <span className="size-2 rounded-full bg-primary" />
+        )}
+        <span>{title}</span>
+        <span className="text-xs font-medium text-muted-foreground">{tickets.length}</span>
       </div>
 
       <div className="space-y-2">
         {tickets.map((ticket) => {
           const relevantDate = formatMaintenanceShortDate(
-            getMaintenanceStatusDate(ticket, ticket.status)
+            getMaintenanceStatusDate(ticket, ticket.status),
           );
 
           return (
@@ -167,45 +171,67 @@ const SearchSection = ({
               type="button"
               onClick={() => onSelectTicket(ticket.id)}
               className={cn(
-                "w-full rounded-2xl border bg-background px-4 py-3 text-left shadow-xs transition hover:border-primary/30 hover:bg-accent/30"
+                "group w-full rounded-lg border bg-card px-3.5 py-3 text-left shadow-sm transition hover:border-primary/30 hover:bg-accent/15",
+                isHistory && "hover:bg-accent/10",
               )}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-primary">{ticket.id}</span>
-                    {relevantDate ? <span>{relevantDate}</span> : null}
-                    <span>•</span>
-                    <span>{ticket.expertise}</span>
-                  </div>
-                  <div className="mt-1 flex items-start gap-3">
+                  <div className="mt-2 flex items-start gap-3">
                     {ticket.imagesUrl?.[0] ? (
                       <img
                         src={ticket.imagesUrl[0]}
                         alt={ticket.title}
-                        className="mt-0.5 h-12 w-12 rounded-lg object-cover"
+                        className={cn(
+                          "mt-0.5 h-14 w-14 rounded-lg border object-cover",
+                          isHistory && "opacity-80 grayscale-[0.2]",
+                        )}
                       />
-                    ) : null}
+                    ) : (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-lg border bg-muted/60 text-muted-foreground">
+                        <Wrench className="size-5" />
+                      </div>
+                    )}
 
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold text-foreground sm:text-base">
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className={cn(
+                          "truncate text-[15px] font-semibold leading-5 transition-colors group-hover:text-foreground",
+                          isHistory ? "text-foreground/80" : "text-foreground",
+                        )}
+                      >
                         {ticket.title}
                       </div>
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-muted-foreground">
                         {ticket.description}
                       </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Assigned to {getMaintenanceAssigneeLabel(ticket)}
-                      </p>
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={cn(
+                              "font-medium",
+                              isHistory ? "text-foreground/70" : "text-foreground/80",
+                            )}
+                          >
+                            {ticket.id}
+                          </span>
+                          <span>&bull;</span>
+                          <span>Assigned to {getMaintenanceAssigneeLabel(ticket)}</span>
+                        </div>
+                        {relevantDate ? <span>{relevantDate}</span> : null}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex shrink-0 flex-col items-end gap-2">
-                  <Badge className={getMaintenancePriorityClasses(ticket.priority)}>
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <Badge className="border px-2 py-0.5 text-[11px]">
+                    {ticket.expertise}
+                  </Badge>
+                  <Badge className={cn("border px-2 py-0.5 text-[11px]", getMaintenancePriorityClasses(ticket.priority))}>
                     {ticket.priority}
                   </Badge>
-                  <Badge className={getMaintenanceStatusClasses(ticket.status)}>
+                  <Badge className={cn("border px-2 py-0.5 text-[11px]", getMaintenanceStatusClasses(ticket.status))}>
                     {getMaintenanceStatusLabel(ticket.status)}
                   </Badge>
                 </div>

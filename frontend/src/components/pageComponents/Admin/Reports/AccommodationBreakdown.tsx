@@ -1,122 +1,208 @@
+import {
+    ChartContainer,
+    ChartTooltip,
+    type ChartConfig,
+} from "@/components/ui/chart";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetAccommodationReportQuery } from "@/hooks/admin/accommodation.hook";
 import { toDateOnly } from "@/lib/date.util";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+
+const chartConfig = {
+    occupied: {
+        label: "Occupied",
+        color: "#1E73BE",
+    },
+    free: {
+        label: "Free",
+        color: "#DCEAFE",
+    },
+} satisfies ChartConfig;
+
+const accommodationTypeColors: Record<string, string> = {
+    Rooms: "#1E73BE",
+    Cottages: "#16A34A",
+    "Event Halls": "#D97706",
+};
 
 const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
     const { data, isLoading } = useGetAccommodationReportQuery(toDateOnly(selectedDate));
-    
-    if(isLoading) return;
 
-    if(!data) return;
-    
-    return (
-        <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <h3 className="text-lg font-bold mb-5 text-foreground">
-                Accommodation Breakdown
-            </h3>
-
-            <div className="space-y-3">
-
-                <AccommodationItem
-                    label="Rooms"
-                    data={data.room}
-                    color="bg-primary"
-                />
-
-                <AccommodationItem
-                    label="Cottages"
-                    data={data.cottages}
-                    color="bg-green-500"
-                />
-
-                <AccommodationItem
-                    label="Event Halls"
-                    data={data.eventHalls}
-                    color="bg-red-500"
-                />
-
-                <div className="grid grid-cols-2 gap-3">
-                    <MiniStat
-                        label="Occupancy Rate"
-                        value={`${data.occupancyRate}%`}
-                        valueColor="text-green-600"
-                    />
-                    <MiniStat
-                        label="Total Capacity"
-                        value={`${data.totalCapacity} units`}
-                    />
+    if (isLoading) {
+        return (
+            <div className="rounded-xl border border-border/70 bg-card p-5 shadow-sm">
+                <div className="flex min-h-80 items-center justify-center">
+                    <LoadingSpinner className="size-6 text-primary" />
                 </div>
-
-                <div className="p-4 rounded-lg bg-muted">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-muted-foreground">
-                            Total remaining free
-                        </span>
-                        <span className="text-sm font-bold text-foreground">
-                            {data.totalFree} remaining
-                        </span>
-                    </div>
-                </div>
-
             </div>
-        </div>
-    );
-}
-
-type AccommodationItemProps = {
-    label: string
-    data: {
-        occupied: number
-        free: number
-        total: number
+        );
     }
-    color: string
-}
 
-const AccommodationItem = ({ label, data, color }: AccommodationItemProps) => {
+    if (!data) {
+        return (
+            <div className="rounded-xl border border-border/70 bg-card p-5 shadow-sm">
+                <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-border/70 bg-muted/20 text-sm text-muted-foreground">
+                    No accommodation report available for this date.
+                </div>
+            </div>
+        );
+    }
+
+    const chartData = [
+        {
+            label: "Rooms",
+            occupied: data.room.occupied,
+            free: data.room.free,
+            total: data.room.total,
+        },
+        {
+            label: "Cottages",
+            occupied: data.cottages.occupied,
+            free: data.cottages.free,
+            total: data.cottages.total,
+        },
+        {
+            label: "Event Halls",
+            occupied: data.eventHalls.occupied,
+            free: data.eventHalls.free,
+            total: data.eventHalls.total,
+        },
+    ];
+
+    const hasAnyCapacity = chartData.some((item) => item.total > 0);
+
     return (
-        <div className="p-4 rounded-lg border border-border bg-muted/40">
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${color}`} />
-                    <span className="text-sm font-medium text-foreground">
-                        {label}
-                    </span>
+        <div className="rounded-xl border border-border/70 bg-card p-5 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                    <h3 className="text-base font-semibold text-foreground">
+                        Accommodation Breakdown
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                        Occupied and free capacity across accommodation types.
+                    </p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <span className="text-sm font-semibold text-foreground">
-                        {data.occupied} occupied
-                    </span>
+                <div className="text-right">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Occupancy Rate
+                    </p>
+                    <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+                        {data.occupancyRate}%
+                    </p>
+                </div>
+            </div>
+
+            <div className="mt-5 h-72 w-full">
+                {!hasAnyCapacity ? (
+                    <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border/70 bg-muted/20 text-sm text-muted-foreground">
+                        No accommodation capacity configured.
+                    </div>
+                ) : (
+                    <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+                        <BarChart
+                            accessibilityLayer
+                            data={chartData}
+                            layout="vertical"
+                            margin={{ left: 0, right: 8, top: 4, bottom: 4 }}
+                            barGap={6}
+                        >
+                            <CartesianGrid horizontal={false} />
+                            <XAxis type="number" tickLine={false} axisLine={false} tickMargin={10} />
+                            <YAxis
+                                dataKey="label"
+                                type="category"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={6}
+                                width={78}
+                            />
+                            <ChartTooltip
+                                cursor={false}
+                                content={({ active, payload }) => {
+                                    if (!active || !payload?.length) return null;
+                                    const item = payload[0]?.payload as (typeof chartData)[number] | undefined;
+                                    if (!item) return null;
+                                    const accentColor = accommodationTypeColors[item.label] ?? "#1E73BE";
+                                    const occupancyRate =
+                                        item.total > 0 ? Math.round((item.occupied / item.total) * 100) : 0;
+
+                                    return (
+                                        <div className="grid min-w-44 gap-2 rounded-lg border border-border/60 bg-background px-3 py-2 text-xs shadow-xl">
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    className="size-2.5 rounded-[2px]"
+                                                    style={{ backgroundColor: accentColor }}
+                                                />
+                                                <div className="font-medium text-foreground">
+                                                    {item.label}
+                                                </div>
+                                            </div>
+                                            <div className="grid gap-1">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <span className="text-muted-foreground">Occupied</span>
+                                                    <span className="font-medium text-foreground">
+                                                        {item.occupied}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <span className="text-muted-foreground">Free</span>
+                                                    <span className="font-medium text-foreground">
+                                                        {item.free}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <span className="text-muted-foreground">Capacity</span>
+                                                    <span className="font-medium text-foreground">
+                                                        {item.total}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="border-t border-border/60 pt-2">
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <span className="font-medium text-foreground">
+                                                        Occupancy Rate
+                                                    </span>
+                                                    <span className="font-semibold text-foreground">
+                                                        {occupancyRate}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }}
+                            />
+                            <Bar
+                                dataKey="occupied"
+                                stackId="capacity"
+                                fill="var(--color-occupied)"
+                                radius={[6, 0, 0, 6]}
+                                barSize={24}
+                            />
+                            <Bar
+                                dataKey="free"
+                                stackId="capacity"
+                                fill="var(--color-free)"
+                                radius={[0, 6, 6, 0]}
+                                barSize={24}
+                            />
+                        </BarChart>
+                    </ChartContainer>
+                )}
+            </div>
+
+            <div className="mt-4 rounded-lg bg-muted/30 px-4 py-3">
+                <div className="flex items-center justify-between gap-4">
                     <span className="text-sm text-muted-foreground">
-                        {data.free} free
+                        Total capacity
+                    </span>
+                    <span className="text-sm font-semibold text-foreground">
+                        {data.totalCapacity} units
                     </span>
                 </div>
             </div>
-
-            <div className="text-xs text-muted-foreground">
-                Total capacity: {data.total} units
-            </div>
         </div>
     );
-}
-
-type MiniStatProps = {
-    label: string
-    value: string
-    valueColor?: string
-}
-
-const MiniStat = ({ label, value, valueColor }: MiniStatProps) => {
-    return (
-        <div className="p-3 rounded-lg border border-border">
-            <div className="text-xs mb-1 text-muted-foreground">
-                {label}
-            </div>
-            <div className={`text-sm font-bold ${valueColor || "text-foreground"}`}>
-                {value}
-            </div>
-        </div>
-    );
-}
+};
 
 export default AccommodationBreakdown;

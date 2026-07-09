@@ -291,6 +291,68 @@ export class PaymentService {
         return reportData;
     }
 
+    async getPaymentOverview(date?: Date) {
+        const report = await this.getPaymentReportBreakdown(date);
+        const todayRevenue = report.totalRevenue + report.privateClosureRevenue;
+
+        const [pendingReviewCount, pendingPayments] = await Promise.all([
+            this.prisma.payment.count({
+                where: { status: PaymentStatus.Pending },
+            }),
+            this.prisma.payment.findMany({
+                where: { status: PaymentStatus.Pending },
+                select: {
+                    id: true,
+                    bookingId: true,
+                    status: true,
+                    referenceNumber: true,
+                    proofImageUrl: true,
+                    amountPaid: true,
+                    amountToPaid: true,
+                    totalAmount: true,
+                    createdAt: true,
+                    method: {
+                        select: {
+                            id: true,
+                            name: true,
+                            type: true,
+                        },
+                    },
+                    booking: {
+                        select: {
+                            id: true,
+                            referenceCode: true,
+                            guestName: true,
+                            bookingDate: true,
+                            stayOptionLabelSnapshot: true,
+                            status: true,
+                            accommodation: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    type: true,
+                                    imageUrl: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                take: 5,
+                orderBy: { createdAt: 'desc' },
+            }),
+        ]);
+
+        return {
+            todayRevenue,
+            pendingReviewCount,
+            pendingPayments,
+            revenueBreakdown: {
+                ...report,
+                totalRevenue: todayRevenue,
+            },
+        };
+    }
+
     async getPaymentById(id: string) {
         const payment = await this.prisma.payment.findUnique({
             where: { id },

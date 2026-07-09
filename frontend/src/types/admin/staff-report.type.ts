@@ -17,6 +17,15 @@ export type StaffReportSummary = {
     rejected: number;
 }
 
+export type StaffReportOverview = {
+    totalToday: number;
+    checkInReportToday: number;
+    checkOutReportToday: number;
+    maintenanceReportToday: number;
+    pendingReviewCount: number;
+    pendingReports: StaffReport[];
+}
+
 export type StaffReportUser = {
     id: string;
     name?: string | null;
@@ -33,6 +42,7 @@ export type StaffReportReviewer = {
 
 export type StaffReportBookingSummary = {
     id: string;
+    referenceCode: string | null;
     guestName: string;
     bookingDate: string;
     accommodation: {

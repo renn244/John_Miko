@@ -211,7 +211,10 @@ export default function MaintenanceDetailScreen({
                 label="Location"
                 value={maintenance.report.booking.accommodation.name}
               />
-              <DetailRow label="Booking ID" value={maintenance.report.booking.id} />
+              <DetailRow
+                label="Booking reference"
+                value={maintenance.report.booking.referenceCode}
+              />
             </View>
           </OperationalCard>
         ) : null}

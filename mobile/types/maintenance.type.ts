@@ -36,6 +36,7 @@ export type AssignedMaintenanceDetail = AssignedMaintenance & {
     createdAt: string;
     booking?: {
       id: string;
+      referenceCode: string;
       guestName: string;
       bookingDate: string;
       accommodation: {

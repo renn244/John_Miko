@@ -21,6 +21,7 @@ const reportInclude = {
   booking: {
     select: {
       id: true,
+      referenceCode: true,
       guestName: true,
       bookingDate: true,
       accommodation: {
@@ -143,6 +144,7 @@ export class StaffReportsService {
               { id: { contains: search, mode: 'insensitive' } },
               { title: { contains: search, mode: 'insensitive' } },
               { bookingId: { contains: search, mode: 'insensitive' } },
+              { booking: { referenceCode: { contains: search, mode: 'insensitive' } } },
               { user: { name: { contains: search, mode: 'insensitive' } } },
               { user: { email: { contains: search, mode: 'insensitive' } } },
               { user: { contactNo: { contains: search, mode: 'insensitive' } } },
@@ -205,6 +207,46 @@ export class StaffReportsService {
       pending,
       approved,
       rejected,
+    };
+  }
+
+  async getOverview(date?: Date) {
+    const { gte, lte } = getSingleDayRange(date);
+
+    const [
+      totalToday,
+      checkInReportToday,
+      checkOutReportToday,
+      maintenanceReportToday,
+      pendingReviewCount,
+      pendingReports,
+    ] = await Promise.all([
+      this.prisma.report.count({ where: { createdAt: { gte, lte } } }),
+      this.prisma.report.count({
+        where: { createdAt: { gte, lte }, type: 'checkIn' },
+      }),
+      this.prisma.report.count({
+        where: { createdAt: { gte, lte }, type: 'checkOut' },
+      }),
+      this.prisma.report.count({
+        where: { createdAt: { gte, lte }, type: 'maintenance' },
+      }),
+      this.prisma.report.count({ where: { status: 'Pending' } }),
+      this.prisma.report.findMany({
+        where: { status: 'Pending' },
+        include: reportInclude,
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return {
+      totalToday,
+      checkInReportToday,
+      checkOutReportToday,
+      maintenanceReportToday,
+      pendingReviewCount,
+      pendingReports,
     };
   }
 

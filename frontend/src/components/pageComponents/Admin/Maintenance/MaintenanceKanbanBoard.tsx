@@ -16,23 +16,21 @@ import {
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
 import { Check, Edit, Eye, Lock, MoreHorizontal, Play } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   ACTIVE_MAINTENANCE_STATUSES,
   type ActiveMaintenanceStatus,
   formatMaintenanceShortDate,
-  getMaintenanceAssigneeLabel,
-  getMaintenancePriorityAccentBorder,
-  getMaintenancePriorityClasses,
   getMaintenanceStatusClasses,
   getMaintenanceStatusDate,
   getMaintenanceStatusLabel,
   sortMaintenanceByRelevantDate,
 } from "./maintenanceDisplay";
+import MaintenanceTicketCard from "./MaintenanceTicketCard";
 
 const MaintenanceKanbanBoard = () => {
-  const setViewId = useMaintenanceStore((state) => state.setViewId);
   const setCompleteId = useMaintenanceStore((state) => state.setCompleteId);
+  const navigate = useNavigate();
 
   const startMutation = useStartMaintnenanceMutation();
   const closeMutation = useClosedMaintenanceMutation();
@@ -92,100 +90,68 @@ const MaintenanceKanbanBoard = () => {
                     ) : null}
 
                     {columnTickets.map((ticket) => (
-                      <div
+                      <MaintenanceTicketCard
                         key={ticket.id}
-                        className={`rounded-xl border-l-4 bg-background p-3 shadow-sm ${getMaintenancePriorityAccentBorder(ticket.priority)}`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="truncate font-medium">{ticket.title}</div>
-                            <div className="truncate text-xs text-muted-foreground">
-                              ID: {ticket.id}
-                            </div>
-                          </div>
+                        ticket={ticket}
+                        actionSlot={
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuGroup>
+                                <Link to={`/admin/maintenance/${ticket.id}/edit`}>
+                                  <DropdownMenuItem>
+                                    <Edit className="h-4 w-4 text-primary" />
+                                    Edit Details
+                                  </DropdownMenuItem>
+                                </Link>
+                              </DropdownMenuGroup>
+                              <DropdownMenuSeparator />
 
-                          <div className="flex items-center gap-2">
-                            <Badge className={getMaintenancePriorityClasses(ticket.priority)}>
-                              {ticket.priority}
-                            </Badge>
+                              <DropdownMenuItem onClick={() => navigate(`/admin/maintenance/${ticket.id}`)}>
+                                <Eye className="h-4 w-4 text-primary" />
+                                View Details
+                              </DropdownMenuItem>
 
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                <DropdownMenuGroup>
-                                  <Link to={`/admin/maintenance/${ticket.id}/edit`}>
-                                    <DropdownMenuItem>
-                                      <Edit className="h-4 w-4 text-primary" />
-                                      Edit Details
-                                    </DropdownMenuItem>
-                                  </Link>
-                                </DropdownMenuGroup>
-                                <DropdownMenuSeparator />
-
-                                <DropdownMenuItem onClick={() => setViewId(ticket.id)}>
-                                  <Eye className="h-4 w-4 text-primary" />
-                                  View Details
+                              {ticket.status === "Pending" ? (
+                                <DropdownMenuItem
+                                  disabled={startMutation.isPending}
+                                  onClick={() => startMutation.mutate(ticket.id)}
+                                >
+                                  <Play className="h-4 w-4 text-primary" />
+                                  Start Maintenance
                                 </DropdownMenuItem>
+                              ) : null}
 
-                                {ticket.status === "Pending" ? (
-                                  <DropdownMenuItem
-                                    disabled={startMutation.isPending}
-                                    onClick={() => startMutation.mutate(ticket.id)}
-                                  >
-                                    <Play className="h-4 w-4 text-primary" />
-                                    Start Maintenance
-                                  </DropdownMenuItem>
-                                ) : null}
+                              {ticket.status === "InProgress" ? (
+                                <DropdownMenuItem onClick={() => setCompleteId(ticket.id)}>
+                                  <Check className="h-4 w-4 text-emerald-500" />
+                                  Complete
+                                </DropdownMenuItem>
+                              ) : null}
 
-                                {ticket.status === "InProgress" ? (
-                                  <DropdownMenuItem onClick={() => setCompleteId(ticket.id)}>
-                                    <Check className="h-4 w-4 text-emerald-500" />
-                                    Complete
-                                  </DropdownMenuItem>
-                                ) : null}
-
-                                {ticket.status === "Completed" ? (
-                                  <DropdownMenuItem
-                                    disabled={closeMutation.isPending}
-                                    onClick={() => closeMutation.mutate(ticket.id)}
-                                  >
-                                    <Lock className="h-4 w-4 text-amber-500" />
-                                    Close Ticket
-                                  </DropdownMenuItem>
-                                ) : null}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-
-                        {ticket.description ? (
-                          <div className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                            {ticket.description}
-                          </div>
-                        ) : null}
-
-                        <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                          <div>
-                            <span className="font-medium text-foreground/80">Expertise:</span>{" "}
-                            <span>{ticket.expertise}</span>
-                          </div>
-                          <div>
-                            <span className="font-medium text-foreground/80">Assigned:</span>{" "}
-                            <span>{getMaintenanceAssigneeLabel(ticket)}</span>
-                          </div>
-                        </div>
-
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          {getDateLabel(ticket.status)}:{" "}
-                          {formatMaintenanceShortDate(
+                              {ticket.status === "Completed" ? (
+                                <DropdownMenuItem
+                                  disabled={closeMutation.isPending}
+                                  onClick={() => closeMutation.mutate(ticket.id)}
+                                >
+                                  <Lock className="h-4 w-4 text-amber-500" />
+                                  Close Ticket
+                                </DropdownMenuItem>
+                              ) : null}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        }
+                        footerLabel={getDateLabel(ticket.status)}
+                        footerValue={
+                          formatMaintenanceShortDate(
                             getMaintenanceStatusDate(ticket, ticket.status),
-                          ) ?? "—"}
-                        </div>
-                      </div>
+                          ) ?? "—"
+                        }
+                      />
                     ))}
                   </div>
                 </div>

@@ -14,6 +14,7 @@ export type KitchenOrderItem = {
 // Kitchen view is booking-centric: one booking can contain many pre-order items.
 export type KitchenOrder = {
     bookingId: string;
+    referenceCode: string;
     guestName: string;
     email?: string;
     contactNo?: string;

@@ -9,8 +9,8 @@ import { useMaintenanceSearch } from "@/hooks/admin/maintenance.search";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
 import { format } from "date-fns";
-import { Check, Edit, Lock, MoreHorizontal, Play } from "lucide-react";
-import { Link } from "react-router";
+import { Check, Edit, Eye, Lock, MoreHorizontal, Play } from "lucide-react";
+import { Link, useNavigate } from "react-router";
 
 const getStatusColor = (status: "Pending" | "InProgress" | "Completed" | "Closed") => {
     switch (status) {
@@ -37,8 +37,8 @@ const getPriorityColor = (priority: "Low" | "Medium" | "High") => {
 };
 
 const MaintenanceTable = () => {
-    const setViewId = useMaintenanceStore((state) => state.setViewId);
     const setCompleteId = useMaintenanceStore((state) => state.setCompleteId);
+    const navigate = useNavigate();
 
     const startMutation = useStartMaintnenanceMutation();
     const closeMutation = useClosedMaintenanceMutation();
@@ -124,7 +124,8 @@ const MaintenanceTable = () => {
                                                 </Link>
                                             </DropdownMenuGroup>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuItem onClick={() => setViewId(ticket.id)}>
+                                            <DropdownMenuItem onClick={() => navigate(`/admin/maintenance/${ticket.id}`)}>
+                                                <Eye className="w-4 h-4 text-primary" />
                                                 View Details
                                             </DropdownMenuItem>
 

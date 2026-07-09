@@ -3,29 +3,64 @@ import LoadingSpinner from "./loadingSpinner";
 
 type StatisticCardsProps = {
     title: string;
-    stat: number;
+    stat: number | string;
     format?: (value: number) => string;
     Icon: React.ReactNode;
     isLoading: boolean;
-    className?: string
-}
+    className?: string;
+    accentClassName?: string;
+    iconContainerClassName?: string;
+};
 
-const StatisticCards = ({ title, stat, format, Icon, isLoading, className }: StatisticCardsProps) => {
+const StatisticCards = ({
+    title,
+    stat,
+    format,
+    Icon,
+    isLoading,
+    className,
+    accentClassName = "border-l-primary",
+    iconContainerClassName = "bg-primary",
+}: StatisticCardsProps) => {
+    const displayValue =
+        typeof stat === "number" && format ? format(stat) : String(stat);
+
     return (
-        <div className={cn("bg-white p-4 rounded-xl shadow-sm border-2", className)}>
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        <div
+            className={cn(
+                "relative overflow-hidden flex justify-between rounded-xl border border-l-3 bg-white px-3 py-3 shadow-md",
+                accentClassName,
+                className
+            )}
+        >
+            <div className="flex flex-col items-start justify-between gap-1">
+                <span className="min-w-0 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
                     {title}
                 </span>
-                {Icon}
+                
+                {isLoading ? (
+                    <LoadingSpinner
+                        className="mt-1.5 size-4.5"
+                        containerClassName="justify-start"
+                    />
+                ) : (
+                    <p className="text-[1.35rem] font-semibold tracking-tight text-foreground sm:text-[1.70rem]">
+                        {displayValue}
+                    </p>
+                )}
             </div>
-            {isLoading ? (
-                <LoadingSpinner className="w-5 h-5" containerClassName="justify-baseline" />
-            ) : (
-                <p className="text-3xl font-bold">{format ? format(stat) : stat}</p>
-            )}
+            <div>
+                <div
+                    className={cn(
+                        "flex size-8 shrink-0 items-center justify-center rounded-sm [&_svg]:size-5 [&_svg]:text-white",
+                        iconContainerClassName,
+                    )}
+                >
+                    {Icon}
+                </div>
+            </div>
         </div>
-    )
-}
+    );
+};
 
-export default StatisticCards
+export default StatisticCards;

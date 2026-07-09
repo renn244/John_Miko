@@ -24,6 +24,7 @@ export type BookingReportDocumentation = {
 
 export type Booking = {
     id: string;
+    referenceCode: string | null;
 
     userId: string | null;
     accommodationId: string;
@@ -145,6 +146,39 @@ export type BookingWithAccommodationAndPreOrderAndPayment = {
         totalAmount: number,
     }
 } & BookingWithAccommodationAndPreOrder
+
+export type BookingOverviewSummary = {
+    id: string;
+    referenceCode: string | null;
+    guestName: string;
+    bookingDate: string;
+    stayOptionLabelSnapshot: string;
+    stayOptionCodeSnapshot: string;
+    paymentType: Booking['paymentType'];
+    status: Booking['status'];
+    createdAt: string;
+    accommodation: {
+        id: Accommodation['id'];
+        name: Accommodation['name'];
+        type: Accommodation['type'];
+        imageUrl: Accommodation['imageUrl'];
+    };
+    payment?: {
+        id: string;
+        status: 'Pending' | 'Approved' | 'Rejected';
+        amountPaid: number;
+        amountToPaid: number;
+        totalAmount: number;
+    } | null;
+}
+
+export type BookingOverview = {
+    todayCount: number;
+    todaySchedule: BookingOverviewSummary[];
+    upcomingBookings: BookingOverviewSummary[];
+    recentBookings: BookingOverviewSummary[];
+}
+
 // My Booking Types
 export type StatusOption = typeof statusOptions[number];
 export type StateSelectedLabel = StatusOption["label"];

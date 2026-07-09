@@ -15,10 +15,12 @@ export default function SignUpGuest() {
         <div className="flex flex-col justify-center p-5 sm:p-7 md:p-10">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-6">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                John Miko&apos;s Place
-              </p>
-              <h1 className="mt-2 text-3xl font-bold tracking-normal text-foreground">
+              <img
+                src="/logo/JMPort_With_MarkDown.png"
+                alt="JMPort"
+                className="h-8 w-auto max-w-[132px] object-contain"
+              />
+              <h1 className="mt-4 text-3xl font-bold tracking-normal text-foreground">
                 Create Account
               </h1>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -40,6 +42,10 @@ export default function SignUpGuest() {
             <Button asChild variant="outline" className="mt-4 w-full">
               <Link to="/">Back to Home</Link>
             </Button>
+
+            <p className="mt-6 text-center text-xs text-muted-foreground">
+              &copy; 2026 John Miko&apos;s Place. All rights reserved.
+            </p>
           </div>
         </div>
       </section>

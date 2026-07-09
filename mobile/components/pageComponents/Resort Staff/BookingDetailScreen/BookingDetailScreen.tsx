@@ -108,7 +108,7 @@ export default function BookingDetailScreen({
       <DetailPageHeader
         onBack={() => navigateBackToBookings(router, fallbackHref)}
         title="Booking details"
-        metadata={`Reference: #${booking.id.slice(-8).toUpperCase()}`}
+        metadata={`Reference: ${booking.referenceCode}`}
       />
 
       <ScrollView

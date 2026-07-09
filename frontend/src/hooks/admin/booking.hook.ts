@@ -73,6 +73,14 @@ export const useGetOverviewBookingsQuery = (limit = 20) => {
     })
 }
 
+export const useGetBookingOverviewQuery = (date?: string) => {
+    return useQuery({
+        queryKey: ['booking', 'admin', 'operational-overview', date],
+        queryFn: () => bookingApi.getBookingOverview(date),
+        refetchOnWindowFocus: false,
+    })
+}
+
 export const useGetBookingDetailsBulkQuery = (bookingIds: string[]) => {
     const queries = useQueries({
         queries: bookingIds.map((bookingId) => ({

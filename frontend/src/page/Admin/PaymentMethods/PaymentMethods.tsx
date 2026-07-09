@@ -1,36 +1,30 @@
-import CreatePaymentMethodDialog from "@/components/pageComponents/Admin/PaymentMethods/CreatePaymentMethodDialog";
-import DeletePaymentMethodDialog from "@/components/pageComponents/Admin/PaymentMethods/DeletePaymentMethodDialog";
-import EditPaymentMethodDialog from "@/components/pageComponents/Admin/PaymentMethods/EditPaymentMethodDialog";
 import PaymentTable from "@/components/pageComponents/Admin/PaymentMethods/PaymentTable";
+import UpdatePaymentMethodAvailabilityDialog from "@/components/pageComponents/Admin/PaymentMethods/UpdatePaymentMethodAvailabilityDialog";
 import { Button } from "@/components/ui/button";
-import { paymentMethodAdminStore } from "@/store/admin/paymentMethodAdmin.store";
 import { Plus } from "lucide-react";
+import { Link } from "react-router";
 
 const PaymentMethods = () => {
-    const setIsCreateOpen = paymentMethodAdminStore((state) => state.setIsCreateOpen);
-
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="text-2xl font-bold">Payment Methods</h1>
                     <p className="text-sm text-muted-foreground">
-                        Manage manual payment options shown at checkout.
+                        Manage and configure payment channels available during checkout.
                     </p>
                 </div>
-                <Button onClick={() => setIsCreateOpen(true)}>
-                    Add Method
-                    <Plus className="w-5 h-5" />
-                </Button>
+                <Link to="/admin/payment-methods/add">
+                    <Button className="gap-2">
+                        Add Payment Method
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                </Link>
             </div>
 
             <PaymentTable />
 
-            <CreatePaymentMethodDialog />
-
-            <EditPaymentMethodDialog />
-
-            <DeletePaymentMethodDialog />
+            <UpdatePaymentMethodAvailabilityDialog />
         </div>
     );
 };

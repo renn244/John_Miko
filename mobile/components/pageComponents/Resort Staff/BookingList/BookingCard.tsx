@@ -46,7 +46,7 @@ const BookingCard = ({
                     </Text>
                 </View>
                 <Text className="text-sm font-sans-semibold text-neutral-grey-2">
-                    #{item.id.slice(-8).toUpperCase()}
+                    {item.referenceCode}
                 </Text>
             </View>
 
@@ -67,7 +67,7 @@ const BookingCard = ({
             </View>
 
             <Text className="text-sm text-neutral-grey-2" numberOfLines={1}>
-                Booking ID: {item.id}
+                Booking reference: {item.referenceCode}
             </Text>
         </OperationalCard>
     )

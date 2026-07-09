@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 type PreOrderListResponse = {
   bookingId: string;
+  referenceCode: string;
   guestName: string;
   bookingDate: string;
   timeSlot?: "Day Stay" | "Over night" | "22 Hours Stay" | "12 Hours";
@@ -16,6 +17,7 @@ type PreOrderListResponse = {
 
 type PreOrderDetailsResponse = {
   bookingId: string;
+  referenceCode: string;
   guestName: string;
   email?: string;
   contactNo?: string;
@@ -72,6 +74,7 @@ const fetchKitchenOrders = async (query?: GetKitchenOrdersQuery) => {
   return (data ?? []).map(
     (booking): KitchenOrder => ({
       bookingId: booking.bookingId,
+      referenceCode: booking.referenceCode,
       guestName: booking.guestName,
       bookingDate: booking.bookingDate,
       timeSlot: booking.timeSlot,
@@ -96,6 +99,7 @@ const fetchKitchenOrderDetails = async (bookingId: string) => {
 
   return {
     bookingId: data.bookingId,
+    referenceCode: data.referenceCode,
     guestName: data.guestName,
     email: data.email,
     contactNo: data.contactNo,

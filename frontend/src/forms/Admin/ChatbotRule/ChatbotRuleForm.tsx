@@ -82,7 +82,7 @@ const ChatbotRuleForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
             <div className="p-6 md:p-8 space-y-6">
                 
                 <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b" style={{ color: '#1F2937', borderColor: '#E5E7EB' }}>
+                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
                         Basic Information
                     </h2>
 

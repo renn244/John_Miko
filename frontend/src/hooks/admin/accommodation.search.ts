@@ -20,6 +20,14 @@ export const useAccommodationSearchParams = () => {
         updateSearchParams(setSearchParams, { page: value === 1 ? undefined : value.toString() });
     };
 
+    const clearFilters = () => {
+        updateSearchParams(setSearchParams, {
+            search: undefined,
+            type: undefined,
+            page: undefined,
+        });
+    };
+
     return {
         search,
         type: type as Accommodation['type'],
@@ -27,6 +35,7 @@ export const useAccommodationSearchParams = () => {
         limit,
         updateSearch,
         updateType,
-        updatePage
+        updatePage,
+        clearFilters,
     };
 };

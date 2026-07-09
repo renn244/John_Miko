@@ -6,46 +6,58 @@ const StaffStatistics = () => {
     const { data: stats, isLoading } = useGetStaffStatsQuery();
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
             <StatisticCards
             title="Total Staff"
             className="col-span-2 md:col-span-1"
-            Icon={<Users className="w-5 h-5 text-primary" />}
+            Icon={<Users />}
+            accentClassName="border-l-blue-500"
+            iconContainerClassName="bg-blue-500"
             stat={stats?.total || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards
             title="Active"
-            Icon={<UserCheck className="w-5 h-5 text-emerald-600" />}
+            Icon={<UserCheck />}
+            accentClassName="border-l-emerald-500"
+            iconContainerClassName="bg-emerald-500"
             stat={stats?.active || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards
             title="Inactive"
-            Icon={<UserX className="w-5 h-5 text-gray-600" />}
+            Icon={<UserX />}
+            accentClassName="border-l-slate-500"
+            iconContainerClassName="bg-slate-500"
             stat={stats?.inactive || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards
             title="Kitchen Staff"
-            Icon={<UtensilsCrossed className="w-5 h-5 text-amber-600" />}
+            Icon={<UtensilsCrossed />}
+            accentClassName="border-l-amber-500"
+            iconContainerClassName="bg-amber-500"
             stat={stats?.kitchen || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards
             title="Resort Staff"
-            Icon={<Home className="w-5 h-5 text-blue-600" />}
+            Icon={<Home />}
+            accentClassName="border-l-cyan-500"
+            iconContainerClassName="bg-cyan-500"
             stat={stats?.resort || 0}
             isLoading={isLoading}
             />
 
             <StatisticCards
             title="Maintenance"
-            Icon={<UserRoundCog className="w-5 h-5 text-violet-600" />}
+            Icon={<UserRoundCog />}
+            accentClassName="border-l-violet-500"
+            iconContainerClassName="bg-violet-500"
             stat={stats?.maintenance || 0}
             isLoading={isLoading}
             />

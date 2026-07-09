@@ -28,7 +28,7 @@ export class CreatePaymentMethodDto {
 
     @IsOptional()
     @IsUrl()
-    qrCodeUrl?: string;
+    qrCodeUrl?: string | null;
 
     @IsOptional()
     @Type(() => Number)

@@ -18,7 +18,7 @@ const EditMenuItem = () => {
     if(error) return null;
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
                 <Link to="/admin/menu-item">
                     <Button size="icon" variant="outline">

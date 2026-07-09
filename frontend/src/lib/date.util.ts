@@ -1,3 +1,5 @@
+import { format, isToday, isYesterday } from "date-fns";
+
 export const toDateOnly = (date: Date): string => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -34,5 +36,18 @@ export const formatToSmartDate = (dateString: string) => {
         return '1 day ago';
     } else {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+}
+
+export const formatFeedbackRelativeTime = (value: string) => {
+    const date = new Date(value);
+
+    switch (true) {
+        case isToday(date):
+            return format(date, "h:mm a");
+        case isYesterday(date):
+            return "Yesterday";
+        default:
+            return format(date, "MMM d");
     }
 }

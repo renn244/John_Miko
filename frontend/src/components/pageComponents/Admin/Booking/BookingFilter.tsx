@@ -19,72 +19,78 @@ const BookingFilter = () => {
     } = useBookingSearch();
 
     return (
-        <div className="bg-white p-4 rounded-xl border-2">
-            <div className="flex flex-col md:flex-row gap-4">
+        <div className="border-b bg-card px-4 py-3">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
 
                 <SearchBookingFilter />
 
-                <AccommodationBookingFilter />
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center xl:ml-4 xl:flex-nowrap xl:justify-end xl:gap-2 xl:self-start">
+                    <AccommodationBookingFilter />
 
-                <div className="relative">
-                    <Select value={status || ""} onValueChange={(value) => updateStatus(value)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Status</SelectLabel>
-                                <SelectItem value="all">All Statuses</SelectItem>
-                                <SelectItem value="Confirmed">Confirmed</SelectItem>
-                                <SelectItem value="Completed">Completed</SelectItem>
-                                <SelectItem value="Cancelled">Cancelled</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
+                    <div className="relative w-full sm:w-auto">
+                        <Select value={status || ""} onValueChange={(value) => updateStatus(value)}>
+                            <SelectTrigger className="w-full sm:w-auto">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Status</SelectLabel>
+                                    <SelectItem value="all">All Statuses</SelectItem>
+                                    <SelectItem value="Confirmed">Confirmed</SelectItem>
+                                    <SelectItem value="Completed">Completed</SelectItem>
+                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="relative w-full sm:w-auto">
+                        <Select value={paymentType || ""} onValueChange={(value) => updatePaymentType(value)}>
+                            <SelectTrigger className="w-full sm:w-auto">
+                                <SelectValue placeholder="Payment Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Payment Type</SelectLabel>
+                                    <SelectItem value="all">All Payment Types</SelectItem>
+                                    <SelectItem value="Partial">50% Downpayment</SelectItem>
+                                    <SelectItem value="Full">Full Payment</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                            variant="outline"
+                            data-empty={!bookingDate}
+                            className="w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground sm:w-auto"
+                            >
+                                <CalendarIcon />
+                                {bookingDate ? format(new Date(bookingDate), 'PPP') : <span>Pick a date</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                            mode="single"
+                            selected={bookingDate ? new Date(bookingDate) : undefined}
+                            onSelect={(date) => {
+                                updateBookingDate(date)
+                            }}
+                            />
+                        </PopoverContent>
+                    </Popover>
+
+                    <Button
+                    onClick={() => clearFilters()}
+                    variant="ghost"
+                    className="justify-start whitespace-nowrap text-primary hover:text-primary"
+                    >
+                        <X className="size-4" />
+                        Clear Filters
+                    </Button>
                 </div>
-
-                <div className="relative">
-                    <Select value={paymentType || ""} onValueChange={(value) => updatePaymentType(value)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Payment Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Payment Type</SelectLabel>
-                                <SelectItem value="all">All Payment Types</SelectItem>
-                                <SelectItem value="Partial">50% Downpayment</SelectItem>
-                                <SelectItem value="Full">Full Payment</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                        variant="outline"
-                        data-empty={!bookingDate}
-                        className="w-70 justify-start text-left font-normal data-[empty=true]:text-muted-foreground"
-                        >
-                            <CalendarIcon />
-                            {bookingDate ? format(new Date(bookingDate), 'PPP') : <span>Pick a date</span>}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                        <Calendar 
-                        mode="single"
-                        selected={bookingDate ? new Date(bookingDate) : undefined}
-                        onSelect={(date) => {
-                            updateBookingDate(date)
-                        }}
-                        />
-                    </PopoverContent>
-                </Popover>
-
-                <Button onClick={() => clearFilters()} variant="secondary">
-                    <X className="w-4 h-4" />
-                    Reset Filters
-                </Button>
             </div>
         </div>
     )
@@ -102,13 +108,13 @@ const SearchBookingFilter = () => {
     }, [debounceValue])
 
     return (
-        <div className="relative flex-1">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <div className="relative w-full xl:max-w-xl xl:flex-1">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-8"
-            placeholder="Search by guest name or booking ID..."
+            className="pl-9"
+            placeholder="Search by guest name or booking reference..."
             />
         </div>
     )
@@ -120,9 +126,9 @@ const AccommodationBookingFilter = () => {
     const { data: options, isLoading } = useGetAccommodationOptionsQuery();
 
     return (
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
             <Select value={accommodationId || ""} onValueChange={(value) => updateAccommodationId(value)}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full sm:w-auto">
                     <SelectValue placeholder="Accommodation" />
                 </SelectTrigger>
                 <SelectContent>

@@ -64,10 +64,12 @@ type AuthHeaderProps = {
 
 const AuthHeader = ({ title, description }: AuthHeaderProps) => (
     <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            John Miko&apos;s Place
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-normal text-foreground">
+        <img
+            src="/logo/JMPort_With_MarkDown.png"
+            alt="JMPort"
+            className="h-8 w-auto max-w-[132px] object-contain"
+        />
+        <h1 className="mt-4 text-3xl font-bold tracking-normal text-foreground">
             {title}
         </h1>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">

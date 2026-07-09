@@ -90,7 +90,7 @@ export class BookingEmailService {
     }
 
     async sendCancelledEmail(params: {
-        bookingId: string;
+        bookingReference: string;
         guestName: string;
         email: string;
         accommodationName: string;
@@ -104,7 +104,7 @@ export class BookingEmailService {
             template: 'bookingCancelled',
             context: {
                 guestName: params.guestName,
-                bookingId: params.bookingId,
+                bookingReference: params.bookingReference,
                 bookingDate: formatBookingDateManila(params.bookingDate),
                 stayOptionLabel: params.stayOptionLabel,
                 accommodationName: params.accommodationName,
@@ -162,7 +162,7 @@ export class BookingEmailService {
             template: 'bookingSubmitted',
             context: {
                 guestName: booking.guestName,
-                bookingId: booking.id,
+                bookingReference: booking.referenceCode ?? booking.id,
                 bookingDate: formatBookingDateManila(booking.bookingDate),
                 stayOptionLabel: booking.stayOptionLabelSnapshot,
                 accommodationName: booking.accommodation.name,
@@ -194,7 +194,7 @@ export class BookingEmailService {
     }
 
     async sendRescheduledEmail(params: {
-        bookingId: string;
+        bookingReference: string;
         guestName: string;
         email: string;
         accommodationName: string;
@@ -209,7 +209,7 @@ export class BookingEmailService {
             template: 'bookingRescheduled',
             context: {
                 guestName: params.guestName,
-                bookingId: params.bookingId,
+                bookingReference: params.bookingReference,
                 accommodationName: params.accommodationName,
                 previousBookingDate: formatBookingDateManila(params.previousBookingDate),
                 previousStayOptionLabel: params.previousStayOptionLabel,
@@ -220,7 +220,7 @@ export class BookingEmailService {
     }
 
     async sendStatusUpdatedEmail(params: {
-        bookingId: string;
+        bookingReference: string;
         guestName: string;
         email: string;
         accommodationName: string;
@@ -236,7 +236,7 @@ export class BookingEmailService {
             template: 'bookingStatusUpdated',
             context: {
                 guestName: params.guestName,
-                bookingId: params.bookingId,
+                bookingReference: params.bookingReference,
                 accommodationName: params.accommodationName,
                 bookingDate: formatBookingDateManila(params.bookingDate),
                 stayOptionLabel: params.stayOptionLabel,

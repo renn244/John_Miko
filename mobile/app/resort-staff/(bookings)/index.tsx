@@ -158,9 +158,9 @@ const NotFoundState = ({
     icon={<SearchX size={24} color="#0E33F3" />}
     tone="info"
     title={hasSearch ? "No bookings found" : "No confirmed upcoming bookings"}
-    description={
-      hasSearch ? 
-        "Try a different guest name, contact number, or booking ID." : 
+      description={
+        hasSearch ? 
+        "Try a different guest name, contact number, or booking reference." : 
         "There are no confirmed reservations to prepare right now."
       }
     />

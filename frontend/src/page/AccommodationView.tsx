@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
 import { formatStayOptionRange } from "@/lib/stayOptionTime";
 import { formatPeso } from "@/lib/utils";
-import { BedDouble, CheckCircle2, Home, ImageIcon, ParkingCircle, Utensils, Users, Waves } from "lucide-react";
+import { BedDouble, CheckCircle2, Home, ParkingCircle, Utensils, Users, Waves } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 const AccommodationView = () => {
@@ -76,32 +76,6 @@ const AccommodationView = () => {
                                     alt={accommodation.name}
                                     className="absolute inset-0 size-full object-cover"
                                 />
-                            </div>
-                            <div className="grid grid-cols-3 gap-2">
-                                {[0, 1].map((index) => (
-                                    <div
-                                        key={index}
-                                        className="relative h-20 overflow-hidden rounded-lg border bg-muted md:h-28"
-                                    >
-                                        <img
-                                            src={accommodation.imageUrl}
-                                            alt={`${accommodation.name} preview ${index + 1}`}
-                                            className="size-full object-cover"
-                                        />
-                                    </div>
-                                ))}
-                                <div className="relative flex h-20 items-center justify-center overflow-hidden rounded-lg border bg-muted text-sm font-semibold text-white md:h-28">
-                                    <img
-                                        src={accommodation.imageUrl}
-                                        alt={`${accommodation.name} gallery preview`}
-                                        className="absolute inset-0 size-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 bg-black/45" />
-                                    <span className="relative z-10 flex items-center gap-2">
-                                        <ImageIcon className="size-4" />
-                                        View All
-                                    </span>
-                                </div>
                             </div>
                         </section>
 

@@ -82,9 +82,9 @@ const MarkCancelBooking = ({ booking } : { booking: BookingWithAccommodation }) 
                     </h4>
                     <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">ID:</span>
+                            <span className="text-muted-foreground">Reference:</span>
                             <span className="font-semibold">
-                                {booking.id}
+                                {booking.referenceCode ?? "—"}
                             </span>
                         </div>
                         <div className="flex justify-between">

@@ -23,7 +23,7 @@ describe('bookingStatusUpdated email template', () => {
     const template = Handlebars.compile(source);
     const rendered = template({
       guestName: 'Avery Stone',
-      bookingId: 'BK-2026-052',
+      bookingReference: 'BK-2026-052',
       accommodationName: 'Family Hall',
       bookingDate: 'July 3, 2026, Friday',
       stayOptionLabel: 'Day Event',

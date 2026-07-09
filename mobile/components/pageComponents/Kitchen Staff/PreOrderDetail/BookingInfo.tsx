@@ -32,7 +32,7 @@ const BookingInfo = ({
                         {order.guestName}
                     </Text>
                     <Text className="text-base text-neutral-grey-1">
-                        Booking ID: {order.bookingId}
+                        Booking reference: {order.referenceCode}
                     </Text>
                 </View>
                 <StatusChip
