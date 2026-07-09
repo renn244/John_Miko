@@ -8,7 +8,6 @@ import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { FeedbackService } from './feedback.service';
 import { GetFeedbackQuery } from './query/getFeedback.query';
-import { GetFeedbackAnalyticsQuery } from './query/getFeedbackAnalytics.query';
 
 @Controller('feedback')
 @UseGuards(AuthGuard, RolesGuard)
@@ -27,18 +26,6 @@ export class FeedbackController {
     @Get()
     async getFeedbacks(@Query() query: GetFeedbackQuery) {
         return this.feedbackService.getFeedbacks(query);
-    }
-
-    @Roles(Role.ADMIN)
-    @Get('analytics')
-    async getAnalytics(@Query() query: GetFeedbackAnalyticsQuery) {
-        return this.feedbackService.getAnalytics(query);
-    }
-
-    @Roles(Role.ADMIN)
-    @Get('count-per-rating')
-    async getCountPerRating(@Query() query: GetFeedbackAnalyticsQuery) {
-        return this.feedbackService.getCountPerRating(query);
     }
 
     @Roles(Role.ADMIN)

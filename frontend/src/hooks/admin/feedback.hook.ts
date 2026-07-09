@@ -1,5 +1,5 @@
 import { feedbackApi } from "@/api/admin/feedback.api";
-import type { GetFeedbackAnalyticsQuery } from "@/types/feedback.types";
+import type { FeedbackStats } from "@/types/feedback.types";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetFeedbacksQuery = (query: { page: number, limit: number, search?: string }) => {
@@ -19,35 +19,19 @@ export const useGetFeedbackReportQuery = (date?: string) => {
     })
 }
 
-export const useGetFeedbackAnalyticsQuery = (query: GetFeedbackAnalyticsQuery) => {
-    return useQuery({
-        queryKey: ['feedbacks', 'analytics', query],
-        queryFn: () => feedbackApi.getFeedbackAnalytics(query),
-        refetchOnWindowFocus: false,
-    })
-}
-
-export const useGetFeedbackCountPerRatingQuery = (query: GetFeedbackAnalyticsQuery) => {
-    return useQuery({
-        queryKey: ['feedbacks', 'countPerRating', query],
-        queryFn: () => feedbackApi.getFeedbackCountPerRating(query),
-        refetchOnWindowFocus: false,
-    })
-}
-
-export const useGetFeedbackStatsQuery = () => {
-    return useQuery({
-        queryKey: ['feedbacks', 'stats'],
-        queryFn: feedbackApi.getFeedbackStats,
-        refetchOnWindowFocus: false
-    })
-}
-
 export const useGetFeedbackOverviewQuery = (date?: string) => {
     return useQuery({
         queryKey: ['feedbacks', 'overview', date],
         queryFn: () => feedbackApi.getFeedbackOverview(date),
         refetchOnWindowFocus: false
+    })
+}
+
+export const useGetFeedbackStatsQuery = () => {
+    return useQuery<FeedbackStats>({
+        queryKey: ['feedbacks', 'stats'],
+        queryFn: () => feedbackApi.getFeedbackStats(),
+        refetchOnWindowFocus: false,
     })
 }
 

@@ -217,7 +217,10 @@ const RevenueLineChart = ({
                             data={data}
                             margin={{ left: 12, right: 12, top: 10, bottom: 30 }}
                         >
-                            <CartesianGrid vertical={false} />
+                            <CartesianGrid
+                                vertical={false}
+                                strokeDasharray="4 4"
+                            />
                             <XAxis
                                 dataKey="month"
                                 tickLine={false}
@@ -233,7 +236,11 @@ const RevenueLineChart = ({
                                 tickFormatter={(value) => formatPeso(Number(value) || 0)}
                             />
                             <ChartTooltip
-                                cursor={false}
+                                cursor={{
+                                    stroke: "hsl(var(--primary))",
+                                    strokeWidth: 1,
+                                    strokeDasharray: "4 4",
+                                }}
                                 content={<RevenueLineTooltip data={data} />}
                             />
                             <Line

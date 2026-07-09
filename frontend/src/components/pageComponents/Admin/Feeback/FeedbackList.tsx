@@ -15,6 +15,36 @@ type FeedbackGroup = {
     items: FeedbackWithUser[];
 }
 
+const FeedbackGroupSection = ({
+    group,
+    onView,
+}: {
+    group: FeedbackGroup;
+    onView: (id: string) => void;
+}) => (
+    <section className="space-y-3">
+        <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2">
+                <h2 className="text-xl font-semibold text-foreground">{group.label}</h2>
+                <span className="text-sm text-muted-foreground">
+                    {group.items.length} {group.items.length === 1 ? "review" : "reviews"}
+                </span>
+            </div>
+            <div className="h-px flex-1 bg-border" />
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {group.items.map((feedback) => (
+                <FeedbackCard
+                    key={feedback.id}
+                    feedback={feedback}
+                    onView={() => onView(feedback.id)}
+                />
+            ))}
+        </div>
+    </section>
+);
+
 const FeedbackList = () => {
     const setViewId = useFeedbackAdminStore((state) => state.setViewId);
     const { search, page, limit, updatePage } = useFeedbackSearch();
@@ -80,27 +110,11 @@ const FeedbackList = () => {
         ) : (
             <div className="space-y-6">
                 {groupedFeedbacks.map((group) => (
-                    <section key={group.label} className="space-y-3">
-                        <div className="flex items-center gap-3">
-                            <div className="flex shrink-0 items-center gap-2">
-                                <h2 className="text-xl font-semibold text-foreground">{group.label}</h2>
-                                <span className="text-sm text-muted-foreground">
-                                    {group.items.length} {group.items.length === 1 ? "review" : "reviews"}
-                                </span>
-                            </div>
-                            <div className="h-px flex-1 bg-border" />
-                        </div>
-
-                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                            {group.items.map((feedback) => (
-                                <FeedbackCard
-                                key={feedback.id}
-                                feedback={feedback}
-                                onView={() => setViewId(feedback.id)}
-                                />
-                            ))}
-                        </div>
-                    </section>
+                    <FeedbackGroupSection
+                        key={group.label}
+                        group={group}
+                        onView={setViewId}
+                    />
                 ))}
 
                 {meta ? (

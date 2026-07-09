@@ -1,13 +1,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
-import { getDateRange, getSingleDayRange } from 'src/lib/utils/date.util';
+import { getSingleDayRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto, UpdateFeedbackDto } from './dto/feedback.dto';
 import { GetFeedbackQuery } from './query/getFeedback.query';
-import { GetFeedbackAnalyticsQuery } from './query/getFeedbackAnalytics.query';
 
 @Injectable()
 export class FeedbackService {
@@ -80,41 +79,6 @@ export class FeedbackService {
         };
     }
 
-    async getAnalytics(query: GetFeedbackAnalyticsQuery) {
-        const { gte, lte } = getDateRange(query.interval);
-
-        const analyticsOvertime = await this.prisma.feedback.groupBy({
-            where: {
-                createdAt: { gte, lte }
-            },
-            by: ['createdAt'],
-            _avg: { rating: true },
-        })
-
-        const data = analyticsOvertime.map(item => ({
-            date: item.createdAt.toISOString(),
-            averageRating: item._avg.rating?.toFixed(2) || '0.00',
-        }))
-
-        return data;
-    }
-
-    async getCountPerRating(query: GetFeedbackAnalyticsQuery) {
-        const { gte, lte } = getDateRange(query.interval);
-
-        const countPerRating = await this.prisma.feedback.groupBy({
-            where: {
-                createdAt: { gte, lte }
-            },
-            by: ['rating'],
-            _count: true,
-        })
-
-        const data = countPerRating.map(item => ({ rating: item.rating, count: item._count, }))
-
-        return data;
-    }
-
     async getFeedbackReport(date?: Date) {
         const { gte, lte } = getSingleDayRange(date);
     
@@ -141,7 +105,7 @@ export class FeedbackService {
     }
 
     async getFeedbackStats() {
-        const totalFeedbacks = await this.prisma.feedback.aggregate({
+        const stats = await this.prisma.feedback.aggregate({
             _count: true,
             _avg: { rating: true },
             _min: { rating: true },
@@ -149,11 +113,11 @@ export class FeedbackService {
         });
 
         return {
-            total: totalFeedbacks._count,
-            averageRating: totalFeedbacks._avg.rating?.toFixed(2),
-            minRating: totalFeedbacks._min.rating,
-            maxRating: totalFeedbacks._max.rating,
-        }
+            total: stats._count,
+            averageRating: stats._avg.rating || 0,
+            minRating: stats._min.rating || 0,
+            maxRating: stats._max.rating || 0,
+        };
     }
 
     async getOverview(date?: Date) {

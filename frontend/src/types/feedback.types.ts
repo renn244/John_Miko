@@ -51,15 +51,6 @@ export type FeedbackOverview = {
     lowRatingFeedback: FeedbackOverviewItem[];
 }
 
-export type GetFeedbackAnalyticsQuery = {
-    interval: 'day' | 'week' | 'month' | 'year';
-}
-
-export type FeedbackAnalytics = {
-    date: string;
-    averageRating: string;
-}
-
 export type FeedbackCountPerRating = {
     rating: number;
     count: number;

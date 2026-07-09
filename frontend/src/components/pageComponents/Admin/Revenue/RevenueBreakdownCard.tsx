@@ -11,6 +11,8 @@ type RevenueBreakdownCardProps = {
     selected: RevenueLineChartPoint | null;
 };
 
+type RevenueBreakdownKey = keyof typeof chartConfig;
+
 const chartConfig = {
     value: { label: "Amount" },
     accommodation: { label: "Accommodation", color: "var(--chart-1)" },
@@ -40,8 +42,14 @@ type RevenueBreakdownTooltipProps = {
     total: number;
 };
 
-const formatBreakdownName = (name?: string) =>
-    name ? (chartConfig[name]?.label ?? name) : "Revenue";
+const isRevenueBreakdownKey = (name: string): name is RevenueBreakdownKey =>
+    name in chartConfig;
+
+const formatBreakdownName = (name?: string) => {
+    if (!name) return "Revenue";
+
+    return isRevenueBreakdownKey(name) ? chartConfig[name].label : name;
+};
 
 function RevenueBreakdownTooltip({
     active,

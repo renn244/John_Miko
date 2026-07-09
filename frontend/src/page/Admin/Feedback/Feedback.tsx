@@ -16,9 +16,7 @@ const Feedback = () => {
                     </p>
                 </div>
             </div>
-
             <FeedbackStatistics />
-
             <FeedbackFilter />
             <FeedbackList />
 
