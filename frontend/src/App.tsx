@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";
 import USER_ROLES from './lib/constant/USER_ROLES.constant';
@@ -38,6 +38,7 @@ import AddStaff from './page/Admin/Staff-Management/AddStaff';
 import StaffManagement from './page/Admin/Staff-Management/StaffManagement';
 import Amenities from './page/Amenities';
 import BookingFlow from './page/Booking';
+import ForbiddenPage from './page/Forbidden';
 import ForgotPassword from "./page/ForgotPassword";
 import CreateFeedback from './page/Guest/CreateFeedback';
 import EditFeedback from './page/Guest/EditFeedback';
@@ -45,176 +46,196 @@ import MyBookings from './page/Guest/MyBookings';
 import Home from "./page/Home";
 import Login from "./page/Login";
 import Menu from './page/Menu';
+import NotFoundPage from './page/NotFound';
 import ResetPassword from "./page/ResetPassword";
+import RouteErrorPage from './page/RouteError';
 import Settings from './page/Settings';
 import SignUpGuest from "./page/SignUpGuest";
 
+const RouterRoot = () => <Outlet />;
+
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Home />
-  },
-  {
-    path: '/amenities',
-    element: <Amenities />
-  },
-  {
-    path: '/about',
-    element: <About />
-  },
-  {
-    path: '/menu',
-    element: <Menu />
-  },
-  {
-    path: "/login",
-    element: <Login />,
-
-  },
-  {
-    path: '/forgot-password',
-    element: <ForgotPassword />
-  },
-  {
-    path: '/reset-password',
-    element: <ResetPassword />
-  },
-  {
-    path: '/signup-guest',
-    element: <SignUpGuest />
-  },
-  {
-    path: '/accommodation',
+    element: <RouterRoot />,
+    errorElement: <RouteErrorPage />,
     children: [
-      { index: true, element: <AccommodationList /> },
-      { path: ':id', element: <AccommodationView /> }
-    ]
-  },
-  {
-    path: '/booking/:accommodationId',
-    element: (
-      // add protected route later after testing and all
-      <BookingFlow />
-    )
-  },
-  {
-    path: '/my-bookings',
-    element: (
-      <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
-        <MyBookings />
-      </ProtectedRoute>
-    )
-  },
-  {
-    path: '/settings',
-    element: (
-      <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
-        <Settings />
-      </ProtectedRoute>
-    )
-  },
-  {
-    path: '/feedback/:bookingId',
-    element: (
-      <CreateFeedback />
-    )
-  },
-  {
-    path: '/feedback/edit/:feedbackId',
-    element: (
-      <EditFeedback />
-    )
-  },
-  {
-    path: '/admin',
-    element: (
-      <ProtectedRoute rolesAllowed={[USER_ROLES.ADMIN]}>
-        <AdminLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <Overview />  },
-      { path: 'report', element: <Report /> },
-      { 
-        path: 'accommodation', 
+      {
+        path: "/",
+        element: <Home />
+      },
+      {
+        path: '/amenities',
+        element: <Amenities />
+      },
+      {
+        path: '/about',
+        element: <About />
+      },
+      {
+        path: '/menu',
+        element: <Menu />
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: '/forgot-password',
+        element: <ForgotPassword />
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPassword />
+      },
+      {
+        path: '/signup-guest',
+        element: <SignUpGuest />
+      },
+      {
+        path: '/unauthorized',
+        element: <ForbiddenPage />
+      },
+      {
+        path: '/accommodation',
         children: [
-          { index: true, element: <Accommodation /> },
-          { path: 'add', element: <AddAccommodation /> },
-          { path: ':id/edit', element: <EditAccommodation /> }
+          { index: true, element: <AccommodationList /> },
+          { path: ':id', element: <AccommodationView /> }
         ]
       },
       {
-        path: 'booking',
+        path: '/booking/:accommodationId',
+        element: <BookingFlow />
+      },
+      {
+        path: '/my-bookings',
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+            <MyBookings />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/settings',
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+            <Settings />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: '/feedback/:bookingId',
+        element: <CreateFeedback />
+      },
+      {
+        path: '/feedback/edit/:feedbackId',
+        element: <EditFeedback />
+      },
+      {
+        path: '/admin',
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.ADMIN]}>
+            <AdminLayout />
+          </ProtectedRoute>
+        ),
         children: [
-          { index: true, element: <Booking /> },
-          { path: 'add', element: <AddBooking /> },
-          { path: ':id', element: <ViewBooking /> },
+          { index: true, element: <Overview />  },
+          { path: 'report', element: <Report /> },
+          {
+            path: 'accommodation',
+            children: [
+              { index: true, element: <Accommodation /> },
+              { path: 'add', element: <AddAccommodation /> },
+              { path: ':id/edit', element: <EditAccommodation /> }
+            ]
+          },
+          {
+            path: 'booking',
+            children: [
+              { index: true, element: <Booking /> },
+              { path: 'add', element: <AddBooking /> },
+              { path: ':id', element: <ViewBooking /> },
+            ]
+          },
+          {
+            path: 'menu-item',
+            children: [
+              { index: true, element: <MenuItem /> },
+              { path: 'add', element: <AddMenuItem /> },
+              { path: ':id/edit', element: <EditMenuItem /> }
+            ]
+          },
+          {
+            path: 'add-on-service',
+            children: [
+              { index: true, element: <AddOnService /> },
+              { path: 'add', element: <AddAddOnService /> },
+              { path: ':id/edit', element: <EditAddOnService /> }
+            ]
+          },
+          {
+            path: 'maintenance',
+            children: [
+              { index: true, element: <Maintenance /> },
+              { path: 'add', element: <AddMaintenance /> },
+              { path: 'reports/:id', element: <ViewStaffReport /> },
+              { path: ':id', element: <ViewMaintenance /> },
+              { path: ':id/edit', element: <EditMaintenance /> }
+            ]
+          },
+          {
+            path: 'staff-management',
+            children: [
+              { index: true, element: <StaffManagement /> },
+              { path: 'add', element: <AddStaff /> }
+            ]
+          },
+          {
+            path: 'user-management',
+            children: [
+              { index: true, element: <GuestManagement /> }
+            ]
+          },
+          {
+            path: 'feedback',
+            children: [
+              { index: true, element: <Feedback /> }
+            ]
+          },
+          {
+            path: 'payment-methods',
+            children: [
+              { index: true, element: <PaymentMethods /> },
+              { path: 'add', element: <AddPaymentMethod /> },
+              { path: ':id/edit', element: <EditPaymentMethod /> },
+            ]
+          },
+          {
+            path: 'chatbot-rule',
+            children: [
+              { index: true, element: <ChatbotRule /> },
+              { path: 'add', element: <AddChatbotRule /> },
+              { path: ':id/edit', element: <EditChatbotRule /> }
+            ]
+          },
+          {
+            path: 'settings',
+            element: <AdminSettings />
+          },
+          {
+            path: '*',
+            element: (
+              <NotFoundPage
+                embedded
+                homeTo="/admin"
+                homeLabel="Back to Overview"
+              />
+            )
+          }
         ]
       },
       {
-        path: 'menu-item',
-        children: [
-          { index: true, element: <MenuItem /> },
-          { path: 'add', element: <AddMenuItem /> },
-          { path: ':id/edit', element: <EditMenuItem /> }
-        ]
-      },
-      {
-        path: 'add-on-service',
-        children: [
-          { index: true, element: <AddOnService /> },
-          { path: 'add', element: <AddAddOnService /> },
-          { path: ':id/edit', element: <EditAddOnService /> }
-        ]
-      },
-      {
-        path: 'maintenance',
-        children: [
-          { index: true, element: <Maintenance /> },
-          { path: 'add', element: <AddMaintenance /> },
-          { path: 'reports/:id', element: <ViewStaffReport /> },
-          { path: ':id', element: <ViewMaintenance /> },
-          { path: ':id/edit', element: <EditMaintenance /> }
-        ]
-      },
-      {
-        path: 'staff-management',
-        children: [
-          { index: true, element: <StaffManagement /> },
-          { path: 'add', element: <AddStaff /> }
-        ]
-      },
-      {
-        path: 'user-management',
-        children: [
-          { index: true, element: <GuestManagement /> }
-        ]
-      },
-      {
-        path: 'feedback',
-        children: [
-          { index: true, element: <Feedback /> }
-        ]
-      },
-      {
-        path: 'payment-methods',
-        children: [
-          { index: true, element: <PaymentMethods /> },
-          { path: 'add', element: <AddPaymentMethod /> },
-          { path: ':id/edit', element: <EditPaymentMethod /> },
-        ]
-      },
-      {
-        path: 'chatbot-rule',
-        children: [
-          { index: true, element: <ChatbotRule /> },
-          { path: 'add', element: <AddChatbotRule /> },
-          { path: ':id/edit', element: <EditChatbotRule /> }
-        ]
-      },
-      {
-        path: 'settings',
-        element: <AdminSettings />
+        path: '*',
+        element: <NotFoundPage />
       }
     ]
   }
@@ -231,3 +252,4 @@ function App() {
 }
 
 export default App
+

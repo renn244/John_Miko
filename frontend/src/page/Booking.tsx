@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
+import NotFoundPage from "./NotFound";
 
 const bookingSteps = [
     "Guest Information",
@@ -23,7 +24,16 @@ const Booking = () => {
 
     if(isLoading) return null
 
-    if(!accommodation) return null; // return 404 page
+    if(!accommodation) {
+        return (
+            <NotFoundPage
+                title="Accommodation not found"
+                message="We could not find the accommodation you are trying to book. Please choose another available stay."
+                homeTo="/accommodation"
+                homeLabel="Browse Accommodations"
+            />
+        );
+    }
 
     return (
         <GuestPageShell className="flex min-h-screen flex-col">
