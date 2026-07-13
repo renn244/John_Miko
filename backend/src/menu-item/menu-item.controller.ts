@@ -6,6 +6,7 @@ import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { CreateMenuItemDto, UpdateMenuItemDto } from './dto/menu-item.dto';
 import { MenuItemService } from './menu-item.service';
 import { GetMenuItemsQuery } from './query/getMenuItem.query';
+import { Public } from 'src/lib/decorators/Public.decorator';
 
 @Controller('menu-item')
 @UseGuards(AuthGuard, RolesGuard)
@@ -20,16 +21,19 @@ export class MenuItemController {
     return this.menuItemService.createMenuItem(body);
   }
 
+  @Public()
   @Get()
   async getMenuItems(@Query() query: GetMenuItemsQuery) {
     return this.menuItemService.getMenuItems(query);
   }
 
+  @Public()
   @Get('bulk')
   async getMenuItemsBulk(@Query('ids') ids: string) {
     return this.menuItemService.getMenuItemsBulk(ids.split(','));
   }
 
+  @Public()
   @Get('categories')
   async getMenuItemCategories() {
     return this.menuItemService.getMenuItemCategories();

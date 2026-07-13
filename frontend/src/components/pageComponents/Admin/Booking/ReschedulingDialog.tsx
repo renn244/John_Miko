@@ -115,6 +115,7 @@ const BookingReschedule = ({ booking }: { booking: BookingWithAccommodation }) =
 
                     setIsRescheduleOpen(false)
                 }}
+                onCancel={() => setIsRescheduleOpen(false)}
                 isLoading={reschedulingLoading}
                 initialData={{
                     bookingDate: new Date(booking.bookingDate),

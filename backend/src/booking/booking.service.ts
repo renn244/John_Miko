@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccommodationStayOption, Prisma } from 'src/generated/prisma/client';
 import { BookingStatus } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
@@ -784,6 +784,12 @@ export class BookingService {
 
         if(!booking) {
             throw new NotFoundException('Booking not found')
+        }
+
+        const isClosed = await this.closureService.validateClosureDate(booking.accommodationId, body.bookingDate);
+
+        if (isClosed) {
+            throw new BadRequestException('The selected date is closed for bookings');
         }
 
         const stayOption = await this.findStayOptionOrThrow(booking.accommodationId, body.stayOptionId);

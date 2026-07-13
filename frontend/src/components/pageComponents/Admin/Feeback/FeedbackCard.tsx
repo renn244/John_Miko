@@ -59,7 +59,7 @@ const FeedbackCard = ({ feedback, onView }: FeedbackCardProps) => {
                 </span>
             </div>
 
-            <p className="mt-3 line-clamp-3 text-sm leading-6 text-foreground/85">
+            <p className="mt-3 line-clamp-3 text-sm leading-6 text-foreground/85 min-h-0 md:min-h-18">
                 {feedback.comment || "No written comment provided."}
             </p>
 

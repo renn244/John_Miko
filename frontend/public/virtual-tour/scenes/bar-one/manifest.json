@@ -1,0 +1,10 @@
+{
+  "projection": "equirectangular",
+  "width": 8192,
+  "height": 4096,
+  "cols": 8,
+  "rows": 4,
+  "tileSize": 1024,
+  "preview": "preview.jpg",
+  "tilePattern": "tiles/{col}_{row}.jpg"
+}

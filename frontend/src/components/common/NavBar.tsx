@@ -31,6 +31,11 @@ const NavBar = () => {
                             }>
                                 Amenities
                             </NavLink>
+                            <NavLink to="/virtual-tour" className={({ isActive }) =>
+                                `font-medium text-sm border-b-2 pb-1 ${isActive ? 'border-primary text-primary' : 'border-transparent'}`
+                            }>
+                                Virtual Tour
+                            </NavLink>
                             <NavLink to="/accommodation" className={({ isActive }) =>
                                 `font-medium text-sm border-b-2 pb-1 ${isActive ? 'border-primary text-primary' : 'border-transparent'}`
                             }>
@@ -102,6 +107,14 @@ const NavBar = () => {
                         className="font-medium"
                     >
                         Amenities
+                    </NavLink>
+
+                    <NavLink 
+                        to="/virtual-tour" 
+                        onClick={() => setIsOpen(false)}
+                        className="font-medium"
+                    >
+                        Virtual Tour
                     </NavLink>
 
                     <NavLink 

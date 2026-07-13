@@ -6,6 +6,7 @@ import { ClosureService } from './closure.service';
 import { CreateClosureDto } from './dto/create-closure.dto';
 import { GetClosureByDateQueryDto } from './query/getClosureByDate.query';
 import { getClosuresQueryDto } from './query/getClosures.query';
+import { Public } from 'src/lib/decorators/Public.decorator';
 
 @Controller('closure')
 @UseGuards(AuthGuard, RolesGuard)
@@ -20,6 +21,7 @@ export class ClosureController {
         return this.closureService.createClosure(body);
     }
 
+    @Public()
     @Get()
     async getClosures(@Query() query: getClosuresQueryDto) {
         return this.closureService.getClosures(query.mode, query.accommodationId);
