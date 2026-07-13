@@ -10,7 +10,7 @@ const UserAvatar = ({ avatarUrl, name, ...avatarProps }: UserAvatarProps) => {
     return (
         <Avatar size="lg" {...avatarProps}>
             <AvatarImage src={avatarUrl} alt={name} />
-            <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>{name ? name.charAt(0) : "A"}</AvatarFallback>
         </Avatar>
     )
 }
