@@ -1,7 +1,6 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
-import MarkCompleteDialog from "@/components/pageComponents/Admin/Maintenance/MarkCompleteDialog";
 import {
   formatMaintenanceDateTime,
   formatMaintenanceShortDate,
@@ -11,6 +10,7 @@ import {
   getMaintenanceStatusLabel,
   MAINTENANCE_STATUS_ORDER,
 } from "@/components/pageComponents/Admin/Maintenance/maintenanceDisplay";
+import MarkCompleteDialog from "@/components/pageComponents/Admin/Maintenance/MarkCompleteDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -366,12 +366,12 @@ const MaintenanceStepper = ({ maintenance }: { maintenance: Maintenance }) => {
                   <span
                     className={cn(
                       "text-[11px] font-bold",
-                      isActive ? "text-white" : isCompleted ? "text-primary" : "text-foreground",
+                      isActive ? "text-white" : isCompleted ? "text-primary" : "text-white",
                     )}
                   >
                     {getMaintenanceStatusLabel(status)}
                   </span>
-                  <span className={cn("text-[10px]", isActive ? "text-white/80" : "text-muted-foreground")}>
+                  <span className={cn("text-[10px]", isActive ? "text-white/80" : "text-white/80")}>
                     {getStepperDate(maintenance, status) ?? "Pending"}
                   </span>
                 </div>
