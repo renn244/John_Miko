@@ -51,6 +51,7 @@ import ResetPassword from "./page/ResetPassword";
 import RouteErrorPage from './page/RouteError';
 import Settings from './page/Settings';
 import SignUpGuest from "./page/SignUpGuest";
+import VirtualTour from './page/VirtualTour';
 
 const RouterRoot = () => <Outlet />;
 
@@ -74,6 +75,10 @@ const router = createBrowserRouter([
       {
         path: '/menu',
         element: <Menu />
+      },
+      {
+        path: '/virtual-tour',
+        element: <VirtualTour />
       },
       {
         path: "/login",
@@ -252,4 +257,3 @@ function App() {
 }
 
 export default App
-
