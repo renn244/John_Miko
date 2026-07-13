@@ -26,13 +26,14 @@ type rescheduleSchema = z.infer<typeof RescheduleSchema>
 type ReschedulingFormProps = {
     className?: string,
     onsubmit: (data: rescheduleSchema) => Promise<void>,
+    onCancel: () => void,
     isLoading: boolean,
     initialData: rescheduleSchema,
     accommodationId: string,
 } & ComponentProps<"form">
 
-const ReschedulingForm = ({ className, initialData, onsubmit, isLoading, accommodationId, ...props } : ReschedulingFormProps) => {
-    const {
+const ReschedulingForm = ({ className, initialData, onsubmit, isLoading, accommodationId, onCancel, ...props } : ReschedulingFormProps) => {
+    const { 
         control,
         handleSubmit,
         watch,
@@ -63,8 +64,8 @@ const ReschedulingForm = ({ className, initialData, onsubmit, isLoading, accommo
     const bookingDate = watch("bookingDate")
 
     return (
-        <form 
-        className={cn("space-y-2", className)} 
+        <form
+        className={cn("space-y-2", className)}
         onSubmit={handleSubmit(onSubmit)}
         {...props}
         >
@@ -150,7 +151,9 @@ const ReschedulingForm = ({ className, initialData, onsubmit, isLoading, accommo
                 </p>
                 
                 <div className="flex items-center gap-3">
-                    <Button variant="outline">
+                    <Button type="button" variant="outline"
+                    onClick={() => onCancel()}
+                    >
                         Cancel
                     </Button>
                     <Button>
