@@ -38,6 +38,15 @@ jobs:
         run: npm ci
         working-directory: backend
 
+      # The generated Prisma client is ignored by Git, so every clean runner
+      # must generate it before NestJS compiles files that import it.
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: backend
+        env:
+          # Generation reads the schema but does not connect to this database.
+          DATABASE_URL: "postgresql://placeholder:placeholder@localhost:5432/placeholder?schema=public"
+
       - name: Compile NestJS backend
         run: npm run build
         working-directory: backend
