@@ -107,7 +107,12 @@ function RoleTourCoordinator({ children }: PropsWithChildren) {
     if (autoCheckKeys.current.has(key)) return;
     autoCheckKeys.current.add(key);
 
-    if (await hasSeenRoleTour(user.id, user.role, definition.storageVersion)) return;
+    try {
+      if (await hasSeenRoleTour(user.id, user.role, definition.storageVersion)) return;
+    } catch {
+      autoCheckKeys.current.delete(key);
+      return;
+    }
 
     setPendingTour((current) => current ?? { user, chapterIndex: 0 });
   }, []);
@@ -208,7 +213,7 @@ function RoleTourCoordinator({ children }: PropsWithChildren) {
         }
 
         setPendingTour(null);
-        void setSeenRoleTour(user.id, user.role, definition.storageVersion);
+        void setSeenRoleTour(user.id, user.role, definition.storageVersion).catch(() => undefined);
       },
     });
 

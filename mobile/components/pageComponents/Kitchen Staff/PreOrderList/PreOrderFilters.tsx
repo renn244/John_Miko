@@ -193,12 +193,17 @@ function DateCalendar({
             {week.map((day) => {
               const selected = day.id === selectedDate;
               const today = day.id === todayId;
+              const accessibilityLabel = `${format(
+                parseISO(day.id),
+                "EEEE, MMMM d, yyyy",
+              )}${today ? ", today" : ""}`;
 
               return (
                 <Pressable
                   key={day.id}
                   accessibilityRole="button"
-                  accessibilityLabel={day.id}
+                  accessibilityLabel={accessibilityLabel}
+                  accessibilityState={{ selected }}
                   className={`h-10 flex-1 items-center justify-center rounded-md ${
                     selected
                       ? "bg-primary"
