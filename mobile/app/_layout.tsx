@@ -1,18 +1,20 @@
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { SessionProvider, useSession } from "@/context/SessionContext";
+import { RoleTourProvider } from "@/context/RoleTourContext";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import Toast from "react-native-toast-message";
 
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
-} from "@expo-google-fonts/inter";
+import { Inter_400Regular } from "@expo-google-fonts/inter/400Regular";
+import { Inter_500Medium } from "@expo-google-fonts/inter/500Medium";
+import { Inter_600SemiBold } from "@expo-google-fonts/inter/600SemiBold";
+import { Inter_700Bold } from "@expo-google-fonts/inter/700Bold";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useFonts } from "expo-font";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import '../global.css';
 
 const queryClient = new QueryClient();
@@ -38,12 +40,49 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <KeyboardProvider>
-        <StatusBar style="dark" />
-        <Slot />
-        <Toast />
-      </KeyboardProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>
+          <RoleTourProvider>
+            <KeyboardProvider>
+              <BottomSheetModalProvider>
+                <StatusBar style="dark" />
+                <RootNavigator />
+                <Toast />
+              </BottomSheetModalProvider>
+            </KeyboardProvider>
+          </RoleTourProvider>
+        </SessionProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   )
+}
+
+function RootNavigator() {
+  const { status, user } = useSession();
+  const isSignedOut = status === "unauthenticated";
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="reset-password" />
+
+      <Stack.Protected guard={isSignedOut}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="onboarding" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={user?.role === "RESORT_STAFF"}>
+        <Stack.Screen name="resort-staff" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={user?.role === "KITCHEN_STAFF"}>
+        <Stack.Screen name="kitchen-staff" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={user?.role === "MAINTENANCE_STAFF"}>
+        <Stack.Screen name="maintenance-staff" />
+      </Stack.Protected>
+    </Stack>
+  );
 }

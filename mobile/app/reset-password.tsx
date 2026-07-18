@@ -130,7 +130,7 @@ export default function ResetPassword() {
                 subtitle="Request a new password reset email to continue."
             >
                 <View className="gap-4">
-                    <Button onPress={() => router.replace('./forgot-password')}>
+                    <Button onPress={() => router.replace('/forgot-password')}>
                         <Text className="text-white font-sans-semibold text-lg">
                             Request New Link
                         </Text>

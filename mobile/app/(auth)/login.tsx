@@ -1,5 +1,6 @@
 import AuthScreenShell from "@/components/auth/AuthScreenShell";
 import { Button } from "@/components/ui/Button";
+import { useSession } from "@/context/SessionContext";
 import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/passwordInput";
@@ -46,12 +47,17 @@ export default function Login() {
 
     const { mutateAsync, isPending } = useLoginMutation<loginSchema>(setError);
     const router = useRouter();
+    const { refreshSession } = useSession();
 
     const onSubmit = async (data: loginSchema) => {
         try {
             const { role: _role, ...payload } = data;
             await mutateAsync(payload);
-            router.replace('/redirecting');
+            const user = await refreshSession();
+
+            if (user) {
+                router.replace('/');
+            }
         } catch {
             return;
         }
