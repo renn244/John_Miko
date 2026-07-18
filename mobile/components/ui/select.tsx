@@ -1,4 +1,4 @@
-import { Check, ChevronDown } from "lucide-react-native";
+import { Check, ChevronDown, X } from "lucide-react-native";
 import {
     createContext,
     useContext,
@@ -212,9 +212,10 @@ const SelectValue = ({ placeholder }: SelectValueProps) => {
 
 type SelectContentProps = ComponentProps<typeof View> & {
   className?: string;
+  title?: string;
 };
 
-const SelectContent = ({ className, children }: SelectContentProps) => {
+const SelectContent = ({ className, title, children }: SelectContentProps) => {
   const { open, setOpen } = useSelect();
 
   if (!open) {
@@ -222,11 +223,36 @@ const SelectContent = ({ className, children }: SelectContentProps) => {
   }
 
   return (
-    <Modal transparent animationType="fade" visible={open} onRequestClose={() => setOpen(false)}>
-      <Pressable className="flex-1 bg-black/30" onPress={() => setOpen(false)} />
-      <View className="absolute bottom-[30%] w-full px-4">
-        <View className={twMerge("bg-white rounded-3xl shadow-lg overflow-hidden px-6 py-3", className)}>
-          <ScrollView>{children}</ScrollView>
+    <Modal
+      transparent
+      animationType="fade"
+      visible={open}
+      statusBarTranslucent
+      onRequestClose={() => setOpen(false)}
+    >
+      <View className="flex-1 items-center justify-center px-4">
+        <Pressable className="absolute inset-0 bg-black/30" onPress={() => setOpen(false)} />
+        <View
+          className={twMerge(
+            "w-full max-w-[360px] overflow-hidden rounded-3xl bg-white px-6 py-5 shadow-lg",
+            className,
+          )}
+        >
+          {title ? (
+            <View className="mb-2 flex-row items-center justify-between">
+              <Text className="font-sans-bold text-xl text-neutral-dark-1">{title}</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Close ${title}`}
+                hitSlop={4}
+                className="size-10 items-center justify-center rounded-full"
+                onPress={() => setOpen(false)}
+              >
+                <X size={20} color="#4D5963" />
+              </Pressable>
+            </View>
+          ) : null}
+          <ScrollView showsVerticalScrollIndicator={false}>{children}</ScrollView>
         </View>
       </View>
     </Modal>

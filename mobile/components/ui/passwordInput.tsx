@@ -29,6 +29,8 @@ const PasswordInput = forwardRef<
       />
 
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={showPassword ? "Hide password" : "Show password"}
         onPress={() => setShowPassword((prev) => !prev)}
         className="absolute bottom-0 right-3 top-0 justify-center"
         hitSlop={8}

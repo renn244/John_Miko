@@ -1,14 +1,19 @@
+import { AppBottomSheet } from "@/components/ui/bottom-sheet";
+import { Button } from "@/components/ui/Button";
 import { useCloudinaryUpload } from "@/hooks/cloudinary.hook";
 import { toast } from "@/lib/toast";
 import * as ImagePicker from "expo-image-picker";
 import { Camera, ImagePlus } from "lucide-react-native";
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 type CloudinaryUploadProps = {
   onSuccess: (url: string) => void;
   onError?: (error: Error) => void;
   disabled?: boolean;
 };
+
+type ImageSource = "camera" | "library";
 
 export function CloudinaryUpload({
   onSuccess,
@@ -17,6 +22,8 @@ export function CloudinaryUpload({
 }: CloudinaryUploadProps) {
   const { upload, reset, status, progress } = useCloudinaryUpload();
   const isUploading = status === "uploading";
+  const [sourceSheetOpen, setSourceSheetOpen] = useState(false);
+  const pendingSource = useRef<ImageSource | null>(null);
 
   const handleAsset = async (asset?: ImagePicker.ImagePickerAsset) => {
     if (!asset) return;
@@ -34,41 +41,65 @@ export function CloudinaryUpload({
   };
 
   const openCamera = async () => {
-    const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) {
-      toast.error("Camera permission is required to take a proof photo.");
-      return;
+    try {
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permission.granted) {
+        toast.error("Camera permission is required to take a proof photo.");
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) await handleAsset(result.assets[0]);
+    } catch {
+      toast.error("Unable to open the camera. Please try again.");
     }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images"],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) await handleAsset(result.assets[0]);
   };
 
   const openGallery = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      toast.error("Photo permission is required to select a proof image.");
-      return;
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        toast.error("Photo permission is required to select a proof image.");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) await handleAsset(result.assets[0]);
+    } catch {
+      toast.error("Unable to open the photo library. Please try again.");
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) await handleAsset(result.assets[0]);
   };
 
   const chooseImageSource = () => {
-    Alert.alert("Add proof photo", "Choose where to get the photo.", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Camera", onPress: openCamera },
-      { text: "Photo library", onPress: openGallery },
-    ]);
+    setSourceSheetOpen(true);
+  };
+
+  const selectImageSource = (source: ImageSource) => {
+    pendingSource.current = source;
+    setSourceSheetOpen(false);
+  };
+
+  const handleSourceSheetClose = () => {
+    setSourceSheetOpen(false);
+
+    const source = pendingSource.current;
+    pendingSource.current = null;
+
+    if (source === "camera") {
+      void openCamera();
+    }
+
+    if (source === "library") {
+      void openGallery();
+    }
   };
 
   return (
@@ -106,6 +137,43 @@ export function CloudinaryUpload({
           />
         </View>
       ) : null}
+
+      <AppBottomSheet
+        open={sourceSheetOpen}
+        onClose={handleSourceSheetClose}
+        title="Add proof photo"
+      >
+        <Text className="text-base text-neutral-grey-1">
+          Choose where to get the photo.
+        </Text>
+        <View className="gap-3">
+          <Button
+            variant="outline"
+            className="justify-start gap-3"
+            onPress={() => selectImageSource("camera")}
+          >
+            <Camera size={20} color="#0E33F3" />
+            <Text className="font-sans-semibold text-base text-neutral-dark-1">
+              Camera
+            </Text>
+          </Button>
+          <Button
+            variant="outline"
+            className="justify-start gap-3"
+            onPress={() => selectImageSource("library")}
+          >
+            <ImagePlus size={20} color="#0E33F3" />
+            <Text className="font-sans-semibold text-base text-neutral-dark-1">
+              Photo library
+            </Text>
+          </Button>
+          <Button variant="ghost" onPress={() => setSourceSheetOpen(false)}>
+            <Text className="font-sans-semibold text-base text-neutral-dark-1">
+              Cancel
+            </Text>
+          </Button>
+        </View>
+      </AppBottomSheet>
     </View>
   );
 }

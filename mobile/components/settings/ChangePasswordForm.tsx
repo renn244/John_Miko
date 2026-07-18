@@ -41,12 +41,13 @@ const ChangePasswordForm = () => {
     criteriaMode: "all",
   });
 
-  const { mutateAsync: changePassword, isPending: isChangingPassword } =
+  const { mutate: changePassword, isPending: isChangingPassword } =
     useChangePasswordMutation<ChangePasswordFormValues>(setError);
 
-  const onChangePasswordSubmit = async (data: ChangePasswordFormValues) => {
-    await changePassword(data);
-    reset();
+  const onChangePasswordSubmit = (data: ChangePasswordFormValues) => {
+    changePassword(data, {
+      onSuccess: () => reset(),
+    });
   };
 
   return (

@@ -46,7 +46,7 @@ const ProfileDetailsForm = ({ user }: ProfileDetailsFormProps) => {
     criteriaMode: "all",
   });
 
-  const { mutateAsync: updateProfile, isPending: isSavingProfile } =
+  const { mutate: updateProfile, isPending: isSavingProfile } =
     useUpdateProfileMutation<ProfileFormValues>(setError);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const ProfileDetailsForm = ({ user }: ProfileDetailsFormProps) => {
   }, [reset, user]);
 
   const onProfileSubmit = async (data: ProfileFormValues) => {
-    await updateProfile(data);
+    updateProfile(data);
   };
 
   return (

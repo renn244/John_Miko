@@ -3,25 +3,41 @@ import ProfileDetailsForm from "@/components/settings/ProfileDetailsForm";
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import ScreenState from "@/components/ui/screen-state";
+import { useSession } from "@/context/SessionContext";
+import { type RoleTourTargetProps, useRoleTour } from "@/context/RoleTourContext";
 import { useProfileQuery } from "@/hooks/profile.hook";
-import { deleteAccessToken } from "@/lib/tokenStorage";
-import { useQueryClient } from "@tanstack/react-query";
+import type { TourScrollViewProps } from "@/hooks/roleTours/useTourScrollContainer";
+import { getRoleRoute } from "@/lib/roleRoutes";
 import { useRouter } from "expo-router";
 import {
-  AlertTriangle
+  AlertTriangle,
+  CircleHelp,
 } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import ProfileCard from "./ProfileCard";
 
-const StaffSettingsScreen = () => {
+type StaffSettingsScreenProps = {
+  replayGuideTargetProps?: RoleTourTargetProps;
+  tourScrollViewProps?: TourScrollViewProps;
+};
+
+const StaffSettingsScreen = ({
+  replayGuideTargetProps,
+  tourScrollViewProps,
+}: StaffSettingsScreenProps) => {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const { signOut } = useSession();
+  const { requestReplay } = useRoleTour();
   const { data: user, isLoading, refetch } = useProfileQuery();
 
   const handleLogout = async () => {
-    await deleteAccessToken();
-    await queryClient.clear();
-    router.replace("/login");
+    await signOut();
+    router.replace("/");
+  };
+
+  const handleReplayRoleGuide = () => {
+    requestReplay(user!);
+    router.replace(getRoleRoute(user!.role));
   };
 
   if (isLoading) {
@@ -39,6 +55,7 @@ const StaffSettingsScreen = () => {
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
       <ScrollView
+        {...tourScrollViewProps}
         className="flex-1"
         contentContainerStyle={{
           paddingHorizontal: 20,
@@ -63,6 +80,19 @@ const StaffSettingsScreen = () => {
         <ProfileDetailsForm user={user} />
 
         <ChangePasswordForm />
+
+        <View {...replayGuideTargetProps}>
+          <Button
+            variant="outline"
+            onPress={handleReplayRoleGuide}
+            className="rounded-md"
+          >
+            <CircleHelp size={19} color="#0E33F3" />
+            <Text className="font-sans-semibold text-base text-primary">
+              Replay role guide
+            </Text>
+          </Button>
+        </View>
 
         <Button
           variant="outline"
