@@ -7,7 +7,7 @@ import type { Accommodation } from "@/types/admin/accommodation.type";
 import type { BookingWithPaymentInfo } from "@/types/booking.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
@@ -165,9 +165,9 @@ const MultiStepBookingForm = ({
     const seniorFee = adultFee - (adultFee * 0.20); // 20 percent discount
     const kidsFee = 100 // just a kid 4-7 years old
 
-    const adultCount = form.watch('adultGuests') || 0;
-    const kidsCount = form.watch('kidGuests') || 0;
-    const seniorCount = form.watch('seniorGuests') || 0;
+    const adultCount = useWatch({ control: form.control, name: 'adultGuests' }) || 0;
+    const kidsCount = useWatch({ control: form.control, name: 'kidGuests' }) || 0;
+    const seniorCount = useWatch({ control: form.control, name: 'seniorGuests' }) || 0;
 
 
     const { totalGuestFee } = useMemo(() => {

@@ -15,8 +15,7 @@ import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckCircle, Users } from "lucide-react";
-import { useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
@@ -41,7 +40,6 @@ const ManualBookingForm = () => {
     const {
         control,
         handleSubmit,
-        watch,
         setError,
         resetField
     } = useForm<manualBookingSchema>({
@@ -62,11 +60,11 @@ const ManualBookingForm = () => {
 
     const { data: accommodations } = useGetAccommodationsQuery({ page: 1, limit: 100 });
 
-    const selectedAccommodationId = watch('accommodationId');
-    const selectedCheckInDate = watch('checkIn');
-    const selectedStayOptionId = watch('stayOptionId');
-    const selectedPaymentType = watch('paymentType');
-    const selectedNumberOfGuests = watch('numberOfGuests');
+    const selectedAccommodationId = useWatch({ control, name: 'accommodationId' });
+    const selectedCheckInDate = useWatch({ control, name: 'checkIn' });
+    const selectedStayOptionId = useWatch({ control, name: 'stayOptionId' });
+    const selectedPaymentType = useWatch({ control, name: 'paymentType' });
+    const selectedNumberOfGuests = useWatch({ control, name: 'numberOfGuests' });
 
     const isAccommodationSelected = !!selectedAccommodationId;
 
@@ -103,13 +101,8 @@ const ManualBookingForm = () => {
         }
     }
 
-    const selectedAccommodation = useMemo(() => {
-        return accommodations?.data.find((acc) => acc.id === selectedAccommodationId);
-    }, [selectedAccommodationId, accommodations]);
-
-    const selectedStayOption = useMemo(() => {
-        return selectedAccommodation?.stayOptions.find((option) => option.id === selectedStayOptionId);
-    }, [selectedAccommodation, selectedStayOptionId]);
+    const selectedAccommodation = accommodations?.data.find((acc) => acc.id === selectedAccommodationId);
+    const selectedStayOption = selectedAccommodation?.stayOptions.find((option) => option.id === selectedStayOptionId);
 
     const accommodationPrice = selectedAccommodation?.price || 0;
     const adultGuestFee = selectedStayOption?.code.toLowerCase() === 'daystay' ? 150 : 180;
