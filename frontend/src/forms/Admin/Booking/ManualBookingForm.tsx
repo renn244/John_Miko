@@ -64,7 +64,9 @@ const ManualBookingForm = () => {
 
     const selectedAccommodationId = watch('accommodationId');
     const selectedCheckInDate = watch('checkIn');
+    const selectedStayOptionId = watch('stayOptionId');
     const selectedPaymentType = watch('paymentType');
+    const selectedNumberOfGuests = watch('numberOfGuests');
 
     const isAccommodationSelected = !!selectedAccommodationId;
 
@@ -91,13 +93,13 @@ const ManualBookingForm = () => {
 
             toast.success("Booking created successfully");
             navigate(`/admin/booking/${booking.id}`);
-        } catch (error: any) {
+        } catch (error: unknown) {
             if(error instanceof ValidationError) {
                 handleNestError(error.response, setError);
                 return;
             }
 
-            toast.error(error.message || "Failed to create booking");
+            toast.error(error instanceof Error ? error.message : "Failed to create booking");
         }
     }
 
@@ -105,11 +107,21 @@ const ManualBookingForm = () => {
         return accommodations?.data.find((acc) => acc.id === selectedAccommodationId);
     }, [selectedAccommodationId, accommodations]);
 
-    const accommodationPrice = selectedAccommodation?.price || 0;
+    const selectedStayOption = useMemo(() => {
+        return selectedAccommodation?.stayOptions.find((option) => option.id === selectedStayOptionId);
+    }, [selectedAccommodation, selectedStayOptionId]);
 
-    const serviceFee = 500; // because in the booking form there is 500, remove later if no service fee...
-    const totalAmount = accommodationPrice + serviceFee; // get base price from selected accommodation
-    const amountToPayNow = selectedPaymentType ? (selectedPaymentType === "Partial" ? totalAmount / 2 : totalAmount) : 0;
+    const accommodationPrice = selectedAccommodation?.price || 0;
+    const adultGuestFee = selectedStayOption?.code.toLowerCase() === 'daystay' ? 150 : 180;
+    const guestFee = selectedAccommodation?.isGuestFeeWaived || !selectedStayOption
+        ? 0
+        : selectedNumberOfGuests * adultGuestFee;
+    const totalAmount = accommodationPrice + guestFee;
+    const amountToPayNow = selectedPaymentType
+        ? selectedPaymentType === "Partial"
+            ? Math.round(totalAmount / 2)
+            : totalAmount
+        : 0;
 
     return (
         <form  
@@ -473,6 +485,13 @@ const ManualBookingForm = () => {
                                         <span className="text-muted-foreground">Base Price:</span>
                                         <span className="font-semibold" >
                                             ₱{selectedAccommodation?.price || 0}/stay
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Guest Fee:</span>
+                                        <span className="font-semibold">
+                                            ₱{guestFee.toLocaleString()}
                                         </span>
                                     </div>
 

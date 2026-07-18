@@ -88,10 +88,6 @@ const MultiStepBookingForm = ({
     const checkIn = useBookingSelectStore((state) => state.bookingDate!);
     const reset = useBookingSelectStore((state) => state.reset);
 
-    if(!stayOptionId || !stayOption || !checkIn) {
-        navigate(`/accommodation/${accommodation.id}`)
-    }
-
     const form = useForm<multiStepBookingFormSchema>({
         resolver: zodResolver(MultiStepBookingFormSchema),
         defaultValues: {
@@ -128,7 +124,7 @@ const MultiStepBookingForm = ({
         try {
             const response = await mutateAsync({
                 accommodationId: accommodation.id,
-                name: `${data.firstName} ${data.lastName}`,
+                name: `${firstName} ${lastName}`,
                 checkIn: toDateOnly(checkIn),
                 addOnServices: addOnServicesPayload,
                 ...rest
@@ -140,7 +136,7 @@ const MultiStepBookingForm = ({
             setConfirmation({
                 booking: response,
                 summary: {
-                    guestName: `${data.firstName} ${data.lastName}`,
+                    guestName: `${firstName} ${lastName}`,
                     email: data.email,
                     contactNo: data.contactNo,
                     stayType: stayOption?.label || "Stay",
@@ -155,13 +151,13 @@ const MultiStepBookingForm = ({
 
             onSuccess?.();
             toast.success('Payment proof submitted. We will verify shortly.');
-        } catch (error: any) {
+        } catch (error: unknown) {
             if(error instanceof ValidationError) {
                 handleNestError(error.response, form.setError);
                 return
             }
 
-            toast.error(error.message)
+            toast.error(error instanceof Error ? error.message : 'Failed to create booking')
         }
     }
 
@@ -180,7 +176,7 @@ const MultiStepBookingForm = ({
             : (adultCount * adultFee) + (seniorCount * seniorFee) + (kidsCount * kidsFee);
 
         return { totalGuestFee };
-    }, [accommodation.isGuestFeeWaived, kidsCount, adultCount, seniorCount])
+    }, [accommodation.isGuestFeeWaived, adultCount, adultFee, kidsCount, seniorCount, seniorFee])
 
     const { checkIn: bookingCheckIn, checkOut: bookingCheckOut } = getBookingDates(checkIn, stayOption);
 
@@ -191,7 +187,7 @@ const MultiStepBookingForm = ({
             <BookingConfirmation
             viewMyBookings={() => {
                 reset();
-                navigate(`/my-bookings/${confirmation.booking.id}`)
+                navigate('/my-bookings')
             }}
             backToHome={() => {
                 reset();

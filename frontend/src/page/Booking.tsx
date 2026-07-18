@@ -2,9 +2,10 @@ import { GuestContainer, GuestPageShell } from "@/components/guest";
 import MultiStepBookingForm from "@/forms/MultiStepBookingForm/MultiStepBookingForm";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
 import { cn } from "@/lib/utils";
+import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Navigate, useNavigate, useParams } from "react-router";
 import NotFoundPage from "./NotFound";
 
 const bookingSteps = [
@@ -19,6 +20,9 @@ const Booking = () => {
     const [currentStep, setCurrentStep] = useState<number>(1);
     const { accommodationId } = useParams<{ accommodationId: string }>();
     const navigate = useNavigate();
+    const bookingDate = useBookingSelectStore((state) => state.bookingDate);
+    const bookingType = useBookingSelectStore((state) => state.bookingType);
+    const stayOption = useBookingSelectStore((state) => state.stayOption);
 
     const { data: accommodation, isLoading } = useGetAccommodationByIdQuery(accommodationId)
 
@@ -33,6 +37,10 @@ const Booking = () => {
                 homeLabel="Browse Accommodations"
             />
         );
+    }
+
+    if (!bookingDate || !bookingType || !stayOption) {
+        return <Navigate to={`/accommodation/${accommodation.id}`} replace />;
     }
 
     return (
