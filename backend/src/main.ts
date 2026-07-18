@@ -8,10 +8,19 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new CustomValidationPipe());
   app.useGlobalFilters(new AllExceptionFilter())
+
+  const allowedFrontendOrigins = (
+    process.env.FRONTEND_URLS ??
+    process.env.FRONTEND_URL ??
+    'http://localhost:5173'
+  )
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
   
   app.enableCors({
     allowedHeaders: '*',
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    origin: allowedFrontendOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
 
