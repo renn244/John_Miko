@@ -2,6 +2,7 @@ import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import NavBar from "@/components/common/NavBar";
 import BookingCard from "@/components/pageComponents/Guest/MyBookings/BookingCard";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import FeedbackForm from "@/forms/FeedbackForm";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
 import { useGetFeedbackById, useUpdateFeedbackGuestMutation } from "@/hooks/feedback.hook";
@@ -13,11 +14,20 @@ const EditFeedback = () => {
 
     const { feedbackId } = useParams<{ feedbackId: string }>();
     const { data: feedback, isLoading: feedbackLoading, error: feedbackError, refetch: refetchFeedback, isRefetching: isRefetchingFeedback } = useGetFeedbackById(feedbackId!);
-    const { data: booking, isLoading: bookingLoading, error: bookingError, refetch: refetchBooking, isRefetching: isRefetchingBooking } = useGetBookingById(feedback?.bookingId!);
+    const { data: booking, isLoading: bookingLoading, error: bookingError, refetch: refetchBooking, isRefetching: isRefetchingBooking } = useGetBookingById(feedback?.bookingId);
 
     const { mutateAsync } = useUpdateFeedbackGuestMutation(feedbackId!);
 
-    if (feedbackLoading || bookingLoading) return null;
+    if (feedbackLoading || bookingLoading) {
+        return (
+            <div className="min-h-screen">
+                <NavBar />
+                <main className="flex min-h-[60vh] items-center justify-center" aria-label="Loading feedback">
+                    <LoadingSpinner />
+                </main>
+            </div>
+        );
+    }
 
     if (feedbackError || bookingError) {
         return (

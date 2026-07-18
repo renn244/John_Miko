@@ -129,11 +129,19 @@ const router = createBrowserRouter([
       },
       {
         path: '/feedback/:bookingId',
-        element: <CreateFeedback />
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+            <CreateFeedback />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/feedback/edit/:feedbackId',
-        element: <EditFeedback />
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST]}>
+            <EditFeedback />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/admin',
@@ -249,7 +257,9 @@ const router = createBrowserRouter([
 function App() {
   const { isLoading } = useAuthContext();
 
-  if(isLoading) return null;
+  if(isLoading) {
+    return null;
+  }
 
   return (
     <RouterProvider router={router} />
