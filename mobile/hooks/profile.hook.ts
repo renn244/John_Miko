@@ -1,12 +1,17 @@
 import apiClient from "@/lib/apiClient";
+import { InvalidSessionError } from "@/lib/auth/errors";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { toast } from "@/lib/toast";
 import type { ChangePasswordRequest, ProfileResponse, UpdateProfileRequest } from "@/types/auth.type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { FieldValues, UseFormSetError } from "react-hook-form";
 
-const fetchProfile = async () => {
+export const fetchCurrentProfile = async (): Promise<ProfileResponse> => {
   const response = await apiClient.get("/auth/profile");
+
+  if (response.status === 401 || response.status === 403) {
+    throw new InvalidSessionError();
+  }
 
   if (response.status >= 400) {
     throw new Error(response.data?.message || "Failed to load profile");
@@ -18,7 +23,7 @@ const fetchProfile = async () => {
 export const useProfileQuery = () => {
   return useQuery({
     queryKey: ["auth", "profile"],
-    queryFn: fetchProfile,
+    queryFn: fetchCurrentProfile,
   });
 };
 

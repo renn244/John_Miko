@@ -1,5 +1,10 @@
 import StaffReportForm from "@/components/pageComponents/Resort Staff/StaffReportForm";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
+import {
+  resortNewReportTourTargetIds,
+  useResortRoleTourTargets,
+} from "@/hooks/roleTours/useResortRoleTourTargets";
+import { useTourScrollContainer } from "@/hooks/roleTours/useTourScrollContainer";
 import { useFocusEffect, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
@@ -8,6 +13,8 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 export default function NewStaffReportScreen() {
   const router = useRouter();
   const [formInstanceKey, setFormInstanceKey] = useState(0);
+  const { newReportHeaderTargetProps } = useResortRoleTourTargets();
+  const { scrollViewProps } = useTourScrollContainer(resortNewReportTourTargetIds);
 
   useFocusEffect(
     useCallback(() => {
@@ -18,6 +25,7 @@ export default function NewStaffReportScreen() {
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
       <ScrollView
+        {...scrollViewProps}
         className="flex-1"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -28,8 +36,11 @@ export default function NewStaffReportScreen() {
           gap: 16,
         }}
       >
-        <View className="flex-row items-start gap-3">
+        <View className="flex-row items-start gap-3" {...newReportHeaderTargetProps}>
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            hitSlop={6}
             onPress={() => router.back()}
             className="h-9 w-9 items-center justify-center"
           >

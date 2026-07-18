@@ -1,6 +1,8 @@
 import { Image } from "expo-image";
 import { Trash2 } from "lucide-react-native";
+import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { FullScreenImageViewer } from "./FullScreenImageViewer";
 
 const PREVIEW_SIZE = 112;
 
@@ -15,6 +17,8 @@ export function CloudinaryPreview({
   onRemove,
   disabled,
 }: CloudinaryPreviewProps) {
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+
   if (images.length === 0) return null;
 
   return (
@@ -25,19 +29,28 @@ export function CloudinaryPreview({
           className="relative overflow-hidden rounded-2xl bg-neutral-soft-grey-2"
           style={{ width: PREVIEW_SIZE, height: PREVIEW_SIZE }}
         >
-          <Image
-            source={imageUrl}
-            contentFit="cover"
-            cachePolicy="memory-disk"
-            transition={150}
-            style={{
-              width: PREVIEW_SIZE,
-              height: PREVIEW_SIZE,
-              borderRadius: 16,
-            }}
-          />
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`View proof photo ${index + 1} of ${images.length}`}
+            onPress={() => setActiveImageIndex(index)}
+          >
+            <Image
+              source={imageUrl}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+              transition={150}
+              style={{
+                width: PREVIEW_SIZE,
+                height: PREVIEW_SIZE,
+                borderRadius: 16,
+              }}
+            />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Remove proof photo ${index + 1} of ${images.length}`}
             disabled={disabled}
+            hitSlop={6}
             onPress={() => onRemove(index)}
             className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-system-red disabled:opacity-50"
           >
@@ -50,6 +63,13 @@ export function CloudinaryPreview({
           </View>
         </View>
       ))}
+
+      <FullScreenImageViewer
+        images={images}
+        initialIndex={activeImageIndex ?? 0}
+        visible={activeImageIndex !== null}
+        onClose={() => setActiveImageIndex(null)}
+      />
     </View>
   );
 }

@@ -26,6 +26,9 @@ export default function DetailPageHeader({
       )}
     >
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        hitSlop={4}
         onPress={onBack}
         className="mt-0.5 h-10 w-10 items-center justify-center rounded-full"
       >

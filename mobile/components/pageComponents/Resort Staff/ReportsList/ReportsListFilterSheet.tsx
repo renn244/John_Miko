@@ -1,12 +1,19 @@
+import { AppBottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/Button";
 import { useStaffReportsFilterStore } from "@/store/staffReportsFilter.store";
 import { ReportSeverity, ReportStatus, ReportType } from "@/types/staffReport.type";
-import { X } from "lucide-react-native";
-import { Modal, Pressable, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 type FilterOption<T extends string> = {
     label: string;
     value?: T;
+};
+
+type ReportFilterDraft = {
+  status?: ReportStatus;
+  type?: ReportType;
+  severity?: ReportSeverity;
 };
 
 const statusOptions: FilterOption<ReportStatus>[] = [
@@ -40,73 +47,59 @@ function ReportListFilterSheet({
     const status = useStaffReportsFilterStore((state) => state.status);
     const type = useStaffReportsFilterStore((state) => state.type);
     const severity = useStaffReportsFilterStore((state) => state.severity);
-    const setStatus = useStaffReportsFilterStore((state) => state.setStatus);
-    const setType = useStaffReportsFilterStore((state) => state.setType);
-    const setSeverity = useStaffReportsFilterStore((state) => state.setSeverity);
-    const onReset = useStaffReportsFilterStore((state) => state.reset);
+    const setFilters = useStaffReportsFilterStore((state) => state.setFilters);
+    const [draft, setDraft] = useState<ReportFilterDraft>({});
+
+    useEffect(() => {
+      if (visible) {
+        setDraft({ status, type, severity });
+      }
+    }, [severity, status, type, visible]);
+
+    const applyFilters = () => {
+      setFilters(draft);
+      onClose();
+    };
 
     return (
-        <Modal
-        visible={visible}
-        transparent
-        animationType="slide"
-        statusBarTranslucent
-        onRequestClose={onClose}
-        >
-            <View className="flex-1 justify-end bg-black/35">
-                <Pressable className="flex-1" onPress={onClose} />
-                <View className="gap-5 rounded-t-3xl border border-neutral-soft-grey-2 bg-white px-5 pb-7 pt-5">
-                    <View className="flex-row items-center justify-between">
-                        <Text className="font-sans-bold text-xl text-neutral-dark-1">
-                            Filter reports
-                        </Text>
-                        <Pressable
-                        onPress={onClose}
-                        className="h-9 w-9 items-center justify-center rounded-full bg-neutral-soft-grey-3"
-                        >
-                            <X size={19} color="#1F2933" />
-                        </Pressable>
-                    </View>
+        <AppBottomSheet open={visible} onClose={onClose} title="Filter reports">
+            <FilterGroup
+                title="Status"
+                options={statusOptions}
+                value={draft.status}
+                onChange={(status) => setDraft((current) => ({ ...current, status }))}
+            />
+            <FilterGroup
+                title="Type"
+                options={typeOptions}
+                value={draft.type}
+                onChange={(type) => setDraft((current) => ({ ...current, type }))}
+            />
+            <FilterGroup
+                title="Severity"
+                options={severityOptions}
+                value={draft.severity}
+                onChange={(severity) => setDraft((current) => ({ ...current, severity }))}
+            />
 
-                    <FilterGroup
-                        title="Status"
-                        options={statusOptions}
-                        value={status}
-                        onChange={setStatus}
-                    />
-                    <FilterGroup
-                        title="Type"
-                        options={typeOptions}
-                        value={type}
-                        onChange={setType}
-                    />
-                    <FilterGroup
-                        title="Severity"
-                        options={severityOptions}
-                        value={severity}
-                        onChange={setSeverity}
-                    />
-
-                    <View className="flex-row gap-3 border-t border-neutral-soft-grey-2 pt-4">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex-1"
-                            onPress={onReset}
-                        >
-                            <Text className="font-sans-semibold text-base text-neutral-dark-1">
-                                Reset
-                            </Text>
-                        </Button>
-                        <Button size="sm" className="flex-1" onPress={onClose}>
-                            <Text className="font-sans-semibold text-base text-white">
-                                Apply filters
-                            </Text>
-                        </Button>
-                    </View>
-                </View>
+            <View className="flex-row gap-3 border-t border-neutral-soft-grey-2 pt-4">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1"
+                    onPress={() => setDraft({})}
+                >
+                    <Text className="font-sans-semibold text-base text-neutral-dark-1">
+                        Reset
+                    </Text>
+                </Button>
+                <Button size="sm" className="flex-1" onPress={applyFilters}>
+                    <Text className="font-sans-semibold text-base text-white">
+                        Apply filters
+                    </Text>
+                </Button>
             </View>
-        </Modal>
+        </AppBottomSheet>
     );
 }
 

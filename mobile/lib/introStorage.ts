@@ -4,7 +4,7 @@ const INTRO_SEEN_KEY = "intro_seen";
 
 export const hasSeenIntro = async () => {
   const value = await AsyncStorage.getItem(INTRO_SEEN_KEY);
-  return value === "false";
+  return value === "true";
 };
 
 export const setSeenIntro = async () => {

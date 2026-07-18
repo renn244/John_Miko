@@ -1,16 +1,20 @@
 import PreOrderFilters from "@/components/pageComponents/Kitchen Staff/PreOrderList/PreOrderFilters";
 import PreOrderList from "@/components/pageComponents/Kitchen Staff/PreOrderList/PreOrderList";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
+import { useKitchenRoleTourTargets } from "@/hooks/roleTours/useKitchenRoleTourTargets";
+import { useRoleTourAutoStart } from "@/hooks/roleTours/useRoleTourAutoStart";
 import {
   Text,
   View
 } from "react-native";
 
 export default function KitchenStaffPreOrdersScreen() {
+  useRoleTourAutoStart("KITCHEN_STAFF");
+  const { dashboardHeaderTargetProps } = useKitchenRoleTourTargets();
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-      <View className="gap-4 border-b border-neutral-soft-grey-2 px-5 pb-4 pt-4">
+      <View className="gap-4 border-b border-neutral-soft-grey-2 px-5 pb-4 pt-4" {...dashboardHeaderTargetProps}>
         <View>
           <Text className="font-sans-bold text-3xl text-neutral-dark-1">
             Kitchen queue

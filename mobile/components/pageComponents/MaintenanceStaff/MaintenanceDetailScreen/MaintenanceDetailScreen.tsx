@@ -1,5 +1,6 @@
 import { CloudinaryPreview } from '@/components/common/CloudinaryPreview';
 import { CloudinaryUpload } from '@/components/common/CloudinaryUpload';
+import { FullScreenImageViewer } from '@/components/common/FullScreenImageViewer';
 import { Button } from '@/components/ui/Button';
 import CustomSafeAreaView from '@/components/ui/CustomSafeAreaView';
 import DetailPageHeader from '@/components/ui/detail-page-header';
@@ -17,7 +18,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AlertTriangle, SearchX } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { ChevronStepper } from './ChevronStepper';
 import { MaintenanceSkeletonCard, MaintenanceSkeletonTimeline } from './MaintenanceDetailSkeleton';
 import { ResolutionDetails } from './ResolutionDetails';
@@ -86,8 +87,9 @@ export default function MaintenanceDetailScreen({
 
   const [resolutionNotes, setResolutionNotes] = useState("");
   const [resolutionProofImages, setResolutionProofImages] = useState<string[]>([]);
+  const [activeIssueImageIndex, setActiveIssueImageIndex] = useState<number | null>(null);
 
-  const handleComplete = async () => {
+  const handleComplete = () => {
     if (resolutionNotes.trim().length < 20) {
       toast.error("Resolution notes must be at least 20 characters.");
       return;
@@ -98,7 +100,7 @@ export default function MaintenanceDetailScreen({
       return;
     }
 
-    await completeMutation.mutateAsync({
+    completeMutation.mutate({
       resolutionNotes: resolutionNotes.trim(),
       resolutionProofImages,
     });
@@ -226,14 +228,27 @@ export default function MaintenanceDetailScreen({
             </Text>
             <View className="flex-row gap-2">
               {maintenance.imagesUrl.slice(0, 3).map((imageUrl, index) => (
-                <Image
+                <Pressable
                   key={`${imageUrl}-${index}`}
-                  source={imageUrl}
-                  contentFit="cover"
-                  style={{ flex: 1, height: 96, borderRadius: 6 }}
-                />
+                  accessibilityRole="button"
+                  accessibilityLabel={`View issue photo ${index + 1} of ${maintenance.imagesUrl.length}`}
+                  onPress={() => setActiveIssueImageIndex(index)}
+                  style={{ flex: 1, height: 96, borderRadius: 6, overflow: 'hidden' }}
+                >
+                  <Image
+                    source={imageUrl}
+                    contentFit="cover"
+                    style={{ width: '100%', height: '100%' }}
+                  />
+                </Pressable>
               ))}
             </View>
+            <FullScreenImageViewer
+              images={maintenance.imagesUrl}
+              initialIndex={activeIssueImageIndex ?? 0}
+              visible={activeIssueImageIndex !== null}
+              onClose={() => setActiveIssueImageIndex(null)}
+            />
           </OperationalCard>
         ) : null}
 

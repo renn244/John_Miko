@@ -1,12 +1,16 @@
+import { FullScreenImageViewer } from "@/components/common/FullScreenImageViewer";
 import OperationalCard from "@/components/ui/operational-card";
 import { Image } from "expo-image";
-import { Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 
 type ProofImagesCardProps = {
   proofImages: string[];
 };
 
 export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+
   return (
     <OperationalCard contentClassName="gap-3 px-5 py-4">
       <View className="flex-row items-baseline gap-2">
@@ -20,8 +24,11 @@ export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
 
       <View className="flex-row flex-wrap gap-3">
         {proofImages.map((imageUrl, index) => (
-          <View
+          <Pressable
             key={`${imageUrl}-${index}`}
+            accessibilityRole="button"
+            accessibilityLabel={`View proof photo ${index + 1} of ${proofImages.length}`}
+            onPress={() => setActiveImageIndex(index)}
             className="overflow-hidden rounded-md bg-neutral-soft-grey-2"
             style={{ width: "47%", aspectRatio: 1 }}
           >
@@ -32,9 +39,16 @@ export function ProofImagesCard({ proofImages }: ProofImagesCardProps) {
               transition={150}
               style={{ width: "100%", height: "100%" }}
             />
-          </View>
+          </Pressable>
         ))}
       </View>
+
+      <FullScreenImageViewer
+        images={proofImages}
+        initialIndex={activeImageIndex ?? 0}
+        visible={activeImageIndex !== null}
+        onClose={() => setActiveImageIndex(null)}
+      />
     </OperationalCard>
   );
 }
