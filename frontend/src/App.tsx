@@ -109,7 +109,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/booking/:accommodationId',
-        element: <BookingFlow />
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+            <BookingFlow />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/my-bookings',
@@ -130,7 +134,7 @@ const router = createBrowserRouter([
       {
         path: '/feedback/:bookingId',
         element: (
-          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST]}>
             <CreateFeedback />
           </ProtectedRoute>
         )
