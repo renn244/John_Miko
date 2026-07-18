@@ -17,7 +17,10 @@ export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetErro
     return useMutation({
         mutationKey: ['auth', 'login'],
         mutationFn: async (data: LoginRequest) => {
-            const response = await apiClient.post('/auth/login', data);
+            const response = await apiClient.post('/auth/login', {
+                ...data,
+                rememberMe: true,
+            });
 
             if (response.status === 400) {
                 throw new ValidationError(response.data || "Validation Error");

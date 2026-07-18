@@ -1,4 +1,5 @@
 import { handleNestError, ValidationError } from "@/lib/handleNestError"
+import { clearAccessToken, saveAccessToken } from "@/lib/tokenStorage"
 import type { ChangePasswordDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, SignUpGuest, UpdateProfileDto } from "@/types/auth.types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { FieldValues, UseFormSetError } from "react-hook-form"
@@ -7,12 +8,21 @@ import { authApi } from "../api/auth/auth.api"
 
 export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetError<T>) => {
     return useMutation({
-        mutationFn: (data: LoginDto) => authApi.login(data),
-        onSuccess: (data, variable) => {
-            toast.success("Login successful");
-            localStorage.setItem("access_token", data.accessToken);
+        mutationFn: async (data: LoginDto) => {
+            const loginResponse = await authApi.login(data);
+            saveAccessToken(loginResponse.accessToken);
 
-            if(variable.userRole === 'admin') {
+            try {
+                return await authApi.getProfile();
+            } catch (error) {
+                clearAccessToken();
+                throw error;
+            }
+        },
+        onSuccess: (user) => {
+            toast.success("Login successful");
+
+            if(user.role === 'ADMIN') {
                 window.location.assign('/admin')
             } else {
                 window.location.assign('/')
@@ -33,7 +43,7 @@ export const useSignUpGuestMutation = <T extends  FieldValues>(setError: UseForm
         mutationFn: (data: SignUpGuest) => authApi.signUpGuest(data),
         onSuccess: (data) => {
             toast.success("Sign up successful.");
-            localStorage.setItem("access_token", data.accessToken);
+            saveAccessToken(data.accessToken);
 
             window.location.assign('/')
         },

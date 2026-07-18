@@ -2,8 +2,12 @@
 export type LoginDto = {
     email: string;
     password: string;
-    userRole: string;
+    userRole: "GUEST" | "ADMIN";
     rememberMe?: boolean;
+}
+
+export type LoginResponse = {
+    accessToken: string;
 }
 
 export type SignUpGuest = {
