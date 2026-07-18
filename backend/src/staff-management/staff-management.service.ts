@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { AuthSessionCacheService } from 'src/auth/auth-session-cache.service';
 import { Role } from 'src/generated/prisma/enums';
 import { UserWhereInput } from 'src/generated/prisma/models';
 import { ValidationException } from 'src/lib/exception/ValidationException';
@@ -14,6 +15,7 @@ export class StaffManagementService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly staffManagementEmailService: StaffManagementEmailService,
+        private readonly authSessionCache: AuthSessionCacheService,
     ) {}
 
     private readonly manageableRoles = [
@@ -126,6 +128,8 @@ export class StaffManagementService {
                 password: true,
             }
         })
+
+        await this.authSessionCache.invalidate(id);
         
         await this.staffManagementEmailService.sendRoleUpdatedEmail({
             name: updatedStaff.name,
@@ -147,6 +151,8 @@ export class StaffManagementService {
             omit: { password: true }
         });
 
+        await this.authSessionCache.invalidate(id);
+
         await this.staffManagementEmailService.sendDeactivatedEmail({
             name: deactivatedStaffUser.name,
             email: deactivatedStaffUser.email,
@@ -166,6 +172,8 @@ export class StaffManagementService {
             data: { status: 'ACTIVE' },
             omit: { password: true }
         })
+
+        await this.authSessionCache.invalidate(id);
 
         await this.staffManagementEmailService.sendReactivatedEmail({
             name: reactivatedStaffUser.name,

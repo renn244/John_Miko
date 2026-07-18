@@ -9,6 +9,7 @@ import { UserService } from 'src/user/user.service';
 import { SignUpGuestDto } from './dto/auth.dto';
 import { UpdateProfileDto } from './dto/updateProfile.dto';
 import { UpdatePasswordDto } from './dto/changePassword.dto';
+import { AuthSessionCacheService } from './auth-session-cache.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
         private readonly prisma: PrismaService,
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
+        private readonly authSessionCache: AuthSessionCacheService,
     ) {}
 
     async SignUpGuest(body: SignUpGuestDto) {
@@ -119,6 +121,8 @@ export class AuthService {
                 contactNo: body.contactNo
             }
         })
+
+        await this.authSessionCache.invalidate(user.id);
 
         return updatedUser;
     }

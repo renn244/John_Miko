@@ -11,6 +11,7 @@ import { UserStatus } from 'src/generated/prisma/client';
 import { IS_PUBLIC_KEY } from 'src/lib/decorators/Public.decorator';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthSessionCacheService } from 'src/auth/auth-session-cache.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -18,6 +19,7 @@ export class AuthGuard implements CanActivate {
     private reflector: Reflector,
     private jwtService: JwtService,
     private prisma: PrismaService,
+    private authSessionCache: AuthSessionCacheService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -51,25 +53,33 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    const currentUser = await this.prisma.user.findUnique({
-      where: { id: payload.id },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        status: true,
-      },
-    });
+    let currentUser = await this.authSessionCache.get(payload.id);
 
-    if (!currentUser || currentUser.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException('Session is no longer valid');
+    if (!currentUser) {
+      const userRecord = await this.prisma.user.findUnique({
+        where: { id: payload.id },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          status: true,
+        },
+      });
+
+      if (!userRecord || userRecord.status !== UserStatus.ACTIVE) {
+        throw new UnauthorizedException('Session is no longer valid');
+      }
+
+      currentUser = {
+        id: userRecord.id,
+        email: userRecord.email,
+        role: userRecord.role,
+      };
+
+      await this.authSessionCache.set(currentUser);
     }
 
-    request.user = {
-      id: currentUser.id,
-      email: currentUser.email,
-      role: currentUser.role,
-    } satisfies UserSession;
+    request.user = currentUser;
 
     return true;
   }
