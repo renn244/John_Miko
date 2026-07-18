@@ -68,13 +68,17 @@ export function FullScreenImageViewer({
   onClose,
 }: FullScreenImageViewerProps) {
   const insets = useSafeAreaInsets();
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const clampedInitialIndex = Math.min(
+    Math.max(initialIndex, 0),
+    Math.max(images.length - 1, 0),
+  );
+  const [currentIndex, setCurrentIndex] = useState(clampedInitialIndex);
 
   useEffect(() => {
     if (visible) {
-      setCurrentIndex(Math.min(Math.max(initialIndex, 0), Math.max(images.length - 1, 0)));
+      setCurrentIndex(clampedInitialIndex);
     }
-  }, [images.length, initialIndex, visible]);
+  }, [clampedInitialIndex, visible]);
 
   const renderItem = useCallback(
     (imageUrl: string) => <GalleryImage imageUrl={imageUrl} />,
@@ -96,9 +100,9 @@ export function FullScreenImageViewer({
 
         <View style={{ flex: 1, backgroundColor: "#000000" }}>
           <Gallery
-            key={`${images.length}-${initialIndex}`}
+            key={`${images.length}-${clampedInitialIndex}`}
             data={images}
-            initialIndex={currentIndex}
+            initialIndex={clampedInitialIndex}
             keyExtractor={(imageUrl, index) => `${imageUrl}-${index}`}
             renderItem={renderItem}
             maxScale={5}

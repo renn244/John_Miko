@@ -10,6 +10,7 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 type CloudinaryUploadProps = {
   onSuccess: (url: string) => void;
   onError?: (error: Error) => void;
+  onUploadingChange?: (isUploading: boolean) => void;
   disabled?: boolean;
 };
 
@@ -18,6 +19,7 @@ type ImageSource = "camera" | "library";
 export function CloudinaryUpload({
   onSuccess,
   onError,
+  onUploadingChange,
   disabled,
 }: CloudinaryUploadProps) {
   const { upload, reset, status, progress } = useCloudinaryUpload();
@@ -28,6 +30,8 @@ export function CloudinaryUpload({
   const handleAsset = async (asset?: ImagePicker.ImagePickerAsset) => {
     if (!asset) return;
 
+    onUploadingChange?.(true);
+
     try {
       const url = await upload(asset);
       onSuccess(url);
@@ -37,6 +41,7 @@ export function CloudinaryUpload({
       );
     } finally {
       reset();
+      onUploadingChange?.(false);
     }
   };
 

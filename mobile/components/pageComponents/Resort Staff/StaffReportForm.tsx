@@ -16,6 +16,7 @@ import { toast } from "@/lib/toast";
 import type { ReportSeverity, ReportType } from "@/types/staffReport.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, CheckCircle2, TriangleAlert } from "lucide-react-native";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -106,6 +107,7 @@ export default function StaffReportForm({
 
   const {
     control,
+    getValues,
     handleSubmit,
     formState: { errors },
   } = useForm<ReportFormValues>({
@@ -118,6 +120,7 @@ export default function StaffReportForm({
       proofImages: [],
     },
   });
+  const [isProofUploading, setIsProofUploading] = useState(false);
 
   const submit = async (values: ReportFormValues) => {
     if (!bookingId && values.type !== "maintenance") {
@@ -139,6 +142,7 @@ export default function StaffReportForm({
   };
 
   const isSubmitting = createReport.isPending;
+  const isFormBusy = isSubmitting || isProofUploading;
   const typeLabel = reportTypeLabels[effectiveType];
 
   return (
@@ -311,15 +315,18 @@ export default function StaffReportForm({
               <Field>
                 {field.value.length < 3 ? (
                   <CloudinaryUpload
-                    disabled={isSubmitting}
-                    onSuccess={(url) => field.onChange([...field.value, url])}
+                    disabled={isFormBusy}
+                    onUploadingChange={setIsProofUploading}
+                    onSuccess={(url) =>
+                      field.onChange([...getValues("proofImages"), url])
+                    }
                     onError={(error) => toast.error(error.message)}
                   />
                 ) : null}
 
                 <CloudinaryPreview
                   images={field.value}
-                  disabled={isSubmitting}
+                  disabled={isFormBusy}
                   onRemove={(index) =>
                     field.onChange(
                       field.value.filter(
@@ -351,7 +358,7 @@ export default function StaffReportForm({
       </View>
 
       <Button
-        disabled={isSubmitting}
+        disabled={isFormBusy}
         onPress={handleSubmit(submit)}
         className="rounded-md shadow-sm"
       >

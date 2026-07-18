@@ -5,7 +5,7 @@ import { useCompleteAllKitchenItemsMutation, useUpdateKitchenItemStatusMutation 
 import { KitchenOrder, KitchenOrderStatus } from '@/types/kitchenOrder.type';
 import { useRouter } from 'expo-router';
 import { UtensilsCrossed } from 'lucide-react-native';
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
 
 type PreOrderListProps = {
@@ -23,11 +23,13 @@ const PreOrderItemList = ({
 }: PreOrderListProps) => {
     const [isLoadingItemId, setIsLoadingItemId] = useState<string | null>(null);
     const [confirmCompleteAllOpen, setConfirmCompleteAllOpen] = useState(false);
+    const mutationLockedRef = useRef(false);
 
     const router = useRouter();
     
     const { mutate: updateItemStatus, isPending: isUpdatingItemStatus } = useUpdateKitchenItemStatusMutation();
     const { mutate: completeAllItems, isPending: isCompletingAllItems } = useCompleteAllKitchenItemsMutation();
+    const isMutating = isUpdatingItemStatus || isCompletingAllItems;
 
     const orderSummary = useMemo(() => {
         const items = order?.items ?? [];
@@ -45,8 +47,9 @@ const PreOrderItemList = ({
         itemId: string,
         currentStatus: KitchenOrderStatus
     ) => {
-        if (!order?.bookingId) return;
+        if (!order?.bookingId || isMutating || mutationLockedRef.current) return;
 
+        mutationLockedRef.current = true;
         setIsLoadingItemId(itemId);
         updateItemStatus(
             {
@@ -56,22 +59,28 @@ const PreOrderItemList = ({
             },
             {
                 onSettled: () => {
-                    setIsLoadingItemId(null);
+                    mutationLockedRef.current = false;
+                    setIsLoadingItemId((current) => current === itemId ? null : current);
                 },
             }
         );
     };
 
     const handleCompleteAll = () => {
-        if (!order?.bookingId || orderSummary.allCompleted) return;
+        if (!order?.bookingId || orderSummary.allCompleted || isMutating || mutationLockedRef.current) return;
         setConfirmCompleteAllOpen(true);
     };
 
     const confirmCompleteAll = () => {
-        if (!order?.bookingId) return;
+        if (!order?.bookingId || isMutating || mutationLockedRef.current) return;
 
+        mutationLockedRef.current = true;
         setConfirmCompleteAllOpen(false);
-        completeAllItems(order.bookingId);
+        completeAllItems(order.bookingId, {
+            onSettled: () => {
+                mutationLockedRef.current = false;
+            },
+        });
     };
 
     const hasItems = order.items.length > 0;
@@ -101,8 +110,7 @@ const PreOrderItemList = ({
                     variant="outline"
                     onPress={handleCompleteAll}
                     disabled={
-                        isCompletingAllItems ||
-                        isUpdatingItemStatus ||
+                        isMutating ||
                         orderSummary.allCompleted
                     }
                     className="self-start"
@@ -145,7 +153,7 @@ const PreOrderItemList = ({
                                     <Button
                                         size="sm"
                                         variant={isCompleted ? "outline" : "default"}
-                                        disabled={isLoadingThisItem}
+                                        disabled={isMutating}
                                         onPress={() => handleToggleItemStatus(item.id, item.status)}
                                         className={isCompleted ? "px-4" : "px-5"}
                                     >
@@ -224,6 +232,7 @@ const PreOrderItemList = ({
                             <Button
                                 size="sm"
                                 className="flex-1"
+                                disabled={isMutating}
                                 onPress={confirmCompleteAll}
                             >
                                 <Text className="font-sans-semibold text-base text-white">

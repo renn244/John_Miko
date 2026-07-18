@@ -25,6 +25,10 @@ export default function Index() {
         if (!isActive) return;
 
         router.replace(seen ? "/login" : "/onboarding");
+      } catch {
+        if (isActive) {
+          router.replace("/login");
+        }
       } finally {
         if (isActive) {
           setIsChecking(false);
@@ -32,7 +36,7 @@ export default function Index() {
       }
     };
 
-    checkIntro();
+    void checkIntro();
 
     return () => {
       isActive = false;
