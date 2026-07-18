@@ -2,13 +2,13 @@ import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import OperationalCard from "@/components/ui/operational-card";
 import ScreenState from "@/components/ui/screen-state";
 import { useAssignedMaintenances } from "@/hooks/maintenance.hook";
-import { useMaintenanceTicketsFilterStore } from "@/store/maintenanceTicketsFilter.store";
+import useDebouncedValue from "@/lib/useDebounce";
 import {
   AlertTriangle,
   SearchX,
   Wrench
 } from "lucide-react-native";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -33,9 +33,9 @@ export default function AssignedMaintenanceListScreen({
   emptyTitle,
   emptyDescription,
 }: AssignedMaintenanceListScreenProps) {
-  const search = useMaintenanceTicketsFilterStore((state) => state.search);
-  const setSearch = useMaintenanceTicketsFilterStore((state) => state.setSearch);
-  
+  const [searchInput, setSearchInput] = useState("");
+  const search = useDebouncedValue(searchInput, 350);
+
   const query = useAssignedMaintenances(scope, search);
 
   const tickets = useMemo(
@@ -54,43 +54,50 @@ export default function AssignedMaintenanceListScreen({
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-      {query.isLoading ? (
-        <FlatList
-          data={[1, 2, 3]}
-          keyExtractor={(item) => String(item)}
-          ListHeaderComponent={() => <MaintenanceListHeader tickets={tickets} scope={scope} title={title} description={description} />}
-          renderItem={() => <MaintenanceSkeletonCard />}
-          contentContainerStyle={{ paddingBottom: 24, gap: 0 }}
-        />
-      ) : (
-        <FlatList
-          data={tickets}
-          keyExtractor={(item) => item.id}
-          renderItem={(data) => (
-            <TicketCard
-              item={data.item}
-              detailHref={`${detailHrefBase}/${data.item.id}`}
-            />
-          )}
-          ListHeaderComponent={() => <MaintenanceListHeader tickets={tickets} scope={scope} title={title} description={description} />}
-          contentContainerStyle={{ paddingBottom: 24 }}
-          refreshControl={
-            <RefreshControl refreshing={query.isRefetching} onRefresh={onRefresh} />
+      <FlatList
+        data={tickets}
+        keyExtractor={(item) => item.id}
+        renderItem={(data) => (
+          <TicketCard
+            item={data.item}
+            detailHref={`${detailHrefBase}/${data.item.id}`}
+          />
+        )}
+        ListHeaderComponent={
+          <MaintenanceListHeader
+            tickets={tickets}
+            scope={scope}
+            title={title}
+            description={description}
+            searchValue={searchInput}
+            onSearchChange={setSearchInput}
+          />
+        }
+        contentContainerStyle={{ paddingBottom: 24 }}
+        refreshControl={
+          <RefreshControl refreshing={query.isRefetching} onRefresh={onRefresh} />
+        }
+        onEndReached={() => {
+          if (query.hasNextPage && !query.isFetchingNextPage) {
+            query.fetchNextPage();
           }
-          onEndReached={() => {
-            if (query.hasNextPage && !query.isFetchingNextPage) {
-              query.fetchNextPage();
-            }
-          }}
-          onEndReachedThreshold={0.3}
-          ListFooterComponent={
-            query.isFetchingNextPage ? (
-              <View className="py-4">
-                <ActivityIndicator />
-              </View>
-            ) : null
-          }
-          ListEmptyComponent={
+        }}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          query.isFetchingNextPage ? (
+            <View className="py-4">
+              <ActivityIndicator />
+            </View>
+          ) : null
+        }
+        ListEmptyComponent={
+          query.isLoading ? (
+            <View className="pt-1">
+              {[1, 2, 3].map((item) => (
+                <MaintenanceSkeletonCard key={item} />
+              ))}
+            </View>
+          ) : (
             <View className="px-5 py-8">
               {query.error ? (
                 <ScreenState
@@ -108,7 +115,7 @@ export default function AssignedMaintenanceListScreen({
                   title="No tickets found"
                   description="Try a different ticket ID or title."
                   actionLabel="Clear search"
-                  onAction={() => setSearch("")}
+                  onAction={() => setSearchInput("")}
                 />
               ) : (
                 <ScreenState
@@ -119,9 +126,9 @@ export default function AssignedMaintenanceListScreen({
                 />
               )}
             </View>
-          }
-        />
-      )}
+          )
+        }
+      />
     </CustomSafeAreaView>
   );
 }

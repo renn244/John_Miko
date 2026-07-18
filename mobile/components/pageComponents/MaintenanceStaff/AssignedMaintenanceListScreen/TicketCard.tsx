@@ -5,8 +5,7 @@ import { format, isToday, isYesterday } from 'date-fns'
 import { useRouter } from 'expo-router'
 import { ChevronRight } from 'lucide-react-native'
 import React from 'react'
-import { Text } from 'react-native'
-import { View } from 'react-native/Libraries/Components/View/View'
+import { Text, View } from 'react-native'
 
 const priorityAccentClassName: Record<MaintenancePriority, string> = {
     Low: "bg-primary",

@@ -1,14 +1,19 @@
+import { FullScreenImageViewer } from '@/components/common/FullScreenImageViewer';
 import OperationalCard from '@/components/ui/operational-card';
 import type { AssignedMaintenanceDetail } from '@/types/maintenance.type';
 import { Image } from 'expo-image';
 import { ImageOff } from 'lucide-react-native';
-import { Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 type ResolutionDetailsProps = {
   maintenance: AssignedMaintenanceDetail;
 };
 
 export function ResolutionDetails({ maintenance }: ResolutionDetailsProps) {
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const resolutionProofImages = maintenance.resolutionProofImages ?? [];
+
   return (
     <OperationalCard contentClassName="gap-3 px-4 py-4">
       <Text className="font-sans-bold text-lg text-neutral-dark-1">
@@ -18,15 +23,22 @@ export function ResolutionDetails({ maintenance }: ResolutionDetailsProps) {
         {maintenance.resolutionNotes}
       </Text>
 
-      {maintenance.resolutionProofImages?.length ? (
+      {resolutionProofImages.length ? (
         <View className="flex-row gap-2">
-          {maintenance.resolutionProofImages.slice(0, 3).map((imageUrl, index) => (
-            <Image
+          {resolutionProofImages.slice(0, 3).map((imageUrl, index) => (
+            <Pressable
               key={`${imageUrl}-${index}`}
-              source={imageUrl}
-              contentFit="cover"
-              style={{ flex: 1, height: 90, borderRadius: 6 }}
-            />
+              accessibilityRole="button"
+              accessibilityLabel={`View resolution proof photo ${index + 1} of ${resolutionProofImages.length}`}
+              onPress={() => setActiveImageIndex(index)}
+              style={{ flex: 1, height: 90, borderRadius: 6, overflow: 'hidden' }}
+            >
+              <Image
+                source={imageUrl}
+                contentFit="cover"
+                style={{ width: '100%', height: '100%' }}
+              />
+            </Pressable>
           ))}
         </View>
       ) : (
@@ -37,6 +49,13 @@ export function ResolutionDetails({ maintenance }: ResolutionDetailsProps) {
           </Text>
         </View>
       )}
+
+      <FullScreenImageViewer
+        images={resolutionProofImages}
+        initialIndex={activeImageIndex ?? 0}
+        visible={activeImageIndex !== null}
+        onClose={() => setActiveImageIndex(null)}
+      />
     </OperationalCard>
   );
 }
