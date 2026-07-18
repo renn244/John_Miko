@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button'
+import { useResortRoleTourTargets } from '@/hooks/roleTours/useResortRoleTourTargets'
 import StatusChip, { StatusChipTone } from '@/components/ui/status-chip'
 import { useStaffReportsFilterStore } from '@/store/staffReportsFilter.store'
 import { useRouter } from 'expo-router'
@@ -12,6 +13,7 @@ type ReportListFilterProps = {
 }
 
 const ReportsListFilter = ({ setFilterOpen }: ReportListFilterProps) => {
+    const { reportsFilterTargetProps, reportsHeaderTargetProps } = useResortRoleTourTargets();
     const setStatus = useStaffReportsFilterStore((state) => state.setStatus)
     const setType = useStaffReportsFilterStore((state) => state.setType)
     const setSeverity = useStaffReportsFilterStore((state) => state.setSeverity)
@@ -26,7 +28,7 @@ const ReportsListFilter = ({ setFilterOpen }: ReportListFilterProps) => {
     return (
         <View className="gap-4 border-b border-neutral-soft-grey-2 bg-neutral-soft-grey-3 px-5 pb-4 pt-4">
             <View className="flex-row items-center justify-between gap-4">
-                <View className="flex-1">
+                <View className="flex-1" {...reportsHeaderTargetProps}>
                 <Text className="font-sans-bold text-2xl text-neutral-dark-1">
                     My reports
                 </Text>
@@ -36,6 +38,7 @@ const ReportsListFilter = ({ setFilterOpen }: ReportListFilterProps) => {
                 </View>
                 <Button
                     size="icon"
+                    accessibilityLabel="Create report"
                     className="h-11 w-11 rounded-md"
                     onPress={() => router.push("/resort-staff/new-report")}
                 >
@@ -45,6 +48,7 @@ const ReportsListFilter = ({ setFilterOpen }: ReportListFilterProps) => {
 
             <View className="flex-row flex-wrap items-center gap-2">
                 <Pressable
+                    {...reportsFilterTargetProps}
                     onPress={() => setFilterOpen(true)}
                     className="h-10 flex-row items-center gap-2 rounded-full border border-neutral-soft-grey-1 bg-white px-4"
                 >
@@ -98,6 +102,9 @@ function ActiveFilterChip({
 }) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Remove ${label} filter`}
+      hitSlop={4}
       onPress={onClear}
       className="rounded-full"
     >

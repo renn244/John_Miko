@@ -2,8 +2,10 @@ import BookingCard from "@/components/pageComponents/Resort Staff/BookingList/Bo
 import BookingListFilter from "@/components/pageComponents/Resort Staff/BookingList/BookingListFilter";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import ScreenState from "@/components/ui/screen-state";
+import StatusChip from "@/components/ui/status-chip";
 import { useStaffBookings } from "@/hooks/staffBookings.hook";
 import { useStaffReportsBookingFilterStore } from "@/store/staffReportsBooking.store";
+import { useRoleTourAutoStart } from "@/hooks/roleTours/useRoleTourAutoStart";
 import { SearchX, WifiOff } from "lucide-react-native";
 import { useMemo } from "react";
 import {
@@ -32,6 +34,7 @@ const getManilaDateKey = () => {
 };
 
 export default function ResortStaffBookingsScreen() {
+  useRoleTourAutoStart("RESORT_STAFF");
   const search = useStaffReportsBookingFilterStore((state) => state.search);
 
   const query = useStaffBookings(search);
@@ -56,17 +59,11 @@ export default function ResortStaffBookingsScreen() {
     ];
   }, [bookings, todayKey]);
 
-  const todayCount = sections.find((section) => section.title === "Today")?.data.length ?? 0;
-  const upcomingCount = sections.find((section) => section.title === "Upcoming")?.data.length ?? 0;
-
   const hasSearch = search.trim().length > 0;
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
-      <BookingListFilter 
-      todayCount={todayCount}
-      upcomingCount={upcomingCount}
-      />
+      <BookingListFilter />
 
       {query.isLoading ? (
         <LoadingState />
@@ -77,9 +74,11 @@ export default function ResortStaffBookingsScreen() {
           renderItem={({ item }) => <BookingCard item={item} todayKey={todayKey} />}
           renderSectionHeader={({ section }) => (
             <View className="bg-neutral-soft-grey-3 pb-2 pt-3">
-              <Text className="font-sans-semibold text-lg text-neutral-dark-1">
-                {section.title} ({section.data.length})
-              </Text>
+              <StatusChip
+                label={`${section.title} ${section.data.length}`}
+                tone={section.title === "Today" ? "pending" : "primary"}
+                size="md"
+              />
             </View>
           )}
           stickySectionHeadersEnabled={false}

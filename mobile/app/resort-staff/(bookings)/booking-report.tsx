@@ -1,8 +1,9 @@
 import StaffReportForm from "@/components/pageComponents/Resort Staff/StaffReportForm";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
+import ScreenState from "@/components/ui/screen-state";
 import type { ReportType } from "@/types/staffReport.type";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
+import { AlertTriangle, ArrowLeft } from "lucide-react-native";
 import { useCallback, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
@@ -14,7 +15,9 @@ export default function BookingLinkedReportScreen() {
   const [formInstanceKey, setFormInstanceKey] = useState(0);
 
   const bookingId =
-    typeof params.bookingId === "string" ? params.bookingId : undefined;
+    typeof params.bookingId === "string" && params.bookingId.trim()
+      ? params.bookingId.trim()
+      : undefined;
   const initialType = reportTypes.includes(params.type as ReportType)
     ? (params.type as ReportType)
     : undefined;
@@ -24,6 +27,30 @@ export default function BookingLinkedReportScreen() {
       setFormInstanceKey((current) => current + 1);
     }, []),
   );
+
+  if (!bookingId || !initialType) {
+    return (
+      <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
+        <View className="flex-1 justify-center px-6">
+          <ScreenState
+            icon={<AlertTriangle size={24} color="#AB091E" />}
+            tone="danger"
+            title="Report link is invalid"
+            description="Open a booking and choose a report type to continue."
+            actionLabel="Go back"
+            onAction={() => {
+              if (router.canGoBack()) {
+                router.back();
+                return;
+              }
+
+              router.replace("/resort-staff/(bookings)");
+            }}
+          />
+        </View>
+      </CustomSafeAreaView>
+    );
+  }
 
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
@@ -40,6 +67,9 @@ export default function BookingLinkedReportScreen() {
       >
         <View className="flex-row items-start gap-3">
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            hitSlop={6}
             onPress={() => router.back()}
             className="h-9 w-9 items-center justify-center"
           >
@@ -56,7 +86,7 @@ export default function BookingLinkedReportScreen() {
         </View>
 
         <StaffReportForm
-          key={`booking-${bookingId ?? "none"}-${initialType ?? "maintenance"}-${formInstanceKey}`}
+          key={`booking-${bookingId}-${initialType}-${formInstanceKey}`}
           bookingId={bookingId}
           initialType={initialType}
           onCreated={(reportId) =>

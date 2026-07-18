@@ -1,39 +1,35 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/Button";
+import { AppBottomSheet } from "@/components/ui/bottom-sheet";
 import { useKitchenPreOrdersFilterStore } from "@/store/kitchenPreOrdersFilter.store";
-import { addDays, format } from "date-fns";
-import { CalendarDays, Search, X } from "lucide-react-native";
+import { useKitchenRoleTourTargets } from "@/hooks/roleTours/useKitchenRoleTourTargets";
+import { buildCalendar } from "@marceloterreiro/flash-calendar";
+import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
+import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
-const isDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+const getCalendarMonth = (dateId: string) => {
+  if (!dateId) return startOfMonth(new Date());
+
+  const parsed = parseISO(dateId);
+  return Number.isNaN(parsed.getTime()) ? startOfMonth(new Date()) : startOfMonth(parsed);
+};
 
 export default function PreOrderFilters() {
+  const { preOrderSearchTargetProps, dateFilterTargetProps } = useKitchenRoleTourTargets();
   const search = useKitchenPreOrdersFilterStore((s) => s.search);
   const date = useKitchenPreOrdersFilterStore((s) => s.date);
   const setSearch = useKitchenPreOrdersFilterStore((s) => s.setSearch);
   const setDate = useKitchenPreOrdersFilterStore((s) => s.setDate);
   const [dateOpen, setDateOpen] = useState(false);
-  const [draftDate, setDraftDate] = useState(date);
-
-  const dateInvalid = useMemo(
-    () => draftDate.trim().length > 0 && !isDateOnly(draftDate.trim()),
-    [draftDate]
-  );
+  const [draftDate, setDraftDate] = useState<string | undefined>();
+  const [calendarMonth, setCalendarMonth] = useState(() => getCalendarMonth(date));
 
   const openDateSheet = () => {
-    setDraftDate(date);
+    setDraftDate(date || undefined);
+    setCalendarMonth(getCalendarMonth(date));
     setDateOpen(true);
-  };
-
-  const applyDate = () => {
-    if (dateInvalid) return;
-    setDate(draftDate.trim());
-    setDateOpen(false);
-  };
-
-  const setQuickDate = (offsetDays: number) => {
-    setDraftDate(format(addDays(new Date(), offsetDays), "yyyy-MM-dd"));
   };
 
   return (
@@ -41,9 +37,9 @@ export default function PreOrderFilters() {
       <View className="flex-row items-center gap-2">
         <View className="flex-1">
           <Input
-            size="sm"
+            {...preOrderSearchTargetProps}
             surface="white"
-            placeholder="Search guest or booking reference"
+            placeholder="Search guest or ref."
             value={search}
             onChangeText={setSearch}
             autoCapitalize="none"
@@ -53,6 +49,10 @@ export default function PreOrderFilters() {
           />
         </View>
         <Pressable
+          {...dateFilterTargetProps}
+          accessibilityRole="button"
+          accessibilityLabel="Filter pre-orders by date"
+          hitSlop={4}
           onPress={openDateSheet}
           className={`h-10 w-10 items-center justify-center rounded-sm border ${
             date ? "border-primary bg-primary/10" : "border-neutral-soft-grey-1 bg-white"
@@ -75,122 +75,158 @@ export default function PreOrderFilters() {
         </View>
       ) : null}
 
-      <Modal
-        visible={dateOpen}
-        transparent
-        animationType="slide"
-        statusBarTranslucent
-        onRequestClose={() => setDateOpen(false)}
+      <AppBottomSheet
+        open={dateOpen}
+        onClose={() => setDateOpen(false)}
+        title="Filter by date"
       >
-        <View className="flex-1 justify-end bg-black/35">
-          <Pressable className="flex-1" onPress={() => setDateOpen(false)} />
-          <View className="gap-5 rounded-t-3xl border border-neutral-soft-grey-2 bg-white px-5 pb-7 pt-5">
-            <View className="flex-row items-center justify-between">
-              <Text className="font-sans-bold text-xl text-neutral-dark-1">
-                Filter by date
-              </Text>
-              <Pressable
-                onPress={() => setDateOpen(false)}
-                className="h-9 w-9 items-center justify-center rounded-full bg-neutral-soft-grey-3"
-              >
-                <X size={19} color="#1F2933" />
-              </Pressable>
-            </View>
+        <View className="gap-5">
+          <DateCalendar
+            calendarMonth={calendarMonth}
+            onMonthChange={setCalendarMonth}
+            onSelectDate={setDraftDate}
+            selectedDate={draftDate}
+          />
 
-            <View className="gap-3">
-              <Text className="text-sm uppercase tracking-wide text-neutral-grey-1">
-                Quick select
+          <View className="flex-row gap-3 border-t border-neutral-soft-grey-2 pt-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1"
+              onPress={() => {
+                setDate("");
+                setDateOpen(false);
+              }}
+            >
+              <Text className="font-sans-semibold text-base text-neutral-dark-1">
+                Clear date
               </Text>
-              <View className="flex-row gap-2">
-                <QuickDateButton
-                  label="Today"
-                  selected={draftDate === format(new Date(), "yyyy-MM-dd")}
-                  onPress={() => setQuickDate(0)}
-                />
-                <QuickDateButton
-                  label="Tomorrow"
-                  selected={draftDate === format(addDays(new Date(), 1), "yyyy-MM-dd")}
-                  onPress={() => setQuickDate(1)}
-                />
-              </View>
-            </View>
-
-            <View className="gap-2">
-              <Text className="text-sm uppercase tracking-wide text-neutral-grey-1">
-                Date
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1"
+              disabled={!draftDate}
+              onPress={() => {
+                if (!draftDate) return;
+                setDate(draftDate);
+                setDateOpen(false);
+              }}
+            >
+              <Text className="font-sans-semibold text-base text-white">
+                Apply
               </Text>
-              <Input
-                size="sm"
-                surface="white"
-                placeholder="YYYY-MM-DD"
-                value={draftDate}
-                onChangeText={setDraftDate}
-                autoCapitalize="none"
-                autoCorrect={false}
-                invalid={dateInvalid}
-                leftIcon={<CalendarDays size={18} color="#9FA8B1" />}
-              />
-              <Text className={dateInvalid ? "text-sm text-system-red" : "text-sm text-neutral-grey-1"}>
-                {dateInvalid ? "Use YYYY-MM-DD" : "Leave blank to show all dates."}
-              </Text>
-            </View>
-
-            <View className="flex-row gap-3 border-t border-neutral-soft-grey-2 pt-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex-1"
-                onPress={() => {
-                  setDraftDate("");
-                  setDate("");
-                  setDateOpen(false);
-                }}
-              >
-                <Text className="font-sans-semibold text-base text-neutral-dark-1">
-                  Clear date
-                </Text>
-              </Button>
-              <Button
-                size="sm"
-                className="flex-1"
-                disabled={dateInvalid}
-                onPress={applyDate}
-              >
-                <Text className="font-sans-semibold text-base text-white">
-                  Apply
-                </Text>
-              </Button>
-            </View>
+            </Button>
           </View>
         </View>
-      </Modal>
+      </AppBottomSheet>
     </>
   );
 }
 
-function QuickDateButton({
-  label,
-  selected,
-  onPress,
+function DateCalendar({
+  calendarMonth,
+  onMonthChange,
+  onSelectDate,
+  selectedDate,
 }: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
+  calendarMonth: Date;
+  onMonthChange: (month: Date) => void;
+  onSelectDate: (dateId: string) => void;
+  selectedDate?: string;
 }) {
+  const { weekDaysList, weeksList } = useMemo(
+    () =>
+      buildCalendar({
+        calendarFirstDayOfWeek: "sunday",
+        calendarMonthId: format(calendarMonth, "yyyy-MM-dd"),
+      }),
+    [calendarMonth],
+  );
+  const todayId = format(new Date(), "yyyy-MM-dd");
+
+  const handleDayPress = (dateId: string) => {
+    onSelectDate(dateId);
+
+    const selectedMonth = getCalendarMonth(dateId);
+    if (format(selectedMonth, "yyyy-MM") !== format(calendarMonth, "yyyy-MM")) {
+      onMonthChange(selectedMonth);
+    }
+  };
+
   return (
-    <Pressable
-      onPress={onPress}
-      className={`h-10 flex-1 items-center justify-center rounded-sm border ${
-        selected ? "border-primary bg-primary" : "border-neutral-soft-grey-1 bg-white"
-      }`}
-    >
-      <Text
-        className={`font-sans-semibold text-base ${
-          selected ? "text-white" : "text-neutral-dark-2"
-        }`}
-      >
-        {label}
-      </Text>
-    </Pressable>
+    <View className="gap-3">
+      <View className="flex-row items-center justify-between">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Previous month"
+          hitSlop={4}
+          className="size-9 items-center justify-center rounded-md bg-neutral-soft-grey-3"
+          onPress={() => onMonthChange(subMonths(calendarMonth, 1))}
+        >
+          <ChevronLeft size={18} color="#1F2933" />
+        </Pressable>
+        <Text className="font-sans-bold text-base text-neutral-dark-1">
+          {format(calendarMonth, "MMMM yyyy")}
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Next month"
+          hitSlop={4}
+          className="size-9 items-center justify-center rounded-md bg-neutral-soft-grey-3"
+          onPress={() => onMonthChange(addMonths(calendarMonth, 1))}
+        >
+          <ChevronRight size={18} color="#1F2933" />
+        </Pressable>
+      </View>
+
+      <View className="flex-row gap-1">
+        {weekDaysList.map((label, index) => (
+          <Text key={`${label}-${index}`} className="flex-1 text-center font-sans-medium text-sm text-neutral-grey-1">
+            {label}
+          </Text>
+        ))}
+      </View>
+
+      <View className="gap-1">
+        {weeksList.map((week, weekIndex) => (
+          <View key={weekIndex} className="flex-row gap-1">
+            {week.map((day) => {
+              const selected = day.id === selectedDate;
+              const today = day.id === todayId;
+
+              return (
+                <Pressable
+                  key={day.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={day.id}
+                  className={`h-10 flex-1 items-center justify-center rounded-md ${
+                    selected
+                      ? "bg-primary"
+                      : today
+                        ? "border border-primary bg-primary/5"
+                        : ""
+                  }`}
+                  onPress={() => handleDayPress(day.id)}
+                >
+                  <Text
+                    className={`font-sans-semibold text-base ${
+                      selected
+                        ? "text-white"
+                        : today
+                          ? "text-primary"
+                          : day.isDifferentMonth
+                            ? "text-neutral-grey-1"
+                            : "text-neutral-dark-1"
+                    }`}
+                  >
+                    {day.displayLabel}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }

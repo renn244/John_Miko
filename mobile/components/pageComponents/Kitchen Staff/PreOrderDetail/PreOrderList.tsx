@@ -6,7 +6,7 @@ import { KitchenOrder, KitchenOrderStatus } from '@/types/kitchenOrder.type';
 import { useRouter } from 'expo-router';
 import { UtensilsCrossed } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
 
 type PreOrderListProps = {
     order: KitchenOrder
@@ -22,11 +22,12 @@ const PreOrderItemList = ({
     order
 }: PreOrderListProps) => {
     const [isLoadingItemId, setIsLoadingItemId] = useState<string | null>(null);
+    const [confirmCompleteAllOpen, setConfirmCompleteAllOpen] = useState(false);
 
     const router = useRouter();
     
-    const { mutateAsync: updateItemStatus, isPending: isUpdatingItemStatus } = useUpdateKitchenItemStatusMutation();
-    const { mutateAsync: completeAllItems, isPending: isCompletingAllItems } = useCompleteAllKitchenItemsMutation();
+    const { mutate: updateItemStatus, isPending: isUpdatingItemStatus } = useUpdateKitchenItemStatusMutation();
+    const { mutate: completeAllItems, isPending: isCompletingAllItems } = useCompleteAllKitchenItemsMutation();
 
     const orderSummary = useMemo(() => {
         const items = order?.items ?? [];
@@ -40,14 +41,14 @@ const PreOrderItemList = ({
         };
     }, [order?.items]);
 
-    const handleToggleItemStatus = async (
+    const handleToggleItemStatus = (
         itemId: string,
         currentStatus: KitchenOrderStatus
     ) => {
         if (!order?.bookingId) return;
 
         setIsLoadingItemId(itemId);
-        await updateItemStatus(
+        updateItemStatus(
             {
                 bookingId: order.bookingId,
                 itemId,
@@ -63,18 +64,14 @@ const PreOrderItemList = ({
 
     const handleCompleteAll = () => {
         if (!order?.bookingId || orderSummary.allCompleted) return;
+        setConfirmCompleteAllOpen(true);
+    };
 
-        Alert.alert(
-            "Mark all as done?",
-            "This will mark every pre-order item in this booking as completed.",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                text: "Mark all done",
-                onPress: () => completeAllItems(order.bookingId),
-                },
-            ]
-        );
+    const confirmCompleteAll = () => {
+        if (!order?.bookingId) return;
+
+        setConfirmCompleteAllOpen(false);
+        completeAllItems(order.bookingId);
     };
 
     const hasItems = order.items.length > 0;
@@ -191,6 +188,52 @@ const PreOrderItemList = ({
                     </Button>
                 </OperationalCard>
             )}
+
+            <Modal
+                transparent
+                animationType="fade"
+                visible={confirmCompleteAllOpen}
+                statusBarTranslucent
+                onRequestClose={() => setConfirmCompleteAllOpen(false)}
+            >
+                <View className="flex-1 items-center justify-center px-5">
+                    <Pressable
+                        className="absolute inset-0 bg-black/30"
+                        onPress={() => setConfirmCompleteAllOpen(false)}
+                    />
+                    <View className="w-full max-w-[360px] rounded-3xl bg-white px-6 py-5 shadow-lg">
+                        <View className="gap-2">
+                            <Text className="font-sans-bold text-xl text-neutral-dark-1">
+                                Mark all as done?
+                            </Text>
+                            <Text className="text-base leading-6 text-neutral-grey-1">
+                                This will mark every pre-order item in this booking as completed.
+                            </Text>
+                        </View>
+                        <View className="mt-6 flex-row gap-3">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                onPress={() => setConfirmCompleteAllOpen(false)}
+                            >
+                                <Text className="font-sans-semibold text-base text-neutral-dark-1">
+                                    Cancel
+                                </Text>
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="flex-1"
+                                onPress={confirmCompleteAll}
+                            >
+                                <Text className="font-sans-semibold text-base text-white">
+                                    Mark all done
+                                </Text>
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 }
