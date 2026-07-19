@@ -175,16 +175,18 @@ export class BookingService {
             throw new NotFoundException('Accommodation not found');
         }
 
-        if(body.numberOfGuests < 1) {
+        const numberOfGuests = body.adultGuests + body.seniorGuests + body.kidGuests;
+
+        if(numberOfGuests < 1) {
             throw new ValidationException({
-                field: 'numberOfGuests',
+                field: 'adultGuests',
                 message: ['at least 1 guest is required']
             });
         }
 
-        if(body.numberOfGuests > accommodation.capacity) {
+        if(numberOfGuests > accommodation.capacity) {
             throw new ValidationException({
-                field: 'numberOfGuests',
+                field: 'adultGuests',
                 message: [`Maximum capacity for ${accommodation.name} is ${accommodation.capacity} guests`]
             });
         }
@@ -196,9 +198,6 @@ export class BookingService {
             const bookingPayload = {
                 ...body,
                 email: body.email.trim().toLowerCase(),
-                adultGuests: body.numberOfGuests,
-                kidGuests: 0,
-                seniorGuests: 0,
             };
 
             const createdBooking = await this.createBooking(
@@ -235,6 +234,7 @@ export class BookingService {
                 preOrderFee: 0,
                 addOnServiceFee: 0,
                 paymentType: body.paymentType,
+                proofImageUrl: body.proofImageUrl,
                 verifiedById: user.id,
             }, txprisma);
 

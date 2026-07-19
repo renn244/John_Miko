@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, ValidateNested } from "class-validator";
+import { IsArray, IsDate, IsEmail, IsEnum, IsInt, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, Min, ValidateNested } from "class-validator";
 import { BookingStatus, PaymentType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
@@ -56,7 +56,7 @@ export class CreateBookingDto {
     @IsString()
     @IsOptional()
     specialRequest?: string;
-    
+
     @IsString()
     @IsNotEmpty({ message: "Stay option is required" })
     stayOptionId!: string;
@@ -113,13 +113,28 @@ export class CreateManualBookingDto {
     contactNo!: string;
 
     @Type(() => Number)
-    @IsNumber()
-    @IsNotEmpty({ message: "numberOfGuests is required" })
-    numberOfGuests!: number;
+    @IsInt()
+    @Min(0)
+    adultGuests!: number;
+
+    @Type(() => Number)
+    @IsInt()
+    @Min(0)
+    kidGuests!: number;
+
+    @Type(() => Number)
+    @IsInt()
+    @Min(0)
+    seniorGuests!: number;
 
     @IsString()
     @IsOptional()
     specialRequest?: string;
+
+    @IsString()
+    @IsUrl()
+    @IsOptional()
+    proofImageUrl?: string;
 
     @IsString()
     @IsNotEmpty({ message: "Stay option is required" })

@@ -8,7 +8,11 @@ export type CreateManualBookingDto = {
     name: string;
     email: string;
     contactNo: string;
-    numberOfGuests: number;
+    adultGuests: number;
+    seniorGuests: number;
+    kidGuests: number;
+    specialRequest?: string;
+    proofImageUrl?: string;
     checkIn: Date;
     stayOptionId: string;
     paymentType: "Partial" | "Full";

@@ -1,5 +1,7 @@
 import AvailabilityCalendar from "@/components/common/AvailabilityCalendar";
 import AvailabilityStayType from "@/components/common/AvailabilityStayType";
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field";
@@ -7,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
 import { useCreateBookingAdminMutation } from "@/hooks/admin/booking.hook";
 import { isSameDateOnly } from "@/lib/date.util";
@@ -14,23 +17,37 @@ import { getErrorMessages } from "@/lib/getErrorMessages";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, CheckCircle, Users } from "lucide-react";
+import { Calendar as CalendarIcon, CheckCircle, Minus, Plus, Users } from "lucide-react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import z from "zod";
 
+const guestCountSchema = z.number().int().min(0, "Guest count cannot be negative");
+
 const ManualBookingSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.email().nonempty("Email is required"),
-    contactNo: z.string().nonempty("Contact number is required"),
-    numberOfGuests: z.number().min(1, "At least one guest is required"),
+    contactNo: z.string().nonempty("Contact number is required").regex(/^[0-9]{10,15}$/, "Phone number must be between 10 and 15 digits"),
+    adultGuests: guestCountSchema,
+    seniorGuests: guestCountSchema,
+    kidGuests: guestCountSchema,
+    specialRequest: z.string().optional(),
+    proofImageUrl: z.url().or(z.literal("")).optional(),
     accommodationId: z.string().nonempty("Accommodation is required"),
 
     checkIn: z.date().nonoptional("Check-in date is required"),
     stayOptionId: z.string().nonempty("Stay option is required"),
 
     paymentType: z.enum(['Partial', 'Full']).nonoptional("Payment type is required"),
+}).superRefine((data, context) => {
+    if(data.adultGuests + data.seniorGuests + data.kidGuests < 1) {
+        context.addIssue({
+            code: "custom",
+            path: ["adultGuests"],
+            message: "At least one guest is required",
+        });
+    }
 })
 
 type manualBookingSchema = z.infer<typeof ManualBookingSchema>;
@@ -48,7 +65,11 @@ const ManualBookingForm = () => {
             name: "",
             email: "",
             contactNo: "",
-            numberOfGuests: 1,
+            adultGuests: 1,
+            seniorGuests: 0,
+            kidGuests: 0,
+            specialRequest: "",
+            proofImageUrl: "",
             accommodationId: "",
             checkIn: undefined,
             stayOptionId: undefined,
@@ -64,13 +85,18 @@ const ManualBookingForm = () => {
     const selectedCheckInDate = useWatch({ control, name: 'checkIn' });
     const selectedStayOptionId = useWatch({ control, name: 'stayOptionId' });
     const selectedPaymentType = useWatch({ control, name: 'paymentType' });
-    const selectedNumberOfGuests = useWatch({ control, name: 'numberOfGuests' });
+    const selectedAdultGuests = useWatch({ control, name: 'adultGuests' });
+    const selectedSeniorGuests = useWatch({ control, name: 'seniorGuests' });
+    const selectedKidGuests = useWatch({ control, name: 'kidGuests' });
+    const selectedNumberOfGuests = selectedAdultGuests + selectedSeniorGuests + selectedKidGuests;
 
     const isAccommodationSelected = !!selectedAccommodationId;
 
     const onSubmit = async (data: manualBookingSchema) => {
-        if(selectedAccommodation && (data.numberOfGuests > selectedAccommodation?.capacity)) {
-            setError('numberOfGuests', {
+        const numberOfGuests = data.adultGuests + data.seniorGuests + data.kidGuests;
+
+        if(selectedAccommodation && numberOfGuests > selectedAccommodation.capacity) {
+            setError('adultGuests', {
                 type: 'manual',
                 message: `Maximum capacity for ${selectedAccommodation.name} is ${selectedAccommodation.capacity} guests`
             })
@@ -83,7 +109,11 @@ const ManualBookingForm = () => {
                 name: data.name.trim(),
                 email: data.email.trim().toLowerCase(),
                 contactNo: data.contactNo.trim(),
-                numberOfGuests: data.numberOfGuests,
+                adultGuests: data.adultGuests,
+                seniorGuests: data.seniorGuests,
+                kidGuests: data.kidGuests,
+                specialRequest: data.specialRequest?.trim() || undefined,
+                proofImageUrl: data.proofImageUrl || undefined,
                 checkIn: data.checkIn,
                 stayOptionId: data.stayOptionId,
                 paymentType: data.paymentType,
@@ -106,9 +136,13 @@ const ManualBookingForm = () => {
 
     const accommodationPrice = selectedAccommodation?.price || 0;
     const adultGuestFee = selectedStayOption?.code.toLowerCase() === 'daystay' ? 150 : 180;
+    const seniorGuestFee = adultGuestFee * 0.8;
+    const kidGuestFee = 100;
     const guestFee = selectedAccommodation?.isGuestFeeWaived || !selectedStayOption
         ? 0
-        : selectedNumberOfGuests * adultGuestFee;
+        : (selectedAdultGuests * adultGuestFee)
+            + (selectedSeniorGuests * seniorGuestFee)
+            + (selectedKidGuests * kidGuestFee);
     const totalAmount = accommodationPrice + guestFee;
     const amountToPayNow = selectedPaymentType
         ? selectedPaymentType === "Partial"
@@ -118,7 +152,7 @@ const ManualBookingForm = () => {
 
     return (
         <form  
-        className="bg-white rounded-xl shadow-sm border-2 overflow-hidden" 
+        className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
         onSubmit={handleSubmit(onSubmit)}
         >
             <div className="p-6 md:p-8 space-y-6">
@@ -209,7 +243,7 @@ const ManualBookingForm = () => {
 
                 <div>
                     <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Accommodation Selection
+                        Stay Details
                     </h2>
 
                     <div className="space-y-5">
@@ -257,7 +291,7 @@ const ManualBookingForm = () => {
                                             <div className="flex items-center justify-between text-xs p-4 pt-2 w-full border-t">
                                                 <div className="flex items-center gap-1 text-muted-foreground">
                                                     <Users className="h-3.5 w-3.5" />
-                                                    Up to 10
+                                                    Up to {acc.capacity}
                                                 </div>
                                                 <div className="font-bold text-primary">
                                                     ₱{acc.price.toLocaleString()}/stay
@@ -285,16 +319,10 @@ const ManualBookingForm = () => {
                             </div>
                         )}
                     </div>
-                </div>
 
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Booking Details
-                    </h2>
-
-                    <div className="space-y-5">
+                    <div className="mt-5 space-y-5">
                          
-                        <div className="grid md:grid-cols-2 gap-5">
+                        <div className="grid gap-5">
                             
                             <Controller
                             name="checkIn"
@@ -340,36 +368,6 @@ const ManualBookingForm = () => {
                             )}
                             />
 
-                            <Controller 
-                            name="numberOfGuests"
-                            control={control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                                    <FieldLabel htmlFor={field.name}>
-                                        Number of Guests <span className="text-red-700">*</span>
-                                    </FieldLabel>
-
-                                    <Input 
-                                    id={field.name}
-                                    aria-invalid={fieldState.invalid}
-                                    min="1"
-                                    type="number"
-                                    {...field}
-                                    value={field.value}
-                                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                                    />
-                                    {selectedAccommodation && (
-                                        <FieldDescription>
-                                            Maximum capacity: {selectedAccommodation.capacity} guests
-                                        </FieldDescription>
-                                    )}
-
-                                    {fieldState.invalid && (
-                                        <FieldError errors={getErrorMessages(fieldState.error)} />
-                                    )}
-                                </Field>
-                            )}
-                            />
                         </div>
 
                         <FieldGroup>
@@ -383,7 +381,7 @@ const ManualBookingForm = () => {
                                     </FieldLegend>
                                     
                                     <AvailabilityStayType 
-                                    key={selectedCheckInDate?.toISOString()}  // ← forces remount on date change
+                                    key={selectedCheckInDate?.toISOString()}
                                     checkInDate={selectedCheckInDate}
                                     accommodationId={selectedAccommodationId}
                                     {...field}
@@ -400,6 +398,112 @@ const ManualBookingForm = () => {
                             )}
                             />
                         </FieldGroup>
+
+                        <FieldSet className="grid gap-3">
+                            <FieldLegend variant="label">
+                                Guest Breakdown <span className="text-red-700">*</span>
+                            </FieldLegend>
+                            <FieldDescription>
+                                Entrance fees are based on guest type. Maximum capacity: {selectedAccommodation?.capacity ?? "Select an accommodation"}.
+                            </FieldDescription>
+
+                            <div className="grid gap-3 md:grid-cols-3">
+                                <Controller
+                                name="adultGuests"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid} className="rounded-lg border p-3">
+                                        <div className="space-y-1">
+                                            <FieldLabel>Adults</FieldLabel>
+                                            <FieldDescription>₱{adultGuestFee} per person</FieldDescription>
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-between gap-2">
+                                            <Button type="button" variant="outline" size="icon" aria-label="Decrease adults" onClick={() => field.onChange(Math.max(0, field.value - 1))}>
+                                                <Minus className="size-4" />
+                                            </Button>
+                                            <span className="w-8 text-center font-bold">{field.value}</span>
+                                            <Button type="button" variant="outline" size="icon" aria-label="Increase adults" onClick={() => field.onChange(field.value + 1)}>
+                                                <Plus className="size-4" />
+                                            </Button>
+                                        </div>
+                                        {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                                    </Field>
+                                )}
+                                />
+
+                                <Controller
+                                name="seniorGuests"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid} className="rounded-lg border p-3">
+                                        <div className="space-y-1">
+                                            <FieldLabel>Seniors</FieldLabel>
+                                            <FieldDescription>₱{seniorGuestFee} per senior (60+)</FieldDescription>
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-between gap-2">
+                                            <Button type="button" variant="outline" size="icon" aria-label="Decrease seniors" onClick={() => field.onChange(Math.max(0, field.value - 1))}>
+                                                <Minus className="size-4" />
+                                            </Button>
+                                            <span className="w-8 text-center font-bold">{field.value}</span>
+                                            <Button type="button" variant="outline" size="icon" aria-label="Increase seniors" onClick={() => field.onChange(field.value + 1)}>
+                                                <Plus className="size-4" />
+                                            </Button>
+                                        </div>
+                                        {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                                    </Field>
+                                )}
+                                />
+
+                                <Controller
+                                name="kidGuests"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid} className="rounded-lg border p-3">
+                                        <div className="space-y-1">
+                                            <FieldLabel>Kids</FieldLabel>
+                                            <FieldDescription>₱{kidGuestFee} per kid (4–7)</FieldDescription>
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-between gap-2">
+                                            <Button type="button" variant="outline" size="icon" aria-label="Decrease kids" onClick={() => field.onChange(Math.max(0, field.value - 1))}>
+                                                <Minus className="size-4" />
+                                            </Button>
+                                            <span className="w-8 text-center font-bold">{field.value}</span>
+                                            <Button type="button" variant="outline" size="icon" aria-label="Increase kids" onClick={() => field.onChange(field.value + 1)}>
+                                                <Plus className="size-4" />
+                                            </Button>
+                                        </div>
+                                        {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                                    </Field>
+                                )}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between rounded-lg bg-primary/5 px-4 py-3">
+                                <span className="text-sm font-semibold">Total Guests</span>
+                                <span className="text-xl font-bold">{selectedNumberOfGuests}</span>
+                            </div>
+                        </FieldSet>
+
+                        <Controller
+                        name="specialRequest"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                                <FieldLabel htmlFor={field.name}>
+                                    Special Requests <span className="text-muted-foreground">(Optional)</span>
+                                </FieldLabel>
+                                <Textarea
+                                id={field.name}
+                                className="min-h-24 resize-y"
+                                placeholder="Add accessibility needs, arrival notes, or other requests..."
+                                aria-invalid={fieldState.invalid}
+                                {...field}
+                                />
+                                <FieldDescription>Requests are subject to availability.</FieldDescription>
+                                {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                            </Field>
+                        )}
+                        />
 
                     </div>
                 </div>
@@ -423,7 +527,7 @@ const ManualBookingForm = () => {
                                 <RadioGroup
                                 {...field}
                                 name={field.name}
-                                value={field.value}
+                                value={field.value ?? ""}
                                 onValueChange={field.onChange}
                                 aria-invalid={fieldState.invalid}
                                 className="grid md:grid-cols-2 gap-3"
@@ -468,6 +572,32 @@ const ManualBookingForm = () => {
                                     <FieldError errors={[fieldState.error]} />
                                 )}
                             </FieldSet>
+                        )}
+                        />
+
+                        <Controller
+                        name="proofImageUrl"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                                <FieldLabel className="gap-1">
+                                    Attach Payment Proof <span className="text-muted-foreground">(Optional)</span>
+                                </FieldLabel>
+
+                                {!field.value ? (
+                                    <CloudinaryUpload onSuccess={field.onChange} />
+                                ) : (
+                                    <CloudinaryPreview
+                                    images={[{ url: field.value }]}
+                                    onRemove={() => field.onChange("")}
+                                    />
+                                )}
+
+                                <FieldDescription>
+                                    Add a receipt or payment screenshot for recordkeeping. Manual payments remain approved by the owner.
+                                </FieldDescription>
+                                {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                            </Field>
                         )}
                         />
 
