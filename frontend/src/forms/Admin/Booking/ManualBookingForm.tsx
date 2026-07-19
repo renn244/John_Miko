@@ -2,6 +2,7 @@ import AvailabilityCalendar from "@/components/common/AvailabilityCalendar";
 import AvailabilityStayType from "@/components/common/AvailabilityStayType";
 import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
+import FormSection from "@/components/common/FormSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field";
@@ -18,48 +19,19 @@ import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckCircle, Minus, Plus, Users } from "lucide-react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useState } from "react";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import z from "zod";
-
-const guestCountSchema = z.number().int().min(0, "Guest count cannot be negative");
-
-const ManualBookingSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.email().nonempty("Email is required"),
-    contactNo: z.string().nonempty("Contact number is required").regex(/^[0-9]{10,15}$/, "Phone number must be between 10 and 15 digits"),
-    adultGuests: guestCountSchema,
-    seniorGuests: guestCountSchema,
-    kidGuests: guestCountSchema,
-    specialRequest: z.string().optional(),
-    proofImageUrl: z.url().or(z.literal("")).optional(),
-    accommodationId: z.string().nonempty("Accommodation is required"),
-
-    checkIn: z.date().nonoptional("Check-in date is required"),
-    stayOptionId: z.string().nonempty("Stay option is required"),
-
-    paymentType: z.enum(['Partial', 'Full']).nonoptional("Payment type is required"),
-}).superRefine((data, context) => {
-    if(data.adultGuests + data.seniorGuests + data.kidGuests < 1) {
-        context.addIssue({
-            code: "custom",
-            path: ["adultGuests"],
-            message: "At least one guest is required",
-        });
-    }
-})
-
-type manualBookingSchema = z.infer<typeof ManualBookingSchema>;
+import ManualAddOnSelector from "./ManualAddOnSelector";
+import { ManualBookingSchema, type ManualBookingFormValues } from "./manualBooking.schema";
+import ManualPreOrderSelector from "./ManualPreOrderSelector";
 
 const ManualBookingForm = () => {
     const navigate = useNavigate();
-    const {
-        control,
-        handleSubmit,
-        setError,
-        resetField
-    } = useForm<manualBookingSchema>({
+    const [addOnSubtotal, setAddOnSubtotal] = useState(0);
+    const [preOrderSubtotal, setPreOrderSubtotal] = useState(0);
+    const form = useForm<ManualBookingFormValues>({
         resolver: zodResolver(ManualBookingSchema),
         defaultValues: {
             name: "",
@@ -73,10 +45,18 @@ const ManualBookingForm = () => {
             accommodationId: "",
             checkIn: undefined,
             stayOptionId: undefined,
+            addOnServices: [],
+            preOrderItems: [],
             paymentType: undefined
         },
         criteriaMode: "all"
-    })
+    });
+    const {
+        control,
+        handleSubmit,
+        setError,
+        resetField
+    } = form;
     const { mutateAsync: createBooking, isPending } = useCreateBookingAdminMutation();
 
     const { data: accommodations } = useGetAccommodationsQuery({ page: 1, limit: 100 });
@@ -92,7 +72,7 @@ const ManualBookingForm = () => {
 
     const isAccommodationSelected = !!selectedAccommodationId;
 
-    const onSubmit = async (data: manualBookingSchema) => {
+    const onSubmit = async (data: ManualBookingFormValues) => {
         const numberOfGuests = data.adultGuests + data.seniorGuests + data.kidGuests;
 
         if(selectedAccommodation && numberOfGuests > selectedAccommodation.capacity) {
@@ -114,6 +94,14 @@ const ManualBookingForm = () => {
                 kidGuests: data.kidGuests,
                 specialRequest: data.specialRequest?.trim() || undefined,
                 proofImageUrl: data.proofImageUrl || undefined,
+                addOnServices: data.addOnServices.map(({ addOnServiceId, quantity }) => ({
+                    addOnServiceId,
+                    quantity,
+                })),
+                preOrderItems: data.preOrderItems.map(({ menuItemId, quantity }) => ({
+                    menuItemId,
+                    quantity,
+                })),
                 checkIn: data.checkIn,
                 stayOptionId: data.stayOptionId,
                 paymentType: data.paymentType,
@@ -143,7 +131,7 @@ const ManualBookingForm = () => {
         : (selectedAdultGuests * adultGuestFee)
             + (selectedSeniorGuests * seniorGuestFee)
             + (selectedKidGuests * kidGuestFee);
-    const totalAmount = accommodationPrice + guestFee;
+    const totalAmount = accommodationPrice + guestFee + addOnSubtotal + preOrderSubtotal;
     const amountToPayNow = selectedPaymentType
         ? selectedPaymentType === "Partial"
             ? Math.round(totalAmount / 2)
@@ -151,18 +139,12 @@ const ManualBookingForm = () => {
         : 0;
 
     return (
-        <form  
-        className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+        <FormProvider {...form}>
+        <form
+        className="space-y-5"
         onSubmit={handleSubmit(onSubmit)}
         >
-            <div className="p-6 md:p-8 space-y-6">
-
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Guest Information
-                    </h2>
-
-                    <div className="space-y-5">
+                <FormSection title="Guest Information" contentClassName="space-y-5">
 
                         <Controller 
                         name="name"
@@ -238,15 +220,9 @@ const ManualBookingForm = () => {
 
                         </div>
 
-                    </div>
-                </div>
+                </FormSection>
 
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Stay Details
-                    </h2>
-
-                    <div className="space-y-5">
+                <FormSection title="Stay Details" contentClassName="space-y-5">
                         
                         <Controller 
                         name="accommodationId"
@@ -318,9 +294,8 @@ const ManualBookingForm = () => {
                                 </div>
                             </div>
                         )}
-                    </div>
 
-                    <div className="mt-5 space-y-5">
+                    <div className="space-y-5">
                          
                         <div className="grid gap-5">
                             
@@ -380,16 +355,26 @@ const ManualBookingForm = () => {
                                         Stay Option <span className="text-red-700">*</span>
                                     </FieldLegend>
                                     
-                                    <AvailabilityStayType 
-                                    key={selectedCheckInDate?.toISOString()}
-                                    checkInDate={selectedCheckInDate}
-                                    accommodationId={selectedAccommodationId}
-                                    {...field}
-                                    name={field.name}
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                    invalid={fieldState.invalid}
-                                    />
+                                    {!selectedAccommodationId ? (
+                                        <div className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                                            Choose an accommodation and check-in date first to view stay options.
+                                        </div>
+                                    ) : !selectedCheckInDate ? (
+                                        <div className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                                            Pick a check-in date first to view available stay options.
+                                        </div>
+                                    ) : (
+                                        <AvailabilityStayType
+                                        key={selectedCheckInDate.toISOString()}
+                                        checkInDate={selectedCheckInDate}
+                                        accommodationId={selectedAccommodationId}
+                                        {...field}
+                                        name={field.name}
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        invalid={fieldState.invalid}
+                                        />
+                                    )}
 
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
@@ -506,14 +491,21 @@ const ManualBookingForm = () => {
                         />
 
                     </div>
-                </div>
+                </FormSection>
 
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Payment Information
-                    </h2>
+                <FormSection title="Add-on Services">
+                    <ManualAddOnSelector
+                        bookingDate={selectedCheckInDate}
+                        stayOptionId={selectedStayOptionId}
+                        onSubtotalChange={setAddOnSubtotal}
+                    />
+                </FormSection>
 
-                    <div className="space-y-5">
+                <FormSection title="Food Preorders">
+                    <ManualPreOrderSelector onSubtotalChange={setPreOrderSubtotal} />
+                </FormSection>
+
+                <FormSection title="Payment Information" contentClassName="space-y-5">
                         
                         <Controller 
                         name="paymentType"
@@ -602,12 +594,12 @@ const ManualBookingForm = () => {
                         />
 
                         {isAccommodationSelected && (
-                            <div className="p-4 rounded-lg">
+                            <div>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between items-center">
                                         <span className="text-muted-foreground">Base Price:</span>
                                         <span className="font-semibold" >
-                                            ₱{selectedAccommodation?.price || 0}/stay
+                                            ₱{(selectedAccommodation?.price || 0).toLocaleString()}/stay
                                         </span>
                                     </div>
 
@@ -615,6 +607,20 @@ const ManualBookingForm = () => {
                                         <span className="text-muted-foreground">Guest Fee:</span>
                                         <span className="font-semibold">
                                             ₱{guestFee.toLocaleString()}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Add-on Services:</span>
+                                        <span className="font-semibold">
+                                            ₱{addOnSubtotal.toLocaleString()}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Food Preorders:</span>
+                                        <span className="font-semibold">
+                                            ₱{preOrderSubtotal.toLocaleString()}
                                         </span>
                                     </div>
 
@@ -643,11 +649,9 @@ const ManualBookingForm = () => {
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
-            </div>
+                </FormSection>
 
-            <div className="px-6 md:px-8 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
+            <div className="rounded-xl border border-border bg-card px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p className="text-sm text-muted-foreground">
                     <span className="text-red-700">*</span> Required fields
                 </p>
@@ -663,6 +667,7 @@ const ManualBookingForm = () => {
                 </div>
             </div>
         </form>
+        </FormProvider>
     )
 }
 

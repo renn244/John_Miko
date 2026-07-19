@@ -24,6 +24,8 @@ describe('BookingService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    preOrderService.createBulkPreOrder.mockResolvedValue({ total: 450 });
+    bookingServicesService.createBulk.mockResolvedValue({ total: 700 });
     service = new BookingService(
       prisma,
       preOrderService,
@@ -91,6 +93,12 @@ describe('BookingService', () => {
         adultGuests: 2,
         seniorGuests: 1,
         kidGuests: 0,
+        preOrderItems: [
+          { menuItemId: 'menu-1', quantity: 2 },
+        ],
+        addOnServices: [
+          { addOnServiceId: 'addon-1', quantity: 1 },
+        ],
         stayOptionId: 'stay-1',
         checkIn: new Date('2026-06-25'),
         paymentType: 'Full',
@@ -109,8 +117,22 @@ describe('BookingService', () => {
         }),
       }),
     );
+    expect(preOrderService.createBulkPreOrder).toHaveBeenCalledWith(
+      'booking-1',
+      [{ menuItemId: 'menu-1', quantity: 2 }],
+      tx,
+    );
+    expect(bookingServicesService.createBulk).toHaveBeenCalledWith(
+      'booking-1',
+      [{ addOnServiceId: 'addon-1', quantity: 1 }],
+      tx,
+    );
     expect(paymentService.createManualPayment).toHaveBeenCalledWith(
-      expect.objectContaining({ bookingId: 'booking-1' }),
+      expect.objectContaining({
+        bookingId: 'booking-1',
+        preOrderFee: 450,
+        addOnServiceFee: 700,
+      }),
       tx,
     );
     expect(paymentService.sendApprovedPaymentEmail).toHaveBeenCalledWith('pay-1');

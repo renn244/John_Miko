@@ -13,6 +13,14 @@ export type CreateManualBookingDto = {
     kidGuests: number;
     specialRequest?: string;
     proofImageUrl?: string;
+    addOnServices?: {
+        addOnServiceId: string;
+        quantity: number;
+    }[];
+    preOrderItems?: {
+        menuItemId: string;
+        quantity: number;
+    }[];
     checkIn: Date;
     stayOptionId: string;
     paymentType: "Partial" | "Full";

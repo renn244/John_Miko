@@ -210,6 +210,18 @@ export class BookingService {
             );
             const newBooking = await this.attachReferenceCode(createdBooking, txprisma);
 
+            const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(
+                newBooking.id,
+                body.preOrderItems || [],
+                txprisma
+            );
+
+            const { total: addOnServiceTotal } = await this.bookingServicesService.createBulk(
+                newBooking.id,
+                body.addOnServices || [],
+                txprisma
+            );
+
             const guestFeeTotal = accommodation.isGuestFeeWaived
                 ? 0
                 : this.calculateGuestFee(bookingPayload.adultGuests, bookingPayload.seniorGuests, bookingPayload.kidGuests, stayOption.code);
@@ -231,8 +243,8 @@ export class BookingService {
                 bookingId: newBooking.id,
                 accommodationFee: accommodation.price,
                 guestFee: guestFeeTotal,
-                preOrderFee: 0,
-                addOnServiceFee: 0,
+                preOrderFee: preOrderTotal,
+                addOnServiceFee: addOnServiceTotal,
                 paymentType: body.paymentType,
                 proofImageUrl: body.proofImageUrl,
                 verifiedById: user.id,
