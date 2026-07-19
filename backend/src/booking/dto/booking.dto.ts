@@ -1,5 +1,5 @@
 import { Transform, Type } from "class-transformer";
-import { IsArray, IsDate, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, ValidateNested } from "class-validator";
+import { ArrayUnique, IsArray, IsDate, IsEmail, IsEnum, IsInt, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, Min, ValidateNested } from "class-validator";
 import { BookingStatus, PaymentType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
@@ -8,7 +8,9 @@ export class PreOrderItemDto {
     @IsString()
     menuItemId!: string;
 
-    @IsNumber()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
     quantity!: number;
 }
 
@@ -16,7 +18,9 @@ export class AddOnServiceItemDto {
     @IsString()
     addOnServiceId!: string;
 
-    @IsNumber()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
     quantity!: number;
 }
 
@@ -56,7 +60,7 @@ export class CreateBookingDto {
     @IsString()
     @IsOptional()
     specialRequest?: string;
-    
+
     @IsString()
     @IsNotEmpty({ message: "Stay option is required" })
     stayOptionId!: string;
@@ -72,12 +76,14 @@ export class CreateBookingDto {
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => PreOrderItemDto)
+    @ArrayUnique((item: PreOrderItemDto) => item.menuItemId, { message: "Pre-order menu items must be unique" })
     preOrderItems?: PreOrderItemDto[];
 
     @IsArray()
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => AddOnServiceItemDto)
+    @ArrayUnique((item: AddOnServiceItemDto) => item.addOnServiceId, { message: "Add-on services must be unique" })
     addOnServices?: AddOnServiceItemDto[];
 
     @IsNotEmpty({ message: "Payment type is required" })
@@ -113,13 +119,28 @@ export class CreateManualBookingDto {
     contactNo!: string;
 
     @Type(() => Number)
-    @IsNumber()
-    @IsNotEmpty({ message: "numberOfGuests is required" })
-    numberOfGuests!: number;
+    @IsInt()
+    @Min(0)
+    adultGuests!: number;
+
+    @Type(() => Number)
+    @IsInt()
+    @Min(0)
+    kidGuests!: number;
+
+    @Type(() => Number)
+    @IsInt()
+    @Min(0)
+    seniorGuests!: number;
 
     @IsString()
     @IsOptional()
     specialRequest?: string;
+
+    @IsString()
+    @IsUrl()
+    @IsOptional()
+    proofImageUrl?: string;
 
     @IsString()
     @IsNotEmpty({ message: "Stay option is required" })
@@ -131,6 +152,20 @@ export class CreateManualBookingDto {
     @IsNotEmpty({ message: "Check-in date is required" })
     @isNotPastDate({ message: "Check-in date cannot be in the past" })
     checkIn!: Date;
+
+    @IsArray()
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => PreOrderItemDto)
+    @ArrayUnique((item: PreOrderItemDto) => item.menuItemId, { message: "Pre-order menu items must be unique" })
+    preOrderItems?: PreOrderItemDto[];
+
+    @IsArray()
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => AddOnServiceItemDto)
+    @ArrayUnique((item: AddOnServiceItemDto) => item.addOnServiceId, { message: "Add-on services must be unique" })
+    addOnServices?: AddOnServiceItemDto[];
 
     @IsNotEmpty({ message: "Payment type is required" })
     @IsEnum(PaymentType, { message: "Payment type must be either 'full' or 'partial'" })

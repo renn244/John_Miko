@@ -4,7 +4,6 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
 import PasswordInput from "@/components/ui/passwordInput"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLoginMutation } from "@/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -14,7 +13,7 @@ import { Link } from "react-router"
 import z from "zod"
 
 const LoginSchema = z.object({
-    userRole: z.enum(['guest', 'staff', 'admin']),
+    userRole: z.enum(['GUEST', 'ADMIN']),
     email: z.string()
         .nonempty('Email is required'),
     password: z.string()
@@ -25,7 +24,7 @@ const LoginSchema = z.object({
 type loginSchema = z.infer<typeof LoginSchema>
 
 const LoginForm = () => {
-    const [showStaffLogin, setShowStaffLogin] = useState(false);
+    const [showAdminLogin, setShowAdminLogin] = useState(false);
     const {
         handleSubmit,
         control,
@@ -35,7 +34,7 @@ const LoginForm = () => {
     } = useForm<loginSchema>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            userRole: "guest",
+            userRole: "GUEST",
             email: "",
             password: "",
             rememberMe: false,
@@ -47,13 +46,17 @@ const LoginForm = () => {
     const rootError = errors.root as HookFormFieldError | undefined;
     
     const onSubmit = async (data: loginSchema) => {
-        await mutateAsync(showStaffLogin ? data : { ...data, userRole: "guest" })
+        try {
+            await mutateAsync(data)
+        } catch {
+            return
+        }
     }
 
-    const handleStaffLoginToggle = () => {
-        const nextValue = !showStaffLogin;
-        setShowStaffLogin(nextValue);
-        setValue("userRole", nextValue ? "admin" : "guest", {
+    const handleAdminLoginToggle = () => {
+        const nextValue = !showAdminLogin;
+        setShowAdminLogin(nextValue);
+        setValue("userRole", nextValue ? "ADMIN" : "GUEST", {
             shouldDirty: true,
             shouldValidate: true,
         });
@@ -65,11 +68,11 @@ const LoginForm = () => {
                 <div className="flex items-center justify-between gap-3">
                     <div>
                         <p className="text-sm font-semibold text-foreground">
-                            {showStaffLogin ? "Admin / Staff Login" : "Guest Login"}
+                            {showAdminLogin ? "Admin Login" : "Guest Login"}
                         </p>
                         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                            {showStaffLogin
-                                ? "Use your staff account credentials."
+                            {showAdminLogin
+                                ? "Use your administrator account credentials."
                                 : "Use your guest account credentials."}
                         </p>
                     </div>
@@ -77,48 +80,11 @@ const LoginForm = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={handleStaffLoginToggle}
+                        onClick={handleAdminLoginToggle}
                     >
-                        {showStaffLogin ? "Use Guest" : "Admin / Staff"}
+                        {showAdminLogin ? "Use Guest" : "Use Admin"}
                     </Button>
                 </div>
-
-                {showStaffLogin ? (
-                    <div className="mt-3 border-t pt-3">
-                        <Controller
-                        name="userRole"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                                <FieldLabel htmlFor={field.name}>Login As</FieldLabel>
-
-                                <Select
-                                value={field.value}
-                                onValueChange={field.onChange}
-                                >
-                                    <SelectTrigger id={field.name} aria-invalid={fieldState.invalid} className="w-full">
-                                        <SelectValue placeholder="Select user type" />
-                                    </SelectTrigger>
-
-                                    <SelectContent>
-                                        <SelectItem value="admin">
-                                            Administrator
-                                        </SelectItem>
-
-                                        <SelectItem value="staff">
-                                            Staff
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                {fieldState.invalid && (
-                                    <FieldError errors={getErrorMessages(fieldState.error)} />
-                                )}
-                            </Field>
-                        )}
-                        />
-                    </div>
-                ) : null}
             </div>
 
             <Controller 

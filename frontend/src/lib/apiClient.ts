@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAccessToken } from "./tokenStorage";
 
 const apiClient = axios.create({
     validateStatus: () => true,
@@ -10,7 +11,7 @@ const apiClient = axios.create({
 
 // add later interceptors for when request to hand in bearer token for authentication
 apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem('access_token');
+    const token = getAccessToken();
     if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
     }

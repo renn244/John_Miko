@@ -109,7 +109,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/booking/:accommodationId',
-        element: <BookingFlow />
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+            <BookingFlow />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/my-bookings',
@@ -129,11 +133,19 @@ const router = createBrowserRouter([
       },
       {
         path: '/feedback/:bookingId',
-        element: <CreateFeedback />
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST]}>
+            <CreateFeedback />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/feedback/edit/:feedbackId',
-        element: <EditFeedback />
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST]}>
+            <EditFeedback />
+          </ProtectedRoute>
+        )
       },
       {
         path: '/admin',
@@ -249,7 +261,9 @@ const router = createBrowserRouter([
 function App() {
   const { isLoading } = useAuthContext();
 
-  if(isLoading) return null;
+  if(isLoading) {
+    return null;
+  }
 
   return (
     <RouterProvider router={router} />

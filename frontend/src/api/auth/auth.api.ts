@@ -1,10 +1,15 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { BasicMessageResponse, ChangePasswordDto, ForgotPasswordDto, LoginDto, ResetPasswordDto, SignUpGuest, UpdateProfileDto, UserProfileDto } from "@/types/auth.types";
+import type { BasicMessageResponse, ChangePasswordDto, ForgotPasswordDto, LoginDto, LoginResponse, ResetPasswordDto, SignUpGuest, UpdateProfileDto, UserProfileDto } from "@/types/auth.types";
 
 export const authApi = {
     login: async (data: LoginDto) => {
-        const response = await apiClient.post('/auth/login', data);
+        const response = await apiClient.post('/auth/login', {
+            email: data.email,
+            password: data.password,
+            userRole: data.userRole,
+            rememberMe: data.rememberMe ?? false,
+        });
 
         if(response.status === 400) {
             throw new ValidationError(response.data);
@@ -14,7 +19,7 @@ export const authApi = {
             throw new Error(response.data.message || "Unexpected error")
         }
 
-        return response.data
+        return response.data as LoginResponse
     },
     signUpGuest: async (data: SignUpGuest)=> {
         const response = await apiClient.post('/auth/signUpGuest', data)

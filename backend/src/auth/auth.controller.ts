@@ -43,7 +43,12 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async Login(@Body() body: SignInDto) {
-    return this.authService.SignIn(body.email, body.password);
+    return this.authService.SignIn(
+      body.email,
+      body.password,
+      body.userRole,
+      body.rememberMe,
+    );
   }
 
   @Post('forgotPassword')

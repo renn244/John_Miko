@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/generated/prisma/client';
+import { Role, User } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -9,6 +9,7 @@ import { UserService } from 'src/user/user.service';
 import { SignUpGuestDto } from './dto/auth.dto';
 import { UpdateProfileDto } from './dto/updateProfile.dto';
 import { UpdatePasswordDto } from './dto/changePassword.dto';
+import { AuthSessionCacheService } from './auth-session-cache.service';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,7 @@ export class AuthService {
         private readonly prisma: PrismaService,
         private readonly userService: UserService,
         private readonly jwtService: JwtService,
+        private readonly authSessionCache: AuthSessionCacheService,
     ) {}
 
     async SignUpGuest(body: SignUpGuestDto) {
@@ -34,8 +36,7 @@ export class AuthService {
         return this.loginJWT(createdUser)
     }
 
-    // add roles validation later
-    async SignIn(email: string, password: string) {
+    async SignIn(email: string, password: string, userRole: Role, rememberMe = false) {
         const user = await this.userService.findUserByEmail(email);
 
         if(!user) {
@@ -43,10 +44,6 @@ export class AuthService {
                 field: "root",
                 message: ["Invalid email or password"]
             });
-        }
-
-        if(user.status === "INACTIVE") {
-            throw new ForbiddenException("Your account is deactivated!")
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -58,13 +55,26 @@ export class AuthService {
             });
         }
 
-        return this.loginJWT(user);
+        if(user.status === "INACTIVE") {
+            throw new ForbiddenException("Your account is deactivated!")
+        }
+
+        if(user.role !== userRole) {
+            throw new ValidationException({
+                field: "root",
+                message: ["Invalid email or password"]
+            });
+        }
+
+        return this.loginJWT(user, rememberMe);
     }
 
-    async loginJWT(user: User) {
+    async loginJWT(user: User, rememberMe = false) {
         const payload = { email: user.email, id: user.id, role: user.role };
 
-        const accessToken = await this.jwtService.signAsync(payload, { expiresIn: '7d' });
+        const accessToken = await this.jwtService.signAsync(payload, {
+            expiresIn: rememberMe ? '30d' : '7d',
+        });
 
         return { accessToken };
     }
@@ -111,6 +121,8 @@ export class AuthService {
                 contactNo: body.contactNo
             }
         })
+
+        await this.authSessionCache.invalidate(user.id);
 
         return updatedUser;
     }

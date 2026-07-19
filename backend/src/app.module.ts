@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
+import { AuthSessionCacheModule } from './auth/auth-session-cache.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
@@ -34,6 +35,7 @@ import { ClosureModule } from './closure/closure.module';
       errorMessage: 'Too many requests. Please try again later.',
     }),
     PrismaModule,
+    AuthSessionCacheModule,
     AuthModule,
     UserModule,
     EmailModule,

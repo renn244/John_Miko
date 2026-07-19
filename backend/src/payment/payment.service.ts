@@ -83,6 +83,7 @@ export class PaymentService {
             addOnServiceFee: number;
             guestFee: number;
             paymentType: PaymentType;
+            proofImageUrl?: string;
             verifiedById: string;
         },
         tx: Prisma.TransactionClient = this.prisma
@@ -98,6 +99,7 @@ export class PaymentService {
                 bookingId: body.bookingId,
                 referenceNumber,
                 status: PaymentStatus.Approved,
+                proofImageUrl: body.proofImageUrl,
                 accommodationAmount: body.accommodationFee,
                 preOrderAmount: body.preOrderFee,
                 addOnAmount: body.addOnServiceFee,

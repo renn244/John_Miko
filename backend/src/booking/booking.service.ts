@@ -175,16 +175,18 @@ export class BookingService {
             throw new NotFoundException('Accommodation not found');
         }
 
-        if(body.numberOfGuests < 1) {
+        const numberOfGuests = body.adultGuests + body.seniorGuests + body.kidGuests;
+
+        if(numberOfGuests < 1) {
             throw new ValidationException({
-                field: 'numberOfGuests',
+                field: 'adultGuests',
                 message: ['at least 1 guest is required']
             });
         }
 
-        if(body.numberOfGuests > accommodation.capacity) {
+        if(numberOfGuests > accommodation.capacity) {
             throw new ValidationException({
-                field: 'numberOfGuests',
+                field: 'adultGuests',
                 message: [`Maximum capacity for ${accommodation.name} is ${accommodation.capacity} guests`]
             });
         }
@@ -196,9 +198,6 @@ export class BookingService {
             const bookingPayload = {
                 ...body,
                 email: body.email.trim().toLowerCase(),
-                adultGuests: body.numberOfGuests,
-                kidGuests: 0,
-                seniorGuests: 0,
             };
 
             const createdBooking = await this.createBooking(
@@ -210,6 +209,18 @@ export class BookingService {
                 'Confirmed'
             );
             const newBooking = await this.attachReferenceCode(createdBooking, txprisma);
+
+            const { total: preOrderTotal } = await this.preOrderService.createBulkPreOrder(
+                newBooking.id,
+                body.preOrderItems || [],
+                txprisma
+            );
+
+            const { total: addOnServiceTotal } = await this.bookingServicesService.createBulk(
+                newBooking.id,
+                body.addOnServices || [],
+                txprisma
+            );
 
             const guestFeeTotal = accommodation.isGuestFeeWaived
                 ? 0
@@ -232,9 +243,10 @@ export class BookingService {
                 bookingId: newBooking.id,
                 accommodationFee: accommodation.price,
                 guestFee: guestFeeTotal,
-                preOrderFee: 0,
-                addOnServiceFee: 0,
+                preOrderFee: preOrderTotal,
+                addOnServiceFee: addOnServiceTotal,
                 paymentType: body.paymentType,
+                proofImageUrl: body.proofImageUrl,
                 verifiedById: user.id,
             }, txprisma);
 

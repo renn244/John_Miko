@@ -18,7 +18,7 @@ import { ForgotPasswordService } from './forgotPassword.service';
       useFactory: async (configService: ConfigService) => {
         return {
           secret: configService.get<string>('JWT_SECRET'),
-          signOptions: { expiresIn: '30d' },
+          signOptions: { expiresIn: '7d' },
         }
       },
     })

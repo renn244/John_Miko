@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { MenuItem, PreOrderStatus, Prisma } from 'src/generated/prisma/client';
+import { MenuItem, MenuItemAvailability, PreOrderStatus, Prisma } from 'src/generated/prisma/client';
 import { PreOrderMenuItemCreateManyInput } from 'src/generated/prisma/models';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetAllPreOrdesQuery } from './query/get-all-preOrders.query';
@@ -16,7 +16,12 @@ export class PreOrderService {
         tx: Prisma.TransactionClient = this.prisma // for optional transaction support
     ) {
         const menuItemIds = menuItems.map(item => item.menuItemId);
-        const menuItemsInfo = await tx.menuItem.findMany({ where: { id: { in: menuItemIds } } })
+        const menuItemsInfo = await tx.menuItem.findMany({
+            where: {
+                id: { in: menuItemIds },
+                availability: MenuItemAvailability.Available,
+            }
+        })
         
         // asserts everything exists before creating any pre-order, to avoid partial creation if some menu item is not found
         this.assertAllMenuItemsExist(menuItemsInfo, menuItemIds);
@@ -51,7 +56,7 @@ export class PreOrderService {
         const missingMenuItemIds = menuItemIds.filter(id => !foundMenuItemIds.has(id));
 
         if(missingMenuItemIds.length > 0) {
-            throw new BadRequestException(`Menu items not found: ${missingMenuItemIds.join(', ')}`);
+            throw new BadRequestException(`Menu items unavailable or not found: ${missingMenuItemIds.join(', ')}`);
         }
 
         return;

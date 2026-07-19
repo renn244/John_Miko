@@ -5,6 +5,8 @@ export type UserStatus = "ACTIVE" | "INACTIVE";
 export type LoginRequest = {
     email: string;
     password: string;
+    userRole: StaffRole;
+    rememberMe?: boolean;
 };
 
 export type ForgotPasswordRequest = {

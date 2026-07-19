@@ -16,7 +16,12 @@ export class BookingServicesService {
     ) {
         const addOnServicesId = addOnServices.map(service => service.addOnServiceId);
         const [addOnServicesInfo, booking] = await Promise.all([
-            tx.addOnService.findMany({ where: { id: { in: addOnServicesId } } }),
+            tx.addOnService.findMany({
+                where: {
+                    id: { in: addOnServicesId },
+                    isActive: true,
+                }
+            }),
             tx.booking.findFirst({
                 where: { id: bookingId },
                 select: {
@@ -116,7 +121,7 @@ export class BookingServicesService {
         const missingAddOnServiceIds = addOnServicesId.filter(id => !foundAddOnServiceIds.has(id));
         
         if(missingAddOnServiceIds.length > 0) {
-            throw new BadRequestException(`Add on services not found: ${missingAddOnServiceIds.join(', ')}`);
+            throw new BadRequestException(`Add on services inactive or not found: ${missingAddOnServiceIds.join(', ')}`);
         }
         
         return;

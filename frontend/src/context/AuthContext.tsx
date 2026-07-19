@@ -1,7 +1,8 @@
 import apiClient from "@/lib/apiClient";
+import { clearAccessToken, getAccessToken } from "@/lib/tokenStorage";
+import type { UserProfileDto } from "@/types/auth.types";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext, type PropsWithChildren } from "react";
-import type { UserProfileDto } from "@/types/auth.types";
 
 type AuthContextType = {
     user: UserProfileDto | null | undefined,
@@ -28,17 +29,28 @@ const AuthProvider = ({ children }: PropsWithChildren ) => {
     const { data: user, isLoading, refetch } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
-            const response = await apiClient.get('/auth/profile').catch(() => null)
+            if (!getAccessToken()) return null;
 
-            if(response?.status === 401) return null
-            
-            return response?.data as UserProfileDto
+            try {
+                const response = await apiClient.get('/auth/profile');
+
+                if(response.status === 401) {
+                    clearAccessToken();
+                    return null;
+                }
+
+                if(response.status >= 400) return null;
+
+                return response.data as UserProfileDto;
+            } catch {
+                return null;
+            }
         },
         refetchOnWindowFocus: false,
     })
 
     const handleLogout = () => {
-        localStorage.removeItem('access_token');
+        clearAccessToken();
         refetch();
     }
 

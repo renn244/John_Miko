@@ -20,7 +20,10 @@ import {
 import { z } from "zod";
 
 const LoginSchema = z.object({
-    role: z.string().nonempty("Role is required"),
+    userRole: z.enum(
+        ["RESORT_STAFF", "KITCHEN_STAFF", "MAINTENANCE_STAFF"],
+        "Role is required",
+    ),
     email: z.string().email("Email is invalid").nonempty("Email is required"),
     password: z.string().nonempty("Password is required"),
 });
@@ -38,7 +41,6 @@ export default function Login() {
     } = useForm<loginSchema>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            role: "",
             email: "",
             password: "",
         },
@@ -51,8 +53,7 @@ export default function Login() {
 
     const onSubmit = async (data: loginSchema) => {
         try {
-            const { role: _role, ...payload } = data;
-            await mutateAsync(payload);
+            await mutateAsync(data);
             const user = await refreshSession();
 
             if (user) {
@@ -76,7 +77,7 @@ export default function Login() {
                         <Field className="gap-1">
                             <FieldLabel className="text-base">Staff Role</FieldLabel>
                             <Controller
-                                name="role"
+                                name="userRole"
                                 control={control}
                                 render={({ field }) => (
                                     <Select
@@ -84,7 +85,7 @@ export default function Login() {
                                         onValueChange={field.onChange}
                                         placeholder="Select role"
                                         surface="white"
-                                        invalid={Boolean(errors.role)}
+                                        invalid={Boolean(errors.userRole)}
                                     >
                                         <SelectTrigger
                                             leftIcon={<UsersRound color="#6B7580" height={18} width={18} />}
@@ -99,7 +100,7 @@ export default function Login() {
                                     </Select>
                                 )}
                             />
-                            <FieldError errors={getErrorMessages(errors.role)} />
+                            <FieldError errors={getErrorMessages(errors.userRole)} />
                         </Field>
 
                         <Field className="gap-1">

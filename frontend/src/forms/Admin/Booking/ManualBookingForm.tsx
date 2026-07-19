@@ -1,5 +1,8 @@
 import AvailabilityCalendar from "@/components/common/AvailabilityCalendar";
 import AvailabilityStayType from "@/components/common/AvailabilityStayType";
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
+import FormSection from "@/components/common/FormSection";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field";
@@ -7,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
 import { useCreateBookingAdminMutation } from "@/hooks/admin/booking.hook";
 import { isSameDateOnly } from "@/lib/date.util";
@@ -14,63 +18,65 @@ import { getErrorMessages } from "@/lib/getErrorMessages";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, CheckCircle, Users } from "lucide-react";
-import { useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Calendar as CalendarIcon, CheckCircle, Minus, Plus, Users } from "lucide-react";
+import { useState } from "react";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import z from "zod";
-
-const ManualBookingSchema = z.object({
-    name: z.string().min(1, "Name is required"),
-    email: z.email().nonempty("Email is required"),
-    contactNo: z.string().nonempty("Contact number is required"),
-    numberOfGuests: z.number().min(1, "At least one guest is required"),
-    accommodationId: z.string().nonempty("Accommodation is required"),
-
-    checkIn: z.date().nonoptional("Check-in date is required"),
-    stayOptionId: z.string().nonempty("Stay option is required"),
-
-    paymentType: z.enum(['Partial', 'Full']).nonoptional("Payment type is required"),
-})
-
-type manualBookingSchema = z.infer<typeof ManualBookingSchema>;
+import ManualAddOnSelector from "./ManualAddOnSelector";
+import { ManualBookingSchema, type ManualBookingFormValues } from "./manualBooking.schema";
+import ManualPreOrderSelector from "./ManualPreOrderSelector";
 
 const ManualBookingForm = () => {
     const navigate = useNavigate();
-    const {
-        control,
-        handleSubmit,
-        watch,
-        setError,
-        resetField
-    } = useForm<manualBookingSchema>({
+    const [addOnSubtotal, setAddOnSubtotal] = useState(0);
+    const [preOrderSubtotal, setPreOrderSubtotal] = useState(0);
+    const form = useForm<ManualBookingFormValues>({
         resolver: zodResolver(ManualBookingSchema),
         defaultValues: {
             name: "",
             email: "",
             contactNo: "",
-            numberOfGuests: 1,
+            adultGuests: 1,
+            seniorGuests: 0,
+            kidGuests: 0,
+            specialRequest: "",
+            proofImageUrl: "",
             accommodationId: "",
             checkIn: undefined,
             stayOptionId: undefined,
+            addOnServices: [],
+            preOrderItems: [],
             paymentType: undefined
         },
         criteriaMode: "all"
-    })
+    });
+    const {
+        control,
+        handleSubmit,
+        setError,
+        resetField
+    } = form;
     const { mutateAsync: createBooking, isPending } = useCreateBookingAdminMutation();
 
     const { data: accommodations } = useGetAccommodationsQuery({ page: 1, limit: 100 });
 
-    const selectedAccommodationId = watch('accommodationId');
-    const selectedCheckInDate = watch('checkIn');
-    const selectedPaymentType = watch('paymentType');
+    const selectedAccommodationId = useWatch({ control, name: 'accommodationId' });
+    const selectedCheckInDate = useWatch({ control, name: 'checkIn' });
+    const selectedStayOptionId = useWatch({ control, name: 'stayOptionId' });
+    const selectedPaymentType = useWatch({ control, name: 'paymentType' });
+    const selectedAdultGuests = useWatch({ control, name: 'adultGuests' });
+    const selectedSeniorGuests = useWatch({ control, name: 'seniorGuests' });
+    const selectedKidGuests = useWatch({ control, name: 'kidGuests' });
+    const selectedNumberOfGuests = selectedAdultGuests + selectedSeniorGuests + selectedKidGuests;
 
     const isAccommodationSelected = !!selectedAccommodationId;
 
-    const onSubmit = async (data: manualBookingSchema) => {
-        if(selectedAccommodation && (data.numberOfGuests > selectedAccommodation?.capacity)) {
-            setError('numberOfGuests', {
+    const onSubmit = async (data: ManualBookingFormValues) => {
+        const numberOfGuests = data.adultGuests + data.seniorGuests + data.kidGuests;
+
+        if(selectedAccommodation && numberOfGuests > selectedAccommodation.capacity) {
+            setError('adultGuests', {
                 type: 'manual',
                 message: `Maximum capacity for ${selectedAccommodation.name} is ${selectedAccommodation.capacity} guests`
             })
@@ -83,7 +89,19 @@ const ManualBookingForm = () => {
                 name: data.name.trim(),
                 email: data.email.trim().toLowerCase(),
                 contactNo: data.contactNo.trim(),
-                numberOfGuests: data.numberOfGuests,
+                adultGuests: data.adultGuests,
+                seniorGuests: data.seniorGuests,
+                kidGuests: data.kidGuests,
+                specialRequest: data.specialRequest?.trim() || undefined,
+                proofImageUrl: data.proofImageUrl || undefined,
+                addOnServices: data.addOnServices.map(({ addOnServiceId, quantity }) => ({
+                    addOnServiceId,
+                    quantity,
+                })),
+                preOrderItems: data.preOrderItems.map(({ menuItemId, quantity }) => ({
+                    menuItemId,
+                    quantity,
+                })),
                 checkIn: data.checkIn,
                 stayOptionId: data.stayOptionId,
                 paymentType: data.paymentType,
@@ -91,39 +109,42 @@ const ManualBookingForm = () => {
 
             toast.success("Booking created successfully");
             navigate(`/admin/booking/${booking.id}`);
-        } catch (error: any) {
+        } catch (error: unknown) {
             if(error instanceof ValidationError) {
                 handleNestError(error.response, setError);
                 return;
             }
 
-            toast.error(error.message || "Failed to create booking");
+            toast.error(error instanceof Error ? error.message : "Failed to create booking");
         }
     }
 
-    const selectedAccommodation = useMemo(() => {
-        return accommodations?.data.find((acc) => acc.id === selectedAccommodationId);
-    }, [selectedAccommodationId, accommodations]);
+    const selectedAccommodation = accommodations?.data.find((acc) => acc.id === selectedAccommodationId);
+    const selectedStayOption = selectedAccommodation?.stayOptions.find((option) => option.id === selectedStayOptionId);
 
     const accommodationPrice = selectedAccommodation?.price || 0;
-
-    const serviceFee = 500; // because in the booking form there is 500, remove later if no service fee...
-    const totalAmount = accommodationPrice + serviceFee; // get base price from selected accommodation
-    const amountToPayNow = selectedPaymentType ? (selectedPaymentType === "Partial" ? totalAmount / 2 : totalAmount) : 0;
+    const adultGuestFee = selectedStayOption?.code.toLowerCase() === 'daystay' ? 150 : 180;
+    const seniorGuestFee = adultGuestFee * 0.8;
+    const kidGuestFee = 100;
+    const guestFee = selectedAccommodation?.isGuestFeeWaived || !selectedStayOption
+        ? 0
+        : (selectedAdultGuests * adultGuestFee)
+            + (selectedSeniorGuests * seniorGuestFee)
+            + (selectedKidGuests * kidGuestFee);
+    const totalAmount = accommodationPrice + guestFee + addOnSubtotal + preOrderSubtotal;
+    const amountToPayNow = selectedPaymentType
+        ? selectedPaymentType === "Partial"
+            ? Math.round(totalAmount / 2)
+            : totalAmount
+        : 0;
 
     return (
-        <form  
-        className="bg-white rounded-xl shadow-sm border-2 overflow-hidden" 
+        <FormProvider {...form}>
+        <form
+        className="space-y-5"
         onSubmit={handleSubmit(onSubmit)}
         >
-            <div className="p-6 md:p-8 space-y-6">
-
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Guest Information
-                    </h2>
-
-                    <div className="space-y-5">
+                <FormSection title="Guest Information" contentClassName="space-y-5">
 
                         <Controller 
                         name="name"
@@ -199,15 +220,9 @@ const ManualBookingForm = () => {
 
                         </div>
 
-                    </div>
-                </div>
+                </FormSection>
 
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Accommodation Selection
-                    </h2>
-
-                    <div className="space-y-5">
+                <FormSection title="Stay Details" contentClassName="space-y-5">
                         
                         <Controller 
                         name="accommodationId"
@@ -252,7 +267,7 @@ const ManualBookingForm = () => {
                                             <div className="flex items-center justify-between text-xs p-4 pt-2 w-full border-t">
                                                 <div className="flex items-center gap-1 text-muted-foreground">
                                                     <Users className="h-3.5 w-3.5" />
-                                                    Up to 10
+                                                    Up to {acc.capacity}
                                                 </div>
                                                 <div className="font-bold text-primary">
                                                     ₱{acc.price.toLocaleString()}/stay
@@ -279,17 +294,10 @@ const ManualBookingForm = () => {
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Booking Details
-                    </h2>
 
                     <div className="space-y-5">
                          
-                        <div className="grid md:grid-cols-2 gap-5">
+                        <div className="grid gap-5">
                             
                             <Controller
                             name="checkIn"
@@ -335,36 +343,6 @@ const ManualBookingForm = () => {
                             )}
                             />
 
-                            <Controller 
-                            name="numberOfGuests"
-                            control={control}
-                            render={({ field, fieldState }) => (
-                                <Field data-invalid={fieldState.invalid} className="grid gap-2">
-                                    <FieldLabel htmlFor={field.name}>
-                                        Number of Guests <span className="text-red-700">*</span>
-                                    </FieldLabel>
-
-                                    <Input 
-                                    id={field.name}
-                                    aria-invalid={fieldState.invalid}
-                                    min="1"
-                                    type="number"
-                                    {...field}
-                                    value={field.value}
-                                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                                    />
-                                    {selectedAccommodation && (
-                                        <FieldDescription>
-                                            Maximum capacity: {selectedAccommodation.capacity} guests
-                                        </FieldDescription>
-                                    )}
-
-                                    {fieldState.invalid && (
-                                        <FieldError errors={getErrorMessages(fieldState.error)} />
-                                    )}
-                                </Field>
-                            )}
-                            />
                         </div>
 
                         <FieldGroup>
@@ -377,16 +355,26 @@ const ManualBookingForm = () => {
                                         Stay Option <span className="text-red-700">*</span>
                                     </FieldLegend>
                                     
-                                    <AvailabilityStayType 
-                                    key={selectedCheckInDate?.toISOString()}  // ← forces remount on date change
-                                    checkInDate={selectedCheckInDate}
-                                    accommodationId={selectedAccommodationId}
-                                    {...field}
-                                    name={field.name}
-                                    value={field.value}
-                                    onValueChange={field.onChange}
-                                    invalid={fieldState.invalid}
-                                    />
+                                    {!selectedAccommodationId ? (
+                                        <div className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                                            Choose an accommodation and check-in date first to view stay options.
+                                        </div>
+                                    ) : !selectedCheckInDate ? (
+                                        <div className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+                                            Pick a check-in date first to view available stay options.
+                                        </div>
+                                    ) : (
+                                        <AvailabilityStayType
+                                        key={selectedCheckInDate.toISOString()}
+                                        checkInDate={selectedCheckInDate}
+                                        accommodationId={selectedAccommodationId}
+                                        {...field}
+                                        name={field.name}
+                                        value={field.value}
+                                        onValueChange={field.onChange}
+                                        invalid={fieldState.invalid}
+                                        />
+                                    )}
 
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />
@@ -396,15 +384,128 @@ const ManualBookingForm = () => {
                             />
                         </FieldGroup>
 
+                        <FieldSet className="grid gap-3">
+                            <FieldLegend variant="label">
+                                Guest Breakdown <span className="text-red-700">*</span>
+                            </FieldLegend>
+                            <FieldDescription>
+                                Entrance fees are based on guest type. Maximum capacity: {selectedAccommodation?.capacity ?? "Select an accommodation"}.
+                            </FieldDescription>
+
+                            <div className="grid gap-3 md:grid-cols-3">
+                                <Controller
+                                name="adultGuests"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid} className="rounded-lg border p-3">
+                                        <div className="space-y-1">
+                                            <FieldLabel>Adults</FieldLabel>
+                                            <FieldDescription>₱{adultGuestFee} per person</FieldDescription>
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-between gap-2">
+                                            <Button type="button" variant="outline" size="icon" aria-label="Decrease adults" onClick={() => field.onChange(Math.max(0, field.value - 1))}>
+                                                <Minus className="size-4" />
+                                            </Button>
+                                            <span className="w-8 text-center font-bold">{field.value}</span>
+                                            <Button type="button" variant="outline" size="icon" aria-label="Increase adults" onClick={() => field.onChange(field.value + 1)}>
+                                                <Plus className="size-4" />
+                                            </Button>
+                                        </div>
+                                        {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                                    </Field>
+                                )}
+                                />
+
+                                <Controller
+                                name="seniorGuests"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid} className="rounded-lg border p-3">
+                                        <div className="space-y-1">
+                                            <FieldLabel>Seniors</FieldLabel>
+                                            <FieldDescription>₱{seniorGuestFee} per senior (60+)</FieldDescription>
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-between gap-2">
+                                            <Button type="button" variant="outline" size="icon" aria-label="Decrease seniors" onClick={() => field.onChange(Math.max(0, field.value - 1))}>
+                                                <Minus className="size-4" />
+                                            </Button>
+                                            <span className="w-8 text-center font-bold">{field.value}</span>
+                                            <Button type="button" variant="outline" size="icon" aria-label="Increase seniors" onClick={() => field.onChange(field.value + 1)}>
+                                                <Plus className="size-4" />
+                                            </Button>
+                                        </div>
+                                        {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                                    </Field>
+                                )}
+                                />
+
+                                <Controller
+                                name="kidGuests"
+                                control={control}
+                                render={({ field, fieldState }) => (
+                                    <Field data-invalid={fieldState.invalid} className="rounded-lg border p-3">
+                                        <div className="space-y-1">
+                                            <FieldLabel>Kids</FieldLabel>
+                                            <FieldDescription>₱{kidGuestFee} per kid (4–7)</FieldDescription>
+                                        </div>
+                                        <div className="mt-3 flex items-center justify-between gap-2">
+                                            <Button type="button" variant="outline" size="icon" aria-label="Decrease kids" onClick={() => field.onChange(Math.max(0, field.value - 1))}>
+                                                <Minus className="size-4" />
+                                            </Button>
+                                            <span className="w-8 text-center font-bold">{field.value}</span>
+                                            <Button type="button" variant="outline" size="icon" aria-label="Increase kids" onClick={() => field.onChange(field.value + 1)}>
+                                                <Plus className="size-4" />
+                                            </Button>
+                                        </div>
+                                        {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                                    </Field>
+                                )}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between rounded-lg bg-primary/5 px-4 py-3">
+                                <span className="text-sm font-semibold">Total Guests</span>
+                                <span className="text-xl font-bold">{selectedNumberOfGuests}</span>
+                            </div>
+                        </FieldSet>
+
+                        <Controller
+                        name="specialRequest"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                                <FieldLabel htmlFor={field.name}>
+                                    Special Requests <span className="text-muted-foreground">(Optional)</span>
+                                </FieldLabel>
+                                <Textarea
+                                id={field.name}
+                                className="min-h-24 resize-y"
+                                placeholder="Add accessibility needs, arrival notes, or other requests..."
+                                aria-invalid={fieldState.invalid}
+                                {...field}
+                                />
+                                <FieldDescription>Requests are subject to availability.</FieldDescription>
+                                {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                            </Field>
+                        )}
+                        />
+
                     </div>
-                </div>
+                </FormSection>
 
-                <div>
-                    <h2 className="text-lg font-bold mb-4 pb-2 border-b">
-                        Payment Information
-                    </h2>
+                <FormSection title="Add-on Services">
+                    <ManualAddOnSelector
+                        bookingDate={selectedCheckInDate}
+                        stayOptionId={selectedStayOptionId}
+                        onSubtotalChange={setAddOnSubtotal}
+                    />
+                </FormSection>
 
-                    <div className="space-y-5">
+                <FormSection title="Food Preorders">
+                    <ManualPreOrderSelector onSubtotalChange={setPreOrderSubtotal} />
+                </FormSection>
+
+                <FormSection title="Payment Information" contentClassName="space-y-5">
                         
                         <Controller 
                         name="paymentType"
@@ -418,7 +519,7 @@ const ManualBookingForm = () => {
                                 <RadioGroup
                                 {...field}
                                 name={field.name}
-                                value={field.value}
+                                value={field.value ?? ""}
                                 onValueChange={field.onChange}
                                 aria-invalid={fieldState.invalid}
                                 className="grid md:grid-cols-2 gap-3"
@@ -466,13 +567,60 @@ const ManualBookingForm = () => {
                         )}
                         />
 
+                        <Controller
+                        name="proofImageUrl"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                                <FieldLabel className="gap-1">
+                                    Attach Payment Proof <span className="text-muted-foreground">(Optional)</span>
+                                </FieldLabel>
+
+                                {!field.value ? (
+                                    <CloudinaryUpload onSuccess={field.onChange} />
+                                ) : (
+                                    <CloudinaryPreview
+                                    images={[{ url: field.value }]}
+                                    onRemove={() => field.onChange("")}
+                                    />
+                                )}
+
+                                <FieldDescription>
+                                    Add a receipt or payment screenshot for recordkeeping. Manual payments remain approved by the owner.
+                                </FieldDescription>
+                                {fieldState.invalid && <FieldError errors={getErrorMessages(fieldState.error)} />}
+                            </Field>
+                        )}
+                        />
+
                         {isAccommodationSelected && (
-                            <div className="p-4 rounded-lg">
+                            <div>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between items-center">
                                         <span className="text-muted-foreground">Base Price:</span>
                                         <span className="font-semibold" >
-                                            ₱{selectedAccommodation?.price || 0}/stay
+                                            ₱{(selectedAccommodation?.price || 0).toLocaleString()}/stay
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Guest Fee:</span>
+                                        <span className="font-semibold">
+                                            ₱{guestFee.toLocaleString()}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Add-on Services:</span>
+                                        <span className="font-semibold">
+                                            ₱{addOnSubtotal.toLocaleString()}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Food Preorders:</span>
+                                        <span className="font-semibold">
+                                            ₱{preOrderSubtotal.toLocaleString()}
                                         </span>
                                     </div>
 
@@ -501,11 +649,9 @@ const ManualBookingForm = () => {
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
-            </div>
+                </FormSection>
 
-            <div className="px-6 md:px-8 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50">
+            <div className="rounded-xl border border-border bg-card px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <p className="text-sm text-muted-foreground">
                     <span className="text-red-700">*</span> Required fields
                 </p>
@@ -521,6 +667,7 @@ const ManualBookingForm = () => {
                 </div>
             </div>
         </form>
+        </FormProvider>
     )
 }
 

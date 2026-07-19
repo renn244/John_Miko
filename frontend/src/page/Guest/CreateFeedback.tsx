@@ -3,6 +3,7 @@ import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import NavBar from "@/components/common/NavBar";
 import BookingCard from "@/components/pageComponents/Guest/MyBookings/BookingCard";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import FeedbackForm from "@/forms/FeedbackForm";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
 import { useCreateFeedbackGuestMutation } from "@/hooks/feedback.hook";
@@ -19,7 +20,16 @@ const CreateFeedback = () => {
 
     // TODO LATER: also put a warning that a feedback already exists for this booking and ask if they want to update the feedback instead of creating a new one
 
-    if (isLoading) return null;
+    if (isLoading) {
+        return (
+            <div className="min-h-screen">
+                <NavBar />
+                <main className="flex min-h-[60vh] items-center justify-center" aria-label="Loading booking for feedback">
+                    <LoadingSpinner />
+                </main>
+            </div>
+        );
+    }
 
     if (error) {
         return (

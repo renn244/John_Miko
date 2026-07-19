@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { AuthSessionCacheService } from 'src/auth/auth-session-cache.service';
 import { UserWhereInput } from 'src/generated/prisma/models';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,7 +8,8 @@ import { GetGuestsQueryDto } from './query/getGuests.query';
 @Injectable()
 export class GuestManagementService {
 	constructor(
-		private readonly prisma: PrismaService
+		private readonly prisma: PrismaService,
+		private readonly authSessionCache: AuthSessionCacheService,
 	) {}
 
 	private guestSelect = {
@@ -90,6 +92,8 @@ export class GuestManagementService {
 			select: this.guestSelect,
 		})
 
+		await this.authSessionCache.invalidate(id);
+
 		const { _count, ...rest } = updated;
 		return {
 			...rest,
@@ -105,6 +109,8 @@ export class GuestManagementService {
 			data: { status: 'ACTIVE' },
 			select: this.guestSelect,
 		})
+
+		await this.authSessionCache.invalidate(id);
 
 		const { _count, ...rest } = updated;
 		return {
