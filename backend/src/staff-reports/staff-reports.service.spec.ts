@@ -5,6 +5,7 @@ describe('StaffReportsService', () => {
     report: {
       count: jest.fn(),
       findMany: jest.fn(),
+      findFirst: jest.fn(),
     },
   } as any;
   const maintenanceService = {} as any;
@@ -50,5 +51,45 @@ describe('StaffReportsService', () => {
       pendingReviewCount: 3,
       pendingReports,
     });
+  });
+
+  it('scopes Resort Staff private proof reads to reports they own', async () => {
+    const report = {
+      id: 'report-1',
+      userId: 'staff-1',
+      proofImages: ['https://example.com/private-report-proof'],
+    };
+    prisma.report.findFirst.mockResolvedValue(report);
+
+    await expect(
+      service.viewReportById(
+        { id: 'staff-1', role: 'RESORT_STAFF', email: 'staff@example.com' } as any,
+        'report-1',
+      ),
+    ).resolves.toBe(report);
+    expect(prisma.report.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'report-1', userId: 'staff-1' },
+      }),
+    );
+  });
+
+  it('allows Admin to read private proofs without an owner filter', async () => {
+    const report = {
+      id: 'report-1',
+      userId: 'staff-1',
+      proofImages: ['https://example.com/private-report-proof'],
+    };
+    prisma.report.findFirst.mockResolvedValue(report);
+
+    await expect(
+      service.viewReportById(
+        { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
+        'report-1',
+      ),
+    ).resolves.toBe(report);
+    expect(prisma.report.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'report-1' } }),
+    );
   });
 });

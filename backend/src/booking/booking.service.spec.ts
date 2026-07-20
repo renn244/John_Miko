@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { BookingService } from './booking.service';
 
 describe('BookingService', () => {
@@ -7,6 +7,7 @@ describe('BookingService', () => {
     booking: {
       count: jest.fn(),
       findMany: jest.fn(),
+      findUnique: jest.fn(),
     },
     $transaction: jest.fn(),
   } as any;
@@ -196,5 +197,68 @@ describe('BookingService', () => {
       upcomingBookings,
       recentBookings,
     });
+  });
+
+  it('returns permanent private media URLs for a guest-owned booking', async () => {
+    const booking = {
+      id: 'booking-1',
+      userId: 'guest-1',
+      payment: {
+        proofImageUrl:
+          'https://res.cloudinary.com/test/image/authenticated/s--payment--/private/payment-proofs/proof',
+      },
+      reports: [
+        {
+          id: 'report-1',
+          proofImages: [
+            'https://res.cloudinary.com/test/image/authenticated/s--report--/private/staff-reports/proof',
+          ],
+        },
+      ],
+    };
+    prisma.booking.findUnique.mockResolvedValue(booking);
+
+    await expect(
+      service.getBookingById('booking-1', {
+        id: 'guest-1',
+        role: 'GUEST',
+        email: 'guest@example.com',
+      } as any),
+    ).resolves.toBe(booking);
+  });
+
+  it('denies a guest access to private media from another guest booking', async () => {
+    prisma.booking.findUnique.mockResolvedValue({
+      id: 'booking-1',
+      userId: 'guest-1',
+      payment: { proofImageUrl: 'https://example.com/private-proof' },
+      reports: [],
+    });
+
+    await expect(
+      service.getBookingById('booking-1', {
+        id: 'guest-2',
+        role: 'GUEST',
+        email: 'other@example.com',
+      } as any),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('allows an admin to read private media from any booking', async () => {
+    const booking = {
+      id: 'booking-1',
+      userId: 'guest-1',
+      payment: { proofImageUrl: 'https://example.com/private-proof' },
+      reports: [{ id: 'report-1', proofImages: ['https://example.com/report-proof'] }],
+    };
+    prisma.booking.findUnique.mockResolvedValue(booking);
+
+    await expect(
+      service.getBookingById('booking-1', {
+        id: 'admin-1',
+        role: 'ADMIN',
+        email: 'admin@example.com',
+      } as any),
+    ).resolves.toBe(booking);
   });
 });
