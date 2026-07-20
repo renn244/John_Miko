@@ -59,6 +59,7 @@ export type UpdateAccommodationDto = Omit<CreateAccommodationDto, "stayOptions" 
 export type GetAccommodationQuery = {
     type?: Accommodation['type'];
     search?: string;
+    date?: string;
 } & PaginationParams
 
 // Response types

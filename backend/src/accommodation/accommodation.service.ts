@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
+import { BookingStatus } from 'src/generated/prisma/enums';
 import { toDateOnly } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
@@ -65,23 +67,64 @@ export class AccommodationService {
     }
 
     async getAccommodations(query: GetAccommodationQueryDto) {
-        const { search, page, limit, ...rest } = cleanPrismaWhere(query);
+        const { search, page, limit, date, ...rest } = cleanPrismaWhere(query);
+
+        if (date) {
+            const globalClosure = await this.prisma.closure.findFirst({
+                where: { accommodationId: null, date },
+                select: { id: true },
+            });
+
+            if (globalClosure) {
+                return {
+                    data: [],
+                    meta: getPaginationMeta(0, page, limit),
+                };
+            }
+        }
+
+        const where: Prisma.AccommodationWhereInput = {
+            ...rest,
+            name: { contains: search, mode: 'insensitive' as const },
+            ...(date ? {
+                closures: { none: { date } },
+                stayOptions: {
+                    some: {
+                        isActive: true,
+                        bookings: {
+                            none: {
+                                bookingDate: date,
+                                status: { notIn: [BookingStatus.Cancelled] },
+                            },
+                        },
+                    },
+                },
+            } : {}),
+        };
 
         const [data, total] = await Promise.all([
             this.prisma.accommodation.findMany({ 
-                where: {
-                    ...rest, name: { contains: search, mode: 'insensitive' },
-                },
+                where,
                 include: {
                     stayOptions: {
-                        where: { isActive: true },
+                        where: {
+                            isActive: true,
+                            ...(date ? {
+                                bookings: {
+                                    none: {
+                                        bookingDate: date,
+                                        status: { notIn: [BookingStatus.Cancelled] },
+                                    },
+                                },
+                            } : {}),
+                        },
                         orderBy: { sortOrder: 'asc' }
                     }
                 },
                 ...getPaginationArgs(page, limit),
                 orderBy: { createdAt: 'desc' },
             }),
-            this.prisma.accommodation.count({ where: { ...rest, name: { contains: search, mode: 'insensitive' } } })
+            this.prisma.accommodation.count({ where })
         ])
 
         return { 

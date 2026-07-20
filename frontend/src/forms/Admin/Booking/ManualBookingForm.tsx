@@ -13,7 +13,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
 import { useCreateBookingAdminMutation } from "@/hooks/admin/booking.hook";
-import { isSameDateOnly } from "@/lib/date.util";
+import { isSameDateOnly, toDateOnly } from "@/lib/date.util";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { handleNestError, ValidationError } from "@/lib/handleNestError";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -102,7 +102,7 @@ const ManualBookingForm = () => {
                     menuItemId,
                     quantity,
                 })),
-                checkIn: data.checkIn,
+                checkIn: toDateOnly(data.checkIn),
                 stayOptionId: data.stayOptionId,
                 paymentType: data.paymentType,
             });
@@ -479,7 +479,7 @@ const ManualBookingForm = () => {
                                 </FieldLabel>
                                 <Textarea
                                 id={field.name}
-                                className="min-h-24 resize-y"
+                                className="min-h-24 resize-y max-h-40"
                                 placeholder="Add accessibility needs, arrival notes, or other requests..."
                                 aria-invalid={fieldState.invalid}
                                 {...field}

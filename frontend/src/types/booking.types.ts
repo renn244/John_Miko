@@ -82,6 +82,29 @@ export type GetBookingsQuery = {
     bookingDate?: Booking['bookingDate'];
 }  & PaginationParams
 
+export type CreateManualBookingDto = {
+    accommodationId: string;
+    name: string;
+    email: string;
+    contactNo: string;
+    adultGuests: number;
+    seniorGuests: number;
+    kidGuests: number;
+    specialRequest?: string;
+    proofImageUrl?: string;
+    addOnServices?: {
+        addOnServiceId: string;
+        quantity: number;
+    }[];
+    preOrderItems?: {
+        menuItemId: string;
+        quantity: number;
+    }[];
+    checkIn: string;
+    stayOptionId: string;
+    paymentType: 'Partial' | 'Full';
+}
+
 // Response types
 export type BookingWithAccommodation = {
     accommodation: {
