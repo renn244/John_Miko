@@ -211,6 +211,7 @@ const AccommodationForm = ({ onsubmit, oncancel, className, initialData, isUpdat
                             <Field data-invalid={fieldState.invalid} className="grid gap-3">
                                 {!field.value ? (
                                     <CloudinaryUpload
+                                    purpose="ACCOMMODATION"
                                     onSuccess={(url) => field.onChange(url)}
                                     onError={(err) => setError("imageUrl", { type: "manual", message: err.message })}
                                     />

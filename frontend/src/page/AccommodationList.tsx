@@ -3,7 +3,6 @@ import NavBar from "@/components/common/NavBar";
 import {
     GuestCard,
     GuestContainer,
-    GuestInfoChip,
     GuestPageHeader,
     GuestPageShell,
 } from "@/components/guest";
@@ -23,19 +22,17 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
 import { toDateOnly } from "@/lib/date.util";
 import type { Accommodation } from "@/types/admin/accommodation.type";
+import { format, startOfToday } from "date-fns";
 import {
     AlertTriangle,
     BedDouble,
     CalendarDays,
-    Home,
-    PartyPopper,
     RefreshCcw,
 } from "lucide-react";
-import { format, startOfToday } from "date-fns";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
-type StayFilter = "All" | "DayStay" | "Overnight" | "22 Hours" | "12 Hours";
+type StayFilter = "DayStay" | "Overnight" | "22 Hours" | "12 Hours";
 
 const typeOptions: Array<{ value: Accommodation["type"] | "All"; label: string }> = [
     { value: "All", label: "All" },
@@ -44,11 +41,11 @@ const typeOptions: Array<{ value: Accommodation["type"] | "All"; label: string }
     { value: "EventHall", label: "Event Hall" },
 ];
 
-const stayOptions: StayFilter[] = ["All", "DayStay", "Overnight", "22 Hours", "12 Hours"];
+const stayOptions: StayFilter[] = ["DayStay", "Overnight", "22 Hours", "12 Hours"];
 
 const AccommodationList = () => {
     const [selectedType, setSelectedType] = useState<Accommodation["type"] | "All">("All");
-    const [selectedStay, setSelectedStay] = useState<StayFilter>("All");
+    const [selectedStay, setSelectedStay] = useState<StayFilter>();
     const [selectedDate, setSelectedDate] = useState<Date>();
     const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
     const navigate = useNavigate();
@@ -66,13 +63,8 @@ const AccommodationList = () => {
         limit: 100,
     });
 
-    const { data: allAccommodationData } = useGetAccommodationsQuery({
-        page: 1,
-        limit: 100,
-    });
-
     const accommodations = useMemo(() => {
-        if (selectedStay === "All") return data?.data ?? [];
+        if (!selectedStay) return data?.data ?? [];
 
         const normalizedSelected = selectedStay.toLowerCase().replace(/\s/g, "");
 
@@ -86,15 +78,11 @@ const AccommodationList = () => {
         );
     }, [data?.data, selectedStay]);
 
-    const allAccommodations = allAccommodationData?.data ?? data?.data ?? [];
-    const roomCount = allAccommodations.filter((item) => item.type === "Room").length;
-    const cottageCount = allAccommodations.filter((item) => item.type === "Cottage").length;
-    const eventHallCount = allAccommodations.filter((item) => item.type === "EventHall").length;
-    const hasFilters = selectedType !== "All" || selectedStay !== "All" || !!selectedDate;
+    const hasFilters = selectedType !== "All" || !!selectedStay || !!selectedDate;
 
     const clearFilters = () => {
         setSelectedType("All");
-        setSelectedStay("All");
+        setSelectedStay(undefined);
         setSelectedDate(undefined);
     };
 
@@ -105,63 +93,47 @@ const AccommodationList = () => {
             <GuestContainer className="pb-12">
                 <GuestPageHeader
                     title="Our Accommodations"
+                    className="pb-3 md:pb-4"
                 />
 
-                <div className="mb-6 flex flex-wrap gap-3">
-                    <GuestInfoChip>
-                        <BedDouble className="size-3.5" />
-                        {roomCount} Rooms
-                    </GuestInfoChip>
-                    <GuestInfoChip>
-                        <Home className="size-3.5" />
-                        {cottageCount} Cottages
-                    </GuestInfoChip>
-                    <GuestInfoChip>
-                        <PartyPopper className="size-3.5" />
-                        {eventHallCount} Event Halls
-                    </GuestInfoChip>
-                </div>
-
-                <div className="mb-7 border-y py-4">
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+                <div className="mb-7 border-b py-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                         <Popover open={isDateFilterOpen} onOpenChange={setIsDateFilterOpen}>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" className="justify-start lg:w-auto">
+                                <Button variant="outline" className="justify-start sm:w-auto">
                                     <CalendarDays className="size-4" />
                                     {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Select Date"}
+                                    {selectedStay ? ` · ${selectedStay}` : null}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
                                 <Calendar
                                     mode="single"
                                     selected={selectedDate}
-                                    onSelect={(date) => {
-                                        setSelectedDate(date);
-                                        setIsDateFilterOpen(false);
-                                    }}
+                                    onSelect={setSelectedDate}
                                     disabled={{ before: startOfToday() }}
                                 />
+                                <div className="border-t p-3">
+                                    <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                        Stay option
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {stayOptions.map((option) => (
+                                            <Button
+                                                key={option}
+                                                type="button"
+                                                size="sm"
+                                                variant={selectedStay === option ? "default" : "outline"}
+                                                className="w-full"
+                                                onClick={() => setSelectedStay((current) => current === option ? undefined : option)}
+                                            >
+                                                {option}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
                             </PopoverContent>
                         </Popover>
-
-                        <div className="hidden h-7 w-px bg-border lg:block" />
-
-                        <div className="flex gap-2 overflow-x-auto pb-1">
-                            {stayOptions.map((option) => (
-                                <Button
-                                    key={option}
-                                    type="button"
-                                    size="sm"
-                                    variant={selectedStay === option ? "default" : "outline"}
-                                    className="shrink-0"
-                                    onClick={() => setSelectedStay(option)}
-                                >
-                                    {option === "All" ? "All Stays" : option}
-                                </Button>
-                            ))}
-                        </div>
-
-                        <div className="hidden h-7 w-px bg-border lg:block" />
 
                         <div className="flex gap-2 overflow-x-auto pb-1">
                             {typeOptions.map((option) => (
@@ -182,7 +154,7 @@ const AccommodationList = () => {
                             type="button"
                             variant="link"
                             size="sm"
-                            className="ml-0 px-0 lg:ml-auto"
+                            className="ml-0 px-0 sm:ml-auto"
                             disabled={!hasFilters}
                             onClick={clearFilters}
                         >

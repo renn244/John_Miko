@@ -31,31 +31,27 @@ const AccommodationCardView = ({
                         <GuestInfoChip className="bg-background/95 text-foreground backdrop-blur">
                             {accommodation.type === "EventHall" ? "Event Hall" : accommodation.type}
                         </GuestInfoChip>
-                        {activeStayOptions.slice(0, 1).map((option) => (
-                            <GuestInfoChip key={option.id} className="bg-background/95 backdrop-blur">
-                                {option.label}
-                            </GuestInfoChip>
-                        ))}
                     </div>
                 </div>
 
                 <div className="flex flex-1 flex-col p-4 md:p-5">
-                    <div className="flex flex-wrap gap-2">
-                        {activeStayOptions.slice(1, 3).map((option) => (
-                            <GuestInfoChip key={option.id}>{option.label}</GuestInfoChip>
-                        ))}
-                        <GuestInfoChip className="bg-primary/10 text-primary">
-                            <Users className="size-3.5" />
-                            Up to {accommodation.capacity} guests
-                        </GuestInfoChip>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Users className="size-3.5" />
+                        Up to {accommodation.capacity} guests
                     </div>
 
-                    <h3 className="mt-4 text-xl font-bold tracking-normal">
+                    <h3 className="mt-3 text-xl font-bold tracking-normal">
                         {accommodation.name}
                     </h3>
                     <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
                         {accommodation.description}
                     </p>
+
+                    {activeStayOptions.length > 0 ? (
+                        <p className="mt-3 line-clamp-1 text-sm text-muted-foreground">
+                            Available stays: {activeStayOptions.map((option) => option.label).join(" / ")}
+                        </p>
+                    ) : null}
 
                     <div className="mt-4 flex flex-wrap gap-2">
                         {visibleAmenities.map((amenity) => (

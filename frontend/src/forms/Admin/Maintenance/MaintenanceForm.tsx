@@ -284,6 +284,7 @@ const MaintenanceForm = ({ onsubmit, oncancel, className, initialData, isUpdate 
                             </FieldLabel>
                 
                             <CloudinaryUpload
+                            purpose="MAINTENANCE_ISSUE"
                             onSuccess={(url) => field.onChange([...(field.value || []), url])}
                             onError={(err) => toast.error(err.message || "Image upload failed. Please try again.")}
                             />

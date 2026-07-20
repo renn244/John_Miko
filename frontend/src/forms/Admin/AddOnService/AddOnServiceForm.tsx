@@ -179,6 +179,7 @@ const AddOnServiceForm = ({ onsubmit, oncancel, className, initialData, isUpdate
 
                                 {!field.value && (
                                     <CloudinaryUpload
+                                        purpose="ADD_ON_SERVICE"
                                         onSuccess={(url) => field.onChange(url)}
                                         onError={(err) => setError("imageUrl", { type: "manual", message: err.message })}
                                     />

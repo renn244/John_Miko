@@ -114,6 +114,7 @@ const MarkCompleteForm = ({
 
           {field.value.length < 3 ? (
             <CloudinaryUpload
+            purpose="MAINTENANCE_RESOLUTION"
             onSuccess={(url) => field.onChange([...field.value, url])}
             onError={(err) => toast.error(err.message || "Image upload failed. Please try again.")}
             />

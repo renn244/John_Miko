@@ -271,6 +271,7 @@ const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => 
                                     <div className="mt-3">
                                         {!field.value && (
                                             <CloudinaryUpload
+                                                purpose="PAYMENT_PROOF"
                                                 onSuccess={(url) => field.onChange(url)}
                                             />
                                         )}

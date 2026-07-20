@@ -315,6 +315,7 @@ export default function StaffReportForm({
               <Field>
                 {field.value.length < 3 ? (
                   <CloudinaryUpload
+                    purpose="STAFF_REPORT_PROOF"
                     disabled={isFormBusy}
                     onUploadingChange={setIsProofUploading}
                     onSuccess={(url) =>

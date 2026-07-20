@@ -302,6 +302,7 @@ export default function MaintenanceDetailScreen({
               </Text>
               {resolutionProofImages.length < 3 ? (
                 <CloudinaryUpload
+                  purpose="MAINTENANCE_RESOLUTION"
                   onSuccess={(url) =>
                     setResolutionProofImages((prev) => [...prev, url])
                   }

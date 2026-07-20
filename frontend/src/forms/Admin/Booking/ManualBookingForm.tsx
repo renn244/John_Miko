@@ -577,7 +577,7 @@ const ManualBookingForm = () => {
                                 </FieldLabel>
 
                                 {!field.value ? (
-                                    <CloudinaryUpload onSuccess={field.onChange} />
+                                    <CloudinaryUpload purpose="PAYMENT_PROOF" onSuccess={field.onChange} />
                                 ) : (
                                     <CloudinaryPreview
                                     images={[{ url: field.value }]}

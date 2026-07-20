@@ -1,13 +1,16 @@
 import { useCloudinaryUpload } from "@/hooks/cloudinary.hook"
+import type { MediaPurpose } from "@/types/media.type"
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react"
 
 interface Props {
+    purpose: MediaPurpose
     onSuccess: (url: string) => void
     onError?: (err: Error) => void
     accept?: string
 }
 
 export function CloudinaryUpload({
+    purpose,
     onSuccess,
     onError,
     accept = "image/*",
@@ -18,7 +21,7 @@ export function CloudinaryUpload({
 
     const handleFile = (file: File | undefined) => {
         if (!file) return
-        upload(file)
+        upload(file, purpose)
             .then((url) => {
                 onSuccess(url)
                 // reset so dropzone is ready for next file immediately
