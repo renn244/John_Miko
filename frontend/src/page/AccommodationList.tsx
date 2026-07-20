@@ -10,6 +10,7 @@ import {
 import AccommodationCardView from "@/components/pageComponents/Accommodation/AccommodationCardView";
 import Chatbot from "@/components/pageComponents/Chatbot";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
     Empty,
     EmptyContent,
@@ -18,7 +19,9 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from "@/components/ui/empty";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useGetAccommodationsQuery } from "@/hooks/admin/accommodation.hook";
+import { toDateOnly } from "@/lib/date.util";
 import type { Accommodation } from "@/types/admin/accommodation.type";
 import {
     AlertTriangle,
@@ -28,6 +31,7 @@ import {
     PartyPopper,
     RefreshCcw,
 } from "lucide-react";
+import { format, startOfToday } from "date-fns";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -45,6 +49,8 @@ const stayOptions: StayFilter[] = ["All", "DayStay", "Overnight", "22 Hours", "1
 const AccommodationList = () => {
     const [selectedType, setSelectedType] = useState<Accommodation["type"] | "All">("All");
     const [selectedStay, setSelectedStay] = useState<StayFilter>("All");
+    const [selectedDate, setSelectedDate] = useState<Date>();
+    const [isDateFilterOpen, setIsDateFilterOpen] = useState(false);
     const navigate = useNavigate();
 
     const {
@@ -55,6 +61,7 @@ const AccommodationList = () => {
         refetch,
     } = useGetAccommodationsQuery({
         type: selectedType === "All" ? undefined : selectedType,
+        date: selectedDate ? toDateOnly(selectedDate) : undefined,
         page: 1,
         limit: 100,
     });
@@ -83,11 +90,12 @@ const AccommodationList = () => {
     const roomCount = allAccommodations.filter((item) => item.type === "Room").length;
     const cottageCount = allAccommodations.filter((item) => item.type === "Cottage").length;
     const eventHallCount = allAccommodations.filter((item) => item.type === "EventHall").length;
-    const hasFilters = selectedType !== "All" || selectedStay !== "All";
+    const hasFilters = selectedType !== "All" || selectedStay !== "All" || !!selectedDate;
 
     const clearFilters = () => {
         setSelectedType("All");
         setSelectedStay("All");
+        setSelectedDate(undefined);
     };
 
     return (
@@ -116,10 +124,25 @@ const AccommodationList = () => {
 
                 <div className="mb-7 border-y py-4">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                        <Button variant="outline" className="justify-start lg:w-auto" disabled>
-                            <CalendarDays className="size-4" />
-                            Select Date
-                        </Button>
+                        <Popover open={isDateFilterOpen} onOpenChange={setIsDateFilterOpen}>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className="justify-start lg:w-auto">
+                                    <CalendarDays className="size-4" />
+                                    {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Select Date"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={(date) => {
+                                        setSelectedDate(date);
+                                        setIsDateFilterOpen(false);
+                                    }}
+                                    disabled={{ before: startOfToday() }}
+                                />
+                            </PopoverContent>
+                        </Popover>
 
                         <div className="hidden h-7 w-px bg-border lg:block" />
 
@@ -211,7 +234,9 @@ const AccommodationList = () => {
                                 </EmptyMedia>
                                 <EmptyTitle>No stays found</EmptyTitle>
                                 <EmptyDescription>
-                                    Try changing the stay type or accommodation type filter.
+                                    {selectedDate
+                                        ? `No accommodations match your filters on ${format(selectedDate, "MMMM d, yyyy")}.`
+                                        : "Try changing the stay type or accommodation type filter."}
                                 </EmptyDescription>
                             </EmptyHeader>
                             <EmptyContent>

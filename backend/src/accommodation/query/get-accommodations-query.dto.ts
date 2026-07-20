@@ -1,6 +1,7 @@
-import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { IsDate, IsEnum, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
 import { AccommodationType } from "src/generated/prisma/enums";
+import { toDateOnly } from "src/lib/utils/date.util";
 
 export class GetAccommodationQueryDto {
     @IsOptional()
@@ -10,6 +11,12 @@ export class GetAccommodationQueryDto {
     @IsOptional()
     @IsEnum(AccommodationType, { message: `Type must be one of: ${Object.values(AccommodationType).join(', ')}` })
     type?: AccommodationType;
+
+    @IsOptional()
+    @Transform(({ value }) => toDateOnly(value))
+    @Type(() => Date)
+    @IsDate({ message: 'Date must be a valid date' })
+    date?: Date;
 
     @IsOptional()
     @Type(() => Number)

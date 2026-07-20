@@ -1,30 +1,7 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Booking, BookingOverview, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrderAndPayment, BookingWithPaymentInfo, GetBookingsQuery } from "@/types/booking.types";
+import type { Booking, BookingOverview, BookingWithAccommodation, BookingWithAccommodationAndFeedback, BookingWithAccommodationAndPreOrderAndPayment, BookingWithPaymentInfo, CreateManualBookingDto, GetBookingsQuery } from "@/types/booking.types";
 import type { PaginatedResponse } from "@/types/pagination.type";
-
-export type CreateManualBookingDto = {
-    accommodationId: string;
-    name: string;
-    email: string;
-    contactNo: string;
-    adultGuests: number;
-    seniorGuests: number;
-    kidGuests: number;
-    specialRequest?: string;
-    proofImageUrl?: string;
-    addOnServices?: {
-        addOnServiceId: string;
-        quantity: number;
-    }[];
-    preOrderItems?: {
-        menuItemId: string;
-        quantity: number;
-    }[];
-    checkIn: Date;
-    stayOptionId: string;
-    paymentType: "Partial" | "Full";
-};
 
 export const bookingApi = {
     bookAccommodation: async (data: any) => {
