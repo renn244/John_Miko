@@ -20,6 +20,7 @@ import { StaffManagementModule } from './staff-management/staff-management.modul
 import { GuestManagementModule } from './guest-management/guest-management.module';
 import { ServicesModule } from './services/services.module';
 import { ClosureModule } from './closure/closure.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ClosureModule } from './closure/closure.module';
     GuestManagementModule,
     ServicesModule,
     ClosureModule,
+    MediaModule,
   ],
 })
 export class AppModule {}

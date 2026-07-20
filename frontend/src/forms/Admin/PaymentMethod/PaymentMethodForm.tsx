@@ -270,7 +270,7 @@ const PaymentMethodForm = ({
                                 <FieldLabel className="gap-1">QR Code</FieldLabel>
 
                                 {!field.value && (
-                                    <CloudinaryUpload onSuccess={(url) => field.onChange(url)} />
+                                    <CloudinaryUpload purpose="PAYMENT_METHOD_QR" onSuccess={(url) => field.onChange(url)} />
                                 )}
 
                                 {field.value && (

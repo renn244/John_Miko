@@ -1,6 +1,7 @@
 import { uploadImageToCloudinary } from "@/lib/cloudinaryUpload";
 import type { ImagePickerAsset } from "expo-image-picker";
 import { useState } from "react";
+import type { MediaPurpose } from "@/types/media.type";
 
 type UploadStatus = "idle" | "uploading" | "done" | "error";
 
@@ -10,13 +11,13 @@ export function useCloudinaryUpload() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const upload = async (asset: ImagePickerAsset) => {
+  const upload = async (asset: ImagePickerAsset, purpose: MediaPurpose) => {
     setStatus("uploading");
     setProgress(0);
     setError(null);
 
     try {
-      const uploadedUrl = await uploadImageToCloudinary(asset, setProgress);
+      const uploadedUrl = await uploadImageToCloudinary(asset, purpose, setProgress);
       setUrl(uploadedUrl);
       setStatus("done");
       return uploadedUrl;

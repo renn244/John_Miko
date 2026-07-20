@@ -187,6 +187,7 @@ const MenuItemForm = ({ onsubmit, oncancel, className, initialData, isUpdate }: 
 
                                 {!field.value && (
                                     <CloudinaryUpload
+                                        purpose="MENU_ITEM"
                                         onSuccess={(url) => field.onChange(url)}
                                         onError={(err) => setError("imageUrl", { type: "manual", message: err.message })}
                                     />

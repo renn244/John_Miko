@@ -6,8 +6,10 @@ import * as ImagePicker from "expo-image-picker";
 import { Camera, ImagePlus } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import type { MediaPurpose } from "@/types/media.type";
 
 type CloudinaryUploadProps = {
+  purpose: MediaPurpose;
   onSuccess: (url: string) => void;
   onError?: (error: Error) => void;
   onUploadingChange?: (isUploading: boolean) => void;
@@ -17,6 +19,7 @@ type CloudinaryUploadProps = {
 type ImageSource = "camera" | "library";
 
 export function CloudinaryUpload({
+  purpose,
   onSuccess,
   onError,
   onUploadingChange,
@@ -33,7 +36,7 @@ export function CloudinaryUpload({
     onUploadingChange?.(true);
 
     try {
-      const url = await upload(asset);
+      const url = await upload(asset, purpose);
       onSuccess(url);
     } catch (error) {
       onError?.(

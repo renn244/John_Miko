@@ -172,6 +172,30 @@ npm run start:dev
 
 Configure environment variables such as `DATABASE_URL` before starting the backend.
 
+### Cloudinary signed uploads
+
+Image uploads require two **signed** Cloudinary upload presets with identical file limits:
+
+- allowed formats: `jpg`, `jpeg`, `png`, `webp`
+- maximum file size: 10 MB
+- overwrite disabled
+- public preset delivery type: `upload`
+- private preset delivery type: `authenticated`
+
+Accommodation, menu-item, add-on, and payment-method QR images use the public preset. Payment proofs, staff-report evidence, and maintenance evidence use the private preset.
+
+Add these values to `backend/.env`:
+
+```env
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_PUBLIC_UPLOAD_PRESET=
+CLOUDINARY_PRIVATE_UPLOAD_PRESET=
+```
+
+Web and mobile clients obtain all Cloudinary upload parameters from the authenticated backend endpoint. The signature binds the preset, public ID, and delivery type. Their old unsigned upload presets should be disabled only after both clients have been updated and verified.
+
 **2. Frontend**
 ```bash
 cd frontend
