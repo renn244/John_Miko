@@ -16,11 +16,14 @@ export function CloudinaryUpload({
     accept = "image/*",
 }: Props) {
     const inputRef = useRef<HTMLInputElement>(null)
+    const uploadInFlightRef = useRef(false)
     const [dragging, setDragging] = useState(false)
-    const { upload, reset, status, progress } = useCloudinaryUpload()
+    const { upload, reset, status, progress, error } = useCloudinaryUpload()
 
     const handleFile = (file: File | undefined) => {
-        if (!file) return
+        if (!file || uploadInFlightRef.current) return
+        uploadInFlightRef.current = true
+
         upload(file, purpose)
             .then((url) => {
                 onSuccess(url)
@@ -30,7 +33,10 @@ export function CloudinaryUpload({
             })
             .catch((err) => {
                 onError?.(err)
-                reset()
+                if (inputRef.current) inputRef.current.value = ""
+            })
+            .finally(() => {
+                uploadInFlightRef.current = false
             })
     }
 
@@ -85,6 +91,21 @@ export function CloudinaryUpload({
                         className="h-full bg-primary rounded-full transition-all duration-200"
                         style={{ width: `${progress}%` }}
                     />
+                </div>
+            )}
+
+            {status === "error" && error && (
+                <div className="flex items-center justify-between gap-3">
+                    <p role="alert" className="text-sm text-red-600">
+                        {error}
+                    </p>
+                    <button
+                        type="button"
+                        className="shrink-0 text-sm font-medium text-primary hover:underline"
+                        onClick={() => inputRef.current?.click()}
+                    >
+                        Try again
+                    </button>
                 </div>
             )}
 

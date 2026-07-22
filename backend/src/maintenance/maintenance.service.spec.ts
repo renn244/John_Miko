@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { MaintenanceService } from './maintenance.service';
 
 describe('MaintenanceService', () => {
@@ -6,6 +7,7 @@ describe('MaintenanceService', () => {
       groupBy: jest.fn(),
       count: jest.fn(),
       findMany: jest.fn(),
+      findFirst: jest.fn(),
     },
   } as any;
 
@@ -58,5 +60,38 @@ describe('MaintenanceService', () => {
         resolvedTickets: 1,
       },
     });
+  });
+
+  it('scopes private maintenance media reads to the assigned staff member', async () => {
+    const maintenance = {
+      id: 'maintenance-1',
+      assignedToId: 'staff-1',
+      imagesUrl: ['https://example.com/private-issue-photo'],
+      resolutionProofImages: ['https://example.com/private-resolution-photo'],
+    };
+    prisma.maintenance.findFirst.mockResolvedValue(maintenance);
+
+    await expect(
+      service.getAssignedMaintenanceById(
+        { id: 'staff-1', role: 'MAINTENANCE_STAFF', email: 'staff@example.com' } as any,
+        'maintenance-1',
+      ),
+    ).resolves.toBe(maintenance);
+    expect(prisma.maintenance.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'maintenance-1', assignedToId: 'staff-1' },
+      }),
+    );
+  });
+
+  it('does not return private maintenance media to unassigned staff', async () => {
+    prisma.maintenance.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.getAssignedMaintenanceById(
+        { id: 'staff-2', role: 'MAINTENANCE_STAFF', email: 'other@example.com' } as any,
+        'maintenance-1',
+      ),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });
