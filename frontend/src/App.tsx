@@ -1,4 +1,5 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
+import { lazy, Suspense } from 'react';
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";
 import USER_ROLES from './lib/constant/USER_ROLES.constant';
@@ -15,9 +16,6 @@ import AdminLayout from "./page/Admin/AdminLayout";
 import AddBooking from './page/Admin/Booking/AddBooking';
 import Booking from './page/Admin/Booking/Booking';
 import ViewBooking from './page/Admin/Booking/ViewBooking';
-import AddChatbotRule from './page/Admin/ChatbotRule/AddChatbotRule';
-import ChatbotRule from './page/Admin/ChatbotRule/ChatbotRule';
-import EditChatbotRule from './page/Admin/ChatbotRule/EditChatbotRule';
 import Feedback from './page/Admin/Feedback/Feedback';
 import GuestManagement from './page/Admin/Guest-Management/GuestManagement';
 import AddMaintenance from './page/Admin/Maintenance/AddMaintenance';
@@ -54,6 +52,7 @@ import SignUpGuest from "./page/SignUpGuest";
 import VirtualTour from './page/VirtualTour';
 
 const RouterRoot = () => <Outlet />;
+const Knowledge = lazy(() => import('./page/Admin/Knowledge/Knowledge'));
 
 const router = createBrowserRouter([
   {
@@ -227,12 +226,12 @@ const router = createBrowserRouter([
             ]
           },
           {
-            path: 'chatbot-rule',
-            children: [
-              { index: true, element: <ChatbotRule /> },
-              { path: 'add', element: <AddChatbotRule /> },
-              { path: ':id/edit', element: <EditChatbotRule /> }
-            ]
+            path: 'knowledge',
+            element: (
+              <Suspense fallback={<div className="min-h-96 animate-pulse rounded-xl bg-muted/40" />}>
+                <Knowledge />
+              </Suspense>
+            ),
           },
           {
             path: 'settings',
