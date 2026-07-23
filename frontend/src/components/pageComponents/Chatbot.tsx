@@ -1,349 +1,166 @@
-import { useAuthContext } from "@/context/AuthContext";
-import { useInteractWithChatbotMutation } from "@/hooks/admin/chatbot.rule.hook";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useChatbotMessageMutation } from "@/hooks/chatbot.hook";
+import type { ChatbotHistoryTurn } from "@/types/chatbot.type";
 import { Bot, MessageCircle, Send, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { useEffect, useRef, useState } from "react";
+import type { FormEvent } from "react";
 
-type chatBotMessage = {
-    id: string;
-    sender: 'user' | 'bot';
-    text: string;
-    timestamp: Date;
-    quickReplies?: { label: string; value: string }[];
-    isLoading?: boolean;
-    isTyping?: boolean;
-}
-
-const CHATBOT_SESSION_STORAGE_KEY = "jm-chatbot-session-id";
-
-const createChatbotSessionId = () => {
-    if (typeof window === "undefined") {
-        return `chatbot-${Date.now()}`;
-    }
-
-    const existingSessionId = window.sessionStorage.getItem(CHATBOT_SESSION_STORAGE_KEY);
-
-    if (existingSessionId) {
-        return existingSessionId;
-    }
-
-    const nextSessionId =
-        typeof window.crypto?.randomUUID === "function"
-            ? window.crypto.randomUUID()
-            : `chatbot-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
-    window.sessionStorage.setItem(CHATBOT_SESSION_STORAGE_KEY, nextSessionId);
-
-    return nextSessionId;
+type ChatMessage = {
+  id: string;
+  sender: "guest" | "assistant";
+  text: string;
 };
 
-const BOT_TYPING_SPEED_MS = 18;
-const BOT_TYPING_CHUNK_SIZE = 2;
+const welcomeMessage: ChatMessage = {
+  id: "welcome",
+  sender: "assistant",
+  text: "Hi! Ask me about public resort information, accommodations, menu items, or add-on services.",
+};
 
-const LoadingDots = () => {
-    return (
-        <div className="flex items-center gap-1 py-1">
-            {[0, 1, 2].map((index) => (
-                <span
-                key={index}
-                className="h-2 w-2 rounded-full bg-slate-400 animate-bounce"
-                style={{ animationDelay: `${index * 0.12}s` }}
-                />
-            ))}
+const ChatbotMain = ({ close }: { close: () => void }) => {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage]);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const messageMutation = useChatbotMessageMutation();
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, messageMutation.isPending]);
+
+  const send = async (event: FormEvent) => {
+    event.preventDefault();
+    const question = input.trim();
+    if (!question || messageMutation.isPending) return;
+
+    setInput("");
+    setMessages((current) => [
+      ...current,
+      { id: `guest-${Date.now()}`, sender: "guest", text: question },
+    ]);
+
+    try {
+      const history: ChatbotHistoryTurn[] = messages
+        .filter((message) => message.id !== welcomeMessage.id)
+        .slice(-6)
+        .map((message) => ({
+          role: message.sender === "guest" ? "user" : "assistant",
+          content: message.text,
+        }));
+      const response = await messageMutation.mutateAsync({
+        message: question,
+        history,
+      });
+      setMessages((current) => [
+        ...current,
+        {
+          id: response.id,
+          sender: "assistant",
+          text: response.answer,
+        },
+      ]);
+    } catch (error) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: `error-${Date.now()}`,
+          sender: "assistant",
+          text: error instanceof Error
+            ? error.message
+            : "The resort assistant is unavailable right now.",
+        },
+      ]);
+    }
+  };
+
+  return (
+    <section
+      aria-label="Resort assistant"
+      className="flex h-[min(640px,calc(100vh-96px))] w-[min(390px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border bg-background shadow-2xl"
+    >
+      <header className="flex items-center justify-between bg-primary px-4 py-3 text-primary-foreground">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-full bg-white/15">
+            <Bot className="size-5" />
+          </span>
+          <div>
+            <h2 className="font-semibold">Resort Assistant</h2>
+            <p className="text-xs text-primary-foreground/75">Ask about public resort information</p>
+          </div>
         </div>
-    );
+        <Button type="button" variant="ghost" size="icon" onClick={close} aria-label="Close chatbot" className="text-white hover:bg-white/15 hover:text-white">
+          <X />
+        </Button>
+      </header>
+
+      <div className="flex-1 space-y-4 overflow-y-auto bg-muted/20 p-4">
+        {messages.map((message) => (
+          <div key={message.id} className={message.sender === "guest" ? "flex justify-end" : "flex justify-start"}>
+            <div
+              className={
+                message.sender === "guest"
+                  ? "max-w-[85%] rounded-2xl rounded-br-sm bg-primary px-4 py-3 text-sm leading-6 text-primary-foreground"
+                  : "max-w-[85%] rounded-2xl rounded-bl-sm border bg-background px-4 py-3 text-sm leading-6 text-foreground shadow-sm"
+              }
+            >
+              <p className="whitespace-pre-wrap">{message.text}</p>
+            </div>
+          </div>
+        ))}
+
+        {messageMutation.isPending ? (
+          <div className="flex justify-start">
+            <div className="flex items-center gap-1 rounded-2xl rounded-bl-sm border bg-background px-4 py-4 shadow-sm" aria-label="Assistant is thinking">
+              {[0, 1, 2].map((item) => (
+                <span key={item} className="size-2 animate-bounce rounded-full bg-muted-foreground" style={{ animationDelay: `${item * 120}ms` }} />
+              ))}
+            </div>
+          </div>
+        ) : null}
+        <div ref={bottomRef} />
+      </div>
+
+      <form onSubmit={send} className="border-t bg-background p-3">
+        <div className="flex items-center gap-2">
+          <Input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="Ask about the resort…"
+            maxLength={500}
+            aria-label="Chat message"
+          />
+          <Button type="submit" size="icon" disabled={!input.trim() || messageMutation.isPending} aria-label="Send message">
+            <Send />
+          </Button>
+        </div>
+        <p className="mt-2 text-center text-[10px] text-muted-foreground">
+          Public information only. Confirm important details with resort staff.
+        </p>
+      </form>
+    </section>
+  );
 };
 
 const Chatbot = () => {
-    const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-    return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-                <Button size="icon-lg" className="bg-blue-500 hover:bg-blue-600 p-3 rounded-full fixed bottom-5 right-5">
-                    <MessageCircle className="w-8 h-8 text-white" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent side="left" align="start" alignOffset={10} className="p-0 border-0 ring-0 rounded-xl fixed bottom-5 right-10">
-                <ChatbotMain 
-                setIsOpen={setIsOpen}
-                />
-            </PopoverContent>
-        </Popover>
-    )
-}
-
-type ChatbotMainProps = {
-    setIsOpen: (isOpen: boolean) => void;
-}
-
-const ChatbotMain = ({ setIsOpen }: ChatbotMainProps) => {
-    const [input, setInput] = useState('');
-    const [messages, setMessages] = useState<chatBotMessage[]>([]);
-    const ref = useRef<HTMLDivElement>(null);
-    const typingIntervalRef = useRef<number | null>(null);
-    const pendingTimeoutsRef = useRef<number[]>([]);
-    const sessionId = useMemo(() => createChatbotSessionId(), []);
-    const { user } = useAuthContext();
-    
-    const { 
-        mutateAsync, 
-        isPending: isLoadingResponse
-    } = useInteractWithChatbotMutation();
-
-    useEffect(() => {
-        getBotResponse("Main Menu");
-    }, [])
-
-    useEffect(() => {
-        return () => {
-            if (typingIntervalRef.current) {
-                window.clearInterval(typingIntervalRef.current);
-            }
-
-            pendingTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
-        };
-    }, []);
-
-    useEffect(() => {
-        if(ref.current) {
-            ref.current.scrollIntoView({ behavior: 'smooth' });
-        }  
-    }, [messages])
-
-    const addPendingTimeout = (callback: () => void, delay: number) => {
-        const timeoutId = window.setTimeout(() => {
-            pendingTimeoutsRef.current = pendingTimeoutsRef.current.filter((id) => id !== timeoutId);
-            callback();
-        }, delay);
-
-        pendingTimeoutsRef.current.push(timeoutId);
-    };
-
-    const stopTypingAnimation = () => {
-        if (typingIntervalRef.current) {
-            window.clearInterval(typingIntervalRef.current);
-            typingIntervalRef.current = null;
-        }
-    };
-
-    const startTypingReply = (
-        messageId: string,
-        fullText: string,
-        quickReplies: { label: string; value: string }[],
-    ) => {
-        stopTypingAnimation();
-
-        let visibleLength = 0;
-
-        typingIntervalRef.current = window.setInterval(() => {
-            visibleLength = Math.min(visibleLength + BOT_TYPING_CHUNK_SIZE, fullText.length);
-
-            const nextText = fullText.slice(0, visibleLength);
-            const isDone = visibleLength >= fullText.length;
-
-            setMessages((prev) =>
-                prev.map((message) =>
-                    message.id === messageId
-                        ? {
-                            ...message,
-                            text: nextText,
-                            isTyping: !isDone,
-                            isLoading: false,
-                            quickReplies: isDone ? quickReplies : undefined,
-                        }
-                        : message,
-                ),
-            );
-
-            if (isDone) {
-                stopTypingAnimation();
-            }
-        }, BOT_TYPING_SPEED_MS);
-    };
-
-    const getBotResponse = async (userMessage: string) => {
-        const normalizedInput = userMessage.trim();
-        const loadingMessageId = `bot-loading-${Date.now()}`;
-
-        stopTypingAnimation();
-        setMessages((prev) => [
-            ...prev,
-            {
-                id: loadingMessageId,
-                sender: 'bot',
-                text: '',
-                timestamp: new Date(),
-                isLoading: true,
-            },
-        ]);
-
-        try {
-            const response = await mutateAsync({
-                message: normalizedInput || "Main Menu",
-                sessionId,
-                userName: user?.name ?? undefined,
-            });
-
-            const quickReplies = response.quickReplies.map((qr: string) => ({ label: qr, value: qr }));
-
-            setMessages((prev) =>
-                prev.map((message) =>
-                    message.id === loadingMessageId
-                        ? {
-                            ...message,
-                            id: response.id,
-                            text: '',
-                            timestamp: new Date(),
-                            isLoading: false,
-                            isTyping: true,
-                        }
-                        : message,
-                ),
-            );
-
-            startTypingReply(response.id, response.response, quickReplies);
-        } catch {
-            setMessages((prev) =>
-                prev.filter((message) => message.id !== loadingMessageId),
-            );
-        }
-    }
-
-    const handleQuickReply = (value: string) => {
-        const userMessage: chatBotMessage = {
-            id: Date.now().toString(),
-            sender: 'user',
-            text: value,
-            timestamp: new Date(),
-        }
-
-        setMessages(prev => [...prev, userMessage]);
-
-        addPendingTimeout(() => {
-            getBotResponse(value);
-        }, 500);
-    }
-
-    const handleSendMessage = () => {
-        if(!input.trim()) return;
-
-        const userMessage: chatBotMessage = {
-            id: Date.now().toString(),
-            sender: 'user',
-            text: input,
-            timestamp: new Date()
-        }
-
-        setMessages((prev) => [...prev, userMessage]);
-        setInput('');
-
-        addPendingTimeout(() => {
-            getBotResponse(input);
-        }, 500);
-    }
-
-    return (
-        <div
-        className="w-95 h-150 bg-white rounded-xl border-2 z-40 flex flex-col overflow-hidden"
-        style={{ maxWidth: 'calc(100vw - 48px)' }}
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          size="icon-lg"
+          className="fixed bottom-5 right-5 z-40 size-13 rounded-full shadow-lg"
+          aria-label="Open resort assistant"
         >
-            <div className="p-4 flex items-center justify-between bg-primary">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/75">
-                        <Bot className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-white">Resort Assistant</h3>
-                        <p className="text-xs text-white/80">Online</p>
-                    </div>
-                </div>
-                <Button variant="ghost" onClick={() => setIsOpen(false)}>
-                    <X className="w-5 h-5 text-white" />
-                </Button>
-            </div>
+          <MessageCircle className="size-6" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="end" sideOffset={12} className="w-auto border-0 bg-transparent p-0 shadow-none">
+        <ChatbotMain close={() => setOpen(false)} />
+      </PopoverContent>
+    </Popover>
+  );
+};
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message, index) => (
-                    <div key={message.id + index}>
-                        <div className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className="flex items-end gap-2 max-w-[80%]">
-                                {message.sender === 'bot' && (
-                                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-primary">
-                                        <Bot className="w-5 h-5 text-white" />
-                                    </div>
-                                )}
-                                
-                                <div>
-                                    <div
-                                    className="px-4 py-3 rounded-2xl border"
-                                    style={{
-                                        backgroundColor: message.sender === 'user' ? '#1447e6' : '#FFFFFF',
-                                        color: message.sender === 'user' ? '#FFFFFF' : '#1F2937',
-                                        borderBottomLeftRadius: message.sender === 'bot' ? '4px' : '16px',
-                                        borderBottomRightRadius: message.sender === 'user' ? '4px' : '16px',
-                                    }}
-                                    >
-                                        {message.isLoading ? (
-                                            <LoadingDots />
-                                        ) : (
-                                            <p className="text-sm whitespace-pre-line min-h-5">{message.text}</p>
-                                        )}
-                                    </div>
-                                    <p className={`text-xs mt-1 px-1 text-muted-foreground ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
-                                        {message.timestamp.toLocaleTimeString('en-US', {
-                                            hour: 'numeric',
-                                            minute: '2-digit',
-                                        })}
-                                    </p>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        {message.sender === 'bot' && message.quickReplies && !message.isTyping && !message.isLoading && (
-                            <div className="flex flex-wrap gap-2 mt-3 ml-10">
-                                {message.quickReplies.map((reply) => (
-                                    <Button
-                                    disabled={isLoadingResponse}
-                                    onClick={() => handleQuickReply(reply.value)}
-                                    variant="outline"
-                                    key={reply.value}
-                                    >
-                                        {reply.label}
-                                    </Button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
-                <div ref={ref} />
-            </div>
-
-            <div className="p-4 border-t">
-                <div className="flex items-center gap-2">
-                    <Input 
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if(isLoadingResponse) return;
-                        
-                        if(e.key === 'Enter') {
-                            if(!input.trim()) return;
-                            
-                            handleSendMessage();
-                        }
-                    }}
-                    type="text" placeholder="Type your message..." />
-                    <Button disabled={isLoadingResponse} onClick={() => handleSendMessage()}>
-                        <Send className="w-5 h-5 text-white" />
-                    </Button>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-export default Chatbot
+export default Chatbot;
