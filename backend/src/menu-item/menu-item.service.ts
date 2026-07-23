@@ -1,14 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CATALOG_CACHE_KEY } from 'src/rag/catalog-search.service';
 import { CreateMenuItemDto, UpdateMenuItemDto } from './dto/menu-item.dto';
 import { GetMenuItemsQuery } from './query/getMenuItem.query';
 
 @Injectable()
 export class MenuItemService {
   constructor(
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
   async createMenuItem(body: CreateMenuItemDto) {
@@ -23,6 +26,7 @@ export class MenuItemService {
       }
     })
 
+    await this.cache.del(CATALOG_CACHE_KEY);
     return menuItem;
   }
 
@@ -108,6 +112,7 @@ export class MenuItemService {
       data: updateMenuItemDto
     })
 
+    await this.cache.del(CATALOG_CACHE_KEY);
     return menuItem;
   }
 
@@ -120,6 +125,7 @@ export class MenuItemService {
 
     const menuItem = await this.prisma.menuItem.delete({ where: { id } })
 
+    await this.cache.del(CATALOG_CACHE_KEY);
     return menuItem;
   }
 }

@@ -1,23 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { BookingStatus } from 'src/generated/prisma/enums';
 import { toDateOnly } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CATALOG_CACHE_KEY } from 'src/rag/catalog-search.service';
 import { CreateAccommodationDto, UpdateAccommodationDto } from './dto/accommodation.dto';
 import { GetAccommodationQueryDto } from './query/get-accommodations-query.dto';
 
 @Injectable()
 export class AccommodationService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        @Inject(CACHE_MANAGER) private readonly cache: Cache,
     ) {}
 
     async createAccommodation(body: CreateAccommodationDto) {
         const { stayOptions, ...accommodationData } = body;
         
-        return this.prisma.accommodation.create({
+        const accommodation = await this.prisma.accommodation.create({
             data: {
                 ...accommodationData,
                 stayOptions: {
@@ -38,6 +41,9 @@ export class AccommodationService {
                 }
             }
         });
+
+        await this.cache.del(CATALOG_CACHE_KEY);
+        return accommodation;
     }
 
     async getAccommodationStats() {
@@ -211,10 +217,14 @@ export class AccommodationService {
     }
 
     async updateAccommodation(id: string, body: UpdateAccommodationDto) {
-        return this.prisma.accommodation.update({ where: { id }, data: body });
+        const accommodation = await this.prisma.accommodation.update({ where: { id }, data: body });
+        await this.cache.del(CATALOG_CACHE_KEY);
+        return accommodation;
     }
 
     async deleteAccommodation(id: string) {
-        return this.prisma.accommodation.delete({ where: { id } });
+        const accommodation = await this.prisma.accommodation.delete({ where: { id } });
+        await this.cache.del(CATALOG_CACHE_KEY);
+        return accommodation;
     }
 }

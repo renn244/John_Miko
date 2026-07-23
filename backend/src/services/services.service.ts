@@ -1,15 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { doBookingStayWindowsOverlap } from 'src/lib/utils/booking-stay.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CATALOG_CACHE_KEY } from 'src/rag/catalog-search.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/services.dto';
 import { GetServicesQueryDto } from './query/getServices.dto';
 
 @Injectable()
 export class ServicesService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        @Inject(CACHE_MANAGER) private readonly cache: Cache,
     ) {}
 
     async createService(body: CreateServiceDto) {
@@ -18,6 +21,7 @@ export class ServicesService {
             data: body
         })
 
+        await this.cache.del(CATALOG_CACHE_KEY);
         return newService
     }
 
@@ -164,6 +168,7 @@ export class ServicesService {
             data: body
         })
 
+        await this.cache.del(CATALOG_CACHE_KEY);
         return service;
     }
 
@@ -173,6 +178,7 @@ export class ServicesService {
             data: { isActive },
         });
 
+        await this.cache.del(CATALOG_CACHE_KEY);
         return service;
     }
 
@@ -182,6 +188,7 @@ export class ServicesService {
             where: { id: serviceId }
         })
 
+        await this.cache.del(CATALOG_CACHE_KEY);
         return service;
     }
 }

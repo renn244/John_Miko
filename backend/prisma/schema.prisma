@@ -51,6 +51,8 @@ model User {
 
   verifiedPayments Payment[]
 
+  knowledgeDocuments KnowledgeDocument[] @relation("KnowledgeDocumentAuthor")
+
   createdAt DateTime @default(now())
 }
 
@@ -487,16 +489,32 @@ model Feedback {
   createdAt     DateTime @default(now())
 }
 
-// CHATBOT
-model Rules {
-  id              String   @id @default(cuid())
-  
-  name            String
-  keywords        String[]
-  response        String
-  quickReplies    String[] @default([])
-  isActive        Boolean @default(true)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model KnowledgeDocument {
+  id          String           @id @default(cuid())
+  title       String
+  category    String
+  contentHtml String           @db.Text
+  contentText String           @db.Text
+  isPublished Boolean          @default(false)
+  createdById String
+  createdBy   User             @relation("KnowledgeDocumentAuthor", fields: [createdById], references: [id], onDelete: Restrict)
+  chunks      KnowledgeChunk[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([isPublished, updatedAt])
+  @@index([createdById])
+}
+
+model KnowledgeChunk {
+  id         String            @id @default(cuid())
+  documentId String
+  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkIndex Int
+  heading    String?
+  content    String            @db.Text
+  embedding  Unsupported("vector(768)")
+
+  @@unique([documentId, chunkIndex])
+  @@index([documentId])
 }

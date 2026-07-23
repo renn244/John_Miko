@@ -1,18 +1,25 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { CATALOG_CACHE_KEY } from 'src/rag/catalog-search.service';
 import { MenuItemService } from './menu-item.service';
 
 describe('MenuItemService', () => {
-  let service: MenuItemService;
+  it('invalidates the public catalog after menu-item mutations', async () => {
+    const menuItem = { id: 'menu-1' };
+    const prisma = {
+      menuItem: {
+        create: jest.fn().mockResolvedValue(menuItem),
+        findUnique: jest.fn().mockResolvedValue(menuItem),
+        update: jest.fn().mockResolvedValue(menuItem),
+        delete: jest.fn().mockResolvedValue(menuItem),
+      },
+    };
+    const cache = { del: jest.fn().mockResolvedValue(undefined) };
+    const service = new MenuItemService(prisma as never, cache as never);
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [MenuItemService],
-    }).compile();
+    await service.createMenuItem({} as never);
+    await service.updateMenuItem('menu-1', {});
+    await service.deleteMenuItem('menu-1');
 
-    service = module.get<MenuItemService>(MenuItemService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(cache.del).toHaveBeenCalledTimes(3);
+    expect(cache.del).toHaveBeenCalledWith(CATALOG_CACHE_KEY);
   });
 });
