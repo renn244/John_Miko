@@ -10,7 +10,6 @@ import { AccommodationModule } from './accommodation/accommodation.module';
 import { BookingModule } from './booking/booking.module';
 import { MenuItemModule } from './menu-item/menu-item.module';
 import { FeedbackModule } from './feedback/feedback.module';
-import { RulesModule } from './rules/rules.module';
 import { PreOrderModule } from './pre-order/pre-order.module';
 import { StaffReportsModule } from './staff-reports/staff-reports.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
@@ -21,6 +20,8 @@ import { GuestManagementModule } from './guest-management/guest-management.modul
 import { ServicesModule } from './services/services.module';
 import { ClosureModule } from './closure/closure.module';
 import { MediaModule } from './media/media.module';
+import { KnowledgeModule } from './knowledge/knowledge.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 
 @Module({
   imports: [
@@ -44,7 +45,6 @@ import { MediaModule } from './media/media.module';
     BookingModule,
     MenuItemModule,
     FeedbackModule,
-    RulesModule,
     PreOrderModule,
     StaffReportsModule,
     MaintenanceModule,
@@ -55,6 +55,8 @@ import { MediaModule } from './media/media.module';
     ServicesModule,
     ClosureModule,
     MediaModule,
+    KnowledgeModule,
+    ChatbotModule,
   ],
 })
 export class AppModule {}

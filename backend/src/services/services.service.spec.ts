@@ -1,4 +1,5 @@
 import { ServicesService } from './services.service';
+import { CATALOG_CACHE_KEY } from 'src/rag/catalog-search.service';
 
 describe('ServicesService', () => {
   const karaokeService = {
@@ -40,16 +41,22 @@ describe('ServicesService', () => {
   };
 
   const prisma = {
-    addOnService: { findMany: jest.fn() },
+    addOnService: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
     bookingAddOn: { findMany: jest.fn() },
     accommodationStayOption: { findFirst: jest.fn() },
   } as any;
 
   let service: ServicesService;
+  const cache = { del: jest.fn().mockResolvedValue(undefined) };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ServicesService(prisma);
+    service = new ServicesService(prisma, cache as never);
 
     prisma.accommodationStayOption.findFirst.mockImplementation(
       async ({ where: { id } }: { where: { id: string } }) => {
@@ -128,5 +135,19 @@ describe('ServicesService', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('service-1');
+  });
+
+  it('invalidates the public catalog after add-on mutations', async () => {
+    prisma.addOnService.create.mockResolvedValue(karaokeService);
+    prisma.addOnService.update.mockResolvedValue(karaokeService);
+    prisma.addOnService.delete.mockResolvedValue(karaokeService);
+
+    await service.createService({} as never);
+    await service.updateService('service-1', {} as never);
+    await service.updateServiceAvailability('service-1', false);
+    await service.deleteService('service-1');
+
+    expect(cache.del).toHaveBeenCalledTimes(4);
+    expect(cache.del).toHaveBeenCalledWith(CATALOG_CACHE_KEY);
   });
 });

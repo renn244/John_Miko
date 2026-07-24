@@ -69,7 +69,7 @@ const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     {
         label: "System",
         items: [
-            { label: "Chatbot", icon: Bot, path: "/admin/chatbot-rule" },
+            { label: "Chatbot Knowledge", icon: Bot, path: "/admin/knowledge" },
             { label: "Settings", icon: Settings, path: "/admin/settings" },
         ],
     },

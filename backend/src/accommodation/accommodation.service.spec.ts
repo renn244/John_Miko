@@ -1,18 +1,26 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { CATALOG_CACHE_KEY } from 'src/rag/catalog-search.service';
 import { AccommodationService } from './accommodation.service';
 
 describe('AccommodationService', () => {
-  let service: AccommodationService;
+  it('invalidates the public catalog after accommodation mutations', async () => {
+    const prisma = {
+      accommodation: {
+        create: jest.fn().mockResolvedValue({ id: 'room-1' }),
+        update: jest.fn().mockResolvedValue({ id: 'room-1' }),
+        delete: jest.fn().mockResolvedValue({ id: 'room-1' }),
+      },
+    };
+    const cache = { del: jest.fn().mockResolvedValue(undefined) };
+    const service = new AccommodationService(
+      prisma as never,
+      cache as never,
+    );
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AccommodationService],
-    }).compile();
+    await service.createAccommodation({ stayOptions: [] } as never);
+    await service.updateAccommodation('room-1', {});
+    await service.deleteAccommodation('room-1');
 
-    service = module.get<AccommodationService>(AccommodationService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(cache.del).toHaveBeenCalledTimes(3);
+    expect(cache.del).toHaveBeenCalledWith(CATALOG_CACHE_KEY);
   });
 });

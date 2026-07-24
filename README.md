@@ -18,7 +18,8 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![React Query](https://img.shields.io/badge/React_Query-Data_Fetching-FF4154?style=for-the-badge&logo=reactquery&logoColor=white)
 ![Zod](https://img.shields.io/badge/Zod-Validation-3E67B1?style=for-the-badge)
-![Dialogflow](https://img.shields.io/badge/Dialogflow-Chatbot-FF9800?style=for-the-badge&logo=googlecloud&logoColor=white)
+![Gemini](https://img.shields.io/badge/Google_Gemini-RAG_Chatbot-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)
+![pgvector](https://img.shields.io/badge/pgvector-Vector_Search-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Jest](https://img.shields.io/badge/Jest-Testing-C21325?style=for-the-badge&logo=jest&logoColor=white)
 ![Git](https://img.shields.io/badge/Git-Version_Control-F05032?style=for-the-badge&logo=git&logoColor=white)
 
@@ -40,7 +41,7 @@ John Miko's Place Resort needs more than a simple reservation tracker. Resort op
 This system centralizes those workflows into one platform across three delivery surfaces:
 
 - a **NestJS backend API** for business rules and data management
-- a **React web admin panel** for resort administration and back-office workflows
+- a **React web application** for public guests, bookings, and resort administration
 - an **Expo mobile application** for staff-facing operational tools
 
 The result is a single resort management platform that supports both guest transactions and day-to-day resort operations.
@@ -57,7 +58,7 @@ The result is a single resort management platform that supports both guest trans
 | 4 | **Pre-order & Kitchen Workflow** | Food pre-order handling for bookings, with dedicated kitchen staff mobile views for incoming orders and status tracking. |
 | 5 | **Payments & Verification** | Full and partial payment handling, proof-of-payment submission, payment approval/rejection flows, and revenue tracking. |
 | 6 | **Guest Feedback & Analytics** | Guest feedback submission, admin feedback review, ratings analytics, and feedback reports. |
-| 7 | **AI Chatbot / FAQ Assistant** | Guest-facing chatbot with admin-manageable rules and responses for automated resort inquiries. |
+| 7 | **Public RAG Chatbot** | Guest-facing Gemini assistant grounded in published admin documents and live public catalog data. |
 | 8 | **Staff Operations & Maintenance** | Resort staff and maintenance staff mobile workflows for booking assistance, incident reporting, and operational support. |
 | 9 | **Reports & Dashboard Analytics** | Administrative dashboards and reporting for bookings, payments, revenue, and operational summaries. |
 | 10 | **User & Access Management** | Role-based access for Admin, Guest, Kitchen Staff, Maintenance Staff, and Resort Staff across web and mobile surfaces. |
@@ -88,8 +89,10 @@ The result is a single resort management platform that supports both guest trans
 ### Feedback and Chatbot
 - Guest feedback submission and editing
 - Admin-side feedback review, reports, and rating analytics
-- Guest-facing chatbot on the frontend
-- Admin management of chatbot rules, quick replies, and response behavior
+- Public guest chatbot with conversational responses from Gemini
+- Resort answers grounded in published knowledge documents and public accommodations, menu items, and add-on services
+- Admin knowledge editor with draft, publish, republish, unpublish, and delete workflows
+- Rate-limited public chatbot requests with six-turn conversation history
 
 ### Staff and Maintenance
 - Mobile interfaces for kitchen staff, maintenance staff, and resort staff
@@ -98,12 +101,40 @@ The result is a single resort management platform that supports both guest trans
 
 ---
 
+## Public RAG Chatbot
+
+The chatbot is a replaceable, public-only RAG feature. It does not read bookings, payments, user accounts, staff records, or other private operational data.
+
+### Knowledge sources
+
+- **Published knowledge documents** - resort policies, amenities, guest instructions, and other public information written by an admin in the Tiptap editor
+- **Public catalog records** - accommodations, menu items, and active add-on services loaded from their existing database tables
+
+### Document publishing flow
+
+1. An admin creates or edits a document as rich text.
+2. The system stores its HTML for the editor and derives plain text for retrieval.
+3. Publishing splits the text into chunks and requests 768-dimensional Gemini embeddings.
+4. The chunks and embeddings are stored in PostgreSQL using pgvector.
+5. Editing a published document returns it to Draft and removes its old chunks until it is published again.
+
+### Guest retrieval flow
+
+1. The backend embeds the guest's question and performs exact cosine-similarity search over published document chunks.
+2. It also matches the question against cached public catalog records. Catalog changes made by an admin invalidate that cache.
+3. Gemini receives the recent six-turn conversation and the retrieved public evidence.
+4. Resort facts are answered only when supported by that evidence. Greetings and casual conversation can still receive a natural response without resort evidence.
+
+The guest interface intentionally shows only the assistant's answer; internal evidence IDs and retrieval scores are not exposed.
+
+---
+
 ## User Roles
 
 | Role | Interface | Access |
 |------|-----------|--------|
-| **Admin** | Web admin panel | Accommodations, bookings, add-on services, menu items, reports, payments, feedback, chatbot rules, and staff operations |
-| **Guest** | Web guest experience | Browse accommodations, create bookings, choose add-ons, submit payments, and send feedback |
+| **Admin** | Web admin panel | Accommodations, bookings, add-on services, menu items, reports, payments, feedback, chatbot knowledge, and staff operations |
+| **Guest** | Web guest experience | Browse accommodations, create bookings, choose add-ons, submit payments, send feedback, and use the public resort assistant |
 | **Kitchen Staff** | Mobile app | View and manage booking-linked pre-orders |
 | **Maintenance Staff** | Mobile app | View and manage maintenance-related operational tasks |
 | **Resort Staff** | Mobile app | Assist with booking-side operational workflows and on-site coordination |
@@ -128,12 +159,12 @@ This keeps time-sensitive resort tasks accessible away from the admin desk.
 |-------|-----------|---------|
 | **Backend** | NestJS 11 | REST API, authentication, validation, and business logic |
 | **ORM** | Prisma | Data access and schema management |
-| **Database** | PostgreSQL via `DATABASE_URL` | Relational data storage |
+| **Database** | PostgreSQL + pgvector via `DATABASE_URL` | Relational data and 768-dimensional knowledge embeddings |
 | **Frontend** | React 19 + Vite | Web admin and guest-facing interface |
 | **Styling** | Tailwind CSS 4 + shadcn/ui | Web UI styling and reusable components |
 | **State / Data** | TanStack Query, Zustand, React Hook Form, Zod | Fetching, local state, forms, and validation |
 | **Mobile** | Expo Router + React Native | Staff mobile application |
-| **Chatbot** | Google Dialogflow + managed chatbot rules | Guest assistance and resort FAQ automation |
+| **Chatbot** | Google Gemini + exact pgvector search | Conversational guest assistance grounded in public resort information |
 | **Email** | Nest mailer / Nodemailer | Booking and account email flows |
 | **Testing** | Jest, ts-jest | Backend unit and integration-style testing |
 | **Version Control** | Git + GitHub | Source control and collaboration |
@@ -147,7 +178,6 @@ John Mickos Capstone/
 |-- backend/        # NestJS API, Prisma schema, booking/payment/add-on logic, templates, tests
 |-- frontend/       # React web app for admins and guests
 |-- mobile/         # Expo mobile app for kitchen, maintenance, and resort staff
-|-- docs/           # Planning notes, specs, and implementation documents
 |-- README.md
 ```
 
@@ -156,21 +186,40 @@ John Mickos Capstone/
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 20.19+ or 22.12+
 - npm
-- PostgreSQL database
+- PostgreSQL database with pgvector support, such as Neon
 
 ### Installation and Run
 
 **1. Backend**
+
+Create `backend/.env` and configure the database and RAG integration:
+
+```env
+DATABASE_URL=
+
+RAG_ENABLED=true
+GEMINI_API_KEY=
+
+# Optional defaults
+GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_EMBEDDING_MODEL=gemini-embedding-2
+RAG_SIMILARITY_THRESHOLD=0.55
+RAG_PROVIDER_TIMEOUT_MS=8000
+```
+
+Then install the backend, generate Prisma Client, apply the existing migrations, and start the API:
+
 ```bash
 cd backend
 npm install
 npx prisma generate
+npx prisma migrate deploy
 npm run start:dev
 ```
 
-Configure environment variables such as `DATABASE_URL` before starting the backend.
+The migrations enable pgvector and create the `KnowledgeDocument` and `KnowledgeChunk` tables. `GEMINI_API_KEY` is required to publish documents and generate Gemini responses. `RAG_ENABLED=true` activates retrieval for the guest chatbot; when disabled, the chatbot returns its local fallback. The remaining RAG values already have the defaults shown above.
 
 ### Cloudinary signed uploads
 
@@ -210,7 +259,7 @@ npm install
 npx expo start
 ```
 
-If your setup requires them, configure additional environment files and service keys such as chatbot-related credentials before running the full system.
+Configure the project's existing authentication, email, Cloudinary, and client environment values as needed for the workflows being demonstrated.
 
 ---
 

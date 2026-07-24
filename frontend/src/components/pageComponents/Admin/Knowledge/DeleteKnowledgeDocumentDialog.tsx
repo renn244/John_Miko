@@ -1,0 +1,124 @@
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useDeleteKnowledgeDocumentMutation } from "@/hooks/admin/knowledge.hook";
+import type { KnowledgeDocument } from "@/types/admin/knowledge.type";
+import { AlertTriangle, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+type DeleteKnowledgeDocumentDialogProps = {
+  document: KnowledgeDocument;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDeleted: () => void;
+};
+
+const DeleteKnowledgeDocumentDialog = ({
+  document,
+  open,
+  onOpenChange,
+  onDeleted,
+}: DeleteKnowledgeDocumentDialogProps) => {
+  const deleteKnowledgeDocument = useDeleteKnowledgeDocumentMutation();
+
+  const handleDelete = async () => {
+    try {
+      await deleteKnowledgeDocument.mutateAsync(document.id);
+      onOpenChange(false);
+      onDeleted();
+
+      toast.success("Document deleted");
+    } catch (error: any) {
+      toast.error(error?.message || "Something went wrong.");
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!deleteKnowledgeDocument.isPending) onOpenChange(nextOpen);
+      }}
+    >
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Delete Knowledge Document</DialogTitle>
+          <DialogDescription>
+            Review the document details before permanently deleting it.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex items-start gap-4 rounded-lg border-2 border-destructive/50 bg-destructive/10 p-4">
+            <AlertTriangle className="mt-0.5 size-6 shrink-0 text-destructive" />
+            <div>
+              <h3 className="mb-1 text-sm font-bold text-destructive">
+                Warning: This action cannot be undone.
+              </h3>
+              <p className="text-sm text-destructive/80">
+                This document will be permanently removed and its information
+                will no longer be available to the chatbot.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-lg border bg-muted/40 p-4">
+            <h4 className="mb-3 text-sm font-semibold">
+              Document to be deleted:
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-start justify-between gap-4">
+                <span className="text-muted-foreground">Title:</span>
+                <span className="text-right font-semibold">
+                  {document.title}
+                </span>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <span className="text-muted-foreground">Category:</span>
+                <span className="text-right font-medium">
+                  {document.category}
+                </span>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="font-medium">
+                  {document.isPublished ? "Published" : "Draft"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={deleteKnowledgeDocument.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleteKnowledgeDocument.isPending}
+          >
+            <Trash2 />
+            {deleteKnowledgeDocument.isPending
+              ? "Deleting..."
+              : "Delete Permanently"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default DeleteKnowledgeDocumentDialog;
