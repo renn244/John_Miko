@@ -13,12 +13,13 @@ const DeactivateGuestDialog = () => {
     const isDeactivateOpen = useGuestManagementStore((state) => state.isDeactivateOpen);
     const deactivateId = useGuestManagementStore((state) => state.deactivateId);
     const setIsDeactivateOpen = useGuestManagementStore((state) => state.setIsDeactivateOpen);
+    const setDeactivateId = useGuestManagementStore((state) => state.setDeactivateId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetGuestById(deactivateId);
 
     return (
         <Dialog open={isDeactivateOpen} onOpenChange={setIsDeactivateOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setDeactivateId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

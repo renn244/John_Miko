@@ -23,10 +23,13 @@ const SetClosureDialog = () => {
     return (
         <Dialog open={isOpen} onOpenChange={(open) => {
             if(!open) {
-                setOpen(false, null)
+                setOpen(false)
             }   
         }}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent
+            className="sm:max-w-md"
+            onCloseAutoFocus={() => setOpen(false, null)}
+            >
                 <Tabs defaultValue="create" className="space-y-5 gap-0">
                     <DialogHeader className="space-y-2">
                         <div className="flex items-start gap-3">

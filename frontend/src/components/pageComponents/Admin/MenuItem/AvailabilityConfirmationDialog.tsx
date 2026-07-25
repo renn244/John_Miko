@@ -13,12 +13,13 @@ const AvailabilityConfirmationDialog = () => {
     const isAvailabilityConfirmationOpen = useMenuItemAdminStore((state) => state.isAvailabilityConfirmationOpen)
     const availabilityConfirmationId = useMenuItemAdminStore((state) => state.availabilityConfirmationId)
     const setIsAvailabilityConfirmationOpen = useMenuItemAdminStore((state) => state.setIsAvailabilityConfirmationOpen)
+    const setAvailabilityConfirmationId = useMenuItemAdminStore((state) => state.setAvailabilityConfirmationId)
 
     const { data, isLoading, error, refetch, isRefetching } = useGetMenuItemById(availabilityConfirmationId);
 
     return (
         <Dialog open={isAvailabilityConfirmationOpen} onOpenChange={setIsAvailabilityConfirmationOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setAvailabilityConfirmationId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

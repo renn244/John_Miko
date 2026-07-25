@@ -21,8 +21,12 @@ export const useClosureAdminStore = create<ClosureAdminState>((set) => ({
     isClosureOpen: false,
 
     setClosureOpen: (open: boolean, param?: accommodation | null) =>
-        set({
+        set((state) => ({
             isClosureOpen: open,
-            accommodation: open ? (param ?? null) : null,
-        }),
+            accommodation: open
+                ? (param ?? null)
+                : param === null
+                    ? null
+                    : state.accommodation,
+        })),
 }));

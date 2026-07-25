@@ -13,12 +13,13 @@ const MarkCompletedDialog = () => {
     const isMarkCompletedOpen = useBookingAdminStore((state) => state.isMarkCompletedOpen);
     const markCompletedBookingId = useBookingAdminStore((state) => state.markCompletedBookingId);
     const setIsMarkCompletedOpen = useBookingAdminStore((state) => state.setIsMarkCompletedOpen);
+    const setMarkCompletedBookingId = useBookingAdminStore((state) => state.setMarkCompletedBookingId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetBookingById(markCompletedBookingId);
     
     return (
         <Dialog open={isMarkCompletedOpen}  onOpenChange={setIsMarkCompletedOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setMarkCompletedBookingId(undefined)}>
                 {isLoading && (
                     <div className="flex items-cetner justify-center h-64">
                         <LoadingSpinner className="size-10" />

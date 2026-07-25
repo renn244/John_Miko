@@ -12,12 +12,13 @@ const DeleteAddOnServiceDialog = () => {
     const isDeleteOpen = useAddOnServiceAdminStore((state) => state.isDeleteOpen);
     const deleteId = useAddOnServiceAdminStore((state) => state.deleteId);
     const setIsDeleteOpen = useAddOnServiceAdminStore((state) => state.setIsDeleteOpen);
+    const setDeleteId = useAddOnServiceAdminStore((state) => state.setDeleteId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetAddOnServiceById(deleteId);
 
     return (
         <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setDeleteId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

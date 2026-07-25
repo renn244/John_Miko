@@ -13,12 +13,13 @@ const MarkCancelDialog = () => {
     const isMarkCancelOpen = useBookingAdminStore((state) => state.isMarkCancelOpen);
     const markCancelBookingId = useBookingAdminStore((state) => state.markCancelBookingId);
     const setIsMarkCancelOpen = useBookingAdminStore((state) => state.setIsMarkCancelOpen);
+    const setMarkCancelBookingId = useBookingAdminStore((state) => state.setMarkCancelBookingId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetBookingById(markCancelBookingId);
 
     return (
         <Dialog open={isMarkCancelOpen}  onOpenChange={setIsMarkCancelOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setMarkCancelBookingId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

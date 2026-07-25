@@ -15,12 +15,13 @@ const ChangeStaffRoleDialog = () => {
     const isChangeRoleOpen = useStaffManagementStore((state) => state.isChangeRoleOpen);
     const changeRoleId = useStaffManagementStore((state) => state.changeRoleId);
     const setIsChangeRoleOpen = useStaffManagementStore((state) => state.setIsChangeRoleOpen);
+    const setChangeRoleId = useStaffManagementStore((state) => state.setChangeRoleId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetStaffById(changeRoleId);
 
     return (
         <Dialog open={isChangeRoleOpen} onOpenChange={setIsChangeRoleOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setChangeRoleId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

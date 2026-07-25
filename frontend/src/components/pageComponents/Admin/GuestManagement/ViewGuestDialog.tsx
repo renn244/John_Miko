@@ -13,12 +13,18 @@ const ViewGuestDialog = () => {
     const isViewOpen = useGuestManagementStore((state) => state.isViewOpen);
     const viewId = useGuestManagementStore((state) => state.viewId);
     const setIsViewOpen = useGuestManagementStore((state) => state.setIsViewOpen);
+    const setViewId = useGuestManagementStore((state) => state.setViewId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetGuestById(viewId);
 
     return (
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent
+                className="sm:max-w-xl"
+                onCloseAutoFocus={() => {
+                    setViewId(undefined);
+                }}
+            >
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

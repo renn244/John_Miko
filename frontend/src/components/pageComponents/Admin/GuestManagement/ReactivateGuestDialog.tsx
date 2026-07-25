@@ -13,12 +13,13 @@ const ReactivateGuestDialog = () => {
     const isReactivateOpen = useGuestManagementStore((state) => state.isReactivateOpen);
     const reactivateId = useGuestManagementStore((state) => state.reactivateId);
     const setIsReactivateOpen = useGuestManagementStore((state) => state.setIsReactivateOpen);
+    const setReactivateId = useGuestManagementStore((state) => state.setReactivateId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetGuestById(reactivateId);
 
     return (
         <Dialog open={isReactivateOpen} onOpenChange={setIsReactivateOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setReactivateId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

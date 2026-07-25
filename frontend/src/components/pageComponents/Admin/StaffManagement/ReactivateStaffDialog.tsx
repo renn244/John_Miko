@@ -13,12 +13,13 @@ const ReactivateStaffDialog = () => {
     const isReactivateOpen = useStaffManagementStore((state) => state.isReactivateOpen);
     const reactivateId = useStaffManagementStore((state) => state.reactivateId);
     const setIsReactivateOpen = useStaffManagementStore((state) => state.setIsReactivateOpen);
+    const setReactivateId = useStaffManagementStore((state) => state.setReactivateId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetStaffById(reactivateId);
 
     return (
         <Dialog open={isReactivateOpen} onOpenChange={setIsReactivateOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setReactivateId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

@@ -21,12 +21,13 @@ const UpdatePaymentMethodAvailabilityDialog = () => {
     const isOpen = paymentMethodAdminStore((state) => state.isAvailabilityConfirmationOpen);
     const setIsOpen = paymentMethodAdminStore((state) => state.setIsAvailabilityConfirmationOpen);
     const methodId = paymentMethodAdminStore((state) => state.availabilityConfirmationId);
+    const setMethodId = paymentMethodAdminStore((state) => state.setAvailabilityConfirmationId);
 
     const { data, error, refetch, isLoading, isRefetching } = useGetPaymentMethodByIdQuery(methodId || "");
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setMethodId(null)}>
                 {isLoading && (
                     <div className="flex h-64 items-center justify-center">
                         <LoadingSpinner className="size-10" />
