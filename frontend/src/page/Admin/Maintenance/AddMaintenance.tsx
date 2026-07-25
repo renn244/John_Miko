@@ -11,11 +11,11 @@ const AddMaintenance = () => {
   return (
     <div className="mx-auto max-w-7xl space-y-5">
       <div className="flex items-center gap-4">
-        <Link to="/admin/maintenance">
-          <Button size="icon" variant="outline">
+        <Button asChild size="icon" variant="outline">
+          <Link to="/admin/maintenance">
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
         <div>
           <h1 className="text-2xl font-semibold md:text-3xl">
             Add New Maintenance

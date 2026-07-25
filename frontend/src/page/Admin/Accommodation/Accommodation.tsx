@@ -19,12 +19,12 @@ const Accommodation = () => {
             Manage rooms, cottages, and event halls
           </p>
         </div>
-        <Link to="/admin/accommodation/add">
-          <Button>
+        <Button asChild>
+          <Link to="/admin/accommodation/add">
             Add Accommodation
             <Plus className="w-5 h-5 text-white" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <AccommodationStatistics />

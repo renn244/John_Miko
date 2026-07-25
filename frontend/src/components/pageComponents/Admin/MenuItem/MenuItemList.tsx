@@ -55,37 +55,37 @@ const MenuItemList = () => {
                                     <DropdownMenuTrigger asChild>
                                         <Button
                                             variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 hover:bg-white"
+                                            size="icon-sm"
+                                            className="text-muted-foreground"
                                         >
                                             <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuGroup>
-                                            <Link to={`/admin/menu-item/${item.id}/edit`}>
-                                                <DropdownMenuItem>
-                                                    <Edit className="h-4 w-4 text-primary" />
+                                            <DropdownMenuItem asChild>
+                                                <Link to={`/admin/menu-item/${item.id}/edit`}>
+                                                    <Edit className="h-4 w-4" />
                                                     Edit Details
-                                                </DropdownMenuItem>
-                                            </Link>
+                                                </Link>
+                                            </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => setAvailabilityConfirmationId(item.id)}>
                                                 {item.availability === "Available" ? (
                                                     <>
-                                                        <XCircle className="h-4 w-4 text-amber-700" />
-                                                        <span className="text-amber-700">Mark Unavailable</span>
+                                                        <XCircle className="h-4 w-4" />
+                                                        <span>Mark Unavailable</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <CheckCircle className="h-4 w-4 text-emerald-700" />
-                                                        <span className="text-emerald-700">Mark Available</span>
+                                                        <CheckCircle className="h-4 w-4" />
+                                                        <span>Mark Available</span>
                                                     </>
                                                 )}
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={() => setDeleteId(item.id)} variant="destructive">
-                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                            <Trash2 className="h-4 w-4" />
                                             Delete Item
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>

@@ -1,39 +1,12 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";
 import USER_ROLES from './lib/constant/USER_ROLES.constant';
 import About from './page/About';
 import AccommodationList from './page/AccommodationList';
 import AccommodationView from './page/AccommodationView';
-import Accommodation from "./page/Admin/Accommodation/Accommodation";
-import AddAccommodation from "./page/Admin/Accommodation/AddAccommodation";
-import EditAccommodation from "./page/Admin/Accommodation/EditAccommodation";
-import AddAddOnService from "./page/Admin/AddOnService/AddAddOnService";
-import AddOnService from "./page/Admin/AddOnService/AddOnService";
-import EditAddOnService from "./page/Admin/AddOnService/EditAddOnService";
 import AdminLayout from "./page/Admin/AdminLayout";
-import AddBooking from './page/Admin/Booking/AddBooking';
-import Booking from './page/Admin/Booking/Booking';
-import ViewBooking from './page/Admin/Booking/ViewBooking';
-import Feedback from './page/Admin/Feedback/Feedback';
-import GuestManagement from './page/Admin/Guest-Management/GuestManagement';
-import AddMaintenance from './page/Admin/Maintenance/AddMaintenance';
-import EditMaintenance from './page/Admin/Maintenance/EditMaintenance';
-import Maintenance from './page/Admin/Maintenance/Maintenance';
-import ViewMaintenance from './page/Admin/Maintenance/ViewMaintenance';
-import ViewStaffReport from './page/Admin/Maintenance/ViewStaffReport';
-import AddMenuItem from './page/Admin/MenuItem/AddMenuItem';
-import EditMenuItem from './page/Admin/MenuItem/EditMenuItem';
-import MenuItem from './page/Admin/MenuItem/MenuItem';
-import Overview from './page/Admin/Overview';
-import AddPaymentMethod from './page/Admin/PaymentMethods/AddPaymentMethod';
-import EditPaymentMethod from './page/Admin/PaymentMethods/EditPaymentMethod';
-import PaymentMethods from './page/Admin/PaymentMethods/PaymentMethods';
-import Report from './page/Admin/Reports/Report';
-import AdminSettings from './page/Admin/Settings';
-import AddStaff from './page/Admin/Staff-Management/AddStaff';
-import StaffManagement from './page/Admin/Staff-Management/StaffManagement';
 import Amenities from './page/Amenities';
 import BookingFlow from './page/Booking';
 import ForbiddenPage from './page/Forbidden';
@@ -52,6 +25,33 @@ import SignUpGuest from "./page/SignUpGuest";
 import VirtualTour from './page/VirtualTour';
 
 const RouterRoot = () => <Outlet />;
+const Accommodation = lazy(() => import('./page/Admin/Accommodation/Accommodation'));
+const AddAccommodation = lazy(() => import('./page/Admin/Accommodation/AddAccommodation'));
+const EditAccommodation = lazy(() => import('./page/Admin/Accommodation/EditAccommodation'));
+const AddAddOnService = lazy(() => import('./page/Admin/AddOnService/AddAddOnService'));
+const AddOnService = lazy(() => import('./page/Admin/AddOnService/AddOnService'));
+const EditAddOnService = lazy(() => import('./page/Admin/AddOnService/EditAddOnService'));
+const AddBooking = lazy(() => import('./page/Admin/Booking/AddBooking'));
+const Booking = lazy(() => import('./page/Admin/Booking/Booking'));
+const ViewBooking = lazy(() => import('./page/Admin/Booking/ViewBooking'));
+const Feedback = lazy(() => import('./page/Admin/Feedback/Feedback'));
+const GuestManagement = lazy(() => import('./page/Admin/Guest-Management/GuestManagement'));
+const AddMaintenance = lazy(() => import('./page/Admin/Maintenance/AddMaintenance'));
+const EditMaintenance = lazy(() => import('./page/Admin/Maintenance/EditMaintenance'));
+const Maintenance = lazy(() => import('./page/Admin/Maintenance/Maintenance'));
+const ViewMaintenance = lazy(() => import('./page/Admin/Maintenance/ViewMaintenance'));
+const ViewStaffReport = lazy(() => import('./page/Admin/Maintenance/ViewStaffReport'));
+const AddMenuItem = lazy(() => import('./page/Admin/MenuItem/AddMenuItem'));
+const EditMenuItem = lazy(() => import('./page/Admin/MenuItem/EditMenuItem'));
+const MenuItem = lazy(() => import('./page/Admin/MenuItem/MenuItem'));
+const Overview = lazy(() => import('./page/Admin/Overview'));
+const AddPaymentMethod = lazy(() => import('./page/Admin/PaymentMethods/AddPaymentMethod'));
+const EditPaymentMethod = lazy(() => import('./page/Admin/PaymentMethods/EditPaymentMethod'));
+const PaymentMethods = lazy(() => import('./page/Admin/PaymentMethods/PaymentMethods'));
+const Report = lazy(() => import('./page/Admin/Reports/Report'));
+const AdminSettings = lazy(() => import('./page/Admin/Settings'));
+const AddStaff = lazy(() => import('./page/Admin/Staff-Management/AddStaff'));
+const StaffManagement = lazy(() => import('./page/Admin/Staff-Management/StaffManagement'));
 const Knowledge = lazy(() => import('./page/Admin/Knowledge/Knowledge'));
 
 const router = createBrowserRouter([
@@ -227,11 +227,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'knowledge',
-            element: (
-              <Suspense fallback={<div className="min-h-96 animate-pulse rounded-xl bg-muted/40" />}>
-                <Knowledge />
-              </Suspense>
-            ),
+            element: <Knowledge />,
           },
           {
             path: 'settings',

@@ -14,12 +14,12 @@ const PaymentMethods = () => {
                         Manage and configure payment channels available during checkout.
                     </p>
                 </div>
-                <Link to="/admin/payment-methods/add">
-                    <Button className="gap-2">
+                <Button asChild className="gap-2">
+                    <Link to="/admin/payment-methods/add">
                         Add Payment Method
                         <Plus className="h-4 w-4" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
 
             <PaymentTable />

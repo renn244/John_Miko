@@ -59,8 +59,14 @@ const BookingCard = ({ booking, className,  variant="default", style, ...props }
         label: booking.stayOption?.label ?? booking.stayOptionLabelSnapshot,
     });
 
-    const preOrderItems = detailedBooking?.preOrders ?? booking.preOrders ?? [];
-    const addOnItems = detailedBooking?.addOns ?? booking.addOns ?? [];
+    const preOrderItems = useMemo(
+        () => detailedBooking?.preOrders ?? booking.preOrders ?? [],
+        [detailedBooking?.preOrders, booking.preOrders]
+    );
+    const addOnItems = useMemo(
+        () => detailedBooking?.addOns ?? booking.addOns ?? [],
+        [detailedBooking?.addOns, booking.addOns]
+    );
     const reports = detailedBooking?.reports ?? booking.reports;
     const payment = detailedBooking?.payment;
     const bookingReference = booking.referenceCode ?? "—";
@@ -133,11 +139,11 @@ const BookingCard = ({ booking, className,  variant="default", style, ...props }
                                 )}
 
                                 {variant === "default"  && (
-                                    <Link to={booking.feedback ? `/feedback/edit/${booking.feedback.id}` : `/feedback/${booking.id}`}>
-                                        <Button variant={booking.feedback ? "outline" : "default"} size="sm">
-                                        {booking.feedback ? "Edit Feedback" : "Submit Feedback"}
-                                        </Button>
-                                    </Link>
+                                    <Button asChild variant={booking.feedback ? "outline" : "default"} size="sm">
+                                        <Link to={booking.feedback ? `/feedback/edit/${booking.feedback.id}` : `/feedback/${booking.id}`}>
+                                            {booking.feedback ? "Edit Feedback" : "Submit Feedback"}
+                                        </Link>
+                                    </Button>
                                 )}
                             </div>
                             
@@ -256,8 +262,8 @@ const BookingCard = ({ booking, className,  variant="default", style, ...props }
             <div className="border-t px-4 py-3 md:px-5">
                 <Button
                     type="button"
-                    variant="secondary"
-                    className="w-full justify-center gap-2 rounded-xl bg-muted/60 hover:bg-muted"
+                    variant="outline"
+                    className="w-full justify-center gap-2 rounded-xl"
                     onClick={() => setIsExpanded((prev) => !prev)}
                 >
                     {isExpanded ? "Hide Details" : "View Details"}

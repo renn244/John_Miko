@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import AdminEditPageLoading from "@/components/common/AdminEditPageLoading";
 import AddOnServiceForm from "@/forms/Admin/AddOnService/AddOnServiceForm";
 import { useGetAddOnServiceById, useUpdateAddOnServiceMutation } from "@/hooks/admin/add-on-service.hook";
 import { ArrowLeft } from "lucide-react";
@@ -11,7 +12,7 @@ const EditAddOnService = () => {
     const { data: service, isLoading, error } = useGetAddOnServiceById(id);
     const { mutateAsync: updateService } = useUpdateAddOnServiceMutation(id || "");
 
-    if (isLoading) return null;
+    if (isLoading) return <AdminEditPageLoading />;
     
     if (!service) return null;
 
@@ -20,11 +21,11 @@ const EditAddOnService = () => {
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
-                <Link to="/admin/add-on-service">
-                    <Button size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline">
+                    <Link to="/admin/add-on-service">
                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold">Edit Service</h1>
                     <p className="text-sm text-muted-foreground mt-1">Update the details below to modify the add-on service</p>

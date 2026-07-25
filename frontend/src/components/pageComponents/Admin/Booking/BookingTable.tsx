@@ -188,8 +188,8 @@ const BookingTable = () => {
                                                 <DropdownMenuTrigger asChild>
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-muted-foreground transition-colors group-hover:text-foreground"
+                                                        size="icon-sm"
+                                                        className="text-muted-foreground transition-colors group-hover:text-foreground"
                                                     >
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
@@ -215,10 +215,13 @@ const BookingTable = () => {
                                                     )}
 
                                                     {hasRowActions && (
-                                                        <DropdownMenuItem onClick={() => setMarkCancelBookingId(booking.id)}>
-                                                            <CircleX />
-                                                            Mark as Cancelled
-                                                        </DropdownMenuItem>
+                                                        <>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem variant="destructive" onClick={() => setMarkCancelBookingId(booking.id)}>
+                                                                <CircleX />
+                                                                Mark as Cancelled
+                                                            </DropdownMenuItem>
+                                                        </>
                                                     )}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>

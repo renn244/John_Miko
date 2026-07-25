@@ -247,7 +247,7 @@ const Home = () => {
     const sideAccommodations = accommodations.slice(1, 3);
 
     return (
-        <GuestPageShell>
+        <GuestPageShell className="bg-background">
             <NavBar />
 
             <GuestContainer className="py-4 md:py-6">
@@ -348,8 +348,8 @@ const Home = () => {
                         <div className="grid gap-3">
                             <GuestCard className="flex items-center justify-between gap-4 p-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                        <Users className="size-4" />
+                                    <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <Users className="size-5" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-semibold">Children & Kids</p>
@@ -360,8 +360,8 @@ const Home = () => {
                             </GuestCard>
                             <GuestCard className="flex items-center justify-between gap-4 p-4">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                        <Star className="size-4" />
+                                    <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <Star className="size-5" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-semibold">Senior Citizens</p>
@@ -432,7 +432,7 @@ const Home = () => {
                                     </p>
                                     <div className="mt-4 flex items-center gap-3">
                                         <p className="font-bold">{formatPeso(1850)}</p>
-                                        <Button asChild size="sm" variant="secondary">
+                                        <Button asChild size="sm" variant="outline">
                                             <Link to="/accommodation">Add to Stay</Link>
                                         </Button>
                                     </div>

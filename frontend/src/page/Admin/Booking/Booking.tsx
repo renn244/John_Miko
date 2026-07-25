@@ -21,12 +21,12 @@ const Booking = () => {
                         Manage reservations, schedules, payment type, and booking actions.
                     </p>
                 </div>
-                <Link to="/admin/booking/add">
-                    <Button>
+                <Button asChild>
+                    <Link to="/admin/booking/add">
                         Add Booking
                         <Plus className="size-4" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card shadow-sm">

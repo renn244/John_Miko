@@ -50,7 +50,19 @@ const MaintenanceTable = () => {
         priority: priority as Maintenance['priority'] 
     });
 
-    if(isLoading) return null;
+    if (isLoading) {
+        return (
+            <Card className="min-h-147.5 px-4 py-5" role="status" aria-live="polite">
+                <span className="sr-only">Loading maintenance tickets</span>
+                <div className="space-y-3 animate-pulse">
+                    <div className="h-5 w-2/3 rounded bg-muted" />
+                    {Array.from({ length: 7 }, (_, index) => (
+                        <div key={index} className="h-12 rounded-md bg-muted/65" />
+                    ))}
+                </div>
+            </Card>
+        );
+    }
 
     const maintenance = data?.data;
     const meta = data?.meta
@@ -81,7 +93,7 @@ const MaintenanceTable = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {maintenance?.map((ticket: any) => {
+                    {maintenance?.map((ticket: Maintenance) => {
                         return (
                             <TableRow key={ticket.id}>
                                 <TableCell>
@@ -110,42 +122,42 @@ const MaintenanceTable = () => {
                                 <TableCell>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon">
-                                                <MoreHorizontal className="w-4 h-4" />
+                                            <Button variant="ghost" size="icon-sm">
+                                                <MoreHorizontal className="h-4 w-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
                                             <DropdownMenuGroup>
-                                                <Link to={`/admin/maintenance/${ticket.id}/edit`}>
-                                                    <DropdownMenuItem>
-                                                        <Edit className="w-4 h-4 text-primary" />
+                                                <DropdownMenuItem asChild>
+                                                    <Link to={`/admin/maintenance/${ticket.id}/edit`}>
+                                                        <Edit className="h-4 w-4" />
                                                         Edit Details
-                                                    </DropdownMenuItem>
-                                                </Link>
+                                                    </Link>
+                                                </DropdownMenuItem>
                                             </DropdownMenuGroup>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={() => navigate(`/admin/maintenance/${ticket.id}`)}>
-                                                <Eye className="w-4 h-4 text-primary" />
+                                                <Eye className="h-4 w-4" />
                                                 View Details
                                             </DropdownMenuItem>
 
                                             {ticket.status === "Pending" && (
                                                 <DropdownMenuItem disabled={startMutation.isPending} onClick={() => startMutation.mutate(ticket.id)}>
-                                                    <Play className="w-4 h-4 text-primary" />
+                                                    <Play className="h-4 w-4" />
                                                     Start Maintenance
                                                 </DropdownMenuItem>
                                             )}
 
                                             {ticket.status === "InProgress" && (
                                                 <DropdownMenuItem onClick={() => setCompleteId(ticket.id)}>
-                                                    <Check className="w-4 h-4 text-emerald-500" />
+                                                    <Check className="h-4 w-4" />
                                                     Complete
                                                 </DropdownMenuItem>
                                             )}
 
                                             {ticket.status === "Completed" && (
                                                 <DropdownMenuItem disabled={closeMutation.isPending} onClick={() => closeMutation.mutate(ticket.id)}>
-                                                    <Lock className="w-4 h-4 text-amber-500" />
+                                                    <Lock className="h-4 w-4" />
                                                     Close Ticket
                                                 </DropdownMenuItem>
                                             )}

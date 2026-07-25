@@ -87,7 +87,7 @@ const AccommodationList = () => {
     };
 
     return (
-        <GuestPageShell>
+        <GuestPageShell className="bg-background">
             <NavBar />
 
             <GuestContainer className="pb-12">
@@ -154,7 +154,7 @@ const AccommodationList = () => {
                             type="button"
                             variant="link"
                             size="sm"
-                            className="ml-0 px-0 sm:ml-auto"
+                            className="ml-0 h-auto px-0 sm:ml-auto"
                             disabled={!hasFilters}
                             onClick={clearFilters}
                         >

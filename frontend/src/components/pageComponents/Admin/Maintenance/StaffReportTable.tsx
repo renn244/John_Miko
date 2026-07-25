@@ -102,16 +102,17 @@ const StaffReportTable = () => {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="px-4 py-4 text-right">
-                                    <Link to={`/admin/maintenance/reports/${report.id}`}>
-                                        <Button
-                                            variant="link"
-                                            size="sm"
-                                            className="h-auto px-0 text-sm font-medium text-primary underline underline-offset-4 hover:text-primary"
+                                    <Button
+                                        asChild
+                                        variant="link"
+                                        size="sm"
+                                        className="h-auto px-0 text-sm font-medium text-primary underline underline-offset-4 hover:text-primary"
                                         >
+                                            <Link to={`/admin/maintenance/reports/${report.id}`}>
                                             Review
                                             <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </Link>
+                                            </Link>
+                                    </Button>
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 const Footer = () => {
     return (
-        <footer className="border-t bg-white">
+        <footer className="mt-auto border-t bg-background">
             <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div>
@@ -15,12 +15,15 @@ const Footer = () => {
                         <p className="mb-3 max-w-xs text-sm leading-6 text-muted-foreground">
                             Your perfect coastal paradise for unforgettable memories.
                         </p>
-                        <Link
-                            to="https://www.facebook.com/johnmikoplaceresort"
+                        <a
+                            href="https://www.facebook.com/johnmikoplaceresort"
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label="Visit John Miko's Place Resort on Facebook"
                             className="flex size-8 items-center justify-center rounded-full bg-primary/10 transition-colors hover:bg-primary/15"
                         >
                             <Facebook className="size-4 text-primary" />
-                        </Link>
+                        </a>
                     </div>
 
                     <div>

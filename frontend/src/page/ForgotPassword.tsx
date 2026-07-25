@@ -6,9 +6,6 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
-const recoveryBackgroundImage =
-    "https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1600";
-
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -115,15 +112,8 @@ type RecoveryShellProps = {
 };
 
 const RecoveryShell = ({ children }: RecoveryShellProps) => (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted/30 p-4 text-foreground md:p-6">
-        <img
-            src={recoveryBackgroundImage}
-            alt="Poolside resort background"
-            className="absolute inset-0 size-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
-
-        <section className="relative w-full max-w-md rounded-xl border bg-card p-5 shadow-sm sm:p-7">
+    <main className="flex min-h-screen items-center justify-center bg-muted/30 p-4 text-foreground md:p-6">
+        <section className="w-full max-w-md rounded-xl border bg-card p-5 shadow-sm sm:p-7">
             {children}
         </section>
     </main>

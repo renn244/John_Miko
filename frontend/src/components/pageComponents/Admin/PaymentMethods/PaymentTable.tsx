@@ -128,8 +128,8 @@ const PaymentMethodCard = ({ method, onEdit, onAvailabilityChange }: PaymentMeth
                         <Button
                         type="button"
                         variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0 rounded-full text-muted-foreground"
+                        size="icon-sm"
+                        className="shrink-0 text-muted-foreground"
                         >
                             <EllipsisVertical className="h-4 w-4" />
                         </Button>

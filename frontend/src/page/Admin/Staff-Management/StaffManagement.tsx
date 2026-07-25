@@ -19,12 +19,12 @@ const StaffManagement = () => {
                         Manage staff accounts, roles, expertise, and active status.
                     </p>
                 </div>
-                <Link to="/admin/staff-management/add">
-                    <Button className="gap-2">
+                <Button asChild className="gap-2">
+                    <Link to="/admin/staff-management/add">
                         Add Staff
                         <Plus className="h-4 w-4" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
 
             <StaffStatistics />

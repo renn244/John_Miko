@@ -20,12 +20,12 @@ const MenuItem = () => {
                         Manage restaurant menu items, pricing, and availability.
                     </p>
                 </div>
-                <Link to='/admin/menu-item/add'>
-                    <Button>
+                <Button asChild>
+                    <Link to='/admin/menu-item/add'>
                         Add Menu Item
                         <Plus className="w-5 h-5 text-white" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
 
             <MenuItemStatistics />

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import AdminEditPageLoading from "@/components/common/AdminEditPageLoading"
 import MenuItemForm from "@/forms/Admin/MenuItem/MenuItemForm"
 import { useGetMenuItemById, useUpdateMenuItemMutation } from "@/hooks/admin/menu-item.hook"
 import { ArrowLeft } from "lucide-react"
@@ -11,7 +12,7 @@ const EditMenuItem = () => {
     const { data: menuItem, isLoading, error } = useGetMenuItemById(id);
     const { mutateAsync: updateMenuItem } = useUpdateMenuItemMutation(id || "");
 
-    if(isLoading) return null;
+    if (isLoading) return <AdminEditPageLoading />;
 
     if(!menuItem) return null;
 
@@ -20,11 +21,11 @@ const EditMenuItem = () => {
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
-                <Link to="/admin/menu-item">
-                    <Button size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline">
+                    <Link to="/admin/menu-item">
                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold">
                         Edit Menu Item

@@ -24,7 +24,7 @@ const TourInfoPanel = ({ marker, onClose }: TourInfoPanelProps) => (
             <button
                 type="button"
                 aria-label={`Close ${marker.title} information`}
-                className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:border-primary/25 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35"
                 onClick={onClose}
             >
                 <X className="size-4" />

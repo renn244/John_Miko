@@ -83,7 +83,7 @@ const arrivalTips = [
 
 const Amenities = () => {
     return (
-        <GuestPageShell>
+        <GuestPageShell className="bg-background">
             <NavBar />
 
             <section className="relative border-b bg-background pt-4">
@@ -121,8 +121,8 @@ const Amenities = () => {
                         {heroHighlights.map(({ icon: Icon, title, description }) => (
                             <GuestCard key={title} className="p-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                                        <Icon className="size-4 text-primary" />
+                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                                        <Icon className="size-5 text-primary" />
                                     </div>
                                     <div>
                                         <h2 className="text-sm font-semibold">{title}</h2>

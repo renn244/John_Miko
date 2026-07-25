@@ -11,11 +11,11 @@ const AddStaff = () => {
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
-                <Link to="/admin/staff-management">
-                    <Button size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline">
+                    <Link to="/admin/staff-management">
                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
                 <div>
                     <h1 className="text-2xl md:text-3xl font-semibold">
                         Add Staff

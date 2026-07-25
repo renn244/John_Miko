@@ -40,7 +40,18 @@ const MaintenanceKanbanBoard = () => {
     limit: 100,
   });
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="overflow-x-auto" role="status" aria-live="polite">
+        <span className="sr-only">Loading maintenance board</span>
+        <div className="grid min-w-225 grid-cols-3 gap-4 animate-pulse">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div key={index} className="h-175 rounded-xl border bg-muted/60" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const tickets = sortMaintenanceByRelevantDate(
     (data?.data ?? []).filter((ticket) => ticket.status !== "Closed"),
@@ -96,23 +107,23 @@ const MaintenanceKanbanBoard = () => {
                         actionSlot={
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                              <Button variant="ghost" size="icon-sm">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                               <DropdownMenuGroup>
-                                <Link to={`/admin/maintenance/${ticket.id}/edit`}>
-                                  <DropdownMenuItem>
-                                    <Edit className="h-4 w-4 text-primary" />
+                                <DropdownMenuItem asChild>
+                                  <Link to={`/admin/maintenance/${ticket.id}/edit`}>
+                                    <Edit className="h-4 w-4" />
                                     Edit Details
-                                  </DropdownMenuItem>
-                                </Link>
+                                  </Link>
+                                </DropdownMenuItem>
                               </DropdownMenuGroup>
                               <DropdownMenuSeparator />
 
                               <DropdownMenuItem onClick={() => navigate(`/admin/maintenance/${ticket.id}`)}>
-                                <Eye className="h-4 w-4 text-primary" />
+                                <Eye className="h-4 w-4" />
                                 View Details
                               </DropdownMenuItem>
 
@@ -121,14 +132,14 @@ const MaintenanceKanbanBoard = () => {
                                   disabled={startMutation.isPending}
                                   onClick={() => startMutation.mutate(ticket.id)}
                                 >
-                                  <Play className="h-4 w-4 text-primary" />
+                                  <Play className="h-4 w-4" />
                                   Start Maintenance
                                 </DropdownMenuItem>
                               ) : null}
 
                               {ticket.status === "InProgress" ? (
                                 <DropdownMenuItem onClick={() => setCompleteId(ticket.id)}>
-                                  <Check className="h-4 w-4 text-emerald-500" />
+                                  <Check className="h-4 w-4" />
                                   Complete
                                 </DropdownMenuItem>
                               ) : null}
@@ -138,7 +149,7 @@ const MaintenanceKanbanBoard = () => {
                                   disabled={closeMutation.isPending}
                                   onClick={() => closeMutation.mutate(ticket.id)}
                                 >
-                                  <Lock className="h-4 w-4 text-amber-500" />
+                                  <Lock className="h-4 w-4" />
                                   Close Ticket
                                 </DropdownMenuItem>
                               ) : null}

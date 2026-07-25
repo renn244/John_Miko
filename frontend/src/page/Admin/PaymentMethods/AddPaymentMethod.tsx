@@ -11,11 +11,11 @@ const AddPaymentMethod = () => {
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
-                <Link to="/admin/payment-methods">
-                    <Button size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline">
+                    <Link to="/admin/payment-methods">
                         <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
                 <div>
                     <h1 className="text-2xl font-semibold md:text-3xl">Add Payment Method</h1>
                     <p className="mt-1 text-sm text-muted-foreground">

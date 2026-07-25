@@ -31,9 +31,9 @@ const RouteErrorPage = ({ embedded = false }: RouteErrorPageProps) => {
 
     if (!embedded) {
         return (
-            <GuestPageShell>
+            <GuestPageShell className="bg-background">
                 <NavBar />
-                <GuestContainer className="flex min-h-[calc(100vh-8rem)] items-center justify-center py-10">
+                <GuestContainer className="flex flex-1 items-center justify-center py-10">
                     <StatusPageCard
                         code={isRouteErrorResponse(error) ? String(error.status) : "500"}
                         title={title}

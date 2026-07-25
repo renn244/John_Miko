@@ -5,6 +5,7 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetAddOnServicesQuery } from "@/hooks/admin/add-on-service.hook";
@@ -45,34 +46,38 @@ const AddOnServiceList = () => {
                                     <DropdownMenuTrigger asChild>
                                         <Button
                                         variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 bg-white "
+                                        size="icon-sm"
+                                        className="text-muted-foreground"
                                         >
                                             <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuGroup>
-                                            <Link to={`/admin/add-on-service/${service.id}/edit`}>
-                                                <DropdownMenuItem>
-                                                    <Edit className="h-4 w-4 text-primary" />
+                                            <DropdownMenuItem asChild>
+                                                <Link to={`/admin/add-on-service/${service.id}/edit`}>
+                                                    <Edit className="h-4 w-4" />
                                                     Edit Details
-                                                </DropdownMenuItem>
-                                            </Link>
-                                            <DropdownMenuItem onClick={() => setDeleteId(service.id)}>
-                                                {service.isActive ? (
-                                                    <>
-                                                        <Power className="h-4 w-4 text-amber-700" />
-                                                        <span className="text-amber-700">Deactivate</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <RotateCcw className="h-4 w-4 text-emerald-700" />
-                                                        <span className="text-emerald-700">Reactivate</span>
-                                                    </>
-                                                )}
+                                                </Link>
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={() => setDeleteId(service.id)}
+                                            variant={service.isActive ? "destructive" : "default"}
+                                        >
+                                            {service.isActive ? (
+                                                <>
+                                                    <Power className="h-4 w-4" />
+                                                    Deactivate
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <RotateCcw className="h-4 w-4" />
+                                                    Reactivate
+                                                </>
+                                            )}
+                                        </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>

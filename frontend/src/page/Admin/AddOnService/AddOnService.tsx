@@ -15,12 +15,12 @@ const AddOnService = () => {
                     <p className="text-sm mt-1 text-muted-foreground">Manage optional guest services, pricing, and availability.</p>
                 </div>
 
-                <Link to="/admin/add-on-service/add">
-                    <Button>
+                <Button asChild>
+                    <Link to="/admin/add-on-service/add">
                         Add Service
                         <Plus className="w-5 h-5 text-white" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
             </div>
 
             <AddOnServiceStatistics />

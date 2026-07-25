@@ -208,8 +208,7 @@ const GuestForm =  ({
                                         <Button
                                         type="button"
                                         variant="outline"
-                                        size="icon"
-                                        className="size-8 rounded-md"
+                                        size="icon-sm"
                                         onClick={() => field.onChange(Math.max(0, (field.value || 0) - 1))}
                                         >
                                             <Minus className="size-4" />
@@ -218,8 +217,7 @@ const GuestForm =  ({
                                         <Button
                                         type="button"
                                         variant="outline"
-                                        size="icon"
-                                        className="size-8 rounded-md"
+                                        size="icon-sm"
                                         onClick={() => field.onChange((field.value || 0) + 1)}
                                         >
                                             <Plus className="size-4" />
@@ -251,8 +249,7 @@ const GuestForm =  ({
                                         <Button
                                         type="button"
                                         variant="outline"
-                                        size="icon"
-                                        className="size-8 rounded-md"
+                                        size="icon-sm"
                                         onClick={() => field.onChange(Math.max(0, (field.value || 0) - 1))}
                                         >
                                             <Minus className="size-4" />
@@ -261,8 +258,7 @@ const GuestForm =  ({
                                         <Button
                                         type="button"
                                         variant="outline"
-                                        size="icon"
-                                        className="size-8 rounded-md"
+                                        size="icon-sm"
                                         onClick={() => field.onChange((field.value || 0) + 1)}
                                         >
                                             <Plus className="size-4" />
@@ -294,8 +290,7 @@ const GuestForm =  ({
                                         <Button
                                         type="button"
                                         variant="outline"
-                                        size="icon"
-                                        className="size-8 rounded-md"
+                                        size="icon-sm"
                                         onClick={() => field.onChange(Math.max(0, (field.value || 0) - 1))}
                                         >
                                             <Minus className="size-4" />
@@ -304,8 +299,7 @@ const GuestForm =  ({
                                         <Button
                                         type="button"
                                         variant="outline"
-                                        size="icon"
-                                        className="size-8 rounded-md"
+                                        size="icon-sm"
                                         onClick={() => field.onChange((field.value || 0) + 1)}
                                         >
                                             <Plus className="size-4" />

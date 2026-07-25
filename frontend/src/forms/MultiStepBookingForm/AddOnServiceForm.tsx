@@ -157,7 +157,7 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                                           <div className="flex items-center justify-between">
                                               {isSelected ? (
                                                   <div className="flex items-center gap-2">
-                                                      <button
+                                                      <Button
                                                           type="button"
                                                           onClick={() => {
                                                               const index = fields.findIndex(
@@ -165,13 +165,13 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                                                               );
                                                               updateQuantity(index, selectedQty - 1);
                                                           }}
-                                                          className="w-7 h-7 rounded-lg flex items-center justify-center border-2 hover:bg-gray-100 transition-colors"
-                                                          style={{ borderColor: "#E5E7EB" }}
+                                                          variant="outline"
+                                                          size="icon-sm"
                                                       >
-                                                          <Minus className="w-3 h-3" />
-                                                      </button>
+                                                          <Minus className="size-3.5" />
+                                                      </Button>
                                                       <span className="w-6 text-center font-bold text-sm">{selectedQty}</span>
-                                                      <button
+                                                      <Button
                                                           type="button"
                                                           onClick={() => {
                                                               const index = fields.findIndex(
@@ -179,14 +179,14 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                                                               );
                                                               updateQuantity(index, selectedQty + 1);
                                                           }}
-                                                          className="w-7 h-7 rounded-lg flex items-center justify-center border-2 hover:bg-gray-100 transition-colors"
-                                                          style={{ borderColor: "#E5E7EB" }}
+                                                          variant="outline"
+                                                          size="icon-sm"
                                                       >
-                                                          <Plus className="w-3 h-3" />
-                                                      </button>
+                                                          <Plus className="size-3.5" />
+                                                      </Button>
                                                   </div>
                                               ) : (
-                                                  <Button size="sm" type="button" onClick={() => addToSelection(service)}>
+                                                  <Button size="sm" variant="outline" type="button" onClick={() => addToSelection(service)}>
                                                       <Plus className="w-4 h-4" /> Add
                                                   </Button>
                                               )}
@@ -195,7 +195,7 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                                                   <Button
                                                       size="sm"
                                                       type="button"
-                                                      variant="secondary"
+                                                      variant="outline"
                                                       onClick={() => {
                                                           const index = fields.findIndex(
                                                               (f) => f.addOnServiceId === service.id
@@ -271,7 +271,7 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                                             </p>
                                         </div>
 
-                                        <Button type="button" onClick={() => removeFromSelection(index)} variant="ghost" size="icon-xs">
+                                        <Button type="button" onClick={() => removeFromSelection(index)} variant="ghost" size="icon-sm">
                                             <X className="size-3.5 text-destructive" />
                                         </Button>
                                     </div>
@@ -282,9 +282,9 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                                                 type="button"
                                                 onClick={() => updateQuantity(index, field.quantity - 1)}
                                                 variant="outline"
-                                                size="icon-xs"
+                                                size="icon-sm"
                                             >
-                                                <Minus className="size-3" />
+                                                <Minus className="size-3.5" />
                                             </Button>
                                             <span className="w-6 text-center text-sm font-bold text-foreground">
                                                 {field.quantity}
@@ -293,9 +293,9 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                                                 type="button"
                                                 onClick={() => updateQuantity(index, field.quantity + 1)}
                                                 variant="outline"
-                                                size="icon-xs"
+                                                size="icon-sm"
                                             >
-                                                <Plus className="size-3" />
+                                                <Plus className="size-3.5" />
                                             </Button>
                                         </div>
 

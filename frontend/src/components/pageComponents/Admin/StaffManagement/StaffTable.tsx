@@ -170,15 +170,15 @@ const StaffTable = () => {
                                                     <DropdownMenuTrigger asChild>
                                                         <Button
                                                         variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-muted-foreground transition-colors group-hover:text-foreground"
+                                                        size="icon-sm"
+                                                        className="text-muted-foreground transition-colors group-hover:text-foreground"
                                                         >
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem onClick={() => setChangeRoleId(staff.id)}>
-                                                            <UserCog className="h-4 w-4 text-primary" />
+                                                            <UserCog className="h-4 w-4" />
                                                             Change Role
                                                         </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
@@ -194,7 +194,7 @@ const StaffTable = () => {
                                                         onClick={() => setReactivateId(staff.id)}
                                                         disabled={!isInactive}
                                                         >
-                                                            <UserCheck className="h-4 w-4 text-emerald-700" />
+                                                            <UserCheck className="h-4 w-4" />
                                                             {isInactive ? "Reactivate" : "Already Active"}
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>

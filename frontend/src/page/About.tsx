@@ -70,7 +70,7 @@ const reasons = [
 
 const About = () => {
     return (
-        <GuestPageShell>
+        <GuestPageShell className="bg-background">
             <NavBar />
 
             <GuestContainer className="py-8 md:py-10">
@@ -114,8 +114,10 @@ const About = () => {
 
                     <section className="grid gap-4 md:grid-cols-2">
                         <GuestCard accent className="p-5">
-                            <div className="flex items-start gap-3">
-                                <Target className="mt-0.5 size-5 text-primary" />
+                            <div className="flex items-start gap-4">
+                                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                                    <Target className="size-5 text-primary" />
+                                </div>
                                 <div>
                                     <h2 className="text-lg font-bold tracking-normal">Our Mission</h2>
                                     <p className="mt-2 text-sm leading-6 text-muted-foreground md:text-[15px]">
@@ -127,8 +129,10 @@ const About = () => {
                         </GuestCard>
 
                         <GuestCard accent className="p-5">
-                            <div className="flex items-start gap-3">
-                                <Eye className="mt-0.5 size-5 text-primary" />
+                            <div className="flex items-start gap-4">
+                                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                                    <Eye className="size-5 text-primary" />
+                                </div>
                                 <div>
                                     <h2 className="text-lg font-bold tracking-normal">Our Vision</h2>
                                     <p className="mt-2 text-sm leading-6 text-muted-foreground md:text-[15px]">
@@ -148,8 +152,8 @@ const About = () => {
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                             {coreValues.map(({ icon: Icon, title, description }) => (
                                 <GuestCard key={title}>
-                                    <div className="mb-4 flex size-9 items-center justify-center rounded-full bg-primary/10">
-                                        <Icon className="size-4 text-primary" />
+                                    <div className="mb-4 flex size-10 items-center justify-center rounded-full bg-primary/10">
+                                        <Icon className="size-5 text-primary" />
                                     </div>
                                     <h3 className="text-base font-semibold">{title}</h3>
                                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -182,7 +186,7 @@ const About = () => {
                         <GuestCard padded={false} className="grid overflow-hidden md:grid-cols-[320px_1fr]">
                             <div className="space-y-4 p-4 md:p-5">
                                 <div className="flex gap-3">
-                                    <MapPin className="mt-0.5 size-4 text-primary" />
+                                    <MapPin className="mt-0.5 size-5 shrink-0 text-primary" />
                                     <div>
                                         <p className="text-sm font-semibold">Location</p>
                                         <p className="mt-1 text-xs leading-5 text-muted-foreground">
@@ -191,7 +195,7 @@ const About = () => {
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <CheckCircle2 className="mt-0.5 size-4 text-primary" />
+                                    <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" />
                                     <div>
                                         <p className="text-sm font-semibold">Open Daily</p>
                                         <p className="mt-1 text-xs leading-5 text-muted-foreground">

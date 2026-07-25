@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useGuestManagementStore } from "@/store/admin/guestManagement.store";
 import type { GuestStatus } from "@/types/admin/guest-management.type";
 import { format } from "date-fns";
-import { MoreHorizontal, UserCheck, UserMinus } from "lucide-react";
+import { Eye, MoreHorizontal, UserCheck, UserMinus } from "lucide-react";
 
 const getStatusLabel = (status: GuestStatus) => {
     return status === "ACTIVE" ? "Active" : "Inactive";
@@ -144,14 +144,15 @@ const GuestTable = () => {
                                                         <DropdownMenuTrigger asChild>
                                                             <Button
                                                             variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 text-muted-foreground transition-colors group-hover:text-foreground"
+                                                            size="icon-sm"
+                                                            className="text-muted-foreground transition-colors group-hover:text-foreground"
                                                             >
                                                                 <MoreHorizontal className="h-4 w-4" />
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
                                                             <DropdownMenuItem onClick={() => setViewId(guest.id)}>
+                                                                <Eye className="h-4 w-4" />
                                                                 View
                                                             </DropdownMenuItem>
                                                             <DropdownMenuSeparator />
@@ -167,7 +168,7 @@ const GuestTable = () => {
                                                             onClick={() => setReactivateId(guest.id)}
                                                             disabled={!isInactive}
                                                             >
-                                                                <UserCheck className="h-4 w-4 text-emerald-700" />
+                                                                <UserCheck className="h-4 w-4" />
                                                                 {isInactive ? "Reactivate" : "Already Active"}
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>

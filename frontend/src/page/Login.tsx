@@ -23,16 +23,13 @@ export default function Login() {
               <h1 className="mt-4 text-3xl font-bold tracking-normal text-foreground">
                 Welcome Back
               </h1>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Sign in to manage your bookings, settings, and guest details.
-              </p>
             </div>
 
             <LoginForm />
 
             <p className="mt-5 text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link to="/signup-guest" className="text-blue-600 font-medium hover:underline">
+              <Link to="/signup-guest" className="font-medium text-primary hover:underline">
                 Register as Guest
               </Link>
             </p>
