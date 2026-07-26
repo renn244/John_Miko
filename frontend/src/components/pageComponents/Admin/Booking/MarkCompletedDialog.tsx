@@ -1,5 +1,6 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
+import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
@@ -65,17 +66,12 @@ const MarkCompletedBooking = ({ booking } : { booking: BookingWithAccommodation 
 
             <div className="space-y-4">
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg border-2 bg-emerald-50 border-emerald-200">
-                    <CheckCircle className="w-6 h-6 shrink-0 mt-0.5 text-emerald-600" />
-                    <div>
-                        <h3 className="font-bold text-sm mb-1 text-emerald-800">
-                            Mark as Completed
-                        </h3>
-                        <p className="text-sm text-emerald-900">
-                            This will update the booking status to Completed and mark it as successfully finished.
-                        </p>
-                    </div>
-                </div>
+                <AdminDecisionNotice
+                    tone="success"
+                    icon={CheckCircle}
+                    title="Mark as Completed"
+                    description="This will update the booking status to Completed and mark it as successfully finished."
+                />
 
                 <div className="bg-gray-50 p-4 rounded-lg border">
                     <h4 className="text-sm font-semibold mb-3">
@@ -130,7 +126,7 @@ const MarkCompletedBooking = ({ booking } : { booking: BookingWithAccommodation 
                     await mutateAsync("Completed")
                     setIsMarkCompletedOpen(false)
                 }}
-                className="bg-emerald-700 hover:bg-emerald-700/90"
+                variant="success"
                 >
                     {
                         isPending ? 

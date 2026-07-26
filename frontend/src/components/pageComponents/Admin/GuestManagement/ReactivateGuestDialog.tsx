@@ -1,6 +1,7 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
-import { Badge } from "@/components/ui/badge";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
+import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
@@ -58,17 +59,12 @@ const ReactivateGuest = ({ guest }: { guest: GuestUser }) => {
             </DialogHeader>
 
             <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 rounded-lg border-2 border-emerald-300/70 bg-emerald-50">
-                    <UserCheck className="w-6 h-6 shrink-0 mt-0.5 text-emerald-700" />
-                    <div>
-                        <h3 className="font-bold text-sm mb-1 text-emerald-700">
-                            This will reactivate the guest account.
-                        </h3>
-                        <p className="text-sm text-emerald-700">
-                            The guest user will be able to sign in again once reactivated.
-                        </p>
-                    </div>
-                </div>
+                <AdminDecisionNotice
+                    tone="success"
+                    icon={UserCheck}
+                    title="This will reactivate the guest account."
+                    description="The guest user will be able to sign in again once reactivated."
+                />
 
                 <div className="bg-gray-50 p-4 rounded-lg border">
                     <h4 className="text-sm font-semibold mb-3">
@@ -85,9 +81,7 @@ const ReactivateGuest = ({ guest }: { guest: GuestUser }) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Status:</span>
-                            <Badge className={isInactive ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-emerald-100 text-emerald-700 border-emerald-300"}>
-                                {isInactive ? "Inactive" : "Active"}
-                            </Badge>
+                            <AdminAvailabilityBadge active={!isInactive} />
                         </div>
                     </div>
                 </div>
@@ -103,6 +97,7 @@ const ReactivateGuest = ({ guest }: { guest: GuestUser }) => {
                 </Button>
                 <Button
                 type="button"
+                variant="success"
                 onClick={async () => {
                     await mutateAsync();
                     setIsReactivateOpen(false);

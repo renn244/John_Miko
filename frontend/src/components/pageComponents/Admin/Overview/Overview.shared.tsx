@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Link, type To } from "react-router";
@@ -30,12 +31,9 @@ export const SectionHeader = ({
     <div className="flex items-center justify-between gap-4">
         <h2 className="text-base font-semibold text-foreground">{title}</h2>
         {linkTo && linkLabel ? (
-            <Link
-                to={linkTo}
-                className="text-xs font-semibold text-primary hover:underline"
-            >
-                {linkLabel}
-            </Link>
+            <Button asChild variant="link" size="sm" className="-mr-2 shrink-0 px-2 text-xs">
+                <Link to={linkTo}>{linkLabel}</Link>
+            </Button>
         ) : null}
     </div>
 );
@@ -78,21 +76,6 @@ export const StatusBadge = ({ value }: { value?: string | null }) => (
 
 export const formatDate = (value: string) =>
     format(new Date(value), "MMM dd, yyyy");
-
-export const getBookingRowAccent = (status?: string | null) => {
-    switch (status) {
-        case "Pending":
-            return "#F59E0B";
-        case "Confirmed":
-            return "#1E73BE";
-        case "Completed":
-            return "#059669";
-        case "Cancelled":
-            return "#DC2626";
-        default:
-            return "#D1D5DB";
-    }
-};
 
 export const getOverviewFeedbackTone = (rating: number) => {
     switch (true) {

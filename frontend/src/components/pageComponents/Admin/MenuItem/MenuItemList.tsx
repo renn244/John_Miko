@@ -1,9 +1,10 @@
 import DataPagination from "@/components/common/DataPagination";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useGetMenuItemsQuery } from "@/hooks/admin/menu-item.hook";
 import { useMenuItemSearch } from "@/hooks/admin/menu-item.search";
-import { cn, formatPeso } from "@/lib/utils";
+import { formatPeso } from "@/lib/utils";
 import { useMenuItemAdminStore } from "@/store/admin/menuItemAdmin.store";
 import { CheckCircle, Edit, MoreVertical, Trash2, UtensilsCrossed, XCircle } from "lucide-react";
 import { Link } from "react-router";
@@ -38,16 +39,11 @@ const MenuItemList = () => {
                             />
 
                             <div className="absolute left-3 top-3">
-                                <span
-                                    className={cn(
-                                        "inline-flex rounded-full border px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur-sm",
-                                        item.availability === "Available"
-                                            ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
-                                            : "border-red-200 bg-red-50/95 text-red-700",
-                                    )}
-                                >
-                                    {item.availability}
-                                </span>
+                                <AdminAvailabilityBadge
+                                    active={item.availability === "Available"}
+                                    activeLabel="Available"
+                                    inactiveLabel="Unavailable"
+                                />
                             </div>
 
                             <div className="absolute right-3 top-3">
@@ -57,6 +53,7 @@ const MenuItemList = () => {
                                             variant="ghost"
                                             size="icon-sm"
                                             className="text-muted-foreground"
+                                            aria-label={`Actions for ${item.name}`}
                                         >
                                             <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                         </Button>

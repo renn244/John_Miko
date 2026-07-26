@@ -1,4 +1,5 @@
 import AdminTableEmptyState from "@/components/common/AdminTableEmptyState";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import DataPagination from "@/components/common/DataPagination";
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import StaffFilter from "@/components/pageComponents/Admin/StaffManagement/StaffFilter";
@@ -11,7 +12,7 @@ import { useGetStaffsQuery } from "@/hooks/admin/staff-management.hook";
 import { useStaffManagementSearch } from "@/hooks/admin/staff-management.search";
 import { cn } from "@/lib/utils";
 import { useStaffManagementStore } from "@/store/admin/staffManagement.store";
-import type { StaffRole, StaffStatus, StaffUser } from "@/types/admin/staff-management.type";
+import type { StaffRole, StaffUser } from "@/types/admin/staff-management.type";
 import { format } from "date-fns";
 import { MoreHorizontal, UserCheck, UserCog, UserMinus } from "lucide-react";
 
@@ -24,10 +25,6 @@ const getRoleLabel = (role: StaffRole) => {
         case "MAINTENANCE_STAFF":
             return "Maintenance Staff";
     }
-};
-
-const getStatusLabel = (status: StaffStatus) => {
-    return status === "ACTIVE" ? "Active" : "Inactive";
 };
 
 const getRoleColor = (role: StaffRole) => {
@@ -47,15 +44,6 @@ const getExpertiseLabel = (staff: StaffUser) => {
     }
 
     return staff.expertise ?? "No expertise";
-};
-
-const getStatusColor = (status: StaffStatus) => {
-    switch (status) {
-        case "ACTIVE":
-            return { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-300" };
-        case "INACTIVE":
-            return { bg: "bg-gray-100", text: "text-gray-600", border: "border-gray-300" };
-    }
 };
 
 const StaffTable = () => {
@@ -99,7 +87,86 @@ const StaffTable = () => {
 
             {!isLoading && !error && (
                 <div className="flex min-h-0 flex-1 flex-col">
-                    <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
+                    <div className="space-y-3 p-3 md:hidden">
+                        {staffs.length === 0 ? (
+                            <p className="py-6 text-center text-sm text-muted-foreground">
+                                {search || role || status ? "No staff members found for the current filters." : "No staff accounts yet."}
+                            </p>
+                        ) : staffs.map((staff) => {
+                            const roleColor = getRoleColor(staff.role);
+                            const isInactive = staff.status === "INACTIVE";
+
+                            return (
+                                <article key={staff.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate font-semibold tracking-tight">{staff.name || "Unnamed Staff"}</p>
+                                            <p className="mt-1 truncate text-xs text-muted-foreground">{staff.id}</p>
+                                        </div>
+                                        <AdminAvailabilityBadge active={!isInactive} className="shrink-0" />
+                                    </div>
+
+                                    <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y py-3 text-sm">
+                                        <div className="col-span-2 min-w-0">
+                                            <dt className="text-xs text-muted-foreground">Email</dt>
+                                            <dd className="mt-1 break-all font-medium text-primary">{staff.email}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">Role</dt>
+                                            <dd className="mt-1">
+                                                <Badge className={cn("shadow-none", roleColor.bg, roleColor.text, roleColor.border)}>
+                                                    {getRoleLabel(staff.role)}
+                                                </Badge>
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">Expertise</dt>
+                                            <dd className="mt-1 font-medium">{getExpertiseLabel(staff) ?? "—"}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">Contact</dt>
+                                            <dd className="mt-1 font-medium">{staff.contactNo || "—"}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">Joined</dt>
+                                            <dd className="mt-1 font-medium">{format(new Date(staff.createdAt), "MMM dd, yyyy")}</dd>
+                                        </div>
+                                    </dl>
+
+                                    <div className="mt-3 flex justify-end">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon-sm" aria-label={`Staff actions for ${staff.name || staff.email}`}>
+                                                    <MoreHorizontal className="size-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => setChangeRoleId(staff.id)}>
+                                                    <UserCog className="size-4" />
+                                                    Change Role
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                onClick={() => setDeactivateId(staff.id)}
+                                                variant="destructive"
+                                                disabled={isInactive}
+                                                >
+                                                    <UserMinus className="size-4" />
+                                                    {isInactive ? "Already Inactive" : "Deactivate"}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => setReactivateId(staff.id)} disabled={!isInactive}>
+                                                    <UserCheck className="size-4" />
+                                                    {isInactive ? "Reactivate" : "Already Active"}
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+
+                    <div className="hidden min-h-0 flex-1 flex-col overflow-x-auto md:flex">
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-border/70">
@@ -124,7 +191,6 @@ const StaffTable = () => {
                                 )}
                                 {staffs.map((staff) => {
                                     const roleColor = getRoleColor(staff.role);
-                                    const statusColor = getStatusColor(staff.status);
                                     const isInactive = staff.status === "INACTIVE";
 
                                     return (
@@ -158,9 +224,7 @@ const StaffTable = () => {
                                                 {getExpertiseLabel(staff) ?? "-"}
                                             </TableCell>
                                             <TableCell className="px-4 py-4 align-top">
-                                                <Badge className={cn("shadow-none", statusColor.bg, statusColor.text, statusColor.border)}>
-                                                    {getStatusLabel(staff.status)}
-                                                </Badge>
+                                                <AdminAvailabilityBadge active={!isInactive} />
                                             </TableCell>
                                             <TableCell className="px-4 py-4 align-top text-sm text-muted-foreground">
                                                 {format(new Date(staff.createdAt), "MMM dd, yyyy")}
@@ -172,6 +236,7 @@ const StaffTable = () => {
                                                         variant="ghost"
                                                         size="icon-sm"
                                                         className="text-muted-foreground transition-colors group-hover:text-foreground"
+                                                        aria-label={`Staff actions for ${staff.name || staff.email}`}
                                                         >
                                                             <MoreHorizontal className="h-4 w-4" />
                                                         </Button>
@@ -206,18 +271,19 @@ const StaffTable = () => {
                             </TableBody>
                         </Table>
 
-                        <div className="mt-auto border-t bg-background/80 px-4 py-4">
-                            <DataPagination
-                            meta={meta}
-                            fallbackMeta={{
-                                total: staffs.length,
-                                limit,
-                            }}
-                            page={page}
-                            onPageChange={updatePage}
-                            showSinglePageControls
-                            />
-                        </div>
+                    </div>
+
+                    <div className="mt-auto border-t bg-background/80 px-4 py-4">
+                        <DataPagination
+                        meta={meta}
+                        fallbackMeta={{
+                            total: staffs.length,
+                            limit,
+                        }}
+                        page={page}
+                        onPageChange={updatePage}
+                        showSinglePageControls
+                        />
                     </div>
                 </div>
             )}

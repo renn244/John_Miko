@@ -1,6 +1,7 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
-import { Badge } from "@/components/ui/badge";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
+import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
@@ -58,17 +59,12 @@ const DeactivateStaff = ({ staff }: { staff: StaffUser }) => {
             </DialogHeader>
 
             <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 rounded-lg border-2 border-destructive/50 bg-destructive/20">
-                    <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5 text-destructive/75" />
-                    <div>
-                        <h3 className="font-bold text-sm mb-1 text-destructive/75">
-                            Warning: This action will deactivate the staff account.
-                        </h3>
-                        <p className="text-sm text-destructive/75">
-                            The staff user will no longer be able to sign in once deactivated.
-                        </p>
-                    </div>
-                </div>
+                <AdminDecisionNotice
+                    tone="destructive"
+                    icon={AlertTriangle}
+                    title="Warning: This action will deactivate the staff account."
+                    description="The staff user will no longer be able to sign in once deactivated."
+                />
 
                 <div className="bg-gray-50 p-4 rounded-lg border">
                     <h4 className="text-sm font-semibold mb-3">
@@ -95,9 +91,7 @@ const DeactivateStaff = ({ staff }: { staff: StaffUser }) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Status:</span>
-                            <Badge className={isInactive ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-emerald-100 text-emerald-700 border-emerald-300"}>
-                                {isInactive ? "Inactive" : "Active"}
-                            </Badge>
+                            <AdminAvailabilityBadge active={!isInactive} />
                         </div>
                     </div>
                 </div>

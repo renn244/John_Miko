@@ -1,15 +1,16 @@
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetBookingOverviewQuery } from "@/hooks/admin/booking.hook";
 import { formatToSmartDate } from "@/lib/date.util";
+import BookingStatusBadge from "@/components/pageComponents/Admin/Booking/BookingStatusBadge";
+import { getBookingStatusDisplay } from "@/components/pageComponents/Admin/Booking/bookingDisplay";
+import { cn } from "@/lib/utils";
 import type { BookingOverviewSummary } from "@/types/booking.types";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 import {
     EmptyState,
     SectionHeader,
-    StatusBadge,
     formatDate,
-    getBookingRowAccent,
     surfaceClassName,
 } from "./Overview.shared";
 
@@ -55,12 +56,10 @@ const RecentBookingsCard = ({ booking }: { booking: BookingOverviewSummary }) =>
             className="group relative block min-h-[84px] py-3 pl-4 pr-1 transition-colors last:pb-0 hover:bg-muted/20"
         >
             <span
-                className="absolute bottom-2 left-0 top-2 w-1 rounded-full"
-                style={{
-                    backgroundColor: getBookingRowAccent(
-                        booking.status,
-                    ),
-                }}
+                className={cn(
+                    "absolute bottom-2 left-0 top-2 w-1 rounded-full",
+                    getBookingStatusDisplay(booking.status).accentBarClassName,
+                )}
             />
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -80,7 +79,7 @@ const RecentBookingsCard = ({ booking }: { booking: BookingOverviewSummary }) =>
                         <span className="text-xs text-muted-foreground">
                             {formatToSmartDate(booking.createdAt)}
                         </span>
-                        <StatusBadge value={booking.status} />
+                        <BookingStatusBadge status={booking.status} />
                     </div>
                     <ArrowRight className="mt-0.5 size-4 text-muted-foreground transition-colors group-hover:text-primary" />
                 </div>

@@ -1,32 +1,17 @@
 import AdminTableEmptyState from "@/components/common/AdminTableEmptyState";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import DataPagination from "@/components/common/DataPagination";
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import GuestFilter from "@/components/pageComponents/Admin/GuestManagement/GuestFilter";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGetGuestsQuery } from "@/hooks/admin/guest-management/guest-management.hook";
 import { useGuestManagementSearch } from "@/hooks/admin/guest-management/guest-management.search";
-import { cn } from "@/lib/utils";
 import { useGuestManagementStore } from "@/store/admin/guestManagement.store";
-import type { GuestStatus } from "@/types/admin/guest-management.type";
 import { format } from "date-fns";
 import { Eye, MoreHorizontal, UserCheck, UserMinus } from "lucide-react";
-
-const getStatusLabel = (status: GuestStatus) => {
-    return status === "ACTIVE" ? "Active" : "Inactive";
-};
-
-const getStatusColor = (status: GuestStatus) => {
-    switch (status) {
-        case "ACTIVE":
-            return { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-300" };
-        case "INACTIVE":
-            return { bg: "bg-gray-100", text: "text-gray-600", border: "border-gray-300" };
-    }
-};
 
 const GuestTable = () => {
     const setViewId = useGuestManagementStore((state) => state.setViewId);
@@ -68,7 +53,82 @@ const GuestTable = () => {
 
             {!isLoading && !error && (
                 <div className="flex min-h-0 flex-1 flex-col">
-                    <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
+                    <div className="space-y-3 p-3 md:hidden">
+                        {guests.length === 0 ? (
+                            <p className="py-6 text-center text-sm text-muted-foreground">
+                                {search || status ? "No guests found for the current filters." : "No guest accounts yet."}
+                            </p>
+                        ) : guests.map((guest) => {
+                            const isInactive = guest.status === "INACTIVE";
+
+                            return (
+                                <article key={guest.id} className="rounded-xl border bg-card p-4 shadow-sm">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate font-semibold tracking-tight">{guest.name || "Unnamed Guest"}</p>
+                                            <p className="mt-1 truncate text-xs text-muted-foreground">{guest.id}</p>
+                                        </div>
+                                        <AdminAvailabilityBadge active={!isInactive} className="shrink-0" />
+                                    </div>
+
+                                    <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y py-3 text-sm">
+                                        <div className="col-span-2 min-w-0">
+                                            <dt className="text-xs text-muted-foreground">Email</dt>
+                                            <dd className="mt-1 break-all font-medium text-primary">{guest.email}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">Contact</dt>
+                                            <dd className="mt-1 font-medium">{guest.contactNo || "—"}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">Bookings</dt>
+                                            <dd className="mt-1 font-medium">{guest.bookingCount}</dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">Registered</dt>
+                                            <dd className="mt-1 font-medium">{format(new Date(guest.createdAt), "MMM dd, yyyy")}</dd>
+                                        </div>
+                                    </dl>
+
+                                    <div className="mt-3 flex items-center justify-between gap-3">
+                                        <Button variant="outline" size="sm" onClick={() => setViewId(guest.id)}>
+                                            <Eye className="size-4" />
+                                            View guest
+                                        </Button>
+
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon-sm" aria-label={`Guest actions for ${guest.name || guest.email}`}>
+                                                    <MoreHorizontal className="size-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => setViewId(guest.id)}>
+                                                    <Eye className="size-4" />
+                                                    View
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                onClick={() => setDeactivateId(guest.id)}
+                                                variant="destructive"
+                                                disabled={isInactive}
+                                                >
+                                                    <UserMinus className="size-4" />
+                                                    {isInactive ? "Already Inactive" : "Deactivate"}
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => setReactivateId(guest.id)} disabled={!isInactive}>
+                                                    <UserCheck className="size-4" />
+                                                    {isInactive ? "Reactivate" : "Already Active"}
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+
+                    <div className="hidden min-h-0 flex-1 flex-col overflow-x-auto md:flex">
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-border/70">
@@ -91,7 +151,6 @@ const GuestTable = () => {
                                     />
                                 )}
                                 {guests.map((guest) => {
-                                    const statusColor = getStatusColor(guest.status);
                                     const isInactive = guest.status === "INACTIVE";
 
                                     return (
@@ -122,9 +181,7 @@ const GuestTable = () => {
                                                 </span>
                                             </TableCell>
                                             <TableCell className="px-4 py-4 align-top">
-                                                <Badge className={cn("shadow-none", statusColor.bg, statusColor.text, statusColor.border)}>
-                                                    {getStatusLabel(guest.status)}
-                                                </Badge>
+                                                <AdminAvailabilityBadge active={!isInactive} />
                                             </TableCell>
                                             <TableCell className="px-4 py-4 align-top text-sm text-muted-foreground">
                                                 {format(new Date(guest.createdAt), "MMM dd, yyyy")}
@@ -146,6 +203,7 @@ const GuestTable = () => {
                                                             variant="ghost"
                                                             size="icon-sm"
                                                             className="text-muted-foreground transition-colors group-hover:text-foreground"
+                                                            aria-label={`Guest actions for ${guest.name || guest.email}`}
                                                             >
                                                                 <MoreHorizontal className="h-4 w-4" />
                                                             </Button>
@@ -181,18 +239,19 @@ const GuestTable = () => {
                             </TableBody>
                         </Table>
 
-                        <div className="mt-auto border-t bg-background/80 px-4 py-4">
-                            <DataPagination
-                            meta={meta}
-                            fallbackMeta={{
-                                total: guests.length,
-                                limit,
-                            }}
-                            page={page}
-                            onPageChange={updatePage}
-                            showSinglePageControls
-                            />
-                        </div>
+                    </div>
+
+                    <div className="mt-auto border-t bg-background/80 px-4 py-4">
+                        <DataPagination
+                        meta={meta}
+                        fallbackMeta={{
+                            total: guests.length,
+                            limit,
+                        }}
+                        page={page}
+                        onPageChange={updatePage}
+                        showSinglePageControls
+                        />
                     </div>
                 </div>
             )}

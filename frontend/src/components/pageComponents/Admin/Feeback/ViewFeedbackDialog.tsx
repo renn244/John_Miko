@@ -89,6 +89,7 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                         type="button"
                         variant="ghost"
                         size="icon-sm"
+                        aria-label="Close feedback details"
                         className="rounded-full text-white/80 hover:bg-white/15 hover:text-white"
                         >
                             <X className="size-4" />

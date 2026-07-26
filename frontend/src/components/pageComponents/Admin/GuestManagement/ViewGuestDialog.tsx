@@ -1,6 +1,6 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
-import { Badge } from "@/components/ui/badge";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
@@ -88,9 +88,7 @@ const ViewGuest = ({ guest }: { guest: GuestUser }) => {
                         </div>
                         <div className="flex justify-between gap-6">
                             <span className="text-muted-foreground">Status:</span>
-                            <Badge className={isInactive ? "bg-gray-100 text-gray-600 border-gray-300" : "bg-emerald-100 text-emerald-700 border-emerald-300"}>
-                                {isInactive ? "Inactive" : "Active"}
-                            </Badge>
+                            <AdminAvailabilityBadge active={!isInactive} />
                         </div>
                         <div className="flex justify-between gap-6">
                             <span className="text-muted-foreground">User ID:</span>

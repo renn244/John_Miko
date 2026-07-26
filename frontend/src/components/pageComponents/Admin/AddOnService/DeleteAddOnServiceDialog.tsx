@@ -1,5 +1,7 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
+import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
@@ -53,27 +55,16 @@ const DeleteConfirmationAddOnService = ({ service }: { service: AddOnService }) 
             </DialogHeader>
 
             <div className="space-y-4">
-                <div className={`flex items-start gap-4 p-4 rounded-lg border-2 ${
-                    service.isActive
-                        ? "border-amber-500/50 bg-amber-500/10"
-                        : "border-emerald-500/40 bg-emerald-500/10"
-                }`}>
-                    {service.isActive ? (
-                        <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5 text-amber-700" />
-                    ) : (
-                        <RotateCcw className="w-6 h-6 shrink-0 mt-0.5 text-emerald-700" />
-                    )}
-                    <div>
-                        <h3 className={`font-bold text-sm mb-1 ${service.isActive ? "text-amber-700" : "text-emerald-700"}`}>
-                            {service.isActive ? "This service will be hidden from future bookings." : "This service will become bookable again."}
-                        </h3>
-                        <p className={`text-sm ${service.isActive ? "text-amber-700" : "text-emerald-700"}`}>
-                            {service.isActive
-                                ? "Deactivating keeps booking history intact while removing the service from new guest selections."
-                                : "Reactivating makes the service visible again in guest add-on availability when stock allows."}
-                        </p>
-                    </div>
-                </div>
+                <AdminDecisionNotice
+                    tone={service.isActive ? "warning" : "success"}
+                    icon={service.isActive ? AlertTriangle : RotateCcw}
+                    title={service.isActive ? "This service will be hidden from future bookings." : "This service will become bookable again."}
+                    description={
+                        service.isActive
+                            ? "Deactivating keeps booking history intact while removing the service from new guest selections."
+                            : "Reactivating makes the service visible again in guest add-on availability when stock allows."
+                    }
+                />
 
                 <div className="bg-gray-50 p-4 rounded-lg border">
                     <h4 className="text-sm font-semibold mb-3">Service details:</h4>
@@ -96,7 +87,7 @@ const DeleteConfirmationAddOnService = ({ service }: { service: AddOnService }) 
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Status:</span>
-                            <span className="font-medium">{service.isActive ? "Active" : "Inactive"}</span>
+                            <AdminAvailabilityBadge active={service.isActive} />
                         </div>
                     </div>
                 </div>
@@ -114,7 +105,7 @@ const DeleteConfirmationAddOnService = ({ service }: { service: AddOnService }) 
                 </Button>
                 <Button
                     type="button"
-                    variant={service.isActive ? "destructive" : "default"}
+                    variant={service.isActive ? "warning" : "success"}
                     onClick={async () => {
                         await updateAvailability({ isActive: nextIsActive });
                         setIsDeleteOpen(false);

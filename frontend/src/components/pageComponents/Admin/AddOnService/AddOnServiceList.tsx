@@ -1,4 +1,5 @@
 import DataPagination from "@/components/common/DataPagination";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useGetAddOnServicesQuery } from "@/hooks/admin/add-on-service.hook";
 import { useAddOnServiceSearch } from "@/hooks/admin/add-on-service.search";
-import { cn, formatPeso } from "@/lib/utils";
+import { formatPeso } from "@/lib/utils";
 import { useAddOnServiceAdminStore } from "@/store/admin/addOnServiceAdmin.store";
 import { Edit, Layers, MoreVertical, Package, Power, RotateCcw } from "lucide-react";
 import { Link } from "react-router";
@@ -48,6 +49,7 @@ const AddOnServiceList = () => {
                                         variant="ghost"
                                         size="icon-sm"
                                         className="text-muted-foreground"
+                                        aria-label={`Actions for ${service.name}`}
                                         >
                                             <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                         </Button>
@@ -108,16 +110,11 @@ const AddOnServiceList = () => {
                                     {service.quantity} {service.quantity === 1 ? "unit" : "units"} available
                                 </span>
 
-                                <span
-                                className={cn(
-                                    "inline-flex rounded-md px-2 py-1 text-xs font-medium",
-                                    service.isActive
-                                        ? "bg-emerald-50 text-emerald-700"
-                                        : "bg-slate-100 text-slate-600",
-                                )}
-                                >
-                                    {service.isActive ? "Available" : "Unavailable"}
-                                </span>
+                                <AdminAvailabilityBadge
+                                    active={service.isActive}
+                                    activeLabel="Available"
+                                    inactiveLabel="Unavailable"
+                                />
                             </div>
                         </div>
                     </div>
