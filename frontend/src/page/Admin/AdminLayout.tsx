@@ -303,7 +303,7 @@ const AdminLayout = () => {
             <div
             aria-hidden={!isDesktop && isSidebarOpen ? true : undefined}
             inert={!isDesktop && isSidebarOpen ? true : undefined}
-            className="flex min-h-screen flex-1 flex-col"
+            className="flex min-h-screen min-w-0 flex-1 flex-col"
             >
                 <header className="sticky top-0 z-30 flex h-15 items-center justify-between border-b border-border/70 bg-background/95 px-4 backdrop-blur lg:px-6">
                     <div className="flex min-w-0 flex-1 items-center gap-1 lg:flex-none">
@@ -353,7 +353,7 @@ const AdminLayout = () => {
                     </div>
                 </header>
 
-                <main className="flex min-h-0 flex-1 flex-col p-4 lg:p-6">
+                <main className="flex min-h-0 min-w-0 flex-1 flex-col p-4 lg:p-6">
                     <Suspense fallback={<AdminPageLoading />}>
                         <Outlet />
                     </Suspense>
