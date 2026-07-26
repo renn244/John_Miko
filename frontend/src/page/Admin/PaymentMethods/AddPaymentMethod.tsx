@@ -11,7 +11,7 @@ const AddPaymentMethod = () => {
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
-                <Button asChild size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline" aria-label="Back to payment methods">
                     <Link to="/admin/payment-methods">
                         <ArrowLeft className="h-5 w-5 text-muted-foreground" />
                     </Link>

@@ -13,7 +13,7 @@ const AddAccommodation = () => {
         <div className="mx-auto max-w-7xl space-y-6">
 
             <div className="flex items-center gap-4">
-                <Button asChild size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline" aria-label="Back to accommodations">
                     <Link to="/admin/accommodation">
                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                     </Link>

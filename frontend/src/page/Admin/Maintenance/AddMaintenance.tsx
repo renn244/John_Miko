@@ -11,7 +11,7 @@ const AddMaintenance = () => {
   return (
     <div className="mx-auto max-w-7xl space-y-5">
       <div className="flex items-center gap-4">
-        <Button asChild size="icon" variant="outline">
+        <Button asChild size="icon" variant="outline" aria-label="Back to maintenance">
           <Link to="/admin/maintenance">
             <ArrowLeft className="w-5 h-5 text-muted-foreground" />
           </Link>

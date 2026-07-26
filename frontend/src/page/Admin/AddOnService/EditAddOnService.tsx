@@ -1,5 +1,8 @@
 import { Button } from "@/components/ui/button";
+import AdminEditPageState from "@/components/common/AdminEditPageState";
 import AdminEditPageLoading from "@/components/common/AdminEditPageLoading";
+import ErrorDialog from "@/components/common/dialog/ErrorDialog";
+import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import AddOnServiceForm from "@/forms/Admin/AddOnService/AddOnServiceForm";
 import { useGetAddOnServiceById, useUpdateAddOnServiceMutation } from "@/hooks/admin/add-on-service.hook";
 import { ArrowLeft } from "lucide-react";
@@ -9,19 +12,23 @@ const EditAddOnService = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
-    const { data: service, isLoading, error } = useGetAddOnServiceById(id);
+    const { data: service, isLoading, error, refetch, isRefetching } = useGetAddOnServiceById(id);
     const { mutateAsync: updateService } = useUpdateAddOnServiceMutation(id || "");
 
     if (isLoading) return <AdminEditPageLoading />;
     
-    if (!service) return null;
+    if (error) {
+        return <AdminEditPageState><ErrorDialog onBack={() => navigate("/admin/add-on-service")} onRetry={refetch} retryLoading={isRefetching} /></AdminEditPageState>;
+    }
 
-    if (error) return null;
+    if (!service) {
+        return <AdminEditPageState><NotFoundDialog title="Add-on Service Not Found" onBack={() => navigate("/admin/add-on-service")} onRetry={refetch} retryLoading={isRefetching} /></AdminEditPageState>;
+    }
 
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
-                <Button asChild size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline" aria-label="Back to add-on services">
                     <Link to="/admin/add-on-service">
                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                     </Link>

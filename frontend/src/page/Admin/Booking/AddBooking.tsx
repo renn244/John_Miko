@@ -8,7 +8,7 @@ const AddBooking = () => {
         <div className="max-w-5xl mx-auto space-y-6">
 
             <div className="flex items-center gap-4">
-                <Button asChild size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline" aria-label="Back to bookings">
                     <Link to="/admin/booking">
                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                     </Link>

@@ -304,7 +304,47 @@ const MaintenanceStepper = ({ maintenance }: { maintenance: Maintenance }) => {
   const activeIndex = MAINTENANCE_STATUS_ORDER.indexOf(maintenance.status);
 
   return (
-    <div className="overflow-x-auto px-4">
+    <>
+      <div className="space-y-0 px-1 md:hidden">
+        {MAINTENANCE_STATUS_ORDER.map((status, index) => {
+          const isActive = maintenance.status === status;
+          const isCompleted = activeIndex > index;
+          const isLast = index === MAINTENANCE_STATUS_ORDER.length - 1;
+          const date = getStepperDate(maintenance, status);
+
+          return (
+            <div key={status} className="flex gap-3">
+              <div className="flex w-5 flex-col items-center">
+                <div
+                  className={cn(
+                    "flex size-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : isCompleted
+                        ? "bg-primary/80 text-primary-foreground"
+                        : "border border-border bg-background text-muted-foreground",
+                  )}
+                >
+                  {isCompleted ? <Check className="size-3" /> : index + 1}
+                </div>
+                {!isLast ? (
+                  <div className={cn("my-1 w-px flex-1", isCompleted ? "bg-primary/60" : "bg-border")} />
+                ) : null}
+              </div>
+              <div className="min-h-12 pb-3">
+                <p className={cn("text-sm font-semibold", isActive ? "text-primary" : "text-foreground")}>
+                  {getMaintenanceStatusLabel(status)}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {date ?? (isActive ? "Current status" : "Not reached yet")}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-x-auto px-4 md:block">
       <div className="mx-auto flex h-10 min-w-[720px] items-stretch overflow-hidden bg-card">
         {MAINTENANCE_STATUS_ORDER.map((status, index) => {
           const isActive = maintenance.status === status;
@@ -380,7 +420,8 @@ const MaintenanceStepper = ({ maintenance }: { maintenance: Maintenance }) => {
           );
         })}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
@@ -439,6 +480,10 @@ const SnapshotRow = ({ label, value }: { label: string; value: string }) => {
 };
 
 const getStepperDate = (maintenance: Maintenance, status: Maintenance["status"]) => {
+  if (MAINTENANCE_STATUS_ORDER.indexOf(status) > MAINTENANCE_STATUS_ORDER.indexOf(maintenance.status)) {
+    return undefined;
+  }
+
   switch (status) {
     case "Pending":
       return formatMaintenanceShortDate(maintenance.createdAt);
