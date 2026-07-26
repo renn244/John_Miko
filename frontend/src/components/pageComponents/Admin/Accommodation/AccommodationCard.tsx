@@ -47,7 +47,11 @@ const AccommodationCard = (accommodation: AccommodationCardProps) => {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon-sm">
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label={`Actions for ${accommodation.name}`}
+                            >
                                 <MoreVertical className="h-4 w-4 text-muted-foreground" />
                             </Button>
                         </DropdownMenuTrigger>

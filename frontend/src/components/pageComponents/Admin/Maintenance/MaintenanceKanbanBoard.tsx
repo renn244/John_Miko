@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +18,7 @@ import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
 import { Check, Edit, Eye, Lock, MoreHorizontal, Play } from "lucide-react";
 import { Link, useNavigate } from "react-router";
+import { useState } from "react";
 import {
   ACTIVE_MAINTENANCE_STATUSES,
   type ActiveMaintenanceStatus,
@@ -31,6 +33,7 @@ import MaintenanceTicketCard from "./MaintenanceTicketCard";
 const MaintenanceKanbanBoard = () => {
   const setCompleteId = useMaintenanceStore((state) => state.setCompleteId);
   const navigate = useNavigate();
+  const [mobileStatus, setMobileStatus] = useState<ActiveMaintenanceStatus>("Pending");
 
   const startMutation = useStartMaintnenanceMutation();
   const closeMutation = useClosedMaintenanceMutation();
@@ -42,12 +45,19 @@ const MaintenanceKanbanBoard = () => {
 
   if (isLoading) {
     return (
-      <div className="overflow-x-auto" role="status" aria-live="polite">
+      <div role="status" aria-live="polite">
         <span className="sr-only">Loading maintenance board</span>
-        <div className="grid min-w-225 grid-cols-3 gap-4 animate-pulse">
+        <div className="space-y-3 p-1 md:hidden">
           {Array.from({ length: 3 }, (_, index) => (
-            <div key={index} className="h-175 rounded-xl border bg-muted/60" />
+            <div key={index} className="h-36 animate-pulse rounded-xl border bg-muted/60" />
           ))}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
+          <div className="grid min-w-225 grid-cols-3 gap-4 animate-pulse">
+            {Array.from({ length: 3 }, (_, index) => (
+              <div key={index} className="h-175 rounded-xl border bg-muted/60" />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -65,9 +75,94 @@ const MaintenanceKanbanBoard = () => {
     {} as Record<ActiveMaintenanceStatus, Maintenance[]>,
   );
 
+  const ticketActions = (ticket: Maintenance) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon-sm" aria-label={`Actions for ${ticket.title}`}>
+          <MoreHorizontal className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link to={`/admin/maintenance/${ticket.id}/edit`}>
+              <Edit className="size-4" />
+              Edit Details
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate(`/admin/maintenance/${ticket.id}`)}>
+          <Eye className="size-4" />
+          View Details
+        </DropdownMenuItem>
+        {ticket.status === "Pending" ? (
+          <DropdownMenuItem
+            disabled={startMutation.isPending}
+            onClick={() => startMutation.mutate(ticket.id)}
+          >
+            <Play className="size-4" />
+            Start Maintenance
+          </DropdownMenuItem>
+        ) : null}
+        {ticket.status === "InProgress" ? (
+          <DropdownMenuItem onClick={() => setCompleteId(ticket.id)}>
+            <Check className="size-4" />
+            Complete
+          </DropdownMenuItem>
+        ) : null}
+        {ticket.status === "Completed" ? (
+          <DropdownMenuItem
+            disabled={closeMutation.isPending}
+            onClick={() => closeMutation.mutate(ticket.id)}
+          >
+            <Lock className="size-4" />
+            Close Ticket
+          </DropdownMenuItem>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto">
+      <Tabs
+        value={mobileStatus}
+        onValueChange={(value) => setMobileStatus(value as ActiveMaintenanceStatus)}
+        className="md:hidden"
+      >
+        <TabsList className="grid h-auto w-full grid-cols-3">
+          {ACTIVE_MAINTENANCE_STATUSES.map((status) => (
+            <TabsTrigger key={status} value={status} className="px-1 text-xs">
+              {getMaintenanceStatusLabel(status)}
+              <span className="text-muted-foreground">{ticketsByStatus[status].length}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value={mobileStatus} className="mt-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold">{getMaintenanceStatusLabel(mobileStatus)}</h3>
+            <Badge className={getMaintenanceStatusClasses(mobileStatus)}>
+              {ticketsByStatus[mobileStatus].length} tickets
+            </Badge>
+          </div>
+          {ticketsByStatus[mobileStatus].length === 0 ? (
+            <div className="rounded-xl border border-dashed p-5 text-center text-sm text-muted-foreground">
+              No tickets in this status.
+            </div>
+          ) : ticketsByStatus[mobileStatus].map((ticket) => (
+            <MaintenanceTicketCard
+              key={ticket.id}
+              ticket={ticket}
+              actionSlot={ticketActions(ticket)}
+              footerLabel={getDateLabel(ticket.status)}
+              footerValue={formatMaintenanceShortDate(getMaintenanceStatusDate(ticket, ticket.status)) ?? "—"}
+            />
+          ))}
+        </TabsContent>
+      </Tabs>
+
+      <div className="hidden overflow-x-auto md:block">
         <div className="grid min-w-225 grid-cols-3 gap-4">
           {ACTIVE_MAINTENANCE_STATUSES.map((columnStatus) => {
             const columnTickets = ticketsByStatus[columnStatus];
@@ -104,58 +199,7 @@ const MaintenanceKanbanBoard = () => {
                       <MaintenanceTicketCard
                         key={ticket.id}
                         ticket={ticket}
-                        actionSlot={
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon-sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                              <DropdownMenuGroup>
-                                <DropdownMenuItem asChild>
-                                  <Link to={`/admin/maintenance/${ticket.id}/edit`}>
-                                    <Edit className="h-4 w-4" />
-                                    Edit Details
-                                  </Link>
-                                </DropdownMenuItem>
-                              </DropdownMenuGroup>
-                              <DropdownMenuSeparator />
-
-                              <DropdownMenuItem onClick={() => navigate(`/admin/maintenance/${ticket.id}`)}>
-                                <Eye className="h-4 w-4" />
-                                View Details
-                              </DropdownMenuItem>
-
-                              {ticket.status === "Pending" ? (
-                                <DropdownMenuItem
-                                  disabled={startMutation.isPending}
-                                  onClick={() => startMutation.mutate(ticket.id)}
-                                >
-                                  <Play className="h-4 w-4" />
-                                  Start Maintenance
-                                </DropdownMenuItem>
-                              ) : null}
-
-                              {ticket.status === "InProgress" ? (
-                                <DropdownMenuItem onClick={() => setCompleteId(ticket.id)}>
-                                  <Check className="h-4 w-4" />
-                                  Complete
-                                </DropdownMenuItem>
-                              ) : null}
-
-                              {ticket.status === "Completed" ? (
-                                <DropdownMenuItem
-                                  disabled={closeMutation.isPending}
-                                  onClick={() => closeMutation.mutate(ticket.id)}
-                                >
-                                  <Lock className="h-4 w-4" />
-                                  Close Ticket
-                                </DropdownMenuItem>
-                              ) : null}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        }
+                        actionSlot={ticketActions(ticket)}
                         footerLabel={getDateLabel(ticket.status)}
                         footerValue={
                           formatMaintenanceShortDate(

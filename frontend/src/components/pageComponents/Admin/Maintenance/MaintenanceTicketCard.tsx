@@ -28,7 +28,7 @@ const MaintenanceTicketCard = ({
   return (
     <div
       className={cn(
-        "rounded-xl border-l-4 bg-background p-3 shadow-sm",
+        "rounded-xl border-l-[3px] bg-background p-3 shadow-sm",
         getMaintenancePriorityAccentBorder(ticket.priority),
         className,
       )}
