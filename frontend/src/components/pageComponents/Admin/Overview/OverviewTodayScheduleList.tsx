@@ -1,12 +1,14 @@
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Button } from "@/components/ui/button";
+import BookingStatusBadge from "@/components/pageComponents/Admin/Booking/BookingStatusBadge";
+import { getBookingStatusDisplay } from "@/components/pageComponents/Admin/Booking/bookingDisplay";
+import { cn } from "@/lib/utils";
 import type { BookingOverviewSummary } from "@/types/booking.types";
 import { Link } from "react-router";
 import {
     EmptyState,
     StatusBadge,
     formatDate,
-    getBookingRowAccent,
 } from "./Overview.shared";
 
 const OverviewTodayScheduleList = ({
@@ -49,8 +51,10 @@ const OverviewTodayScheduleList = ({
             {bookings.map((booking) => (
                 <div
                     key={booking.id}
-                    className="grid gap-3 border-l-[3px] px-4 py-3 pl-[13px] text-sm transition-colors hover:bg-primary/[0.03] md:grid-cols-[1.15fr_1.35fr_1.3fr_1fr_0.9fr_0.9fr_0.6fr] md:items-center md:gap-4"
-                    style={{ borderLeftColor: getBookingRowAccent(booking.status) }}
+                    className={cn(
+                        "grid gap-3 border-l-[3px] px-4 py-3 pl-[13px] text-sm transition-colors hover:bg-primary/[0.03] md:grid-cols-[1.15fr_1.35fr_1.3fr_1fr_0.9fr_0.9fr_0.6fr] md:items-center md:gap-4",
+                        getBookingStatusDisplay(booking.status).accentBorderClassName,
+                    )}
                 >
                     <div>
                         <p className="font-medium text-foreground">
@@ -73,12 +77,12 @@ const OverviewTodayScheduleList = ({
                         {booking.stayOptionLabelSnapshot}
                     </p>
                     <StatusBadge value={booking.payment?.status} />
-                    <StatusBadge value={booking.status} />
+                    <BookingStatusBadge status={booking.status} />
                     <Button
                         asChild
                         variant="link"
                         size="sm"
-                        className="justify-start px-0 md:justify-end"
+                        className="min-h-8 justify-start px-2 text-xs md:justify-end"
                     >
                         <Link to={`/admin/booking/${booking.id}`}>View</Link>
                     </Button>

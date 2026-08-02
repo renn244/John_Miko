@@ -192,7 +192,7 @@ const AddOnServiceForm = ({ onsubmit, oncancel, className, initialData, isUpdate
                                             onRemove={() => field.onChange("")}
                                             className="grid-cols-1"
                                             itemClassName="aspect-[16/10]"
-                                        />w
+                                        />
                                     </div>
                                 )}
 

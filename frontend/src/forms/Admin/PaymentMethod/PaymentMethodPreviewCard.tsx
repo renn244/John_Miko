@@ -64,9 +64,9 @@ const PaymentMethodPreviewCard = ({
                         <Button
                         type="button"
                         variant="ghost"
-                        size="icon"
+                        size="icon-sm"
                         disabled
-                        className="h-8 w-8 shrink-0 rounded-full text-muted-foreground"
+                        className="shrink-0 rounded-full text-muted-foreground"
                         >
                             <EllipsisVertical className="h-4 w-4" />
                         </Button>

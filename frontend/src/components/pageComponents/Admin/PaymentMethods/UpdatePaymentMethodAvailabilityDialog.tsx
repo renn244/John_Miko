@@ -1,11 +1,12 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
+import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetPaymentMethodByIdQuery, useUpdatePaymentMethodAvailabilityMutation } from "@/hooks/admin/payment-methods.hook";
-import { cn } from "@/lib/utils";
 import { paymentMethodAdminStore } from "@/store/admin/paymentMethodAdmin.store";
 import type { PaymentMethod } from "@/types/payment-method.type";
 import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
@@ -21,12 +22,13 @@ const UpdatePaymentMethodAvailabilityDialog = () => {
     const isOpen = paymentMethodAdminStore((state) => state.isAvailabilityConfirmationOpen);
     const setIsOpen = paymentMethodAdminStore((state) => state.setIsAvailabilityConfirmationOpen);
     const methodId = paymentMethodAdminStore((state) => state.availabilityConfirmationId);
+    const setMethodId = paymentMethodAdminStore((state) => state.setAvailabilityConfirmationId);
 
     const { data, error, refetch, isLoading, isRefetching } = useGetPaymentMethodByIdQuery(methodId || "");
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setMethodId(null)}>
                 {isLoading && (
                     <div className="flex h-64 items-center justify-center">
                         <LoadingSpinner className="size-10" />
@@ -71,35 +73,16 @@ const UpdatePaymentMethodAvailability = ({ method }: { method: PaymentMethod }) 
             </DialogHeader>
 
             <div className="space-y-4">
-                <div
-                className={cn(
-                    "flex items-start gap-4 rounded-lg border-2 p-4",
-                    isDeactivating ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50",
-                )}
-                >
-                    <AlertTriangle
-                    className={cn(
-                        "mt-0.5 h-6 w-6 shrink-0",
-                        isDeactivating ? "text-amber-600" : "text-emerald-600",
-                    )}
-                    />
-                    <div>
-                        <h3 className={cn(
-                            "mb-1 text-sm font-bold",
-                            isDeactivating ? "text-amber-800" : "text-emerald-800",
-                        )}>
-                            {isDeactivating ? "Warning: This affects guest checkout" : "Confirm payment method activation"}
-                        </h3>
-                        <p className={cn(
-                            "text-sm",
-                            isDeactivating ? "text-amber-900" : "text-emerald-900",
-                        )}>
-                            {isDeactivating
-                                ? "Guests will no longer see this payment method during checkout. Existing payments that already used this method will remain unchanged."
-                                : "Guests will be able to choose this payment method during checkout immediately."}
-                        </p>
-                    </div>
-                </div>
+                <AdminDecisionNotice
+                    tone={isDeactivating ? "warning" : "success"}
+                    icon={isDeactivating ? AlertTriangle : CheckCircle2}
+                    title={isDeactivating ? "Warning: This affects guest checkout" : "Confirm payment method activation"}
+                    description={
+                        isDeactivating
+                            ? "Guests will no longer see this payment method during checkout. Existing payments that already used this method will remain unchanged."
+                            : "Guests will be able to choose this payment method during checkout immediately."
+                    }
+                />
 
                 <div className="rounded-lg border bg-gray-50 p-4">
                     <h4 className="mb-3 text-sm font-semibold">
@@ -122,12 +105,12 @@ const UpdatePaymentMethodAvailability = ({ method }: { method: PaymentMethod }) 
 
                         <div className="flex items-center justify-between gap-4 border-t pt-2">
                             <span className="text-muted-foreground">Current Status:</span>
-                            <StatusBadge active={method.isActive} label={method.isActive ? "Active" : "Inactive"} />
+                            <AdminAvailabilityBadge active={method.isActive} />
                         </div>
 
                         <div className="flex items-center justify-between gap-4">
                             <span className="text-muted-foreground">New Status:</span>
-                            <StatusBadge active={nextStatus} label={nextStatus ? "Active" : "Inactive"} />
+                            <AdminAvailabilityBadge active={nextStatus} />
                         </div>
                     </div>
                 </div>
@@ -152,11 +135,7 @@ const UpdatePaymentMethodAvailability = ({ method }: { method: PaymentMethod }) 
                     await mutateAsync(nextStatus);
                     setIsOpen(false);
                 }}
-                className={cn(
-                    isDeactivating
-                        ? "bg-amber-700 hover:bg-amber-700/90"
-                        : "bg-emerald-700 hover:bg-emerald-700/90"
-                )}
+                variant={isDeactivating ? "warning" : "success"}
                 >
                     {isPending ? (
                         <LoadingSpinner />
@@ -172,17 +151,5 @@ const UpdatePaymentMethodAvailability = ({ method }: { method: PaymentMethod }) 
     );
 };
 
-const StatusBadge = ({ active, label }: { active: boolean; label: string }) => {
-    return (
-        <Badge className={cn(
-            "rounded-full border px-2.5 py-0.5 text-[11px] font-medium shadow-none",
-            active
-                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                : "border-slate-200 bg-slate-100 text-slate-600",
-        )}>
-            {label}
-        </Badge>
-    );
-};
 
 export default UpdatePaymentMethodAvailabilityDialog;

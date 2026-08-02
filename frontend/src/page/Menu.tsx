@@ -43,7 +43,7 @@ const Menu = () => {
     }, [menuItems, selectedCategory]);
 
     return (
-        <GuestPageShell>
+        <GuestPageShell className="bg-background">
             <NavBar />
 
             <GuestContainer className="pt-4">

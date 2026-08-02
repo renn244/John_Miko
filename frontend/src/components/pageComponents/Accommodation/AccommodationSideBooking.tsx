@@ -118,13 +118,12 @@ const AccommodationSideBooking = ({
                         onClick={() => navigate(`/booking/${accommodation.id}`)}
                         disabled={!bookingDate || !bookingType}
                         className="w-full"
-                        size="lg"
                     >
                         Book Now
                         <ArrowRight className="size-4" />
                     </Button>
                 ) : (
-                    <Button asChild className="w-full" size="lg">
+                    <Button asChild className="w-full">
                         <Link to="/login">Login to Book</Link>
                     </Button>
                 )}

@@ -18,7 +18,7 @@ export const useAddOnServiceAdminStore = create<AddOnServiceAdminStore>((set) =>
 
             return {
                 isDeleteOpen: open,
-                deleteId: open ? state.deleteId : undefined,
+                deleteId: state.deleteId,
             };
         });
     },

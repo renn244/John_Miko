@@ -11,12 +11,13 @@ const MarkCompleteDialog = () => {
   const isCompleteOpen = useMaintenanceStore((state) => state.isCompleteOpen);
   const isCompleteId = useMaintenanceStore((state) => state.completeId);
   const setIsCompleteOpen = useMaintenanceStore((state) => state.setIsCompleteOpen); 
+  const setCompleteId = useMaintenanceStore((state) => state.setCompleteId);
 
   const { data, isLoading, error, refetch, isRefetching } = useGetMaintenancebyId(isCompleteId);
 
   return (
     <Dialog open={isCompleteOpen} onOpenChange={setIsCompleteOpen}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setCompleteId(undefined)}>
         {isLoading && (
           <div className="flex items-center justify-center h-64">
             <LoadingSpinner className="size-10" />

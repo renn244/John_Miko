@@ -1,4 +1,8 @@
 import { Button } from "@/components/ui/button"
+import AdminEditPageState from "@/components/common/AdminEditPageState"
+import AdminEditPageLoading from "@/components/common/AdminEditPageLoading"
+import ErrorDialog from "@/components/common/dialog/ErrorDialog"
+import NotFoundDialog from "@/components/common/dialog/NotFoundDialog"
 import MenuItemForm from "@/forms/Admin/MenuItem/MenuItemForm"
 import { useGetMenuItemById, useUpdateMenuItemMutation } from "@/hooks/admin/menu-item.hook"
 import { ArrowLeft } from "lucide-react"
@@ -8,23 +12,27 @@ const EditMenuItem = () => {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
-    const { data: menuItem, isLoading, error } = useGetMenuItemById(id);
+    const { data: menuItem, isLoading, error, refetch, isRefetching } = useGetMenuItemById(id);
     const { mutateAsync: updateMenuItem } = useUpdateMenuItemMutation(id || "");
 
-    if(isLoading) return null;
+    if (isLoading) return <AdminEditPageLoading />;
 
-    if(!menuItem) return null;
+    if (error) {
+        return <AdminEditPageState><ErrorDialog onBack={() => navigate("/admin/menu-item")} onRetry={refetch} retryLoading={isRefetching} /></AdminEditPageState>;
+    }
 
-    if(error) return null;
+    if (!menuItem) {
+        return <AdminEditPageState><NotFoundDialog title="Menu Item Not Found" onBack={() => navigate("/admin/menu-item")} onRetry={refetch} retryLoading={isRefetching} /></AdminEditPageState>;
+    }
 
     return (
         <div className="mx-auto max-w-7xl space-y-6">
             <div className="flex items-center gap-4">
-                <Link to="/admin/menu-item">
-                    <Button size="icon" variant="outline">
+                <Button asChild size="icon" variant="outline" aria-label="Back to menu items">
+                    <Link to="/admin/menu-item">
                         <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                    </Button>
-                </Link>
+                    </Link>
+                </Button>
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold">
                         Edit Menu Item

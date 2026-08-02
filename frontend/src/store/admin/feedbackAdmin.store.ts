@@ -18,7 +18,7 @@ export const useFeedbackAdminStore = create<feedbackAdminStore>((set) => ({
 
             return {
                 isViewOpen: open,
-                viewId: open ? state.viewId : undefined,
+                viewId: state.viewId,
             }
         });
     },
@@ -30,4 +30,3 @@ export const useFeedbackAdminStore = create<feedbackAdminStore>((set) => ({
         });
     },
 }))
-

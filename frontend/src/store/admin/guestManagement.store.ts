@@ -28,7 +28,7 @@ export const useGuestManagementStore = create<guestManagementStore>((set) => ({
 
             return {
                 isViewOpen: open,
-                viewId: open ? state.viewId : undefined,
+                viewId: state.viewId,
             };
         });
     },
@@ -50,7 +50,7 @@ export const useGuestManagementStore = create<guestManagementStore>((set) => ({
 
             return {
                 isDeactivateOpen: open,
-                deactivateId: open ? state.deactivateId : undefined,
+                deactivateId: state.deactivateId,
             };
         });
     },
@@ -72,7 +72,7 @@ export const useGuestManagementStore = create<guestManagementStore>((set) => ({
 
             return {
                 isReactivateOpen: open,
-                reactivateId: open ? state.reactivateId : undefined,
+                reactivateId: state.reactivateId,
             };
         });
     },

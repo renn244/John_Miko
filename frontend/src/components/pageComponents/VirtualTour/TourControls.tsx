@@ -83,12 +83,12 @@ const TourControls = ({
                 <button
                     type="button"
                     aria-label="Zoom out"
-                    className="inline-flex size-10 items-center justify-center border-r border-border/60 text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+                    className="inline-flex size-11 items-center justify-center border-r border-border/60 text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
                     onClick={onZoomOut}
                 >
                     <Minus className="size-4" />
                 </button>
-                <label className="flex h-10 items-center gap-2 border-r border-border/60 px-2.5 text-xs font-semibold tabular-nums text-foreground">
+                <label className="flex h-11 items-center gap-2 border-r border-border/60 px-2.5 text-xs font-semibold tabular-nums text-foreground">
                     <input
                         aria-label="Zoom level"
                         className="virtual-tour-zoom-range"
@@ -104,7 +104,7 @@ const TourControls = ({
                 <button
                     type="button"
                     aria-label="Zoom in"
-                    className="inline-flex size-10 items-center justify-center border-r border-border/60 text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+                    className="inline-flex size-11 items-center justify-center border-r border-border/60 text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
                     onClick={onZoomIn}
                 >
                     <Plus className="size-4" />
@@ -112,7 +112,7 @@ const TourControls = ({
                 <button
                     type="button"
                     aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-                    className="inline-flex size-10 items-center justify-center border-r border-border/60 text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+                    className="inline-flex size-11 items-center justify-center border-r border-border/60 text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
                     onClick={onFullscreenToggle}
                 >
                     {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
@@ -121,7 +121,7 @@ const TourControls = ({
                     type="button"
                     aria-expanded={isSettingsOpen}
                     aria-label="Tour display settings"
-                    className="inline-flex size-10 items-center justify-center text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
+                    className="inline-flex size-11 items-center justify-center text-foreground transition-colors hover:bg-background/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
                     onClick={() => setIsSettingsOpen((isOpen) => !isOpen)}
                 >
                     <Settings2 className="size-4" />

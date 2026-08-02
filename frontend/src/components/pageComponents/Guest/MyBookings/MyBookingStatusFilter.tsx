@@ -14,11 +14,13 @@ const MyBookingStatusFilter = ({
     return (
         <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
             {statusOptions.map((option) => (
-                <Button 
-                key={option.label} 
-                variant={option.value === selectedStatus ? "default" : "outline"} 
+                <Button
+                key={option.label}
+                type="button"
+                size="sm"
+                variant={option.value === selectedStatus ? "default" : "outline"}
                 onClick={() => setSelectedStatus(option.value)}
-                className="h-9 shrink-0 rounded-full px-5 text-sm"
+                className="shrink-0"
                 >
                     {option.label}
                 </Button>

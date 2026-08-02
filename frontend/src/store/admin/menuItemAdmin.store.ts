@@ -23,7 +23,7 @@ export const useMenuItemAdminStore = create<menuItemAdminStore>((set) => ({
 
             return {
                 isDeleteOpen: open,
-                deleteId: open ? state.deleteId : undefined,
+                deleteId: state.deleteId,
             };
         })
     },
@@ -45,7 +45,7 @@ export const useMenuItemAdminStore = create<menuItemAdminStore>((set) => ({
 
             return {
                 isAvailabilityConfirmationOpen: open,
-                availabilityConfirmationId: open ? state.availabilityConfirmationId : undefined,
+                availabilityConfirmationId: state.availabilityConfirmationId,
             };
         })
     },

@@ -102,8 +102,9 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                 <div className="flex flex-wrap gap-2">
                     <Button
                     type="button"
+                    size="sm"
                     onClick={() => setSelectedCategory(null)}
-                    variant={selectedCategory === null ? "default" : "secondary"}
+                    variant={selectedCategory === null ? "default" : "outline"}
                     >
                         All
                     </Button>
@@ -111,8 +112,9 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                         <Button
                         key={category}
                         type="button"
+                        size="sm"
                         onClick={() => setSelectedCategory(category)}
-                        variant={selectedCategory === category ? "default" : "secondary"}
+                        variant={selectedCategory === category ? "default" : "outline"}
                         >
                             {category}
                         </Button>
@@ -142,34 +144,34 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                                         </span>
                                         {cartEntry ? (
                                             <div className="flex items-center gap-2">
-                                                <button
+                                                <Button
                                                     type="button"
                                                     onClick={() => {
                                                         const index = fields.findIndex(f => f.menuItemId === item.id);
                                                         updateQuantity(index, cartEntry.quantity - 1);
                                                     }}
-                                                    className="w-7 h-7 rounded-lg flex items-center justify-center border-2 hover:bg-gray-100 transition-colors"
-                                                    style={{ borderColor: '#E5E7EB' }}
+                                                    variant="outline"
+                                                    size="icon-sm"
                                                 >
-                                                    <Minus className="w-3 h-3" />
-                                                </button>
+                                                    <Minus className="size-3.5" />
+                                                </Button>
                                                 <span className="w-6 text-center font-bold text-sm">
                                                     {cartEntry.quantity}
                                                 </span>
-                                                <button
+                                                <Button
                                                     type="button"
                                                     onClick={() => {
                                                         const index = fields.findIndex(f => f.menuItemId === item.id);
                                                         updateQuantity(index, cartEntry.quantity + 1);
                                                     }}
-                                                    className="w-7 h-7 rounded-lg flex items-center justify-center border-2 hover:bg-gray-100 transition-colors"
-                                                    style={{ borderColor: '#E5E7EB' }}
+                                                    variant="outline"
+                                                    size="icon-sm"
                                                 >
-                                                    <Plus className="w-3 h-3" />
-                                                </button>
+                                                    <Plus className="size-3.5" />
+                                                </Button>
                                             </div>
                                         ) : (
-                                            <Button size="sm" type="button" onClick={() => addToPreorder(item)}>
+                                            <Button size="sm" variant="outline" type="button" onClick={() => addToPreorder(item)}>
                                                 <Plus className="w-4 h-4" /> Add
                                             </Button>
                                         )}
@@ -222,7 +224,7 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                                         type="button"
                                         onClick={() => removeFromPreorder(index)}
                                         variant="ghost"
-                                        size="icon-xs"
+                                        size="icon-sm"
                                         >
                                             <X className="size-3.5 text-destructive" />
                                         </Button>
@@ -233,9 +235,9 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                                             <Button
                                             type="button"
                                             onClick={() => updateQuantity(index, field.quantity - 1)}
-                                            variant="outline" size="icon-xs"
+                                            variant="outline" size="icon-sm"
                                             >
-                                                <Minus className="size-3" />
+                                                <Minus className="size-3.5" />
                                             </Button>
                                             <span className="w-6 text-center text-sm font-bold text-foreground">
                                                 {field.quantity}
@@ -243,9 +245,9 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
                                             <Button
                                             type="button"
                                             onClick={() => updateQuantity(index, field.quantity + 1)}
-                                            variant="outline" size="icon-xs"
+                                            variant="outline" size="icon-sm"
                                             >
-                                                <Plus className="size-3" />
+                                                <Plus className="size-3.5" />
                                             </Button>
                                         </div>
 

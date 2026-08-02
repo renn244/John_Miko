@@ -11,27 +11,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetBookingsAdminQuery } from "@/hooks/admin/booking.hook";
 import { useBookingSearch } from "@/hooks/admin/booking.search";
 import { useBookingAdminStore } from "@/store/admin/bookingAdmin.store";
+import type { GetBookingsQuery } from "@/types/booking.types";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarSync, CircleCheck, CircleX, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router";
-
-const getStatusColor = (status: string) => {
-    switch (status) {
-        case "Pending":
-            return { bg: "#FEF3C7", text: "#B45309", border: "#F59E0B" };
-        case "Confirmed":
-            return { bg: "#DBEAFE", text: "#1E73BE", border: "#1E73BE" };
-        case "Completed":
-            return { bg: "#D1FAE5", text: "#059669", border: "#059669" };
-        case "Cancelled":
-            return { bg: "#FEE2E2", text: "#DC2626", border: "#DC2626" };
-        default:
-            return { bg: "#F3F4F6", text: "#6B7280", border: "#6B7280" };
-    }
-};
+import BookingStatusBadge from "./BookingStatusBadge";
+import { getBookingStatusDisplay } from "./bookingDisplay";
 
 const getPaymentTypeColor = (paymentType: string) => {
     switch (paymentType) {
@@ -67,11 +57,17 @@ const BookingTable = () => {
         bookingDate,
         page,
         limit,
-        status: status as any,
-        paymentType: paymentType as any,
+        status: status as GetBookingsQuery["status"],
+        paymentType: paymentType as GetBookingsQuery["paymentType"],
     });
 
-    if (isLoading) return;
+    if (isLoading) {
+        return (
+            <div className="flex min-h-72 items-center justify-center p-6">
+                <LoadingSpinner className="size-8" />
+            </div>
+        );
+    }
 
     const bookings = data?.data ?? [];
     const meta = data?.meta;
@@ -79,7 +75,108 @@ const BookingTable = () => {
 
     return (
         <div className="flex min-h-0 flex-1 flex-col">
-            <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
+            <div className="space-y-3 p-3 md:hidden">
+                {bookings.length === 0 ? (
+                    <p className="py-6 text-center text-sm text-muted-foreground">
+                        {hasActiveFilters ? "No bookings found for the current filters." : "No bookings yet."}
+                    </p>
+                ) : bookings.map((booking) => {
+                    const statusDisplay = getBookingStatusDisplay(booking.status);
+                    const paymentTypeColor = getPaymentTypeColor(booking.paymentType);
+                    const hasRowActions = booking.status === "Confirmed";
+
+                    return (
+                        <article
+                            key={booking.id}
+                            className={cn(
+                                "rounded-xl border border-l-[3px] bg-card p-4 shadow-sm",
+                                statusDisplay.accentBorderClassName,
+                            )}
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="truncate font-semibold tracking-tight">{booking.referenceCode ?? "N/A"}</p>
+                                    <p className="mt-1 truncate text-sm text-muted-foreground">{booking.guestName}</p>
+                                </div>
+                                <BookingStatusBadge status={booking.status} className="shrink-0" />
+                            </div>
+
+                            <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y py-3 text-sm">
+                                <div className="min-w-0">
+                                    <dt className="text-xs text-muted-foreground">Accommodation</dt>
+                                    <dd className="mt-1 truncate font-medium">{booking.accommodation.name}</dd>
+                                    <dd className="text-xs text-muted-foreground">{booking.accommodation.type}</dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs text-muted-foreground">Date</dt>
+                                    <dd className="mt-1 font-medium">{format(new Date(booking.bookingDate), "MMM dd, yyyy")}</dd>
+                                </div>
+                                <div className="min-w-0">
+                                    <dt className="text-xs text-muted-foreground">Stay</dt>
+                                    <dd className="mt-1 truncate font-medium">
+                                        {booking.stayOption?.label ?? booking.stayOptionLabelSnapshot ?? booking.timeSlot ?? "Stay"}
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt className="text-xs text-muted-foreground">Payment</dt>
+                                    <dd className="mt-1">
+                                        <Badge style={{ backgroundColor: paymentTypeColor.bg, color: paymentTypeColor.text }}>
+                                            {booking.paymentType}
+                                        </Badge>
+                                    </dd>
+                                </div>
+                            </dl>
+
+                            <div className="mt-3 flex items-center justify-between gap-3">
+                                <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => navigate(`/admin/booking/${booking.id}`)}
+                                >
+                                    View details
+                                </Button>
+
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon-sm" aria-label={`Booking actions for ${booking.referenceCode ?? booking.guestName}`}>
+                                            <MoreHorizontal className="size-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        {hasRowActions ? (
+                                            <DropdownMenuItem onClick={() => setMarkCompletedBookingId(booking.id)}>
+                                                <CircleCheck />
+                                                Mark as Completed
+                                            </DropdownMenuItem>
+                                        ) : (
+                                            <DropdownMenuItem disabled>No actions available</DropdownMenuItem>
+                                        )}
+                                        {hasRowActions && (
+                                            <DropdownMenuItem onClick={() => setRescheduleBookingId(booking.id)}>
+                                                <CalendarSync />
+                                                Reschedule
+                                            </DropdownMenuItem>
+                                        )}
+                                        {hasRowActions && (
+                                            <>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem variant="destructive" onClick={() => setMarkCancelBookingId(booking.id)}>
+                                                    <CircleX />
+                                                    Mark as Cancelled
+                                                </DropdownMenuItem>
+                                            </>
+                                        )}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </article>
+                    );
+                })}
+            </div>
+
+            <div className="hidden min-h-0 flex-1 flex-col overflow-x-auto md:flex">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-muted/30 hover:bg-muted/30">
@@ -121,15 +218,17 @@ const BookingTable = () => {
                         )}
 
                         {bookings.map((booking) => {
-                            const statusColor = getStatusColor(booking.status);
+                            const statusDisplay = getBookingStatusDisplay(booking.status);
                             const paymentTypeColor = getPaymentTypeColor(booking.paymentType);
                             const hasRowActions = booking.status === "Confirmed";
 
                             return (
                                 <TableRow key={booking.id} className="group hover:bg-primary/[0.03]">
                                     <TableCell
-                                        className="border-l-[3px] px-4 py-4 pl-3 transition-colors group-hover:text-foreground"
-                                        style={{ borderLeftColor: statusColor.border }}
+                                        className={cn(
+                                            "border-l-[3px] px-4 py-4 pl-3 transition-colors group-hover:text-foreground",
+                                            statusDisplay.accentBorderClassName,
+                                        )}
                                     >
                                         <span className="font-medium tracking-tight">{booking.referenceCode ?? "N/A"}</span>
                                     </TableCell>
@@ -162,16 +261,7 @@ const BookingTable = () => {
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="px-4 py-4 align-top">
-                                        <Badge
-                                            style={{
-                                                backgroundColor: statusColor.bg,
-                                                color: statusColor.text,
-                                                borderColor: statusColor.border,
-                                                borderWidth: "1px",
-                                            }}
-                                        >
-                                            {booking.status}
-                                        </Badge>
+                                        <BookingStatusBadge status={booking.status} />
                                     </TableCell>
                                     <TableCell className="px-4 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
@@ -188,8 +278,9 @@ const BookingTable = () => {
                                                 <DropdownMenuTrigger asChild>
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-muted-foreground transition-colors group-hover:text-foreground"
+                                                        size="icon-sm"
+                                                        className="text-muted-foreground transition-colors group-hover:text-foreground"
+                                                        aria-label={`Booking actions for ${booking.referenceCode ?? booking.guestName}`}
                                                     >
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
@@ -215,10 +306,13 @@ const BookingTable = () => {
                                                     )}
 
                                                     {hasRowActions && (
-                                                        <DropdownMenuItem onClick={() => setMarkCancelBookingId(booking.id)}>
-                                                            <CircleX />
-                                                            Mark as Cancelled
-                                                        </DropdownMenuItem>
+                                                        <>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem variant="destructive" onClick={() => setMarkCancelBookingId(booking.id)}>
+                                                                <CircleX />
+                                                                Mark as Cancelled
+                                                            </DropdownMenuItem>
+                                                        </>
                                                     )}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -230,18 +324,19 @@ const BookingTable = () => {
                     </TableBody>
                 </Table>
 
-                <div className="mt-auto border-t bg-background/80 px-4 py-4">
-                    <DataPagination
-                        meta={meta}
-                        fallbackMeta={{
-                            total: bookings.length,
-                            limit,
-                        }}
-                        page={page}
-                        onPageChange={updatePage}
-                        showSinglePageControls
-                    />
-                </div>
+            </div>
+
+            <div className="mt-auto border-t bg-background/80 px-4 py-4">
+                <DataPagination
+                    meta={meta}
+                    fallbackMeta={{
+                        total: bookings.length,
+                        limit,
+                    }}
+                    page={page}
+                    onPageChange={updatePage}
+                    showSinglePageControls
+                />
             </div>
         </div>
     );

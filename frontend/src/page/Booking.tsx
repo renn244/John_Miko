@@ -1,4 +1,5 @@
 import { GuestContainer, GuestPageShell } from "@/components/guest";
+import { Button } from "@/components/ui/button";
 import MultiStepBookingForm from "@/forms/MultiStepBookingForm/MultiStepBookingForm";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
 import { cn } from "@/lib/utils";
@@ -48,14 +49,15 @@ const Booking = () => {
             <header className="border-b bg-background">
                 <GuestContainer className="py-3">
                     <div className="flex items-center justify-between">
-                        <button
+                        <Button
                             type="button"
+                            variant="ghost"
                             onClick={() => navigate(`/accommodation/${accommodation.id}`)}
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+                            className="-ml-2 px-2 text-sm font-semibold hover:text-primary"
                         >
                             <ArrowLeft className="size-4" />
                             Booking Flow
-                        </button>
+                        </Button>
 
                         <span className="text-sm font-medium text-muted-foreground">
                             Step {currentStep} of {bookingSteps.length}

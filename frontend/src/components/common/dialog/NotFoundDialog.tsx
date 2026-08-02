@@ -45,7 +45,7 @@ const NotFoundDialog = ({
                 ) : (
                     <div className="grid grid-cols-2 gap-3">
                         {onBack && (
-                            <Button onClick={onBack} disabled={backLoading} variant="outline" className="text-gray-700 bg-transparent">
+                            <Button onClick={onBack} disabled={backLoading} variant="outline">
                                 {backLoading ? (
                                     <LoadingSpinner />
                                 ) : (
@@ -58,7 +58,7 @@ const NotFoundDialog = ({
                         )}
 
                         {onRetry && (
-                            <Button onClick={onRetry} disabled={retryLoading} className="w-full bg-blue-600 hover:bg-blue-700">
+                            <Button onClick={onRetry} disabled={retryLoading} className="w-full">
                                 {retryLoading ? (
                                     <>
                                         <LoadingSpinner />

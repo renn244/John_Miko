@@ -1,7 +1,9 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import NavBar from "@/components/common/NavBar";
+import { GuestContainer, GuestPageShell } from "@/components/guest";
 import BookingCard from "@/components/pageComponents/Guest/MyBookings/BookingCard";
+import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import FeedbackForm from "@/forms/FeedbackForm";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
@@ -20,20 +22,20 @@ const EditFeedback = () => {
 
     if (feedbackLoading || bookingLoading) {
         return (
-            <div className="min-h-screen">
+            <GuestPageShell>
                 <NavBar />
-                <main className="flex min-h-[60vh] items-center justify-center" aria-label="Loading feedback">
+                <GuestContainer className="flex flex-1 items-center justify-center py-10" aria-label="Loading feedback">
                     <LoadingSpinner />
-                </main>
-            </div>
+                </GuestContainer>
+            </GuestPageShell>
         );
     }
 
     if (feedbackError || bookingError) {
         return (
-            <div className="min-h-screen">
+            <GuestPageShell>
                 <NavBar />
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <GuestContainer className="flex-1 py-6">
                     <ErrorDialog
                     title="Feedback is unavailable"
                     message="We could not load this feedback record. It may no longer belong to your guest account."
@@ -44,34 +46,36 @@ const EditFeedback = () => {
                     }}
                     retryLoading={isRefetchingFeedback || isRefetchingBooking}
                     />
-                </div>
-            </div>
+                </GuestContainer>
+            </GuestPageShell>
         );
     }
 
     if (!feedback || !booking) {
         return (
-            <div className="min-h-screen">
+            <GuestPageShell>
                 <NavBar />
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <GuestContainer className="flex-1 py-6">
                     <NotFoundDialog
                     title="Feedback not available"
                     message="This feedback record cannot be edited from your guest account."
                     onBack={() => navigate('/my-bookings')}
                     />
-                </div>
-            </div>
+                </GuestContainer>
+            </GuestPageShell>
         );
     }
 
     return (
-        <div className="min-h-screen bg-muted/30">
+        <GuestPageShell>
             <NavBar />
-            <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+            <GuestContainer className="max-w-5xl flex-1 space-y-6 py-6">
                 <div className="flex items-start gap-4">
-                    <Link to="/my-bookings">
-                        <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                    </Link>
+                    <Button asChild size="icon" variant="outline">
+                        <Link to="/my-bookings" aria-label="Back to My Bookings">
+                            <ArrowLeft className="size-5 text-muted-foreground" />
+                        </Link>
+                    </Button>
                     <div>
                         <h1 className="text-3xl font-bold tracking-normal">
                             Edit Feedback
@@ -97,8 +101,8 @@ const EditFeedback = () => {
                     booking={booking}
                     />
                 </FeedbackForm>
-            </div>
-        </div>
+            </GuestContainer>
+        </GuestPageShell>
     )
 }
 

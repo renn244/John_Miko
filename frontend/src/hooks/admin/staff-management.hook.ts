@@ -88,16 +88,6 @@ export const useGetStaffStatsQuery = () => {
                 refetchOnWindowFocus: false,
             },
             {
-                queryKey: ['staff-management', 'stats', 'active'],
-                queryFn: () => staffManagementApi.getStaffs({ page: 1, limit: 1, status: 'ACTIVE' }),
-                refetchOnWindowFocus: false,
-            },
-            {
-                queryKey: ['staff-management', 'stats', 'inactive'],
-                queryFn: () => staffManagementApi.getStaffs({ page: 1, limit: 1, status: 'INACTIVE' }),
-                refetchOnWindowFocus: false,
-            },
-            {
                 queryKey: ['staff-management', 'stats', 'kitchen'],
                 queryFn: () => staffManagementApi.getStaffs({ page: 1, limit: 1, role: 'KITCHEN_STAFF' }),
                 refetchOnWindowFocus: false,
@@ -119,11 +109,9 @@ export const useGetStaffStatsQuery = () => {
 
     const data: StaffStats = {
         total: queries[0]?.data?.meta.total || 0,
-        active: queries[1]?.data?.meta.total || 0,
-        inactive: queries[2]?.data?.meta.total || 0,
-        kitchen: queries[3]?.data?.meta.total || 0,
-        resort: queries[4]?.data?.meta.total || 0,
-        maintenance: queries[5]?.data?.meta.total || 0,
+        kitchen: queries[1]?.data?.meta.total || 0,
+        resort: queries[2]?.data?.meta.total || 0,
+        maintenance: queries[3]?.data?.meta.total || 0,
     };
 
     return {

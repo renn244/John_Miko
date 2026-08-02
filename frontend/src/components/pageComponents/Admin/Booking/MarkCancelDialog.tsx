@@ -1,5 +1,6 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
+import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
@@ -13,12 +14,13 @@ const MarkCancelDialog = () => {
     const isMarkCancelOpen = useBookingAdminStore((state) => state.isMarkCancelOpen);
     const markCancelBookingId = useBookingAdminStore((state) => state.markCancelBookingId);
     const setIsMarkCancelOpen = useBookingAdminStore((state) => state.setIsMarkCancelOpen);
+    const setMarkCancelBookingId = useBookingAdminStore((state) => state.setMarkCancelBookingId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetBookingById(markCancelBookingId);
 
     return (
         <Dialog open={isMarkCancelOpen}  onOpenChange={setIsMarkCancelOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setMarkCancelBookingId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />
@@ -64,17 +66,12 @@ const MarkCancelBooking = ({ booking } : { booking: BookingWithAccommodation }) 
 
             <div className="space-y-4">
                 
-                <div className="flex items-start gap-4 p-4 rounded-lg border-2 bg-amber-50 border-amber-200">
-                    <AlertTriangle className="w-6 h-6 shrink-0 mt-0.5 text-amber-600" />
-                    <div>
-                        <h3 className="font-bold text-sm mb-1 text-amber-800">
-                            Mark as Cancelled
-                        </h3>
-                        <p className="text-sm text-amber-900">
-                            Cancelling this booking will permanently change its status to Cancelled.
-                        </p>
-                    </div>
-                </div>
+                <AdminDecisionNotice
+                    tone="destructive"
+                    icon={AlertTriangle}
+                    title="Mark as Cancelled"
+                    description="Cancelling this booking will permanently change its status to Cancelled."
+                />
 
                 <div className="bg-gray-50 p-4 rounded-lg border">
                     <h4 className="text-sm font-semibold mb-3">
@@ -129,7 +126,7 @@ const MarkCancelBooking = ({ booking } : { booking: BookingWithAccommodation }) 
                     await mutateAsync("Cancelled")
                     setIsMarkCancelOpen(false)
                 }}
-                className="bg-amber-700 hover:bg-amber-700/90"
+                variant="destructive"
                 >
                     {
                         isPending ? 

@@ -16,11 +16,18 @@ export class EmailService {
         context: ISendMailOptions['context'];
     }) {
         try {
+            const frontendUrl = process.env.FRONTEND_URL?.replace(/\/$/, '');
+            const logoUrl = frontendUrl
+                ? `${frontendUrl}/logo/JMPort_With_MarkDown.png`
+                : undefined;
             const emailOptions: ISendMailOptions = {
                 to: params.to,
                 subject: params.subject,
                 template: params.template,
-                context: params.context,
+                context: {
+                    ...params.context,
+                    logoUrl,
+                },
             }
 
             await this.mailerService.sendMail(emailOptions);

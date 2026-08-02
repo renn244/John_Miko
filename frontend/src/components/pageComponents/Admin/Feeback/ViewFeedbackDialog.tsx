@@ -22,12 +22,18 @@ const ViewFeedbackDialog = () => {
     const isViewOpen = useFeedbackAdminStore((state) => state.isViewOpen);
     const viewFeedbackId = useFeedbackAdminStore((state) => state.viewId);
     const setIsViewOpen = useFeedbackAdminStore((state) => state.setIsViewOpen);
+    const setViewFeedbackId = useFeedbackAdminStore((state) => state.setViewId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetFeedbackByIdQuery(viewFeedbackId);
 
     return (
         <Sheet open={isViewOpen} onOpenChange={setIsViewOpen}>
-            <SheetContent side="right" showCloseButton={false} className="flex h-full w-full gap-0 overflow-hidden p-0 sm:max-w-[460px]">
+            <SheetContent
+            side="right"
+            showCloseButton={false}
+            className="flex h-full w-full gap-0 overflow-hidden p-0 sm:max-w-[460px]"
+            onCloseAutoFocus={() => setViewFeedbackId(undefined)}
+            >
                 <SheetHeader className="sr-only">
                     <SheetTitle>Feedback Details</SheetTitle>
                     <SheetDescription>View the selected guest feedback details.</SheetDescription>
@@ -83,6 +89,7 @@ const FeedbackDetails = ({ feedback }: { feedback: FeedbackWithUser }) => {
                         type="button"
                         variant="ghost"
                         size="icon-sm"
+                        aria-label="Close feedback details"
                         className="rounded-full text-white/80 hover:bg-white/15 hover:text-white"
                         >
                             <X className="size-4" />

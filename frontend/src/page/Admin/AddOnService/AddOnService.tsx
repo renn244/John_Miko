@@ -1,4 +1,5 @@
 import AddOnServiceFilter from "@/components/pageComponents/Admin/AddOnService/AddOnServiceFilter";
+import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import AddOnServiceList from "@/components/pageComponents/Admin/AddOnService/AddOnServiceList";
 import AddOnServiceStatistics from "@/components/pageComponents/Admin/AddOnService/AddOnServiceStatistics";
 import DeleteAddOnServiceDialog from "@/components/pageComponents/Admin/AddOnService/DeleteAddOnServiceDialog";
@@ -7,31 +8,30 @@ import { Plus } from "lucide-react";
 import { Link } from "react-router";
 
 const AddOnService = () => {
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">Add-on Services</h1>
-                    <p className="text-sm mt-1 text-muted-foreground">Manage optional guest services, pricing, and availability.</p>
-                </div>
+  return (
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Add-on Services"
+        description="Manage optional guest services, pricing, and availability."
+        actions={
+          <Button asChild>
+            <Link to="/admin/add-on-service/add">
+              Add Service
+              <Plus className="size-4" />
+            </Link>
+          </Button>
+        }
+      />
 
-                <Link to="/admin/add-on-service/add">
-                    <Button>
-                        Add Service
-                        <Plus className="w-5 h-5 text-white" />
-                    </Button>
-                </Link>
-            </div>
+      <AddOnServiceStatistics />
 
-            <AddOnServiceStatistics />
+      <AddOnServiceFilter />
 
-            <AddOnServiceFilter />
+      <AddOnServiceList />
 
-            <AddOnServiceList />
-
-            <DeleteAddOnServiceDialog />
-        </div>
-    );
+      <DeleteAddOnServiceDialog />
+    </div>
+  );
 };
 
 export default AddOnService;

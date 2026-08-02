@@ -1,28 +1,23 @@
 import FeedbackFilter from "@/components/pageComponents/Admin/Feeback/FeedbackFilter";
+import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import FeedbackList from "@/components/pageComponents/Admin/Feeback/FeedbackList";
 import FeedbackStatistics from "@/components/pageComponents/Admin/Feeback/FeedbackStatistics";
 import ViewFeedbackDialog from "@/components/pageComponents/Admin/Feeback/ViewFeedbackDialog";
 
 const Feedback = () => {
-    return (
-        <div className="space-y-5">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">
-                        Guest Feedback
-                    </h1>
-                    <p className="text-sm mt-1 text-muted-foreground">
-                        View and manage guest reviews and ratings
-                    </p>
-                </div>
-            </div>
-            <FeedbackStatistics />
-            <FeedbackFilter />
-            <FeedbackList />
+  return (
+    <div className="space-y-5">
+      <AdminPageHeader
+        title="Guest Feedback"
+        description="View and manage guest reviews and ratings"
+      />
+      <FeedbackStatistics />
+      <FeedbackFilter />
+      <FeedbackList />
 
-            <ViewFeedbackDialog />
-        </div>
-    )
-}
+      <ViewFeedbackDialog />
+    </div>
+  );
+};
 
-export default Feedback
+export default Feedback;

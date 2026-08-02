@@ -46,7 +46,7 @@ export const paymentMethodAdminStore = create<paymentMethodAdminStore>((set) => 
 
             return {
                 isAvailabilityConfirmationOpen: open,
-                availabilityConfirmationId: open ? state.availabilityConfirmationId : null
+                availabilityConfirmationId: state.availabilityConfirmationId
             }
         })
     },

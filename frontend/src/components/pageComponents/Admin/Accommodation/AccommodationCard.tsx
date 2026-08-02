@@ -47,17 +47,21 @@ const AccommodationCard = (accommodation: AccommodationCardProps) => {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant='ghost'>
-                                <MoreVertical className="w-5 h-5" />
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label={`Actions for ${accommodation.name}`}
+                            >
+                                <MoreVertical className="h-4 w-4 text-muted-foreground" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                            <Link to={`/admin/accommodation/${accommodation.id}/edit`}>
-                                <DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link to={`/admin/accommodation/${accommodation.id}/edit`}>
                                     <Edit />
                                     Edit Details
-                                </DropdownMenuItem>  
-                            </Link>              
+                                </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
                                 <DropdownMenuItem

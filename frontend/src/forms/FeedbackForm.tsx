@@ -93,7 +93,9 @@ const FeedbackForm = ({
                                     <button
                                     key={star}
                                     type="button"
-                                    className="rounded-md outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    aria-label={`${star} star${star === 1 ? "" : "s"}`}
+                                    aria-pressed={field.value === star}
+                                    className="inline-flex size-11 items-center justify-center rounded-md outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                     onClick={() => field.onChange(star)}
                                     >
                                         <Star 

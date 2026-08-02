@@ -1,6 +1,7 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
-import { Badge } from "@/components/ui/badge";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
+import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
@@ -13,12 +14,13 @@ const ReactivateStaffDialog = () => {
     const isReactivateOpen = useStaffManagementStore((state) => state.isReactivateOpen);
     const reactivateId = useStaffManagementStore((state) => state.reactivateId);
     const setIsReactivateOpen = useStaffManagementStore((state) => state.setIsReactivateOpen);
+    const setReactivateId = useStaffManagementStore((state) => state.setReactivateId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetStaffById(reactivateId);
 
     return (
         <Dialog open={isReactivateOpen} onOpenChange={setIsReactivateOpen}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-xl" onCloseAutoFocus={() => setReactivateId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />
@@ -57,17 +59,12 @@ const ReactivateStaff = ({ staff }: { staff: StaffUser }) => {
             </DialogHeader>
 
             <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 rounded-lg border-2 border-emerald-500/30 bg-emerald-500/10">
-                    <UserCheck className="w-6 h-6 shrink-0 mt-0.5 text-emerald-700" />
-                    <div>
-                        <h3 className="font-bold text-sm mb-1 text-emerald-800">
-                            This action will reactivate the staff account.
-                        </h3>
-                        <p className="text-sm text-emerald-800/80">
-                            The staff user will be able to sign in again once reactivated.
-                        </p>
-                    </div>
-                </div>
+                <AdminDecisionNotice
+                    tone="success"
+                    icon={UserCheck}
+                    title="This action will reactivate the staff account."
+                    description="The staff user will be able to sign in again once reactivated."
+                />
 
                 <div className="bg-gray-50 p-4 rounded-lg border">
                     <h4 className="text-sm font-semibold mb-3">
@@ -94,9 +91,7 @@ const ReactivateStaff = ({ staff }: { staff: StaffUser }) => {
                         </div>
                         <div className="flex justify-between">
                             <span className="text-muted-foreground">Status:</span>
-                            <Badge className={isActive ? "bg-emerald-100 text-emerald-700 border-emerald-300" : "bg-gray-100 text-gray-600 border-gray-300"}>
-                                {isActive ? "Active" : "Inactive"}
-                            </Badge>
+                            <AdminAvailabilityBadge active={isActive} />
                         </div>
                     </div>
                 </div>
@@ -112,6 +107,7 @@ const ReactivateStaff = ({ staff }: { staff: StaffUser }) => {
                 </Button>
                 <Button
                 type="button"
+                variant="success"
                 onClick={async () => {
                     await mutateAsync();
                     setIsReactivateOpen(false);

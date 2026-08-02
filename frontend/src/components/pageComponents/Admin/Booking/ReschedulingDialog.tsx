@@ -13,12 +13,13 @@ const ReschedulingDialog = () => {
     const isRescheduleOpen = useBookingAdminStore((state) => state.isRescheduleOpen);
     const rescheduleBookingId = useBookingAdminStore((state) => state.rescheduleBookingId);
     const setIsRescheduleOpen = useBookingAdminStore((state) => state.setIsRescheduleOpen);
+    const setRescheduleBookingId = useBookingAdminStore((state) => state.setRescheduleBookingId);
 
     const { data, isLoading, error, refetch, isRefetching } = useGetBookingById(rescheduleBookingId);
 
     return (
         <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-2xl" onCloseAutoFocus={() => setRescheduleBookingId(undefined)}>
                 {isLoading && (
                     <div className="flex items-center justify-center h-64">
                         <LoadingSpinner className="size-10" />

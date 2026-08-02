@@ -44,7 +44,7 @@ const ErrorDialog = ({
                 ) : (
                     <div className="grid grid-cols-2 gap-3">
                         {onBack && (
-                            <Button variant="outline" disabled={backLoading} onClick={onBack} className="text-gray-700 bg-transparent">
+                            <Button variant="outline" disabled={backLoading} onClick={onBack}>
                                 {backLoading ? (
                                     <LoadingSpinner />
                                 ) : (
@@ -56,7 +56,7 @@ const ErrorDialog = ({
                             </Button>
                         )}
                     
-                        <Button disabled={retryLoading} onClick={onRetry} className="w-full bg-blue-600 hover:bg-blue-700">
+                        <Button disabled={retryLoading} onClick={onRetry} className="w-full">
                             {retryLoading ? (
                                 <>
                                     <LoadingSpinner />

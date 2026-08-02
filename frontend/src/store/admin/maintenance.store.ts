@@ -21,16 +21,9 @@ export const useMaintenanceStore = create<maintenanceStore>((set) => ({
     isCompleteOpen: false,
     setIsCompleteOpen: (open) => {
         set((state) => {
-            if (!open) {
-                return {
-                    isCompleteOpen: false,
-                    completeId: undefined,
-                };
-            }
-            
             return {
-                isCompleteOpen: true,
-                completeId: open ? state.completeId : undefined,
+                isCompleteOpen: open,
+                completeId: state.completeId,
             };
         });
     },

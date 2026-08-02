@@ -1,9 +1,10 @@
 import DataPagination from "@/components/common/DataPagination";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useGetMenuItemsQuery } from "@/hooks/admin/menu-item.hook";
 import { useMenuItemSearch } from "@/hooks/admin/menu-item.search";
-import { cn, formatPeso } from "@/lib/utils";
+import { formatPeso } from "@/lib/utils";
 import { useMenuItemAdminStore } from "@/store/admin/menuItemAdmin.store";
 import { CheckCircle, Edit, MoreVertical, Trash2, UtensilsCrossed, XCircle } from "lucide-react";
 import { Link } from "react-router";
@@ -38,16 +39,11 @@ const MenuItemList = () => {
                             />
 
                             <div className="absolute left-3 top-3">
-                                <span
-                                    className={cn(
-                                        "inline-flex rounded-full border px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur-sm",
-                                        item.availability === "Available"
-                                            ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
-                                            : "border-red-200 bg-red-50/95 text-red-700",
-                                    )}
-                                >
-                                    {item.availability}
-                                </span>
+                                <AdminAvailabilityBadge
+                                    active={item.availability === "Available"}
+                                    activeLabel="Available"
+                                    inactiveLabel="Unavailable"
+                                />
                             </div>
 
                             <div className="absolute right-3 top-3">
@@ -55,37 +51,38 @@ const MenuItemList = () => {
                                     <DropdownMenuTrigger asChild>
                                         <Button
                                             variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 hover:bg-white"
+                                            size="icon-sm"
+                                            className="text-muted-foreground"
+                                            aria-label={`Actions for ${item.name}`}
                                         >
                                             <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuGroup>
-                                            <Link to={`/admin/menu-item/${item.id}/edit`}>
-                                                <DropdownMenuItem>
-                                                    <Edit className="h-4 w-4 text-primary" />
+                                            <DropdownMenuItem asChild>
+                                                <Link to={`/admin/menu-item/${item.id}/edit`}>
+                                                    <Edit className="h-4 w-4" />
                                                     Edit Details
-                                                </DropdownMenuItem>
-                                            </Link>
+                                                </Link>
+                                            </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => setAvailabilityConfirmationId(item.id)}>
                                                 {item.availability === "Available" ? (
                                                     <>
-                                                        <XCircle className="h-4 w-4 text-amber-700" />
-                                                        <span className="text-amber-700">Mark Unavailable</span>
+                                                        <XCircle className="h-4 w-4" />
+                                                        <span>Mark Unavailable</span>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <CheckCircle className="h-4 w-4 text-emerald-700" />
-                                                        <span className="text-emerald-700">Mark Available</span>
+                                                        <CheckCircle className="h-4 w-4" />
+                                                        <span>Mark Available</span>
                                                     </>
                                                 )}
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={() => setDeleteId(item.id)} variant="destructive">
-                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                            <Trash2 className="h-4 w-4" />
                                             Delete Item
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>

@@ -1,15 +1,17 @@
 import DataPagination from "@/components/common/DataPagination";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetAddOnServicesQuery } from "@/hooks/admin/add-on-service.hook";
 import { useAddOnServiceSearch } from "@/hooks/admin/add-on-service.search";
-import { cn, formatPeso } from "@/lib/utils";
+import { formatPeso } from "@/lib/utils";
 import { useAddOnServiceAdminStore } from "@/store/admin/addOnServiceAdmin.store";
 import { Edit, Layers, MoreVertical, Package, Power, RotateCcw } from "lucide-react";
 import { Link } from "react-router";
@@ -45,34 +47,39 @@ const AddOnServiceList = () => {
                                     <DropdownMenuTrigger asChild>
                                         <Button
                                         variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 bg-white "
+                                        size="icon-sm"
+                                        className="text-muted-foreground"
+                                        aria-label={`Actions for ${service.name}`}
                                         >
                                             <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuGroup>
-                                            <Link to={`/admin/add-on-service/${service.id}/edit`}>
-                                                <DropdownMenuItem>
-                                                    <Edit className="h-4 w-4 text-primary" />
+                                            <DropdownMenuItem asChild>
+                                                <Link to={`/admin/add-on-service/${service.id}/edit`}>
+                                                    <Edit className="h-4 w-4" />
                                                     Edit Details
-                                                </DropdownMenuItem>
-                                            </Link>
-                                            <DropdownMenuItem onClick={() => setDeleteId(service.id)}>
-                                                {service.isActive ? (
-                                                    <>
-                                                        <Power className="h-4 w-4 text-amber-700" />
-                                                        <span className="text-amber-700">Deactivate</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <RotateCcw className="h-4 w-4 text-emerald-700" />
-                                                        <span className="text-emerald-700">Reactivate</span>
-                                                    </>
-                                                )}
+                                                </Link>
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            onClick={() => setDeleteId(service.id)}
+                                            variant={service.isActive ? "destructive" : "default"}
+                                        >
+                                            {service.isActive ? (
+                                                <>
+                                                    <Power className="h-4 w-4" />
+                                                    Deactivate
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <RotateCcw className="h-4 w-4" />
+                                                    Reactivate
+                                                </>
+                                            )}
+                                        </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -103,16 +110,11 @@ const AddOnServiceList = () => {
                                     {service.quantity} {service.quantity === 1 ? "unit" : "units"} available
                                 </span>
 
-                                <span
-                                className={cn(
-                                    "inline-flex rounded-md px-2 py-1 text-xs font-medium",
-                                    service.isActive
-                                        ? "bg-emerald-50 text-emerald-700"
-                                        : "bg-slate-100 text-slate-600",
-                                )}
-                                >
-                                    {service.isActive ? "Available" : "Unavailable"}
-                                </span>
+                                <AdminAvailabilityBadge
+                                    active={service.isActive}
+                                    activeLabel="Available"
+                                    inactiveLabel="Unavailable"
+                                />
                             </div>
                         </div>
                     </div>

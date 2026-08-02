@@ -140,7 +140,7 @@ const MaintenanceTickets = ({ selectedDate }: { selectedDate: Date }) => {
                 </ChartContainer>
             </div>
 
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 {reportSummary.map((item) => (
                     <div
                         key={item.label}

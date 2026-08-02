@@ -21,9 +21,9 @@ const ForbiddenPage = ({ embedded = false }: ForbiddenPageProps) => {
 
     if (!embedded) {
         return (
-            <GuestPageShell>
+            <GuestPageShell className="bg-background">
                 <NavBar />
-                <GuestContainer className="flex min-h-[calc(100vh-8rem)] items-center justify-center py-10">
+                <GuestContainer className="flex flex-1 items-center justify-center py-10">
                     <StatusPageCard
                         code="403"
                         title="You do not have access to this page"

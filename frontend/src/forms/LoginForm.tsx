@@ -64,26 +64,28 @@ const LoginForm = () => {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="rounded-lg border bg-muted/20 p-3">
-                <div className="flex items-center justify-between gap-3">
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">
-                            {showAdminLogin ? "Admin Login" : "Guest Login"}
-                        </p>
-                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                            {showAdminLogin
-                                ? "Use your administrator account credentials."
-                                : "Use your guest account credentials."}
+            <div aria-live="polite">
+                <p className="text-sm font-semibold text-foreground">
+                    {showAdminLogin ? "Administrator account" : "Guest account"}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                    {showAdminLogin
+                        ? "Sign in to manage resort operations and guest services."
+                        : "Sign in to manage your bookings, settings, and guest details."}
+                </p>
+
+                <div
+                    id="admin-login-context"
+                    aria-hidden={!showAdminLogin}
+                    className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none ${
+                        showAdminLogin ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                >
+                    <div className="overflow-hidden">
+                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                            Administrative access is reserved for resort staff.
                         </p>
                     </div>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleAdminLoginToggle}
-                    >
-                        {showAdminLogin ? "Use Guest" : "Use Admin"}
-                    </Button>
                 </div>
             </div>
 
@@ -149,7 +151,7 @@ const LoginForm = () => {
 
                 <Link
                 to="/forgot-password"
-                className="text-blue-600 font-medium hover:underline underline-offset-2"
+                className="font-medium text-primary hover:underline underline-offset-2"
                 >
                     Forgot Password?
                 </Link>
@@ -159,8 +161,19 @@ const LoginForm = () => {
                 {isPending ? (
                     <LoadingSpinner />
                 ) : (
-                    "Sign In"
+                    "Sign in"
                 )}
+            </Button>
+
+            <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                aria-controls="admin-login-context"
+                aria-expanded={showAdminLogin}
+                onClick={handleAdminLoginToggle}
+            >
+                {showAdminLogin ? "Switch to guest" : "Switch to admin"}
             </Button>
         </form>
     )

@@ -1,4 +1,5 @@
 import DataPagination from "@/components/common/DataPagination";
+import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import PaymentMethodFilter from "@/components/pageComponents/Admin/PaymentMethods/PaymentMethodFilter";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,6 @@ import {
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetPaymentMethodsQuery } from "@/hooks/admin/payment-methods.hook";
 import { usePaymentMethodSearch } from "@/hooks/admin/payment-methods.search";
-import { cn } from "@/lib/utils";
 import { paymentMethodAdminStore } from "@/store/admin/paymentMethodAdmin.store";
 import type { PaymentMethod } from "@/types/payment-method.type";
 import { CheckCircle2, CreditCard, EllipsisVertical, QrCode } from "lucide-react";
@@ -128,8 +128,9 @@ const PaymentMethodCard = ({ method, onEdit, onAvailabilityChange }: PaymentMeth
                         <Button
                         type="button"
                         variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0 rounded-full text-muted-foreground"
+                        size="icon-sm"
+                        className="shrink-0 text-muted-foreground"
+                        aria-label={`Actions for ${method.name}`}
                         >
                             <EllipsisVertical className="h-4 w-4" />
                         </Button>
@@ -188,14 +189,7 @@ const PaymentMethodCard = ({ method, onEdit, onAvailabilityChange }: PaymentMeth
                     <Badge>
                         {paymentTypeLabel[method.type]}
                     </Badge>
-                    <Badge className={cn(
-                        "rounded-full border px-2.5 py-0.5 text-[11px] font-medium shadow-none",
-                        method.isActive
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border-slate-200 bg-slate-100 text-slate-600",
-                    )}>
-                        {method.isActive ? "Active" : "Inactive"}
-                    </Badge>
+                    <AdminAvailabilityBadge active={method.isActive} />
                 </div>
             </div>
         </div>

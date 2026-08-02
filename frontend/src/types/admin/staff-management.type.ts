@@ -36,8 +36,6 @@ export type GetStaffsQuery = {
 
 export type StaffStats = {
     total: number;
-    active: number;
-    inactive: number;
     kitchen: number;
     resort: number;
     maintenance: number;

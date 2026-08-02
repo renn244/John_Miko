@@ -1,84 +1,79 @@
-import { Button } from "@/components/ui/button";
+import {
+  AdminClearFiltersButton,
+  AdminFilterLayout,
+} from "@/components/pageComponents/Admin/AdminFilterLayout";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useGuestManagementSearch } from "@/hooks/admin/guest-management/guest-management.search";
 import useDebounce from "@/lib/useDebounce";
-import { Search, X } from "lucide-react";
+import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const GuestFilter = () => {
-    const { search, status, clearFilters } = useGuestManagementSearch();
-    const hasFilters = Boolean(search || status);
+  const { search, status, clearFilters } = useGuestManagementSearch();
+  const hasFilters = Boolean(search || status);
 
-    return (
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-            <div className="w-full xl:max-w-xl xl:flex-1">
-                <SearchGuestFilter />
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center xl:ml-4 xl:flex-nowrap xl:justify-end xl:gap-2 xl:self-start">
-                <SelectGuestStatus />
-
-                <Button
-                type="button"
-                variant="ghost"
-                onClick={clearFilters}
-                disabled={!hasFilters}
-                className="justify-start whitespace-nowrap px-0 text-primary hover:bg-transparent hover:text-primary disabled:pointer-events-none disabled:opacity-40"
-                >
-                    <X className="size-4" />
-                    Clear Filters
-                </Button>
-            </div>
-        </div>
-    );
+  return (
+    <AdminFilterLayout search={<SearchGuestFilter />}>
+      <SelectGuestStatus />
+      <AdminClearFiltersButton onClick={clearFilters} disabled={!hasFilters} />
+    </AdminFilterLayout>
+  );
 };
 
 const SearchGuestFilter = () => {
-    const { search, updateSearch } = useGuestManagementSearch();
-    const [searchInput, setSearchInput] = useState(search || "");
-    const debounceValue = useDebounce(searchInput, 500);
+  const { search, updateSearch } = useGuestManagementSearch();
+  const [searchInput, setSearchInput] = useState(search || "");
+  const debounceValue = useDebounce(searchInput, 500);
 
-    useEffect(() => {
-        if(debounceValue !== search) {
-            updateSearch(debounceValue);
-        }
-    }, [debounceValue]);
+  useEffect(() => {
+    if (debounceValue !== search) {
+      updateSearch(debounceValue);
+    }
+  }, [debounceValue]);
 
-    return (
-        <div className="relative w-full xl:max-w-xl xl:flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-9"
-            placeholder="Search by guest name, email, or ID..."
-            />
-        </div>
-    );
+  return (
+    <div className="relative w-full xl:max-w-xl xl:flex-1">
+      <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
+        className="pl-9"
+        placeholder="Search by guest name, email, or ID..."
+      />
+    </div>
+  );
 };
 
 const SelectGuestStatus = () => {
-    const { status, updateStatus } = useGuestManagementSearch();
+  const { status, updateStatus } = useGuestManagementSearch();
 
-    return (
-        <Select
-        value={status || "all"}
-        onValueChange={(value) => updateStatus(value)}
-        >
-            <SelectTrigger className="w-full sm:w-auto">
-                <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectGroup>
-                    <SelectLabel>Status</SelectLabel>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="INACTIVE">Inactive</SelectItem>
-                </SelectGroup>
-            </SelectContent>
-        </Select>
-    );
+  return (
+    <Select
+      value={status || "all"}
+      onValueChange={(value) => updateStatus(value)}
+    >
+      <SelectTrigger className="w-full sm:w-auto">
+        <SelectValue placeholder="Status" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Status</SelectLabel>
+          <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="ACTIVE">Active</SelectItem>
+          <SelectItem value="INACTIVE">Inactive</SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
 };
 
 export default GuestFilter;

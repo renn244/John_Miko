@@ -28,7 +28,7 @@ export const useStaffManagementStore = create<staffManagementStore>((set) => ({
 
             return {
                 isChangeRoleOpen: open,
-                changeRoleId: open ? state.changeRoleId : undefined,
+                changeRoleId: state.changeRoleId,
             };
         });
     },
@@ -50,7 +50,7 @@ export const useStaffManagementStore = create<staffManagementStore>((set) => ({
 
             return {
                 isDeactivateOpen: open,
-                deactivateId: open ? state.deactivateId : undefined,
+                deactivateId: state.deactivateId,
             };
         });
     },
@@ -72,7 +72,7 @@ export const useStaffManagementStore = create<staffManagementStore>((set) => ({
 
             return {
                 isReactivateOpen: open,
-                reactivateId: open ? state.reactivateId : undefined,
+                reactivateId: state.reactivateId,
             };
         });
     },

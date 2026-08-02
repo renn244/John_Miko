@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export const guestLayout = {
-  page: "min-h-screen bg-muted/30 text-foreground",
+  page: "flex min-h-screen flex-col bg-muted/30 text-foreground",
   container: "mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8",
   pageGap: "py-6 md:py-8",
   sectionGap: "py-8 md:py-10",

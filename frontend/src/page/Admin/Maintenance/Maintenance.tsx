@@ -2,6 +2,7 @@ import MaintenanceKanbanBoard from "@/components/pageComponents/Admin/Maintenanc
 import MaintenanceSearchDialog from "@/components/pageComponents/Admin/Maintenance/MaintenanceSearchDialog";
 import MarkCompleteDialog from "@/components/pageComponents/Admin/Maintenance/MarkCompleteDialog";
 import StaffReportsTab from "@/components/pageComponents/Admin/Maintenance/StaffReportsTab";
+import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { updateSearchParams } from "@/lib/updateSearchParams";
@@ -27,17 +28,10 @@ const Maintenance = () => {
       >
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold">
-                    Maintenance
-                  </h1>
-                  <p className="text-sm mt-1 text-muted-foreground">
-                    Manage resort maintenance tickets, view statistics, and filter by status or priority.
-                  </p>
-                </div>
-            </div>
-
+            <AdminPageHeader
+              title="Maintenance"
+              description="Manage resort maintenance tickets, view statistics, and filter by status or priority."
+            />
 
             <TabsList>
               <TabsTrigger value="board">Board</TabsTrigger>
@@ -46,10 +40,7 @@ const Maintenance = () => {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              variant="outline"
-              onClick={() => setIsSearchOpen(true)}
-            >
+            <Button variant="outline" onClick={() => setIsSearchOpen(true)}>
               <Search className="size-4" />
               Find Ticket
             </Button>
@@ -67,7 +58,10 @@ const Maintenance = () => {
           <MaintenanceKanbanBoard />
         </TabsContent>
 
-        <TabsContent value="staff-reports" className="flex min-h-0 flex-1 flex-col">
+        <TabsContent
+          value="staff-reports"
+          className="flex min-h-0 flex-1 flex-col"
+        >
           <StaffReportsTab />
         </TabsContent>
       </Tabs>

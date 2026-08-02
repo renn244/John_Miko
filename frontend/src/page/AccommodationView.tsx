@@ -22,7 +22,7 @@ const AccommodationView = () => {
 
     if (isLoading) {
         return (
-            <GuestPageShell>
+            <GuestPageShell className="bg-background">
                 <NavBar />
                 <GuestContainer className="py-8">
                     <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -40,7 +40,7 @@ const AccommodationView = () => {
 
     if (error || !accommodation) {
         return (
-            <GuestPageShell>
+            <GuestPageShell className="bg-background">
                 <NavBar />
                 <GuestContainer className="py-12">
                     <GuestCard className="mx-auto max-w-xl text-center">
@@ -63,7 +63,7 @@ const AccommodationView = () => {
     const activeStayOptions = accommodation.stayOptions.filter((stayOption) => stayOption.isActive);
 
     return (
-        <GuestPageShell>
+        <GuestPageShell className="bg-background">
             <NavBar />
 
             <GuestContainer className="py-5 md:py-6">

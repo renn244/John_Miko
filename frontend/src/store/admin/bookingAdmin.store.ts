@@ -33,7 +33,7 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
 
             return {
                 isViewOpen: open,
-                viewId: open ? state.viewId : undefined,
+                viewId: state.viewId,
             };
         });
     },
@@ -55,7 +55,7 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
             
             return {
                 isRescheduleOpen: open,
-                rescheduleBookingId: open ? state.rescheduleBookingId : undefined,
+                rescheduleBookingId: state.rescheduleBookingId,
             };
         });
     },
@@ -77,7 +77,7 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
             
             return {
                 isMarkCompletedOpen: open,
-                markCompletedBookingId: open ? state.markCompletedBookingId : undefined,
+                markCompletedBookingId: state.markCompletedBookingId,
             };
         });
     },
@@ -99,7 +99,7 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
 
             return {
                 isMarkCancelOpen: open,
-                markCancelBookingId: open ? state.markCancelBookingId : undefined,
+                markCancelBookingId: state.markCancelBookingId,
             };
         });
     },
