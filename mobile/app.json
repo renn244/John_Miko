@@ -54,6 +54,7 @@
       "expo-asset",
       "expo-web-browser",
       "expo-secure-store",
+      "expo-notifications",
       [
         "expo-image-picker",
         {

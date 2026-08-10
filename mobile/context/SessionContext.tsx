@@ -1,6 +1,7 @@
 import { InvalidSessionError } from "@/lib/auth/errors";
 import { fetchCurrentProfile } from "@/hooks/profile.hook";
 import { deleteAccessToken, getAccessToken } from "@/lib/tokenStorage";
+import { unregisterPushNotifications } from "@/lib/pushNotifications";
 import type { AuthUser } from "@/types/auth.type";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -68,10 +69,18 @@ export function SessionProvider({ children }: PropsWithChildren) {
   }, [queryClient]);
 
   const signOut = useCallback(async () => {
+    if (session.user?.role === "MAINTENANCE_STAFF") {
+      try {
+        await unregisterPushNotifications();
+      } catch {
+        // A signed-out device cannot retry this safely; a new sign-in replaces the token.
+      }
+    }
+
     await deleteAccessToken();
     queryClient.clear();
     setSession({ status: "unauthenticated", user: null, error: null });
-  }, [queryClient]);
+  }, [queryClient, session.user?.role]);
 
   useEffect(() => {
     void refreshSession();

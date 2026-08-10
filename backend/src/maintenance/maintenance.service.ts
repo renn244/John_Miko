@@ -17,11 +17,13 @@ import {
     UpdateMaintenanceDto,
 } from './dto/maintenance.dto';
 import { GetMaintenanceDto } from './query/getMaintenance.dto';
+import { PushNotificationService } from 'src/notifications/push-notification.service';
 
 @Injectable()
 export class MaintenanceService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly pushNotifications: PushNotificationService,
     ) {}
 
     async createMaintenance(_user: UserSession, body: CreateMaintenanceDto) {
@@ -37,6 +39,15 @@ export class MaintenanceService {
                 assignedToId,
             }
         })
+
+        if (assignedToId) {
+            await this.pushNotifications.sendMaintenanceAssignment({
+                userId: assignedToId,
+                maintenanceId: newMaintenance.id,
+                title: newMaintenance.title,
+                priority: newMaintenance.priority,
+            });
+        }
 
         return newMaintenance;
     }

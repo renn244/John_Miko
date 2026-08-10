@@ -12,6 +12,7 @@ import { Inter_600SemiBold } from "@expo-google-fonts/inter/600SemiBold";
 import { Inter_700Bold } from "@expo-google-fonts/inter/700Bold";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useMaintenancePushNotifications } from "@/hooks/useMaintenancePushNotifications";
 import { useFonts } from "expo-font";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -61,6 +62,9 @@ export default function RootLayout() {
 function RootNavigator() {
   const { status, user } = useSession();
   const isSignedOut = status === "unauthenticated";
+  useMaintenancePushNotifications(
+    status === "authenticated" && user?.role === "MAINTENANCE_STAFF",
+  );
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

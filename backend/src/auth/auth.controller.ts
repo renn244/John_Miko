@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Patch,
   Post,
@@ -24,6 +25,7 @@ import { ForgotPasswordService } from './forgotPassword.service';
 import { UpdateProfileDto } from './dto/updateProfile.dto';
 import { UserModule } from 'src/user/user.module';
 import { UpdatePasswordDto } from './dto/changePassword.dto';
+import { PushTokenDto } from './dto/push-token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -106,5 +108,17 @@ export class AuthController {
     @Body() body: UpdatePasswordDto,
   ) {
     return this.authService.updatePassword(user, body);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('push-token')
+  async registerPushToken(@User() user: UserSession, @Body() body: PushTokenDto) {
+    return this.authService.registerPushToken(user, body.expoPushToken);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete('push-token')
+  async removePushToken(@User() user: UserSession) {
+    return this.authService.removePushToken(user);
   }
 }

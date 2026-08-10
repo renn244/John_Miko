@@ -4,18 +4,71 @@ import { MaintenanceService } from './maintenance.service';
 describe('MaintenanceService', () => {
   const prisma = {
     maintenance: {
+      create: jest.fn(),
+      findUnique: jest.fn(),
       groupBy: jest.fn(),
       count: jest.fn(),
       findMany: jest.fn(),
       findFirst: jest.fn(),
     },
+    user: {
+      findMany: jest.fn(),
+    },
   } as any;
+  const pushNotifications = {
+    sendMaintenanceAssignment: jest.fn(),
+  };
 
   let service: MaintenanceService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new MaintenanceService(prisma);
+    service = new MaintenanceService(prisma, pushNotifications as any);
+  });
+
+  it('notifies the automatically assigned maintenance staff member', async () => {
+    prisma.user.findMany.mockResolvedValue([
+      { id: 'staff-1', createdAt: new Date('2026-01-01'), assignedMaintenances: [] },
+    ]);
+    prisma.maintenance.create.mockResolvedValue({
+      id: 'maintenance-1',
+      title: 'Pool pump repair',
+      priority: 'High',
+    });
+
+    await service.createMaintenance({} as any, {
+      title: 'Pool pump repair',
+      description: 'The pump is leaking.',
+      imagesUrl: [],
+      priority: 'High',
+      expertise: 'Pool',
+    });
+
+    expect(pushNotifications.sendMaintenanceAssignment).toHaveBeenCalledWith({
+      userId: 'staff-1',
+      maintenanceId: 'maintenance-1',
+      title: 'Pool pump repair',
+      priority: 'High',
+    });
+  });
+
+  it('does not send a push notification when no staff member can be assigned', async () => {
+    prisma.user.findMany.mockResolvedValue([]);
+    prisma.maintenance.create.mockResolvedValue({
+      id: 'maintenance-1',
+      title: 'Pool pump repair',
+      priority: 'High',
+    });
+
+    await service.createMaintenance({} as any, {
+      title: 'Pool pump repair',
+      description: 'The pump is leaking.',
+      imagesUrl: [],
+      priority: 'High',
+      expertise: 'Pool',
+    });
+
+    expect(pushNotifications.sendMaintenanceAssignment).not.toHaveBeenCalled();
   });
 
   it('returns maintenance overview pressure and high-priority active tickets', async () => {

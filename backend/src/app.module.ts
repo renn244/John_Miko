@@ -22,6 +22,7 @@ import { ClosureModule } from './closure/closure.module';
 import { MediaModule } from './media/media.module';
 import { KnowledgeModule } from './knowledge/knowledge.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
     MediaModule,
     KnowledgeModule,
     ChatbotModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
