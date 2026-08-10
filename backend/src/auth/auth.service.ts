@@ -157,4 +157,26 @@ export class AuthService {
 
         return { message: "Password updated successfully" }
     }
+
+    async registerPushToken(user: UserSession, expoPushToken: string) {
+        if (user.role !== Role.MAINTENANCE_STAFF) {
+            throw new ForbiddenException('Only maintenance staff can register push notifications.');
+        }
+
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { expoPushToken },
+        });
+
+        return { message: 'Push notifications registered.' };
+    }
+
+    async removePushToken(user: UserSession) {
+        await this.prisma.user.update({
+            where: { id: user.id },
+            data: { expoPushToken: null },
+        });
+
+        return { message: 'Push notifications removed.' };
+    }
 }

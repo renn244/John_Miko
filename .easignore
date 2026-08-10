@@ -1,0 +1,34 @@
+# Dependencies and local build output
+node_modules/
+.expo/
+dist/
+web-build/
+.kotlin/
+.metro-health-check*
+
+# Local configuration and credentials
+.env
+.env.*
+.env*.local
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# Tooling and generated files
+.agents/
+*.tsbuildinfo
+*.orig.*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+
+# Workspace documentation and review artifacts not needed by the mobile build
+docs/
+diagrams/
+_qa_front_pages/
+*.docx
+~$*
