@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "908707761182",
+    "project_id": "jmport-8959b",
+    "storage_bucket": "jmport-8959b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:908707761182:android:f30df255fbbc4061d0320f",
+        "android_client_info": {
+          "package_name": "com.renn244.jmport"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqNpMIEcnAox9e7yqa9RxkZUteiRLm69k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
