@@ -2,19 +2,29 @@ import { StaffReportsService } from './staff-reports.service';
 
 describe('StaffReportsService', () => {
   const prisma = {
+    $transaction: jest.fn(),
     report: {
       count: jest.fn(),
       findMany: jest.fn(),
       findFirst: jest.fn(),
     },
   } as any;
-  const maintenanceService = {} as any;
+  const maintenanceService = {
+    selectAssignee: jest.fn(),
+  } as any;
+  const pushNotifications = {
+    sendMaintenanceAssignment: jest.fn(),
+  } as any;
 
   let service: StaffReportsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new StaffReportsService(prisma, maintenanceService);
+    service = new StaffReportsService(
+      prisma,
+      maintenanceService,
+      pushNotifications,
+    );
   });
 
   it('should be defined', () => {
@@ -63,7 +73,11 @@ describe('StaffReportsService', () => {
 
     await expect(
       service.viewReportById(
-        { id: 'staff-1', role: 'RESORT_STAFF', email: 'staff@example.com' } as any,
+        {
+          id: 'staff-1',
+          role: 'RESORT_STAFF',
+          email: 'staff@example.com',
+        } as any,
         'report-1',
       ),
     ).resolves.toBe(report);
@@ -91,5 +105,52 @@ describe('StaffReportsService', () => {
     expect(prisma.report.findFirst).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 'report-1' } }),
     );
+  });
+
+  it('notifies the maintenance assignee when approving a report creates a ticket', async () => {
+    const report = {
+      id: 'report-1',
+      status: 'Pending',
+      title: 'Broken pool pump',
+      description: 'The pump is leaking.',
+      proofImages: [],
+      severity: 'High',
+    };
+    const maintenance = {
+      id: 'maintenance-1',
+      title: report.title,
+      priority: report.severity,
+      assignedToId: 'staff-1',
+    };
+    const transaction = {
+      report: {
+        findUnique: jest
+          .fn()
+          .mockResolvedValueOnce(report)
+          .mockResolvedValueOnce({ ...report, status: 'Approved' }),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        update: jest.fn(),
+      },
+      maintenance: {
+        create: jest.fn().mockResolvedValue(maintenance),
+      },
+    };
+    prisma.$transaction.mockImplementation((callback: any) =>
+      callback(transaction),
+    );
+    maintenanceService.selectAssignee.mockResolvedValue('staff-1');
+
+    await service.reviewReport(
+      { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
+      report.id,
+      { status: 'Approved', expertise: 'Pool' } as any,
+    );
+
+    expect(pushNotifications.sendMaintenanceAssignment).toHaveBeenCalledWith({
+      userId: 'staff-1',
+      maintenanceId: 'maintenance-1',
+      title: 'Broken pool pump',
+      priority: 'High',
+    });
   });
 });
