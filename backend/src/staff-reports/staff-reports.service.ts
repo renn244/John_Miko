@@ -11,6 +11,7 @@ import { getDateRange, getSingleDayRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MaintenanceService } from 'src/maintenance/maintenance.service';
+import { PushNotificationService } from 'src/notifications/push-notification.service';
 import {
   CreateReportDto,
   GetStaffReportsQuery,
@@ -56,6 +57,7 @@ export class StaffReportsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly maintenanceService: MaintenanceService,
+    private readonly pushNotifications: PushNotificationService,
   ) {}
 
   async createReports(user: UserSession, body: CreateReportDto) {
@@ -144,10 +146,16 @@ export class StaffReportsService {
               { id: { contains: search, mode: 'insensitive' } },
               { title: { contains: search, mode: 'insensitive' } },
               { bookingId: { contains: search, mode: 'insensitive' } },
-              { booking: { referenceCode: { contains: search, mode: 'insensitive' } } },
+              {
+                booking: {
+                  referenceCode: { contains: search, mode: 'insensitive' },
+                },
+              },
               { user: { name: { contains: search, mode: 'insensitive' } } },
               { user: { email: { contains: search, mode: 'insensitive' } } },
-              { user: { contactNo: { contains: search, mode: 'insensitive' } } },
+              {
+                user: { contactNo: { contains: search, mode: 'insensitive' } },
+              },
             ],
           }
         : {}),
@@ -277,59 +285,78 @@ export class StaffReportsService {
       );
     }
 
-    const updatedReport = await this.prisma.$transaction(async (tx) => {
-      const report = await tx.report.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          status: true,
-          title: true,
-          description: true,
-          proofImages: true,
-          severity: true,
-        },
-      });
+    const { updatedReport, maintenance } = await this.prisma.$transaction(
+      async (tx) => {
+        const report = await tx.report.findUnique({
+          where: { id },
+          select: {
+            id: true,
+            status: true,
+            title: true,
+            description: true,
+            proofImages: true,
+            severity: true,
+          },
+        });
 
-      if (!report) {
-        throw new NotFoundException('Report not found');
-      }
+        if (!report) {
+          throw new NotFoundException('Report not found');
+        }
 
-      if (report.status !== 'Pending') {
-        throw new BadRequestException('Only pending reports can be reviewed');
-      }
+        if (report.status !== 'Pending') {
+          throw new BadRequestException('Only pending reports can be reviewed');
+        }
 
-      const reviewResult = await tx.report.updateMany({
-        where: {
-          id,
-          status: 'Pending',
-        },
-        data: {
-          status: body.status,
-          rejectionNote:
-            body.status === 'Rejected'
-              ? (body.rejectionNote?.trim() ?? null)
-              : null,
-          reviewedAt: new Date(),
-          reviewedById: user.id,
-        },
-      });
+        const reviewResult = await tx.report.updateMany({
+          where: {
+            id,
+            status: 'Pending',
+          },
+          data: {
+            status: body.status,
+            rejectionNote:
+              body.status === 'Rejected'
+                ? (body.rejectionNote?.trim() ?? null)
+                : null,
+            reviewedAt: new Date(),
+            reviewedById: user.id,
+          },
+        });
 
-      if (reviewResult.count === 0) {
-        throw new BadRequestException('Only pending reports can be reviewed');
-      }
+        if (reviewResult.count === 0) {
+          throw new BadRequestException('Only pending reports can be reviewed');
+        }
 
-      if (body.status === 'Approved') {
-        await this.createMaintenanceFromReport(tx, report, body.expertise!);
-      }
+        const maintenance =
+          body.status === 'Approved'
+            ? await this.createMaintenanceFromReport(
+                tx,
+                report,
+                body.expertise!,
+              )
+            : null;
 
-      return tx.report.findUnique({
-        where: { id },
-        include: reportInclude,
-      });
-    });
+        return {
+          maintenance,
+          updatedReport: await tx.report.findUnique({
+            where: { id },
+            include: reportInclude,
+          }),
+        };
+      },
+    );
 
     if (!updatedReport) {
       throw new NotFoundException('Report not found');
+    }
+
+    if (maintenance?.assignedToId) {
+      await this.pushNotifications.sendMaintenanceAssignment({
+        userId: maintenance.assignedToId,
+        maintenanceId: maintenance.id,
+        title: maintenance.title,
+        priority: maintenance.priority,
+      });
     }
 
     return updatedReport;
@@ -346,7 +373,8 @@ export class StaffReportsService {
     },
     expertise: MaintenanceExpertise,
   ) {
-    const assignedToId = await this.maintenanceService.selectAssignee(expertise);
+    const assignedToId =
+      await this.maintenanceService.selectAssignee(expertise);
 
     const maintenance = await tx.maintenance.create({
       data: {
