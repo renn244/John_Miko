@@ -52,6 +52,12 @@ export type GetAssignedMaintenancesQuery = PaginationParams & {
   search?: string;
 };
 
+export type AssignedMaintenanceSummary = {
+  pending: number;
+  inProgress: number;
+  highPriority: number;
+};
+
 export type CompleteAssignedMaintenanceRequest = {
   resolutionNotes: string;
   resolutionProofImages: string[];

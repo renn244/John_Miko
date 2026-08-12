@@ -6,6 +6,14 @@ import type { FieldValues, UseFormSetError } from "react-hook-form"
 import { toast } from "sonner"
 import { authApi } from "../api/auth/auth.api"
 
+const LOGIN_REDIRECTS = {
+    ADMIN: "/admin",
+    GUEST: "/",
+    MAINTENANCE_STAFF: "/staff/maintenance/assigned",
+    KITCHEN_STAFF: "/staff/kitchen/dashboard",
+    RESORT_STAFF: "/staff/resort/dashboard",
+} as const;
+
 export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetError<T>) => {
     return useMutation({
         mutationFn: async (data: LoginDto) => {
@@ -22,11 +30,7 @@ export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetErro
         onSuccess: (user) => {
             toast.success("Login successful");
 
-            if(user.role === 'ADMIN') {
-                window.location.assign('/admin')
-            } else {
-                window.location.assign('/')
-            }
+            window.location.assign(LOGIN_REDIRECTS[user.role])
         },
         onError: (err) => {
             if(err instanceof ValidationError) {

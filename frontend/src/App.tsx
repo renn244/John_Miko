@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router';
 import { lazy } from 'react';
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";
@@ -53,6 +53,23 @@ const AdminSettings = lazy(() => import('./page/Admin/Settings'));
 const AddStaff = lazy(() => import('./page/Admin/Staff-Management/AddStaff'));
 const StaffManagement = lazy(() => import('./page/Admin/Staff-Management/StaffManagement'));
 const Knowledge = lazy(() => import('./page/Admin/Knowledge/Knowledge'));
+const StaffLayout = lazy(() => import('./page/Staff/StaffLayout'));
+const MaintenanceAssignedTickets = lazy(() => import('./page/Staff/Maintenance/AssignedTickets'));
+const MaintenanceHistory = lazy(() => import('./page/Staff/Maintenance/History'));
+const MaintenanceSettings = lazy(() => import('./page/Staff/Maintenance/Settings'));
+const MaintenanceTicketDetail = lazy(() => import('./page/Staff/Maintenance/TicketDetail'));
+const KitchenLayout = lazy(() => import('./page/Staff/Kitchen/KitchenLayout'));
+const KitchenDashboard = lazy(() => import('./page/Staff/Kitchen/Dashboard'));
+const KitchenOrderDetail = lazy(() => import('./page/Staff/Kitchen/OrderDetail'));
+const KitchenSettings = lazy(() => import('./page/Staff/Kitchen/Settings'));
+const ResortLayout = lazy(() => import('./page/Staff/Resort/ResortLayout'));
+const ResortDashboard = lazy(() => import('./page/Staff/Resort/Dashboard'));
+const ResortNewReport = lazy(() => import('./page/Staff/Resort/NewReport'));
+const ResortReports = lazy(() => import('./page/Staff/Resort/Reports'));
+const ResortSettings = lazy(() => import('./page/Staff/Resort/Settings'));
+const ResortBookingDetail = lazy(() => import('./page/Staff/Resort/BookingDetail'));
+const ResortBookingReport = lazy(() => import('./page/Staff/Resort/BookingReport'));
+const ResortReportDetail = lazy(() => import('./page/Staff/Resort/ReportDetail'));
 
 const router = createBrowserRouter([
   {
@@ -244,6 +261,54 @@ const router = createBrowserRouter([
             )
           }
         ]
+      },
+      {
+        path: '/staff/maintenance',
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.MAINTENANCE_STAFF]}>
+            <StaffLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Navigate to="assigned" replace /> },
+          { path: 'assigned', element: <MaintenanceAssignedTickets /> },
+          { path: 'history', element: <MaintenanceHistory /> },
+          { path: 'settings', element: <MaintenanceSettings /> },
+          { path: 'assigned/:id', element: <MaintenanceTicketDetail /> },
+          { path: 'history/:id', element: <MaintenanceTicketDetail /> },
+        ],
+      },
+      {
+        path: '/staff/kitchen',
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.KITCHEN_STAFF]}>
+            <KitchenLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: 'dashboard', element: <KitchenDashboard /> },
+          { path: 'order/:id', element: <KitchenOrderDetail /> },
+          { path: 'settings', element: <KitchenSettings /> },
+        ],
+      },
+      {
+        path: '/staff/resort',
+        element: (
+          <ProtectedRoute rolesAllowed={[USER_ROLES.RESORT_STAFF]}>
+            <ResortLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: 'dashboard', element: <ResortDashboard /> },
+          { path: 'new-report', element: <ResortNewReport /> },
+          { path: 'reports', element: <ResortReports /> },
+          { path: 'settings', element: <ResortSettings /> },
+          { path: 'booking/:id', element: <ResortBookingDetail /> },
+          { path: 'booking/:id/report/:type', element: <ResortBookingReport /> },
+          { path: 'report/:id', element: <ResortReportDetail /> },
+        ],
       },
       {
         path: '*',

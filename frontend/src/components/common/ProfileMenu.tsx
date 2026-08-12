@@ -1,6 +1,7 @@
 import { useAuthContext } from "@/context/AuthContext";
 import { useClosureAdminStore } from "@/store/admin/closureAdmin.store";
-import { FolderKanban, History, Lock, LogOutIcon, Settings } from "lucide-react";
+import { isStaffRole, type StaffRole } from "@/types/auth.types";
+import { ClipboardCheck, FolderKanban, History, Lock, LogOutIcon, Settings } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -21,6 +22,7 @@ const ProfileMenu = () => {
                     <DropdownMenuContent align="end">
                         {user.role === "ADMIN" && <AdminMenu />}
                         {user.role === "GUEST" && <GuestMenu />}
+                        {isStaffRole(user.role) && <StaffMenu role={user.role} />}
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
@@ -37,7 +39,7 @@ type MobileProfileMenuProps = {
 };
 
 export const MobileProfileMenu = ({ onSelect }: MobileProfileMenuProps) => {
-    const { user, handleLogout } = useAuthContext();
+    const { user, handleLogout, isStaff, staffRole } = useAuthContext();
     const setClosureOpen = useClosureAdminStore((s) => s.setClosureOpen);
 
     if (!user) {
@@ -49,7 +51,7 @@ export const MobileProfileMenu = ({ onSelect }: MobileProfileMenuProps) => {
     }
 
     const isAdmin = user.role === "ADMIN";
-    const accountLabel = isAdmin ? "Administrator" : "Guest account";
+    const accountLabel = isAdmin ? "Administrator" : isStaff ? getStaffLabel(staffRole) : "Guest account";
     const itemClassName = "h-11 w-full justify-start";
 
     const handleLogoutClick = () => {
@@ -89,6 +91,21 @@ export const MobileProfileMenu = ({ onSelect }: MobileProfileMenuProps) => {
                         </Button>
                         <Button variant="ghost" className={itemClassName} asChild>
                             <Link to="/admin/settings" onClick={onSelect}>
+                                <Settings data-icon="inline-start" />
+                                Settings
+                            </Link>
+                        </Button>
+                    </>
+                ) : isStaff && staffRole ? (
+                    <>
+                        <Button variant="ghost" className={itemClassName} asChild>
+                            <Link to={getStaffPaths(staffRole).workspace} onClick={onSelect}>
+                                <ClipboardCheck data-icon="inline-start" />
+                                Staff workspace
+                            </Link>
+                        </Button>
+                        <Button variant="ghost" className={itemClassName} asChild>
+                            <Link to={getStaffPaths(staffRole).settings} onClick={onSelect}>
                                 <Settings data-icon="inline-start" />
                                 Settings
                             </Link>
@@ -179,5 +196,51 @@ const AdminMenu = () => {
         </>
     )
 }
+
+const getStaffPaths = (role: StaffRole) => {
+    switch (role) {
+        case "KITCHEN_STAFF":
+            return { workspace: "/staff/kitchen/dashboard", settings: "/staff/kitchen/settings" };
+        case "RESORT_STAFF":
+            return { workspace: "/staff/resort/dashboard", settings: "/staff/resort/settings" };
+        case "MAINTENANCE_STAFF":
+            return { workspace: "/staff/maintenance/assigned", settings: "/staff/maintenance/settings" };
+    }
+};
+
+const getStaffLabel = (role: StaffRole | null) => {
+    if (role === "KITCHEN_STAFF") return "Kitchen staff";
+    if (role === "RESORT_STAFF") return "Resort staff";
+    return "Maintenance staff";
+};
+
+const StaffMenu = ({ role }: { role: StaffRole }) => {
+    const { handleLogout } = useAuthContext();
+    const { workspace, settings } = getStaffPaths(role);
+
+    return (
+        <>
+            <DropdownMenuGroup>
+                <DropdownMenuItem asChild>
+                    <Link to={workspace}>
+                        <ClipboardCheck />
+                        Staff workspace
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link to={settings}>
+                        <Settings />
+                        Settings
+                    </Link>
+                </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleLogout()}>
+                <LogOutIcon />
+                Sign Out
+            </DropdownMenuItem>
+        </>
+    );
+};
 
 export default ProfileMenu

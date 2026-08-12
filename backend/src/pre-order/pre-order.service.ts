@@ -81,9 +81,18 @@ export class PreOrderService {
     }
 
     async getPreOrders(query: GetAllPreOrdesQuery) {
+        const preOrders = query.status === PreOrderStatus.Completed
+            ? {
+                some: {},
+                every: { status: PreOrderStatus.Completed },
+            }
+            : query.status === PreOrderStatus.Pending
+                ? { some: { status: PreOrderStatus.Pending } }
+                : { some: {} };
+
         const bookings = await this.prisma.booking.findMany({
             where: {
-                preOrders: { some: {} },
+                preOrders,
                 ...(query.search ? {
                     OR: [
                         { guestName: { contains: query.search, mode: 'insensitive' } },

@@ -62,6 +62,7 @@ const fetchKitchenOrders = async (query?: GetKitchenOrdersQuery) => {
     params: {
       search: query?.search || undefined,
       date: query?.date || undefined,
+      status: query?.status || undefined,
     } satisfies GetKitchenOrdersQuery,
   });
 

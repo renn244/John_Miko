@@ -1,7 +1,7 @@
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import OperationalCard from "@/components/ui/operational-card";
 import ScreenState from "@/components/ui/screen-state";
-import { useAssignedMaintenances } from "@/hooks/maintenance.hook";
+import { useAssignedMaintenanceSummary, useAssignedMaintenances } from "@/hooks/maintenance.hook";
 import useDebouncedValue from "@/lib/useDebounce";
 import {
   AlertTriangle,
@@ -37,6 +37,7 @@ export default function AssignedMaintenanceListScreen({
   const search = useDebouncedValue(searchInput, 350);
 
   const query = useAssignedMaintenances(scope, search);
+  const summaryQuery = useAssignedMaintenanceSummary(search, scope === "active");
 
   const tickets = useMemo(
     () => query.data?.pages.flatMap((page) => page.data) ?? [],
@@ -44,8 +45,11 @@ export default function AssignedMaintenanceListScreen({
   );
 
   const onRefresh = useCallback(async () => {
-    await query.refetch();
-  }, [query]);
+    await Promise.all([
+      query.refetch(),
+      ...(scope === "active" ? [summaryQuery.refetch()] : []),
+    ]);
+  }, [query, scope, summaryQuery]);
 
   const detailHrefBase =
     scope === "active"
@@ -65,17 +69,18 @@ export default function AssignedMaintenanceListScreen({
         )}
         ListHeaderComponent={
           <MaintenanceListHeader
-            tickets={tickets}
             scope={scope}
             title={title}
             description={description}
             searchValue={searchInput}
             onSearchChange={setSearchInput}
+            summary={summaryQuery.data}
+            isSummaryLoading={summaryQuery.isLoading}
           />
         }
         contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={
-          <RefreshControl refreshing={query.isRefetching} onRefresh={onRefresh} />
+          <RefreshControl refreshing={query.isRefetching || summaryQuery.isRefetching} onRefresh={onRefresh} />
         }
         onEndReached={() => {
           if (query.hasNextPage && !query.isFetchingNextPage) {

@@ -31,4 +31,5 @@ export type KitchenOrder = {
 export type GetKitchenOrdersQuery = {
     search?: string;
     date?: string; // YYYY-MM-DD
+    status?: KitchenOrderStatus;
 };

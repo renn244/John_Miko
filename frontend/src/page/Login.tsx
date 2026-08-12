@@ -62,7 +62,7 @@ const ResortImagePanel = () => (
     <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
       <p className="text-sm font-semibold">John Miko&apos;s Place</p>
       <p className="mt-2 max-w-sm text-sm leading-6 text-white/90">
-        Experience seamless hospitality. Sign in to manage your stay and booking details.
+        Sign in to access your guest account or staff operations workspace.
       </p>
     </div>
   </div>

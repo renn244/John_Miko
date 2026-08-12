@@ -314,6 +314,32 @@ export class MaintenanceService {
         return this.getAssignedMaintenances(user, query, ['Completed', 'Closed']);
     }
 
+    async getAssignedMaintenanceSummary(user: UserSession, query: GetMaintenanceDto) {
+        const where = this.getAssignedMaintenanceWhere(user, query, ['Pending', 'InProgress']);
+        const highPriorityQuery = query.priority && query.priority !== 'High'
+            ? Promise.resolve(0)
+            : this.prisma.maintenance.count({ where: { ...where, priority: 'High' } });
+        const [statusCounts, highPriority] = await Promise.all([
+            this.prisma.maintenance.groupBy({
+                by: ['status'],
+                where,
+                _count: { status: true },
+            }),
+            highPriorityQuery,
+        ]);
+
+        const summaryByStatus: Partial<Record<MaintenanceStatus, number>> = {};
+        for (const item of statusCounts) {
+            summaryByStatus[item.status as MaintenanceStatus] = item._count.status;
+        }
+
+        return {
+            pending: summaryByStatus[MaintenanceStatus.Pending] ?? 0,
+            inProgress: summaryByStatus[MaintenanceStatus.InProgress] ?? 0,
+            highPriority,
+        };
+    }
+
     async getAssignedMaintenanceById(user: UserSession, id: string) {
         const maintenance = await this.prisma.maintenance.findFirst({
             where: {
@@ -374,18 +400,8 @@ export class MaintenanceService {
         query: GetMaintenanceDto,
         statuses: MaintenanceStatus[],
     ) {
-        const { search, page = 1, limit = 10 } = query;
-
-        const where: Prisma.MaintenanceWhereInput = {
-            assignedToId: user.id,
-            status: { in: statuses },
-            ...(search ? {
-                OR: [
-                    { title: { contains: search, mode: 'insensitive' } },
-                    { id: { contains: search, mode: 'insensitive' } },
-                ],
-            } : {}),
-        };
+        const { page = 1, limit = 10 } = query;
+        const where = this.getAssignedMaintenanceWhere(user, query, statuses);
 
         const [data, total] = await Promise.all([
             this.prisma.maintenance.findMany({
@@ -412,6 +428,29 @@ export class MaintenanceService {
         return {
             data,
             meta: getPaginationMeta(total, page, limit),
+        };
+    }
+
+    private getAssignedMaintenanceWhere(
+        user: UserSession,
+        query: GetMaintenanceDto,
+        statuses: MaintenanceStatus[],
+    ): Prisma.MaintenanceWhereInput {
+        const { search, status, priority } = query;
+        const scopedStatus = status
+            ? statuses.includes(status) ? status : { in: [] }
+            : { in: statuses };
+
+        return {
+            assignedToId: user.id,
+            status: scopedStatus,
+            ...(priority ? { priority } : {}),
+            ...(search ? {
+                OR: [
+                    { title: { contains: search, mode: 'insensitive' } },
+                    { id: { contains: search, mode: 'insensitive' } },
+                ],
+            } : {}),
         };
     }
 

@@ -2,6 +2,7 @@ import apiClient from "@/lib/apiClient";
 import { toast } from "@/lib/toast";
 import type {
   AssignedMaintenanceDetail,
+  AssignedMaintenanceSummary,
   CompleteAssignedMaintenanceRequest,
   GetAssignedMaintenancesQuery,
   PaginatedAssignedMaintenances,
@@ -42,6 +43,25 @@ export const useAssignedMaintenances = (
   });
 };
 
+export const useAssignedMaintenanceSummary = (search?: string, enabled = true) => {
+  return useQuery({
+    queryKey: ["maintenance", "assigned", "summary", search],
+    queryFn: async () => {
+      const response = await apiClient.get("/maintenance/assigned/summary", {
+        params: { search: search?.trim() || undefined },
+      });
+
+      if (response.status >= 400) {
+        throw new Error(response.data?.message || "Failed to fetch maintenance summary");
+      }
+
+      return response.data as AssignedMaintenanceSummary;
+    },
+    enabled,
+    staleTime: 15_000,
+  });
+};
+
 export const useAssignedMaintenanceById = (maintenanceId?: string) => {
   return useQuery({
     queryKey: ["maintenance", "assigned", "detail", maintenanceId],
@@ -76,8 +96,7 @@ export const useStartAssignedMaintenance = () => {
     },
     onSuccess: async (data) => {
       toast.success("Maintenance started.");
-      await queryClient.invalidateQueries({ queryKey: ["maintenance", "assigned", "active"] });
-      await queryClient.invalidateQueries({ queryKey: ["maintenance", "assigned", "history"] });
+      await queryClient.invalidateQueries({ queryKey: ["maintenance", "assigned"] });
       await queryClient.invalidateQueries({
         queryKey: ["maintenance", "assigned", "detail", data.id],
       });
@@ -104,8 +123,7 @@ export const useCompleteAssignedMaintenance = (maintenanceId?: string) => {
     },
     onSuccess: async (data) => {
       toast.success("Maintenance marked as completed.");
-      await queryClient.invalidateQueries({ queryKey: ["maintenance", "assigned", "active"] });
-      await queryClient.invalidateQueries({ queryKey: ["maintenance", "assigned", "history"] });
+      await queryClient.invalidateQueries({ queryKey: ["maintenance", "assigned"] });
       await queryClient.invalidateQueries({
         queryKey: ["maintenance", "assigned", "detail", data.id],
       });

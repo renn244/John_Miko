@@ -9,7 +9,7 @@ export class GetMaintenanceDto {
 
     @IsOptional()
     @IsString()
-    @IsEnum(MaintenanceStatus, { message: 'Status must be one of "Open", "Pending", "Resolved", or "Closed"' })
+    @IsEnum(MaintenanceStatus, { message: 'Status must be one of "Pending", "InProgress", "Completed", or "Closed"' })
     status?: MaintenanceStatus;
 
     @IsOptional()

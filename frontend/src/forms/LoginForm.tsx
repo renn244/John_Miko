@@ -4,16 +4,22 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
 import PasswordInput from "@/components/ui/passwordInput"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { useLoginMutation } from "@/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useState } from "react"
-import { Controller, useForm, type FieldError as HookFormFieldError } from "react-hook-form"
+import { Controller, useForm, useWatch, type FieldError as HookFormFieldError } from "react-hook-form"
 import { Link } from "react-router"
 import z from "zod"
 
 const LoginSchema = z.object({
-    userRole: z.enum(['GUEST', 'ADMIN']),
+    userRole: z.enum(['GUEST', 'ADMIN', 'MAINTENANCE_STAFF', 'KITCHEN_STAFF', 'RESORT_STAFF']),
     email: z.string()
         .nonempty('Email is required'),
     password: z.string()
@@ -21,17 +27,38 @@ const LoginSchema = z.object({
     rememberMe: z.boolean().optional(),
 })
 
-type loginSchema = z.infer<typeof LoginSchema>
+type LoginSchemaType = z.infer<typeof LoginSchema>
+
+const LOGIN_CONTEXT = {
+    GUEST: {
+        label: "Guest account",
+        description: "Sign in to manage your bookings, settings, and guest details.",
+    },
+    ADMIN: {
+        label: "Administrator account",
+        description: "Sign in to manage resort operations and guest services.",
+    },
+    MAINTENANCE_STAFF: {
+        label: "Maintenance staff account",
+        description: "Sign in to view and manage maintenance work assigned to you.",
+    },
+    KITCHEN_STAFF: {
+        label: "Kitchen staff account",
+        description: "Sign in to prepare and manage guest meal pre-orders.",
+    },
+    RESORT_STAFF: {
+        label: "Resort staff account",
+        description: "Sign in to prepare confirmed bookings and submit staff reports.",
+    },
+} as const;
 
 const LoginForm = () => {
-    const [showAdminLogin, setShowAdminLogin] = useState(false);
     const {
         handleSubmit,
         control,
         setError,
-        setValue,
         formState: { errors },
-    } = useForm<loginSchema>({
+    } = useForm<LoginSchemaType>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
             userRole: "GUEST",
@@ -42,10 +69,12 @@ const LoginForm = () => {
         criteriaMode: "all"
     })
 
-    const { mutateAsync, isPending } = useLoginMutation<loginSchema>(setError)
+    const selectedRole = useWatch({ control, name: "userRole" });
+    const context = LOGIN_CONTEXT[selectedRole];
+    const { mutateAsync, isPending } = useLoginMutation<LoginSchemaType>(setError)
     const rootError = errors.root as HookFormFieldError | undefined;
     
-    const onSubmit = async (data: loginSchema) => {
+    const onSubmit = async (data: LoginSchemaType) => {
         try {
             await mutateAsync(data)
         } catch {
@@ -53,40 +82,40 @@ const LoginForm = () => {
         }
     }
 
-    const handleAdminLoginToggle = () => {
-        const nextValue = !showAdminLogin;
-        setShowAdminLogin(nextValue);
-        setValue("userRole", nextValue ? "ADMIN" : "GUEST", {
-            shouldDirty: true,
-            shouldValidate: true,
-        });
-    }
-
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Controller
+                    name="userRole"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                            <FieldLabel htmlFor={field.name}>Sign in as</FieldLabel>
+                            <Select value={field.value} onValueChange={field.onChange}>
+                                <SelectTrigger id={field.name} className="h-11 w-full" aria-invalid={fieldState.invalid}>
+                                    <SelectValue placeholder="Select account type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="GUEST">Guest</SelectItem>
+                                    <SelectItem value="ADMIN">Administrator</SelectItem>
+                                    <SelectItem value="MAINTENANCE_STAFF">Maintenance Staff</SelectItem>
+                                    <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
+                                    <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {fieldState.invalid && (
+                                <FieldError errors={getErrorMessages(fieldState.error)} />
+                            )}
+                        </Field>
+                    )}
+            />
+
             <div aria-live="polite">
                 <p className="text-sm font-semibold text-foreground">
-                    {showAdminLogin ? "Administrator account" : "Guest account"}
+                    {context.label}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    {showAdminLogin
-                        ? "Sign in to manage resort operations and guest services."
-                        : "Sign in to manage your bookings, settings, and guest details."}
+                    {context.description}
                 </p>
-
-                <div
-                    id="admin-login-context"
-                    aria-hidden={!showAdminLogin}
-                    className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none ${
-                        showAdminLogin ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-                    }`}
-                >
-                    <div className="overflow-hidden">
-                        <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                            Administrative access is reserved for resort staff.
-                        </p>
-                    </div>
-                </div>
             </div>
 
             <Controller 
@@ -163,17 +192,6 @@ const LoginForm = () => {
                 ) : (
                     "Sign in"
                 )}
-            </Button>
-
-            <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                aria-controls="admin-login-context"
-                aria-expanded={showAdminLogin}
-                onClick={handleAdminLoginToggle}
-            >
-                {showAdminLogin ? "Switch to guest" : "Switch to admin"}
             </Button>
         </form>
     )
