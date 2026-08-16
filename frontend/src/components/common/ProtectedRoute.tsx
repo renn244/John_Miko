@@ -1,9 +1,10 @@
 import { useAuthContext } from "@/context/AuthContext";
+import type { UserRole } from "@/types/auth.types";
 import type { PropsWithChildren } from "react";
 import { Navigate } from "react-router";
 
 type ProtectedRouteProps = {
-    rolesAllowed: string[] // do enum later
+    rolesAllowed: readonly UserRole[];
 } & PropsWithChildren
 
 const ProtectedRoute = ({ children, rolesAllowed }: ProtectedRouteProps) => {

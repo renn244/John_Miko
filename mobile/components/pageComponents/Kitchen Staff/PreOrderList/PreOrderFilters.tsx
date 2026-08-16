@@ -4,6 +4,7 @@ import { AppBottomSheet } from "@/components/ui/bottom-sheet";
 import { useKitchenPreOrdersFilterStore } from "@/store/kitchenPreOrdersFilter.store";
 import { useKitchenRoleTourTargets } from "@/hooks/roleTours/useKitchenRoleTourTargets";
 import { buildCalendar } from "@marceloterreiro/flash-calendar";
+import type { KitchenOrderStatus } from "@/types/kitchenOrder.type";
 import { addMonths, format, parseISO, startOfMonth, subMonths } from "date-fns";
 import { CalendarDays, ChevronLeft, ChevronRight, Search } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -20,8 +21,10 @@ export default function PreOrderFilters() {
   const { preOrderSearchTargetProps, dateFilterTargetProps } = useKitchenRoleTourTargets();
   const search = useKitchenPreOrdersFilterStore((s) => s.search);
   const date = useKitchenPreOrdersFilterStore((s) => s.date);
+  const status = useKitchenPreOrdersFilterStore((s) => s.status);
   const setSearch = useKitchenPreOrdersFilterStore((s) => s.setSearch);
   const setDate = useKitchenPreOrdersFilterStore((s) => s.setDate);
+  const setStatus = useKitchenPreOrdersFilterStore((s) => s.setStatus);
   const [dateOpen, setDateOpen] = useState(false);
   const [draftDate, setDraftDate] = useState<string | undefined>();
   const [calendarMonth, setCalendarMonth] = useState(() => getCalendarMonth(date));
@@ -60,6 +63,40 @@ export default function PreOrderFilters() {
         >
           <CalendarDays size={18} color={date ? "#0E33F3" : "#4D5963"} />
         </Pressable>
+      </View>
+
+      <View className="flex-row gap-2">
+        {(
+          [
+            { label: "All", value: undefined },
+            { label: "Pending", value: "Pending" },
+            { label: "Completed", value: "Completed" },
+          ] as const
+        ).map((option) => {
+          const selected = status === option.value;
+
+          return (
+            <Pressable
+              key={option.label}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              className={`h-9 flex-1 items-center justify-center rounded-full border px-3 ${
+                selected
+                  ? "border-primary bg-primary"
+                  : "border-neutral-soft-grey-1 bg-white"
+              }`}
+              onPress={() => setStatus(option.value as KitchenOrderStatus | undefined)}
+            >
+              <Text
+                className={`font-sans-semibold text-sm ${
+                  selected ? "text-white" : "text-neutral-dark-2"
+                }`}
+              >
+                {option.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {date ? (

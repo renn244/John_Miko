@@ -20,6 +20,7 @@ const isDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
 const PreOrderList = () => {
     const search = useKitchenPreOrdersFilterStore((s) => s.search);
     const date = useKitchenPreOrdersFilterStore((s) => s.date);
+    const status = useKitchenPreOrdersFilterStore((s) => s.status);
 
     const debouncedSearch = useDebouncedValue(search.trim(), 350);
     const debouncedDate = useDebouncedValue(date.trim(), 350);
@@ -40,6 +41,7 @@ const PreOrderList = () => {
     } = useKitchenOrders({
         search: debouncedSearch || undefined,
         date: dateParam,
+        status,
     });
 
     const filteredOrders = useMemo(() => orders ?? [], [orders]);
@@ -80,7 +82,7 @@ const PreOrderList = () => {
                         description={
                             error
                                 ? "There was a problem connecting to the kitchen display system."
-                                : "Try changing the search or date filter."
+                                : "Try changing the search, date, or status filter."
                         }
                         actionLabel={error ? "Retry" : undefined}
                         onAction={error ? () => refetch() : undefined}

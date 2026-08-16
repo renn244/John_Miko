@@ -147,4 +147,82 @@ describe('MaintenanceService', () => {
       ),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
+
+  it('filters active assignments before paginating', async () => {
+    prisma.maintenance.findMany.mockResolvedValue([{ id: 'ticket-1' }]);
+    prisma.maintenance.count.mockResolvedValue(12);
+
+    const result = await service.getAssignedActiveMaintenances(
+      { id: 'staff-1', role: 'MAINTENANCE_STAFF', email: 'staff@example.com' } as any,
+      { page: 2, limit: 5, search: 'pool', status: 'Pending', priority: 'High' },
+    );
+
+    expect(prisma.maintenance.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        assignedToId: 'staff-1',
+        status: 'Pending',
+        priority: 'High',
+      }),
+      skip: 5,
+      take: 5,
+    }));
+    expect(result).toEqual(expect.objectContaining({
+      meta: expect.objectContaining({ total: 12, page: 2, limit: 5 }),
+    }));
+    expect(result).not.toHaveProperty('summary');
+  });
+
+  it('returns unpaginated assigned-work summary totals', async () => {
+    prisma.maintenance.groupBy.mockResolvedValue([
+      { status: 'Pending', _count: { status: 12 } },
+    ]);
+    prisma.maintenance.count.mockResolvedValue(4);
+
+    const result = await service.getAssignedMaintenanceSummary(
+      { id: 'staff-1', role: 'MAINTENANCE_STAFF', email: 'staff@example.com' } as any,
+      { page: 2, limit: 5, search: 'pool', status: 'Pending', priority: 'High' },
+    );
+
+    expect(prisma.maintenance.groupBy).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ assignedToId: 'staff-1', status: 'Pending', priority: 'High' }),
+    }));
+    expect(prisma.maintenance.count).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ assignedToId: 'staff-1', status: 'Pending', priority: 'High' }),
+    }));
+    expect(prisma.maintenance.findMany).not.toHaveBeenCalled();
+    expect(result).toEqual({ pending: 12, inProgress: 0, highPriority: 4 });
+  });
+
+  it('reports no high-priority work when the summary is filtered to another priority', async () => {
+    prisma.maintenance.groupBy.mockResolvedValue([
+      { status: 'Pending', _count: { status: 3 } },
+    ]);
+
+    const result = await service.getAssignedMaintenanceSummary(
+      { id: 'staff-1', role: 'MAINTENANCE_STAFF', email: 'staff@example.com' } as any,
+      { priority: 'Medium' },
+    );
+
+    expect(prisma.maintenance.count).not.toHaveBeenCalled();
+    expect(result).toEqual({ pending: 3, inProgress: 0, highPriority: 0 });
+  });
+
+  it('keeps history assignments scoped to completed and closed tickets', async () => {
+    prisma.maintenance.findMany.mockResolvedValue([]);
+    prisma.maintenance.count.mockResolvedValue(0);
+
+    const result = await service.getAssignedMaintenanceHistory(
+      { id: 'staff-1', role: 'MAINTENANCE_STAFF', email: 'staff@example.com' } as any,
+      { priority: 'Medium' },
+    );
+
+    expect(prisma.maintenance.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({
+        assignedToId: 'staff-1',
+        status: { in: ['Completed', 'Closed'] },
+        priority: 'Medium',
+      }),
+    }));
+    expect(result).not.toHaveProperty('summary');
+  });
 });

@@ -1,13 +1,15 @@
 import apiClient from "@/lib/apiClient";
 import { clearAccessToken, getAccessToken } from "@/lib/tokenStorage";
-import type { UserProfileDto } from "@/types/auth.types";
+import { isStaffRole, type StaffRole, type UserProfileDto } from "@/types/auth.types";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext, type PropsWithChildren } from "react";
 
 type AuthContextType = {
-    user: UserProfileDto | null | undefined,
+    user: UserProfileDto | null,
     isLoading: boolean;
-    isLoggedIn: boolean;    
+    isLoggedIn: boolean;
+    isStaff: boolean;
+    staffRole: StaffRole | null;
     handleLogout: () => void;
 }
 
@@ -15,6 +17,8 @@ const initialAuthContext: AuthContextType = {
     user: null,
     isLoading: true,
     isLoggedIn: false,
+    isStaff: false,
+    staffRole: null,
     handleLogout: () => {}
 }
 
@@ -26,7 +30,7 @@ export const useAuthContext = () => {
 }
 
 const AuthProvider = ({ children }: PropsWithChildren ) => {
-    const { data: user, isLoading, refetch } = useQuery({
+    const { data: queriedUser, isLoading, refetch } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
             if (!getAccessToken()) return null;
@@ -49,6 +53,9 @@ const AuthProvider = ({ children }: PropsWithChildren ) => {
         refetchOnWindowFocus: false,
     })
 
+    const user = queriedUser ?? null;
+    const staffRole = user && isStaffRole(user.role) ? user.role : null;
+
     const handleLogout = () => {
         clearAccessToken();
         refetch();
@@ -58,6 +65,8 @@ const AuthProvider = ({ children }: PropsWithChildren ) => {
         user,
         isLoading,
         isLoggedIn: !!user,
+        isStaff: !!staffRole,
+        staffRole,
         handleLogout
     } satisfies AuthContextType;
     

@@ -1,27 +1,28 @@
 import { Input } from "@/components/ui/input";
 import StatusChip from "@/components/ui/status-chip";
 import { useMaintenanceRoleTourTargets } from "@/hooks/roleTours/useMaintenanceRoleTourTargets";
-import type { AssignedMaintenance } from "@/types/maintenance.type";
+import type { AssignedMaintenanceSummary } from "@/types/maintenance.type";
 import { Search } from "lucide-react-native";
-import { useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 
 type MaintenanceListHeaderProps = {
-  tickets: AssignedMaintenance[];
   scope: "active" | "history";
   title: string;
   description: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
+  summary?: AssignedMaintenanceSummary;
+  isSummaryLoading?: boolean;
 };
 
 const MaintenanceListHeader = ({
-  tickets,
   scope,
   title,
   description,
   searchValue,
   onSearchChange,
+  summary,
+  isSummaryLoading = false,
 }: MaintenanceListHeaderProps) => {
   const {
     dashboardHeaderTargetProps,
@@ -36,14 +37,9 @@ const MaintenanceListHeader = ({
       ? ticketSearchTargetProps
       : historyTicketSearchTargetProps;
 
-  const summary = useMemo(() => {
-    return {
-      pending: tickets.filter((ticket) => ticket.status === "Pending").length,
-      inProgress: tickets.filter((ticket) => ticket.status === "InProgress")
-        .length,
-      high: tickets.filter((ticket) => ticket.priority === "High").length,
-    };
-  }, [tickets]);
+  const hasActiveTickets = Boolean(
+    summary && summary.pending + summary.inProgress > 0,
+  );
 
   return (
     <View className="gap-4 px-5 pb-3 pt-4">
@@ -65,24 +61,24 @@ const MaintenanceListHeader = ({
         onChangeText={onSearchChange}
       />
 
-      {scope === "active" && tickets.length > 0 ? (
+      {scope === "active" && hasActiveTickets && !isSummaryLoading ? (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: 10, paddingRight: 20 }}
         >
           <StatusChip
-            label={`Pending ${summary.pending}`}
+            label={`Pending ${summary?.pending ?? 0}`}
             tone="pending"
             size="sm"
           />
           <StatusChip
-            label={`In Progress ${summary.inProgress}`}
+            label={`In Progress ${summary?.inProgress ?? 0}`}
             tone="inProgress"
             size="sm"
           />
           <StatusChip
-            label={`High Priority ${summary.high}`}
+            label={`High Priority ${summary?.highPriority ?? 0}`}
             tone="high"
             size="sm"
           />

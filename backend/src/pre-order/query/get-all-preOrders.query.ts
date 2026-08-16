@@ -1,4 +1,5 @@
 import { Transform, Type } from "class-transformer";
+import { PreOrderStatus } from "src/generated/prisma/client";
 import { IsDate, IsEnum, IsOptional, IsString } from "class-validator";
 import { toDateOnly } from "src/lib/utils/date.util";
 
@@ -12,4 +13,10 @@ export class GetAllPreOrdesQuery {
     @Type(() => Date)
     @IsDate()
     date?: string
+
+    @IsOptional()
+    @IsEnum(PreOrderStatus, {
+        message: `status must be one of: ${Object.values(PreOrderStatus).join(", ")}`,
+    })
+    status?: PreOrderStatus;
 }

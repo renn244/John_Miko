@@ -2,7 +2,7 @@
 export type LoginDto = {
     email: string;
     password: string;
-    userRole: "GUEST" | "ADMIN";
+    userRole: UserRole;
     rememberMe?: boolean;
 }
 
@@ -29,6 +29,20 @@ export type ResetPasswordDto = {
 }
 
 export type UserRole = "ADMIN" | "GUEST" | "KITCHEN_STAFF" | "RESORT_STAFF" | "MAINTENANCE_STAFF";
+
+export type StaffRole = Extract<
+    UserRole,
+    "KITCHEN_STAFF" | "RESORT_STAFF" | "MAINTENANCE_STAFF"
+>;
+
+export const STAFF_ROLES: readonly StaffRole[] = [
+    "KITCHEN_STAFF",
+    "RESORT_STAFF",
+    "MAINTENANCE_STAFF",
+];
+
+export const isStaffRole = (role: UserRole): role is StaffRole =>
+    STAFF_ROLES.includes(role as StaffRole);
 
 export type UserStatus = "ACTIVE" | "INACTIVE";
 
