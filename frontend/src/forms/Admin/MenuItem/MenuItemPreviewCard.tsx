@@ -133,11 +133,11 @@ const MenuItemPreviewCard = ({
                     </p>
 
                     <div className="flex flex-col-reverse gap-3 sm:flex-row xl:flex-col">
-                        <Button onClick={oncancel} type="button" variant="outline" className="w-full">
+                        <Button onClick={oncancel} type="button" variant="outline" className="w-full flex-1">
                             Cancel
                         </Button>
 
-                        <Button disabled={isLoading} type="submit" className="w-full">
+                        <Button disabled={isLoading} type="submit" className="w-full flex-1">
                             {isLoading ? (
                                 <LoadingSpinner />
                             ) : (

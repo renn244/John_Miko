@@ -72,11 +72,11 @@ const MaintenancePreviewCard = ({
                     </p>
 
                     <div className="flex flex-col-reverse gap-3 sm:flex-row xl:flex-col">
-                        <Button onClick={oncancel} type="button" variant="outline" className="w-full">
+                        <Button onClick={oncancel} type="button" variant="outline" className="w-full flex-1">
                             Cancel
                         </Button>
 
-                        <Button type="submit" disabled={isLoading} className="w-full">
+                        <Button type="submit" disabled={isLoading} className="w-full flex-1">
                             {isLoading ? (
                                 <LoadingSpinner />
                             ) : (

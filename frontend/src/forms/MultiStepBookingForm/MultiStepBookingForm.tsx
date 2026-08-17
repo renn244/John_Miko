@@ -86,7 +86,15 @@ const MultiStepBookingForm = ({
     const stayOption = useBookingSelectStore((state) => state.stayOption);
     const stayOptionId = useBookingSelectStore((state) => state.bookingType!);
     const checkIn = useBookingSelectStore((state) => state.bookingDate!);
-    const reset = useBookingSelectStore((state) => state.reset);
+    const resetBookingSelection = useBookingSelectStore((state) => state.reset);
+
+    const navigateAfterConfirmation = (destination: string) => {
+        navigate(destination);
+
+        // Let the destination render before clearing the persisted selection.
+        // Clearing it first makes the current Booking page redirect to accommodation.
+        window.setTimeout(resetBookingSelection, 0);
+    };
 
     const form = useForm<multiStepBookingFormSchema>({
         resolver: zodResolver(MultiStepBookingFormSchema),
@@ -186,12 +194,10 @@ const MultiStepBookingForm = ({
         return (
             <BookingConfirmation
             viewMyBookings={() => {
-                reset();
-                navigate('/my-bookings')
+                navigateAfterConfirmation('/my-bookings');
             }}
             backToHome={() => {
-                reset();
-                navigate('/');
+                navigateAfterConfirmation('/');
             }}
             accommodation={accommodation}
             booking={confirmation.booking}

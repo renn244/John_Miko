@@ -170,10 +170,10 @@ const MaintenanceKanbanBoard = () => {
             return (
               <div
                 key={columnStatus}
-                className="h-175 overflow-hidden rounded-xl border bg-muted/30"
+                className="flex h-175 flex-col overflow-hidden rounded-xl border bg-muted/30"
               >
                 <div className={`h-2 w-full ${getColumnAccent(columnStatus)}`} />
-                <div className="bg-background/60 p-4">
+                <div className="shrink-0 bg-background/60 p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold">
@@ -188,27 +188,27 @@ const MaintenanceKanbanBoard = () => {
                     </Badge>
                   </div>
 
-                  <div className="mt-4 space-y-3">
-                    {columnTickets.length === 0 ? (
-                      <div className="rounded-lg border border-dashed bg-background/70 p-4 text-sm text-muted-foreground">
-                        No tickets
-                      </div>
-                    ) : null}
+                </div>
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+                  {columnTickets.length === 0 ? (
+                    <div className="rounded-lg border border-dashed bg-background/70 p-4 text-sm text-muted-foreground">
+                      No tickets
+                    </div>
+                  ) : null}
 
-                    {columnTickets.map((ticket) => (
-                      <MaintenanceTicketCard
-                        key={ticket.id}
-                        ticket={ticket}
-                        actionSlot={ticketActions(ticket)}
-                        footerLabel={getDateLabel(ticket.status)}
-                        footerValue={
-                          formatMaintenanceShortDate(
-                            getMaintenanceStatusDate(ticket, ticket.status),
-                          ) ?? "—"
-                        }
-                      />
-                    ))}
-                  </div>
+                  {columnTickets.map((ticket) => (
+                    <MaintenanceTicketCard
+                      key={ticket.id}
+                      ticket={ticket}
+                      actionSlot={ticketActions(ticket)}
+                      footerLabel={getDateLabel(ticket.status)}
+                      footerValue={
+                        formatMaintenanceShortDate(
+                          getMaintenanceStatusDate(ticket, ticket.status),
+                        ) ?? "—"
+                      }
+                    />
+                  ))}
                 </div>
               </div>
             );
