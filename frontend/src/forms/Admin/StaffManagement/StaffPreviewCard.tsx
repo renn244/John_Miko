@@ -131,10 +131,10 @@ const StaffPreviewCard = ({
                         <span className="text-red-700">*</span> Required fields
                     </p>
                     <div className="flex flex-col-reverse gap-3 sm:flex-row xl:flex-col">
-                        <Button type="button" variant="outline" disabled={isLoading} onClick={oncancel} className="w-full">
+                        <Button type="button" variant="outline" disabled={isLoading} onClick={oncancel} className="w-full flex-1">
                             Cancel
                         </Button>
-                        <Button disabled={isLoading} type="submit" className="w-full">
+                        <Button disabled={isLoading} type="submit" className="w-full flex-1">
                             {isLoading ? (
                                 <LoadingSpinner />
                             ) : (
