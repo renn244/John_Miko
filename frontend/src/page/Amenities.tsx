@@ -7,36 +7,9 @@ import {
     GuestPageShell,
 } from "@/components/guest";
 import {
-    Car,
     CheckCircle2,
-    ConciergeBell,
     ShieldCheck,
-    Utensils,
-    Waves,
 } from "lucide-react";
-
-const heroHighlights = [
-    {
-        icon: Waves,
-        title: "Pool Access",
-        description: "Crystal clear pools for all guests.",
-    },
-    {
-        icon: Utensils,
-        title: "Food Pre-orders",
-        description: "Delicious meals ready on arrival.",
-    },
-    {
-        icon: Car,
-        title: "Parking",
-        description: "Secure on-site slots for guests.",
-    },
-    {
-        icon: ConciergeBell,
-        title: "Family Friendly",
-        description: "Perfect for groups and reunions.",
-    },
-];
 
 const amenityTiles = [
     {
@@ -113,26 +86,6 @@ const Amenities = () => {
                                 Everything you need for a relaxing day tour, overnight stay, or small celebration.
                             </p>
                         </div>
-                    </div>
-                </GuestContainer>
-
-                <GuestContainer className="-mt-10 pb-4">
-                    <div className="relative z-10 mx-2 grid gap-3 md:mx-4 md:grid-cols-4">
-                        {heroHighlights.map(({ icon: Icon, title, description }) => (
-                            <GuestCard key={title} className="p-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                                        <Icon className="size-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-sm font-semibold">{title}</h2>
-                                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                                            {description}
-                                        </p>
-                                    </div>
-                                </div>
-                            </GuestCard>
-                        ))}
                     </div>
                 </GuestContainer>
             </section>
