@@ -23,10 +23,15 @@ import { MediaModule } from './media/media.module';
 import { KnowledgeModule } from './knowledge/knowledge.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { getEnvironmentFiles } from './config/environment';
+import { VirtualTourModule } from './virtual-tour/virtual-tour.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: getEnvironmentFiles(),
+    }),
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -59,6 +64,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     KnowledgeModule,
     ChatbotModule,
     NotificationsModule,
+    VirtualTourModule,
   ],
 })
 export class AppModule {}

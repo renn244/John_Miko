@@ -1,0 +1,3 @@
+ALTER TABLE "VirtualTourHotspot"
+  ADD COLUMN "targetYaw" DOUBLE PRECISION,
+  ADD COLUMN "targetPitch" DOUBLE PRECISION;

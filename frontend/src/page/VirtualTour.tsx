@@ -4,7 +4,7 @@ import VirtualTourViewer from "@/components/pageComponents/VirtualTour/VirtualTo
 import { GuestCard, GuestContainer, GuestPageShell, GuestSection } from "@/components/guest";
 import { Button } from "@/components/ui/button";
 import { VIRTUAL_TOUR_GUIDE_CARDS } from "@/lib/constant/VIRTUAL_TOUR.constant";
-import { CalendarDays, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Link } from "react-router";
 
 const VirtualTour = () => (
@@ -40,10 +40,6 @@ const VirtualTour = () => (
                             </GuestCard>
                         ))}
                     </div>
-                    <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                        <CalendarDays className="size-3.5 text-primary" />
-                        This is a sample guided route. Resort-specific scenes and details will be added with the final photography.
-                    </p>
                 </GuestSection>
             </div>
         </GuestContainer>

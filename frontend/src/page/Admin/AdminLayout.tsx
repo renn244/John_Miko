@@ -15,6 +15,7 @@ import {
     LogOut,
     Menu,
     MessageSquare,
+    MapPinned,
     PlusCircle,
     Settings,
     Users,
@@ -70,6 +71,7 @@ const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     {
         label: "System",
         items: [
+            { label: "Virtual Tour", icon: MapPinned, path: "/admin/virtual-tour" },
             { label: "Chatbot Knowledge", icon: Bot, path: "/admin/knowledge" },
             { label: "Settings", icon: Settings, path: "/admin/settings" },
         ],

@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -28,27 +28,26 @@ enum UserStatus {
 }
 
 model User {
-  id        String      @id @default(cuid())
-  email     String   @unique
-  name      String?
-  contactNo String   
-  password  String
-  role      Role     @default(GUEST)
-  status    UserStatus @default(ACTIVE)
-  expertise MaintenanceExpertise?
+  id            String                @id @default(cuid())
+  email         String                @unique
+  name          String?
+  contactNo     String
+  password      String
+  role          Role                  @default(GUEST)
+  status        UserStatus            @default(ACTIVE)
+  expertise     MaintenanceExpertise?
   expoPushToken String?
 
   forgotPasswordTokens PasswordResetToken[]
 
   // for guests, this will be their bookings and feedbacks.
-  bookings  Booking[]
+  bookings       Booking[]
   guestFeedbacks Feedback[]
 
   // for staff, this will be the reports they made
-  reports   Report[] @relation("User")
-  reviewedReports Report[] @relation("ReviewedBy")
+  reports              Report[]      @relation("User")
+  reviewedReports      Report[]      @relation("ReviewedBy")
   assignedMaintenances Maintenance[] @relation("AssignedMaintenanceStaff")
-
 
   verifiedPayments Payment[]
 
@@ -58,14 +57,14 @@ model User {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  
+  id     String @id @default(cuid())
+  token  String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 enum AccommodationType {
@@ -75,47 +74,47 @@ enum AccommodationType {
 }
 
 model Accommodation {
-  id            String  @id @default(cuid())
-  name          String
-  description   String?
-  imageUrl      String // could be virtual tour field, but for now just photos
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String // could be virtual tour field, but for now just photos
 
-  type          AccommodationType
-  capacity      Int
-  price         Int
-  isGuestFeeWaived Boolean @default(false)
+  type             AccommodationType
+  capacity         Int
+  price            Int
+  isGuestFeeWaived Boolean           @default(false)
 
-  amenities     String[]  @default([]) 
-  
-  stayOptions   AccommodationStayOption[]
-  closures      Closure[]
-  bookings      Booking[]
+  amenities String[] @default([])
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  stayOptions AccommodationStayOption[]
+  closures    Closure[]
+  bookings    Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AccommodationStayOption {
-  id              String  @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   accommodationId String
   accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
 
-  code            String
-  label           String
-  
-  durationHours   Int?
-  
-  startTime       DateTime? @db.Time
-  endTime         DateTime? @db.Time
-  
-  sortOrder       Int     @default(0)
-  isActive        Boolean @default(true)
+  code  String
+  label String
 
-  bookings         Booking[]
+  durationHours Int?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  startTime DateTime? @db.Time
+  endTime   DateTime? @db.Time
+
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([accommodationId, code])
   @@unique([id, accommodationId])
@@ -129,18 +128,18 @@ enum ClosureType {
 }
 
 model Closure {
-  id                String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  accommodationId   String?
-  accommodation     Accommodation? @relation(fields: [accommodationId], references: [id])
+  accommodationId String?
+  accommodation   Accommodation? @relation(fields: [accommodationId], references: [id])
 
-  date              DateTime @db.Date
-  type              ClosureType @default(Close)
-  reason            String?
+  date   DateTime    @db.Date
+  type   ClosureType @default(Close)
+  reason String?
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([accommodationId, date]) // prevent overlapping closures for the same accommodation
   @@index([accommodationId])
   @@index([date])
@@ -166,48 +165,48 @@ enum BookingStatus {
 }
 
 model Booking {
-  id              String @id @default(cuid())
-  referenceCode   String? @unique
+  id            String  @id @default(cuid())
+  referenceCode String? @unique
 
-  userId          String?
-  user            User?  @relation(fields: [userId], references: [id])
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
   accommodationId String
   accommodation   Accommodation @relation(fields: [accommodationId], references: [id])
 
   bookedAccommodation BookedAccommodation?
-  preOrders         PreOrderMenuItem[]
-  addOns            BookingAddOn[]
+  preOrders           PreOrderMenuItem[]
+  addOns              BookingAddOn[]
 
-  feedback          Feedback?
-  reports           Report[]
+  feedback Feedback?
+  reports  Report[]
 
-  guestName       String
-  email           String
-  contactNo       String
+  guestName String
+  email     String
+  contactNo String
 
-  adultGuests     Int
-  kidGuests       Int
-  seniorGuest     Int
+  adultGuests Int
+  kidGuests   Int
+  seniorGuest Int
 
   numberOfGuests  Int
   specialRequests String?
 
-  bookingDate      DateTime @db.Date
+  bookingDate DateTime @db.Date
 
-  stayOptionId     String
-  stayOption       AccommodationStayOption @relation(fields: [stayOptionId, accommodationId], references: [id, accommodationId])
-  stayOptionCodeSnapshot  String
-  stayOptionLabelSnapshot String
+  stayOptionId              String
+  stayOption                AccommodationStayOption @relation(fields: [stayOptionId, accommodationId], references: [id, accommodationId])
+  stayOptionCodeSnapshot    String
+  stayOptionLabelSnapshot   String
   stayDurationHoursSnapshot Int?
-  guestFeeWaivedSnapshot Boolean @default(false)
+  guestFeeWaivedSnapshot    Boolean                 @default(false)
 
-  status           BookingStatus @default(Pending)
-  paymentType      PaymentType
-  payment          Payment?
+  status      BookingStatus @default(Pending)
+  paymentType PaymentType
+  payment     Payment?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([accommodationId, bookingDate])
   @@index([userId])
@@ -223,54 +222,53 @@ enum PaymentStatus {
 }
 
 model PaymentMethod {
-  id            String   @id @default(cuid())
+  id            String            @id @default(cuid())
   name          String
   type          PaymentMethodType
   accountName   String?
   accountNumber String?
   instructions  String?
   qrCodeUrl     String?
-  isActive      Boolean  @default(true)
-  sortOrder     Int      @default(0)
+  isActive      Boolean           @default(true)
+  sortOrder     Int               @default(0)
 
-  payments      Payment[]
+  payments Payment[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isActive])
   @@index([sortOrder])
 }
 
 model Payment {
-  id                  String   @id @default(cuid())
-  
-  bookingId           String   @unique
-  booking             Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  methodId            String?
-  method              PaymentMethod? @relation(fields: [methodId], references: [id])
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
+  methodId String?
+  method   PaymentMethod? @relation(fields: [methodId], references: [id])
 
-  accommodationAmount Int  
+  accommodationAmount Int
   preOrderAmount      Int
   addOnAmount         Int
   guestFeeAmount      Int
 
-  amountPaid          Int
-  amountToPaid        Int
-  totalAmount         Int
+  amountPaid   Int
+  amountToPaid Int
+  totalAmount  Int
 
-  status              PaymentStatus @default(Pending)
-  referenceNumber     String?  @unique
-  proofImageUrl       String?
-  rejectionNote       String?
-  verifiedAt          DateTime?
-  verifiedById        String?
-  verifiedBy          User?    @relation(fields: [verifiedById], references: [id])
+  status          PaymentStatus @default(Pending)
+  referenceNumber String?       @unique
+  proofImageUrl   String?
+  rejectionNote   String?
+  verifiedAt      DateTime?
+  verifiedById    String?
+  verifiedBy      User?         @relation(fields: [verifiedById], references: [id])
 
-  paidAt              DateTime?
-  createdAt           DateTime @default(now())
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
 
   @@index([methodId])
   @@index([status])
@@ -278,44 +276,43 @@ model Payment {
 
 // Snapshot of accommodation details at the time of booking to avoid issues with price changes or availability changes
 model BookedAccommodation {
-  id            String   @id @default(cuid())
-  
-  bookingId     String   @unique
-  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  name          String
-  description   String?
-  imageUrl      String
-  type          AccommodationType
-  capacity      Int
-  price         Int
-  amenities     String[] @default([])
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  createdAt     DateTime @default(now())
+  name        String
+  description String?
+  imageUrl    String
+  type        AccommodationType
+  capacity    Int
+  price       Int
+  amenities   String[]          @default([])
+
+  createdAt DateTime @default(now())
 }
 
 model BookingAddOn {
-  id                    String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  bookingId             String
-  booking               Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  addOnServiceId        String
-  addOnService          AddOnService @relation(fields: [addOnServiceId], references: [id])
+  addOnServiceId String
+  addOnService   AddOnService @relation(fields: [addOnServiceId], references: [id])
 
-  quantity              Int
+  quantity Int
 
   // Snapshots
-  name                  String
-  price                 Int
+  name  String
+  price Int
 
-  createdAt             DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([bookingId, addOnServiceId]) // prevent duplicates of many services in one booking
   @@index([bookingId])
   @@index([addOnServiceId])
 }
-
 
 enum PreOrderStatus {
   Pending
@@ -323,20 +320,20 @@ enum PreOrderStatus {
 }
 
 model PreOrderMenuItem {
-  id            String   @id @default(cuid())
-  
-  bookingId     String
-  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
 
-  name          String
-  description   String
-  category      String
-  price         Int
-  status        PreOrderStatus @default(Pending)
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  quantity      Int
+  name        String
+  description String
+  category    String
+  price       Int
+  status      PreOrderStatus @default(Pending)
 
-  createdAt     DateTime @default(now())
+  quantity Int
+
+  createdAt DateTime @default(now())
 }
 
 enum ReportStatus {
@@ -345,7 +342,7 @@ enum ReportStatus {
   Rejected
 }
 
-enum ReportType  {
+enum ReportType {
   checkIn
   checkOut
   maintenance
@@ -358,37 +355,37 @@ enum ReportSeverity {
 }
 
 model Report {
-  id            String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  bookingId     String?
-  booking       Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  bookingId String?
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
 
-  userId        String 
-  user          User   @relation("User", fields: [userId], references: [id])
+  userId String
+  user   User   @relation("User", fields: [userId], references: [id])
 
-  maintenanceId String? @unique
+  maintenanceId String?      @unique
   maintenance   Maintenance? @relation(fields: [maintenanceId], references: [id], onDelete: SetNull)
 
-  title         String
-  proofImages   String[]
-  description   String
+  title       String
+  proofImages String[]
+  description String
 
-  type        ReportType
-  status      ReportStatus @default(Pending)
-  severity    ReportSeverity 
+  type     ReportType
+  status   ReportStatus   @default(Pending)
+  severity ReportSeverity
 
   rejectionNote String?
   reviewedAt    DateTime?
-  reviewedById   String?
-  reviewedBy   User?    @relation("ReviewedBy", fields: [reviewedById], references: [id])
+  reviewedById  String?
+  reviewedBy    User?     @relation("ReviewedBy", fields: [reviewedById], references: [id])
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([bookingId])
   @@index([userId])
   @@index([status])
   @@index([severity])
-  @@index([ status, severity])
+  @@index([status, severity])
 }
 
 enum MaintenanceStatus {
@@ -411,31 +408,31 @@ enum MaintenanceExpertise {
 }
 
 model Maintenance {
-  id            String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  title         String
-  imagesUrl     String[]
-  description   String
+  title       String
+  imagesUrl   String[]
+  description String
 
-  status        MaintenanceStatus @default(Pending)
-  priority      MaintenancePriority
-  expertise     MaintenanceExpertise
+  status    MaintenanceStatus    @default(Pending)
+  priority  MaintenancePriority
+  expertise MaintenanceExpertise
 
-  assignedToId  String?
-  assignedTo    User? @relation("AssignedMaintenanceStaff", fields: [assignedToId], references: [id], onDelete: SetNull)
+  assignedToId String?
+  assignedTo   User?   @relation("AssignedMaintenanceStaff", fields: [assignedToId], references: [id], onDelete: SetNull)
 
-  notes         String?            // general notes
-  resolutionNotes String?          // final fix notes
+  notes                 String? // general notes
+  resolutionNotes       String? // final fix notes
   resolutionProofImages String[] @default([])
 
-  startedAt     DateTime?
-  resolvedAt    DateTime?
-  closedAt      DateTime?
-  
-  report        Report? 
+  startedAt  DateTime?
+  resolvedAt DateTime?
+  closedAt   DateTime?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  report Report?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([expertise])
   @@index([assignedToId])
@@ -448,46 +445,46 @@ enum MenuItemAvailability {
 }
 
 model MenuItem {
-  id            String   @id @default(cuid())
-  imageUrl      String
-  name          String
-  description   String
+  id          String @id @default(cuid())
+  imageUrl    String
+  name        String
+  description String
 
-  category      String
-  price         Int
-  availability  MenuItemAvailability @default(Available)
+  category     String
+  price        Int
+  availability MenuItemAvailability @default(Available)
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model AddOnService {
-  id            String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  imageUrl      String
-  name          String
-  description   String?
-  
-  price         Int
-  quantity      Int
-  isActive      Boolean @default(true)
+  imageUrl    String
+  name        String
+  description String?
 
-  Booking       BookingAddOn[]
+  price    Int
+  quantity Int
+  isActive Boolean @default(true)
 
-  createdAt     DateTime @default(now())
+  Booking BookingAddOn[]
+
+  createdAt DateTime @default(now())
 }
 
 model Feedback {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  bookingId     String  @unique
-  booking       Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  rating        Int     
-  comment       String?
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  createdAt     DateTime @default(now())
+  rating  Int
+  comment String?
+
+  createdAt DateTime @default(now())
 }
 
 model KnowledgeDocument {
@@ -508,14 +505,84 @@ model KnowledgeDocument {
 }
 
 model KnowledgeChunk {
-  id         String            @id @default(cuid())
+  id         String                     @id @default(cuid())
   documentId String
-  document   KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  document   KnowledgeDocument          @relation(fields: [documentId], references: [id], onDelete: Cascade)
   chunkIndex Int
   heading    String?
-  content    String            @db.Text
+  content    String                     @db.Text
   embedding  Unsupported("vector(768)")
 
   @@unique([documentId, chunkIndex])
   @@index([documentId])
+}
+
+enum VirtualTourSceneStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+}
+
+enum VirtualTourHotspotType {
+  NAVIGATION
+  INFORMATION
+}
+
+model VirtualTour {
+  id              String             @id
+  name            String             @default("John Miko's Place Virtual Tour")
+  startingSceneId String?            @unique
+  startingScene   VirtualTourScene?  @relation("VirtualTourStartingScene", fields: [startingSceneId], references: [id], onDelete: Restrict)
+  scenes          VirtualTourScene[] @relation("VirtualTourScenes")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+model VirtualTourScene {
+  id               String                 @id @default(cuid())
+  tourId           String
+  tour             VirtualTour            @relation("VirtualTourScenes", fields: [tourId], references: [id], onDelete: Cascade)
+  startsTour       VirtualTour?           @relation("VirtualTourStartingScene")
+  name             String
+  slug             String                 @unique
+  status           VirtualTourSceneStatus @default(DRAFT)
+  originalUrl      String?
+  previewUrl       String?
+  tilesBaseUrl     String?
+  tileCols         Int                    @default(8)
+  tileRows         Int                    @default(4)
+  panoramaWidth    Int?
+  initialYaw       Float                  @default(0)
+  initialPitch     Float                  @default(0)
+  outgoingHotspots VirtualTourHotspot[]   @relation("VirtualTourHotspotSource")
+  incomingHotspots VirtualTourHotspot[]   @relation("VirtualTourHotspotTarget")
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  @@index([tourId, status])
+}
+
+model VirtualTourHotspot {
+  id              String                 @id @default(cuid())
+  sourceSceneId   String
+  sourceScene     VirtualTourScene       @relation("VirtualTourHotspotSource", fields: [sourceSceneId], references: [id], onDelete: Cascade)
+  type            VirtualTourHotspotType
+  label           String
+  icon            String?
+  yaw             Float
+  pitch           Float
+  targetSceneId   String?
+  targetScene     VirtualTourScene?      @relation("VirtualTourHotspotTarget", fields: [targetSceneId], references: [id], onDelete: Restrict)
+  targetYaw       Float?
+  targetPitch     Float?
+  infoTitle       String?
+  infoDescription String?                @db.Text
+  infoImageUrl    String?
+  isActive        Boolean                @default(true)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  @@index([sourceSceneId])
+  @@index([targetSceneId])
+  @@index([sourceSceneId, isActive])
 }

@@ -31,25 +31,35 @@ const TourInfoPanel = ({ marker, onClose }: TourInfoPanelProps) => (
             </button>
         </div>
 
+        {marker.imageUrl ? (
+            <img
+                src={marker.imageUrl}
+                alt={marker.title}
+                className="mt-4 h-40 w-full rounded-lg object-cover"
+            />
+        ) : null}
+
         <p className="mt-4 border-t pt-4 text-sm leading-6 text-muted-foreground">{marker.description}</p>
 
-        <div className="mt-4 grid gap-2">
-            {marker.facts.map(({ label, value }, index) => {
-                const Icon = index === 0 ? Sparkles : index === 1 ? Compass : MapPinned;
+        {marker.facts.length ? (
+            <div className="mt-4 grid gap-2">
+                {marker.facts.map(({ label, value }, index) => {
+                    const Icon = index === 0 ? Sparkles : index === 1 ? Compass : MapPinned;
 
-                return (
-                    <div key={label} className="flex items-start gap-2.5 rounded-lg border border-white/45 bg-background/45 p-2.5">
-                        <div className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary">
-                            <Icon className="size-3.5" />
+                    return (
+                        <div key={label} className="flex items-start gap-2.5 rounded-lg border border-white/45 bg-background/45 p-2.5">
+                            <div className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary">
+                                <Icon className="size-3.5" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-foreground">{value}</p>
+                                <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{label}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-semibold text-foreground">{value}</p>
-                            <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{label}</p>
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
+                    );
+                })}
+            </div>
+        ) : null}
     </aside>
 );
 

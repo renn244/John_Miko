@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
@@ -40,6 +41,13 @@ export class MediaService {
     user: UserSession,
     purpose: MediaPurpose,
   ): UploadSignatureResponse {
+    const cloudinary = this.cloudinary;
+    if (!cloudinary) {
+      throw new ServiceUnavailableException(
+        'Media uploads are disabled in this environment.',
+      );
+    }
+
     const policy = MEDIA_POLICIES[purpose];
 
     if (!policy.allowedRoles.includes(user.role)) {
@@ -48,7 +56,7 @@ export class MediaService {
       );
     }
 
-    const cloudinaryConfig = this.cloudinary.config();
+    const cloudinaryConfig = cloudinary.config();
     const cloudName = cloudinaryConfig.cloud_name!;
     const apiKey = cloudinaryConfig.api_key!;
     const apiSecret = cloudinaryConfig.api_secret!;
@@ -60,7 +68,7 @@ export class MediaService {
 
     const timestamp = Math.floor(Date.now() / 1000);
     const publicId = `${policy.publicIdPrefix}/${randomUUID()}`;
-    const signature = this.cloudinary.utils.api_sign_request(
+    const signature = cloudinary.utils.api_sign_request(
       {
         public_id: publicId,
         timestamp,
@@ -83,7 +91,7 @@ export class MediaService {
     };
 
     if (policy.visibility === 'private') {
-      response.deliveryUrl = this.cloudinary.url(publicId, {
+      response.deliveryUrl = cloudinary.url(publicId, {
         resource_type: 'image',
         type: 'authenticated',
         secure: true,

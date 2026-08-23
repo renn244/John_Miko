@@ -117,7 +117,7 @@ const main = async () => {
             await rawImage()
                 .extract({ left: col * tileSize, top: row * tileSize, width: tileSize, height: tileSize })
                 .jpeg({ quality: 82, chromaSubsampling: "4:2:0" })
-                .toFile(path.join(tilesDirectory, `${col}_${row}.jpg`));
+                .toFile(path.join(tilesDirectory, `${row}_${col}.jpg`));
         }
     }
 
@@ -129,7 +129,7 @@ const main = async () => {
         rows,
         tileSize,
         preview: "preview.jpg",
-        tilePattern: "tiles/{col}_{row}.jpg",
+        tilePattern: "tiles/{row}_{col}.jpg",
     };
 
     await writeFile(path.join(sceneDirectory, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);

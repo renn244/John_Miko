@@ -1,4 +1,6 @@
 .expo
 docs/
 .agents/
+*.docx
+diagrams/
 backend/scripts/seed-qa-accounts.ts

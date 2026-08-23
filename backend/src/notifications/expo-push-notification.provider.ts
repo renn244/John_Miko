@@ -13,17 +13,28 @@ import type {
 export class ExpoPushNotificationProvider implements PushNotificationProvider {
   private readonly logger = new Logger(ExpoPushNotificationProvider.name);
   private readonly expoPushUrl: string;
+  private readonly enabled: boolean;
 
   constructor(
     private readonly http: HttpService,
     config: ConfigService,
   ) {
-    this.expoPushUrl = config.getOrThrow<string>('EXPO_PUSH_URL');
+    this.enabled = config.get<string>('PUSH_NOTIFICATIONS_ENABLED') !== 'false';
+    this.expoPushUrl = this.enabled
+      ? config.getOrThrow<string>('EXPO_PUSH_URL')
+      : '';
   }
 
   async sendMaintenanceAssignment(
     notification: MaintenancePushNotification,
   ): Promise<PushDeliveryResult> {
+    if (!this.enabled) {
+      this.logger.debug(
+        'Push delivery disabled; skipped maintenance assignment notification.',
+      );
+      return {};
+    }
+
     try {
       const response = await lastValueFrom(
         this.http.post<ExpoPushResponse>(this.expoPushUrl, {

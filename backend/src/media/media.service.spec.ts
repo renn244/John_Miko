@@ -40,9 +40,7 @@ const rejectedCases: Array<[MediaPurpose, Role]> = Object.values(
 );
 
 describe('MediaService', () => {
-  const configGet = jest.fn(
-    (key: string): string | undefined => CONFIG[key],
-  );
+  const configGet = jest.fn((key: string): string | undefined => CONFIG[key]);
   const configService = { get: configGet };
   let service: MediaService;
 
@@ -86,9 +84,7 @@ describe('MediaService', () => {
       deliveryType: 'upload',
       visibility: 'public',
     });
-    expect(result.publicId).toMatch(
-      /^public\/accommodations\/[0-9a-f-]{36}$/,
-    );
+    expect(result.publicId).toMatch(/^public\/accommodations\/[0-9a-f-]{36}$/);
     expect(result.signature).toBeTruthy();
     expect(result.deliveryUrl).toBeUndefined();
   });
@@ -105,9 +101,7 @@ describe('MediaService', () => {
       deliveryType: 'authenticated',
       visibility: 'private',
     });
-    expect(result.publicId).toMatch(
-      /^private\/payment-proofs\/[0-9a-f-]{36}$/,
-    );
+    expect(result.publicId).toMatch(/^private\/payment-proofs\/[0-9a-f-]{36}$/);
     expect(result.deliveryUrl).toContain('/image/authenticated/');
     expect(result.deliveryUrl).toContain('/s--');
   });
@@ -124,22 +118,35 @@ describe('MediaService', () => {
       deliveryType: 'upload',
       visibility: 'public',
     });
-    expect(result.publicId).toMatch(
-      /^public\/payment-methods\/[0-9a-f-]{36}$/,
-    );
+    expect(result.publicId).toMatch(/^public\/payment-methods\/[0-9a-f-]{36}$/);
     expect(result.deliveryUrl).toBeUndefined();
+  });
+
+  it('allows only administrators to upload public virtual tour information images', () => {
+    const result = service.createUploadSignature(
+      createUser(Role.ADMIN),
+      MediaPurpose.VIRTUAL_TOUR_INFO,
+    );
+
+    expect(result).toMatchObject({
+      deliveryType: 'upload',
+      visibility: 'public',
+    });
+    expect(result.publicId).toMatch(
+      /^public\/virtual-tour\/info\/[0-9a-f-]{36}$/,
+    );
+    expect(() =>
+      service.createUploadSignature(
+        createUser(Role.GUEST),
+        MediaPurpose.VIRTUAL_TOUR_INFO,
+      ),
+    ).toThrow(ForbiddenException);
   });
 
   it('generates a unique public ID for each signature', () => {
     const user = createUser(Role.ADMIN);
-    const first = service.createUploadSignature(
-      user,
-      MediaPurpose.MENU_ITEM,
-    );
-    const second = service.createUploadSignature(
-      user,
-      MediaPurpose.MENU_ITEM,
-    );
+    const first = service.createUploadSignature(user, MediaPurpose.MENU_ITEM);
+    const second = service.createUploadSignature(user, MediaPurpose.MENU_ITEM);
 
     expect(first.publicId).not.toBe(second.publicId);
   });
