@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { unlink } from 'fs/promises';
 import * as sharpModule from 'sharp';
 import { VirtualTourPanoramaUploadPipe } from './virtual-tour-panorama-upload.pipe';
+import { virtualTourPanoramaUploadOptions } from './virtual-tour-upload.config';
 
 jest.mock('fs/promises', () => ({
   unlink: jest.fn().mockResolvedValue(undefined),
@@ -15,7 +16,6 @@ const sharpMock =
 describe('VirtualTourPanoramaUploadPipe', () => {
   let pipe: VirtualTourPanoramaUploadPipe;
   let panorama: Express.Multer.File;
-  let tiles: Express.Multer.File[];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -25,15 +25,6 @@ describe('VirtualTourPanoramaUploadPipe', () => {
       originalname: 'panorama.jpg',
       mimetype: 'image/jpeg',
     } as Express.Multer.File;
-    tiles = Array.from({ length: 32 }, (_, index) => {
-      const row = Math.floor(index / 8);
-      const column = index % 8;
-      return {
-        path: `tile-${row}-${column}.jpg`,
-        originalname: `${row}_${column}.jpg`,
-        mimetype: 'image/jpeg',
-      } as Express.Multer.File;
-    });
     sharpMock.mockReturnValue({
       metadata: jest.fn().mockResolvedValue({
         width: 8192,
@@ -43,32 +34,18 @@ describe('VirtualTourPanoramaUploadPipe', () => {
     });
   });
 
+  it('accepts only one file up to 60 MB at the multipart boundary', () => {
+    expect(virtualTourPanoramaUploadOptions.limits).toEqual({
+      files: 1,
+      fileSize: 60 * 1024 * 1024,
+    });
+  });
+
   it('requires one original panorama', async () => {
-    await expect(pipe.transform({ tiles })).rejects.toBeInstanceOf(
+    await expect(pipe.transform(undefined)).rejects.toBeInstanceOf(
       BadRequestException,
     );
-    expect(unlink).toHaveBeenCalledTimes(32);
-  });
-
-  it('requires exactly 32 slices', async () => {
-    await expect(
-      pipe.transform({ panorama: [panorama], tiles: tiles.slice(0, 31) }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-  });
-
-  it.each([
-    ['a duplicate slice name', { originalname: '0_0.jpg' }],
-    ['an unexpected slice name', { originalname: '4_0.jpg' }],
-    ['a non-JPG slice', { mimetype: 'image/png' }],
-  ])('rejects %s', async (_case, override) => {
-    tiles[31] = {
-      ...tiles[31],
-      ...override,
-    } as Express.Multer.File;
-
-    await expect(
-      pipe.transform({ panorama: [panorama], tiles }),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(unlink).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -80,14 +57,15 @@ describe('VirtualTourPanoramaUploadPipe', () => {
       'an original panorama that is not approximately 2:1',
       { width: 4096, height: 4096, format: 'jpeg' },
     ],
-  ])('rejects %s', async (_case, metadata) => {
+  ])('rejects %s and cleans the temporary file', async (_case, metadata) => {
     sharpMock.mockReturnValue({
       metadata: jest.fn().mockResolvedValue(metadata),
     });
 
-    await expect(
-      pipe.transform({ panorama: [panorama], tiles }),
-    ).rejects.toBeInstanceOf(BadRequestException);
+    await expect(pipe.transform(panorama)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(unlink).toHaveBeenCalledWith('panorama.jpg');
   });
 
   it('rejects a file that Sharp cannot read as an image', async () => {
@@ -95,31 +73,22 @@ describe('VirtualTourPanoramaUploadPipe', () => {
       metadata: jest.fn().mockRejectedValue(new Error('Invalid image')),
     });
 
-    await expect(
-      pipe.transform({ panorama: [panorama], tiles }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-    expect(unlink).toHaveBeenCalledTimes(33);
+    await expect(pipe.transform(panorama)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(unlink).toHaveBeenCalledWith('panorama.jpg');
   });
 
-  it('accepts all 32 slices regardless of selection order', async () => {
-    const result = await pipe.transform({
-      panorama: [panorama],
-      tiles: [...tiles].reverse(),
+  it('accepts a valid JPG panorama', async () => {
+    await expect(pipe.transform(panorama)).resolves.toEqual({
+      panorama,
+      panoramaWidth: 8192,
+      originalExtension: 'jpg',
     });
-
-    expect(result.panorama).toBe(panorama);
-    expect(result.panoramaWidth).toBe(8192);
-    expect(result.originalExtension).toBe('jpg');
-    expect(result.tiles.some(({ filename }) => filename === '0_0.jpg')).toBe(
-      true,
-    );
-    expect(result.tiles.some(({ filename }) => filename === '3_7.jpg')).toBe(
-      true,
-    );
     expect(unlink).not.toHaveBeenCalled();
   });
 
-  it('accepts a valid PNG original', async () => {
+  it('accepts a valid PNG panorama', async () => {
     panorama = {
       ...panorama,
       path: 'panorama.png',
@@ -128,20 +97,16 @@ describe('VirtualTourPanoramaUploadPipe', () => {
     } as Express.Multer.File;
     sharpMock.mockReturnValue({
       metadata: jest.fn().mockResolvedValue({
-        width: 8192,
-        height: 4096,
+        width: 4096,
+        height: 2048,
         format: 'png',
       }),
     });
 
-    await expect(
-      pipe.transform({ panorama: [panorama], tiles }),
-    ).resolves.toEqual(
-      expect.objectContaining({
-        panorama,
-        panoramaWidth: 8192,
-        originalExtension: 'png',
-      }),
-    );
+    await expect(pipe.transform(panorama)).resolves.toEqual({
+      panorama,
+      panoramaWidth: 4096,
+      originalExtension: 'png',
+    });
   });
 });

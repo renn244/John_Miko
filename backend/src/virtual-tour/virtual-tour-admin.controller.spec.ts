@@ -12,7 +12,7 @@ describe('VirtualTourAdminController', () => {
     publishScene: jest.fn(),
   };
   const panoramaService = {
-    uploadPackage: jest.fn(),
+    uploadPanorama: jest.fn(),
   };
   const controller = new VirtualTourAdminController(
     service as never,
@@ -79,17 +79,16 @@ describe('VirtualTourAdminController', () => {
     );
   });
 
-  it('delegates a validated direct EquiSlice upload', async () => {
+  it('delegates a validated panorama upload', async () => {
     const upload = {
       panorama: { path: 'panorama.jpg' },
       panoramaWidth: 8192,
       originalExtension: 'jpg',
-      tiles: [{ filename: '0_0.jpg', file: { path: 'tile-0-0.jpg' } }],
     };
 
-    await controller.uploadPanoramaPackage('scene-1', upload as never);
+    await controller.uploadPanorama('scene-1', upload as never);
 
-    expect(panoramaService.uploadPackage).toHaveBeenCalledWith(
+    expect(panoramaService.uploadPanorama).toHaveBeenCalledWith(
       'scene-1',
       upload,
     );

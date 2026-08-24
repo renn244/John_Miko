@@ -255,9 +255,9 @@ Web and mobile clients obtain all Cloudinary upload parameters from the authenti
 
 Virtual-tour panoramas use the same Cloudinary account but follow a separate
 admin upload flow. Upload one JPG or PNG equirectangular original with an
-approximately 2:1 ratio and exactly 32 JPG slices named `0_0.jpg` through
-`3_7.jpg` from an 8x4 EquiSlice export. The backend generates only the
-lightweight WebP preview; it does not slice the panorama.
+approximately 2:1 ratio. The backend preserves the original and synchronously
+generates a lightweight WebP preview plus the fixed 8x4 JPG tile set used by
+the public viewer. Generated viewer assets are capped at 8192x4096.
 
 **2. Frontend**
 ```bash

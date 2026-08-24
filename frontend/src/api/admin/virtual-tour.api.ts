@@ -59,12 +59,10 @@ export const virtualTourApi = {
   uploadPanorama: async (
     sceneId: string,
     panorama: File,
-    tiles: File[],
     onUploadProgress?: (percentage: number) => void,
   ) => {
     const formData = new FormData();
     formData.append("panorama", panorama);
-    tiles.forEach((tile) => formData.append("tiles", tile));
 
     const response = await apiClient.post(
       `/admin/virtual-tour/scenes/${sceneId}/panorama`,

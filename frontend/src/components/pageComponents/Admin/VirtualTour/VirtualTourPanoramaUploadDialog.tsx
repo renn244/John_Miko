@@ -33,8 +33,8 @@ const VirtualTourPanoramaUploadDialog = () => {
         <DialogHeader>
           <DialogTitle>Upload panorama</DialogTitle>
           <DialogDescription>
-            Add the original panorama and the complete 8 × 4 JPG export for{" "}
-            {target?.name}.
+            Add one equirectangular panorama for {target?.name}. The preview and
+            detailed viewer tiles are created automatically.
           </DialogDescription>
         </DialogHeader>
 
