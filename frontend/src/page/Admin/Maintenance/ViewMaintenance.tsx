@@ -1,6 +1,7 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
+import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import {
   formatMaintenanceDateTime,
   formatMaintenanceShortDate,
@@ -24,15 +25,10 @@ import { cn } from "@/lib/utils";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
 import {
-  ArrowLeft,
   Check,
-  Clock3,
   Edit,
-  ImageIcon,
   Lock,
-  type LucideIcon,
   Play,
-  Sparkles,
 } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -88,28 +84,28 @@ const ViewMaintenanceContent = ({ maintenance }: { maintenance: Maintenance }) =
   );
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-5">
-      <div className="space-y-3">
-        <Link
-          to="/admin/maintenance"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Back to Maintenance Board
-        </Link>
-
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Maintenance Details</h1>
-            <p className="mt-1 break-all text-sm text-muted-foreground">{maintenance.id}</p>
+    <div className="mx-auto w-full max-w-7xl space-y-6">
+      <AdminPageHeader
+        backTo="/admin/maintenance"
+        backLabel="Back to maintenance board"
+        title="Maintenance Details"
+        description={maintenance.id}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className={cn("border", getMaintenanceStatusClasses(maintenance.status))}>
+              {getMaintenanceStatusLabel(maintenance.status)}
+            </Badge>
+            <Badge className={cn("border", getMaintenancePriorityClasses(maintenance.priority))}>
+              {maintenance.priority} Priority
+            </Badge>
           </div>
-        </div>
+        }
+      />
 
-        <MaintenanceStepper maintenance={maintenance} />
-      </div>
+      <MaintenanceStepper maintenance={maintenance} />
 
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="space-y-5">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="space-y-6">
           <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
             <div className="pb-4">
               <SectionHeader title="Ticket Information" />
@@ -152,7 +148,10 @@ const ViewMaintenanceContent = ({ maintenance }: { maintenance: Maintenance }) =
 
           {maintenance.imagesUrl?.length ? (
             <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
-              <SectionHeader title="Attached Media" icon={ImageIcon} />
+              <SectionHeader
+                title="Attached Media"
+                detail={`${maintenance.imagesUrl.length} ${maintenance.imagesUrl.length === 1 ? "photo" : "photos"}`}
+              />
 
               <div className="space-y-3">
                 {selectedImage ? (
@@ -190,7 +189,10 @@ const ViewMaintenanceContent = ({ maintenance }: { maintenance: Maintenance }) =
 
           {maintenance.resolutionProofImages?.length ? (
             <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
-              <SectionHeader title="Resolution Proof" icon={Sparkles} />
+              <SectionHeader
+                title="Resolution Proof"
+                detail={`${maintenance.resolutionProofImages.length} ${maintenance.resolutionProofImages.length === 1 ? "photo" : "photos"}`}
+              />
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {maintenance.resolutionProofImages.map((imageUrl, index) => (
@@ -209,26 +211,18 @@ const ViewMaintenanceContent = ({ maintenance }: { maintenance: Maintenance }) =
           ) : null}
         </div>
 
-        <div className="space-y-5 xl:sticky xl:top-6">
+        <div className="space-y-6 xl:sticky xl:top-6">
           <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
             <SectionHeader title="Quick Snapshot" />
 
             <div className="space-y-3 text-sm">
-              <div className="flex flex-wrap gap-2 border-b pb-3">
-                <Badge className={cn("border", getMaintenanceStatusClasses(maintenance.status))}>
-                  {getMaintenanceStatusLabel(maintenance.status)}
-                </Badge>
-                <Badge className={cn("border", getMaintenancePriorityClasses(maintenance.priority))}>
-                  {maintenance.priority} Priority
-                </Badge>
-              </div>
               <SnapshotRow label="Expertise" value={maintenance.expertise} />
               <SnapshotRow label="Assigned" value={getMaintenanceAssigneeLabel(maintenance)} />
             </div>
           </Card>
 
           <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
-            <SectionHeader title="Activity" icon={Clock3} />
+            <SectionHeader title="Activity" />
 
             <div className="ml-3 border-l border-slate-300">
               {activityItems.map((item, index) => (
@@ -294,11 +288,13 @@ const ViewMaintenanceContent = ({ maintenance }: { maintenance: Maintenance }) =
   );
 };
 
-const STEP_CHEVRON_SIZE = 12;
-const FIRST_STEP_CLIP =
-  `polygon(calc(100% - ${STEP_CHEVRON_SIZE}px) 0%, 100% 50%, calc(100% - ${STEP_CHEVRON_SIZE}px) 100%, 0% 100%, ${STEP_CHEVRON_SIZE}px 50%, 0% 0%)`;
-const CONNECTED_STEP_CLIP =
-  `polygon(calc(100% - ${STEP_CHEVRON_SIZE}px) 0%, 100% 50%, calc(100% - ${STEP_CHEVRON_SIZE}px) 100%, 0% 100%, ${STEP_CHEVRON_SIZE}px 50%, 0% 0%)`;
+const statusSteps = ["Pending", "Started", "Done", "Closed"] as const;
+const stepperColors = {
+  active: "#0E33F3",
+  complete: "#DDFBEF",
+  idle: "#EEF2F6",
+  divider: "#FFFFFF",
+} as const;
 
 const MaintenanceStepper = ({ maintenance }: { maintenance: Maintenance }) => {
   const activeIndex = MAINTENANCE_STATUS_ORDER.indexOf(maintenance.status);
@@ -344,82 +340,73 @@ const MaintenanceStepper = ({ maintenance }: { maintenance: Maintenance }) => {
         })}
       </div>
 
-      <div className="hidden overflow-x-auto px-4 md:block">
-      <div className="mx-auto flex h-10 min-w-[720px] items-stretch overflow-hidden bg-card">
-        {MAINTENANCE_STATUS_ORDER.map((status, index) => {
-          const isActive = maintenance.status === status;
-          const isCompleted = activeIndex > index;
-          const isFirst = index === 0;
-          const clipPath = isFirst ? FIRST_STEP_CLIP : CONNECTED_STEP_CLIP;
+      <div
+        className="hidden overflow-hidden rounded-md border bg-card p-1 md:block"
+        aria-label={`Ticket status: ${getMaintenanceStatusLabel(maintenance.status)}`}
+      >
+        <div className="flex" role="list">
+          {statusSteps.map((step, index) => {
+            const isActive = index === activeIndex;
+            const isCompleted = index < activeIndex;
+            const backgroundColor = isActive
+              ? stepperColors.active
+              : isCompleted
+                ? stepperColors.complete
+                : stepperColors.idle;
+            const textColor = isActive
+              ? "#FFFFFF"
+              : isCompleted
+                ? "#087443"
+                : "#64748B";
 
-          return (
-            <div
-              key={status}
-              className={cn(
-                "relative flex flex-1 items-center gap-2 pl-6",
-                index === MAINTENANCE_STATUS_ORDER.length - 1 ? "pr-4" : "pr-6",
-              )}
-              style={{
-                marginLeft: isFirst ? 0 : `-${STEP_CHEVRON_SIZE}px`,
-                zIndex: isActive ? 20 : MAINTENANCE_STATUS_ORDER.length - index,
-              }}
-            >
+            return (
               <div
-                className={cn(
-                  "absolute inset-0",
-                  isActive
-                    ? "bg-primary"
-                    : isCompleted
-                      ? "bg-primary/50"
-                      : "bg-border",
-                )}
-                style={{ clipPath }}
-              />
-
-              <div
-                className={cn(
-                  "absolute inset-px",
-                  isActive
-                    ? "bg-primary shadow-lg"
-                    : isCompleted
-                      ? "bg-primary/35"
-                      : "bg-card",
-                )}
-                style={{ clipPath }}
-              />
-
-              <div className="relative flex items-baseline gap-2 leading-none">
-                <div
-                  className={cn(
-                    "flex size-4 items-center justify-center rounded-full text-[10px] font-bold",
-                    isActive
-                      ? "bg-white text-primary"
-                      : isCompleted
-                        ? "bg-primary text-white"
-                        : "border border-border bg-background text-muted-foreground",
-                  )}
-                >
-                  {isCompleted ? <Check className="size-3" /> : index + 1}
-                </div>
-
-                <div className="flex items-baseline gap-2 leading-none">
+                key={step}
+                role="listitem"
+                style={{
+                  backgroundColor,
+                  color: textColor,
+                  marginLeft: index === 0 ? 0 : 4,
+                  paddingLeft: index === 0 ? 6 : 15,
+                  paddingRight: index === statusSteps.length - 1 ? 6 : 16,
+                  zIndex: statusSteps.length - index,
+                }}
+                className="relative flex h-10 flex-1 items-center justify-center text-center text-[11px] font-bold"
+              >
+                {index > 0 ? (
                   <span
-                    className={cn(
-                      "text-[11px] font-bold",
-                      isActive ? "text-white" : isCompleted ? "text-primary" : "text-white",
-                    )}
-                  >
-                    {getMaintenanceStatusLabel(status)}
-                  </span>
-                  <span className={cn("text-[10px]", isActive ? "text-white/80" : "text-white/80")}>
-                    {getStepperDate(maintenance, status) ?? "Pending"}
-                  </span>
-                </div>
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-0 left-0 z-3 size-0"
+                    style={{
+                      borderTop: "20px solid transparent",
+                      borderBottom: "20px solid transparent",
+                      borderLeft: `18px solid ${stepperColors.divider}`,
+                    }}
+                  />
+                ) : null}
+                {index < statusSteps.length - 1 ? (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-0 right-[-1px] bottom-0 z-3 w-0.75"
+                      style={{ backgroundColor }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-0 -right-4.5 z-4 size-0"
+                      style={{
+                        borderTop: "20px solid transparent",
+                        borderBottom: "20px solid transparent",
+                        borderLeft: `18px solid ${backgroundColor}`,
+                      }}
+                    />
+                  </>
+                ) : null}
+                {step}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
       </div>
     </>
   );
@@ -427,15 +414,15 @@ const MaintenanceStepper = ({ maintenance }: { maintenance: Maintenance }) => {
 
 const SectionHeader = ({
   title,
-  icon: Icon,
+  detail,
 }: {
   title: string;
-  icon?: LucideIcon;
+  detail?: string;
 }) => {
   return (
-    <div className="mb-4 flex items-center gap-2">
-      {Icon ? <Icon className="size-5 text-primary" /> : null}
+    <div className="mb-4 flex items-center justify-between gap-3">
       <h2 className="text-base font-semibold text-foreground md:text-lg">{title}</h2>
+      {detail ? <span className="text-xs text-muted-foreground">{detail}</span> : null}
     </div>
   );
 };

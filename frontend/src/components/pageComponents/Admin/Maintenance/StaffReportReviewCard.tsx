@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useReviewStaffReportMutation } from "@/hooks/admin/staff-report.hook";
 import type { MaintenanceExpertise } from "@/types/admin/staff-management.type";
 import type { StaffReport } from "@/types/admin/staff-report.type";
-import { CheckCircle2, ShieldCheck, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
 
 type StaffReportReviewCardProps = {
@@ -21,10 +21,9 @@ const StaffReportReviewCard = ({ report }: StaffReportReviewCardProps) => {
     const isPending = report.status === "Pending";
 
     return (
-        <Card className="gap-0 border-primary/30 p-6">
-            <div className="mb-4 flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-bold">Admin Review</h2>
+        <Card className="gap-0 rounded-xl border border-primary/30 bg-card p-5 shadow-sm">
+            <div className="mb-4">
+                <h2 className="text-base font-semibold text-foreground md:text-lg">Admin Review</h2>
             </div>
 
             {isPending ? (
@@ -59,7 +58,7 @@ const StaffReportReviewCard = ({ report }: StaffReportReviewCardProps) => {
                         Approve Report
                     </Button>
 
-                    <div className="space-y-3 rounded-2xl border border-red-200 p-4">
+                    <div className="space-y-3 rounded-xl border border-red-200 p-4">
                         <div className="space-y-1">
                             <p className="text-sm font-medium">Reject Report</p>
                             <p className="text-sm text-muted-foreground">
@@ -100,7 +99,7 @@ const StaffReportReviewCard = ({ report }: StaffReportReviewCardProps) => {
                     </p>
 
                     {report.rejectionNote && (
-                        <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+                        <div className="rounded-xl border border-red-200 bg-red-50 p-4">
                             <p className="mb-1 text-sm font-semibold text-red-700">
                                 Rejection Note
                             </p>

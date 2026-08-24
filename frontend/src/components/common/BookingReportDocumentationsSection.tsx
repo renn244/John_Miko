@@ -31,8 +31,14 @@ const BookingReportDocumentationsSection = ({
             )}>
                 <div className={cn("flex items-center justify-between gap-3", compact ? "mb-3" : "mb-4")}>
                     <div className="flex items-center gap-2">
-                        <FileText className={cn("text-primary", compact ? "size-4" : "h-5 w-5")} />
-                        <h2 className={`${compact ? "text-base" : "text-xl"} font-bold`}>
+                        {compact ? null : <FileText className="size-5 text-primary" />}
+                        <h2
+                            className={cn(
+                                compact
+                                    ? "text-base font-semibold text-foreground md:text-lg"
+                                    : "text-xl font-bold",
+                            )}
+                        >
                             Report Documentations
                         </h2>
                     </div>
