@@ -55,15 +55,12 @@ export const useUploadVirtualTourPanoramaMutation = () => {
     mutationFn: ({
       sceneId,
       panorama,
-      tiles,
       onUploadProgress,
     }: {
       sceneId: string;
       panorama: File;
-      tiles: File[];
       onUploadProgress?: (percentage: number) => void;
-    }) =>
-      virtualTourApi.uploadPanorama(sceneId, panorama, tiles, onUploadProgress),
+    }) => virtualTourApi.uploadPanorama(sceneId, panorama, onUploadProgress),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["virtual-tour", "admin"] });
     },

@@ -2,21 +2,18 @@ import { randomUUID } from 'crypto';
 import { mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { extname, resolve } from 'path';
-import {
-  VIRTUAL_TOUR_MAX_FILE_BYTES,
-  VIRTUAL_TOUR_UPLOAD_FILE_COUNT,
-} from './virtual-tour.constants';
+import { VIRTUAL_TOUR_MAX_FILE_BYTES } from './virtual-tour.constants';
 
-const uploadTempDirectory = resolve(
+export const virtualTourUploadTempDirectory = resolve(
   process.cwd(),
   '.tmp',
   'virtual-tour-uploads',
 );
-mkdirSync(uploadTempDirectory, { recursive: true });
+mkdirSync(virtualTourUploadTempDirectory, { recursive: true });
 
-export const virtualTourPackageUploadOptions = {
+export const virtualTourPanoramaUploadOptions = {
   storage: diskStorage({
-    destination: uploadTempDirectory,
+    destination: virtualTourUploadTempDirectory,
     filename: (_request, file, callback) => {
       callback(
         null,
@@ -25,7 +22,7 @@ export const virtualTourPackageUploadOptions = {
     },
   }),
   limits: {
-    files: VIRTUAL_TOUR_UPLOAD_FILE_COUNT,
+    files: 1,
     fileSize: VIRTUAL_TOUR_MAX_FILE_BYTES,
   },
 };

@@ -6,11 +6,11 @@ import {
   Param,
   Patch,
   Post,
-  UploadedFiles,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Role } from 'src/generated/prisma/enums';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
@@ -27,7 +27,7 @@ import {
   VirtualTourPanoramaUploadPipe,
 } from './virtual-tour-panorama-upload.pipe';
 import { VirtualTourPanoramaService } from './virtual-tour-panorama.service';
-import { virtualTourPackageUploadOptions } from './virtual-tour-upload.config';
+import { virtualTourPanoramaUploadOptions } from './virtual-tour-upload.config';
 import { VirtualTourService } from './virtual-tour.service';
 
 @Controller('admin/virtual-tour')
@@ -59,20 +59,14 @@ export class VirtualTourAdminController {
 
   @Post('scenes/:sceneId/panorama')
   @UseInterceptors(
-    FileFieldsInterceptor(
-      [
-        { name: 'panorama', maxCount: 1 },
-        { name: 'tiles', maxCount: 32 },
-      ],
-      virtualTourPackageUploadOptions,
-    ),
+    FileInterceptor('panorama', virtualTourPanoramaUploadOptions),
   )
-  uploadPanoramaPackage(
+  uploadPanorama(
     @Param('sceneId') sceneId: string,
-    @UploadedFiles(VirtualTourPanoramaUploadPipe)
+    @UploadedFile(VirtualTourPanoramaUploadPipe)
     upload: ValidatedVirtualTourPanoramaUpload,
   ) {
-    return this.virtualTourPanoramaService.uploadPackage(sceneId, upload);
+    return this.virtualTourPanoramaService.uploadPanorama(sceneId, upload);
   }
 
   @Post('scenes/:sceneId/navigation-hotspots')

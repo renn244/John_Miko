@@ -12,14 +12,14 @@ This is the implementation contract for an agent working on the `virtual-tour-ma
 - Creating a Navigation hotspot and a new connected scene is one atomic action; never save an unfinished hotspot between requests.
 - Information hotspots show content and never change scenes.
 - Remove Category; it has no current guest or management purpose.
-- Admin uploads one 2:1 equirectangular panorama plus all 32 JPG slices created with an EquiSlice 8x4 grid. JMPort creates only the lightweight preview; it never slices panoramas.
+- Admin uploads one 2:1 equirectangular panorama. JMPort creates the lightweight preview and fixed 8x4 JPG tile set automatically.
 - Hotspot and camera coordinates are captured visually and remain hidden from normal form fields.
 - A destination scene opens in its saved default direction unless that Navigation hotspot has an optional custom arrival view.
 - Keep the existing JMPort `AdminLayout` and the existing Photo Sphere Viewer guest experience.
 
 ## Non-Goals
 
-- No VR/AR mode, floor-map editor, drag-and-drop route graph, analytics dashboard, built-in panorama slicer, or hotspot scheduling.
+- No VR/AR mode, floor-map editor, drag-and-drop route graph, analytics dashboard, or hotspot scheduling.
 - Do not redesign unrelated admin pages.
 - Do not replace the existing viewer library.
 - Keep development connected only to the local PostgreSQL database. Cloudinary uploads may be enabled explicitly for real media testing.
@@ -121,35 +121,33 @@ Publishing requires the scene panorama to be `READY` and every active Navigation
 
 **Gate:** migrations apply locally; service tests cover starting-scene uniqueness, conditional hotspot rules, optional arrival-view validation, publish validation, public filtering, the atomic connected-scene transaction, and deletion conflicts.
 
-## Phase 2 — Original Panorama and Direct EquiSlice Upload
+## Phase 2 — Single Panorama Upload and Backend Slicing
 
 ### Upload Endpoint and Package Contract
 
 - Add `POST /admin/virtual-tour/scenes/:sceneId/panorama` using multipart upload.
-- Require multipart field `panorama` with one original image and `tiles` with exactly 32 directly selected slice files.
+- Require one multipart field named `panorama`.
 - Accept JPG or PNG originals up to 60 MB.
-- Use `sharp` only to inspect the original and generate one lightweight WebP preview.
 - Reject originals that are not approximately 2:1.
-- Require an EquiSlice 8x4 grid containing exactly 32 JPG files named `0_0.jpg` through `3_7.jpg`; selection order does not matter.
-- Reject duplicate, missing, incorrectly named, or non-JPG slices through a reusable Nest upload pipe.
+- Validate the original through a reusable Nest upload pipe before processing.
 
 ### Ingestion
 
 1. Preserve the original image.
-2. Generate a lightweight preview.
-3. Upload the 32 directly provided EquiSlice slices without resizing, decoding, recompressing, or slicing them.
+2. Normalize the viewer image to an exact 2:1 size divisible by the 8x4 grid, capped at 8192x4096 without enlarging smaller panoramas.
+3. Generate a lightweight WebP preview and 32 JPG tiles named `0_0.jpg` through `3_7.jpg` with Sharp.
 4. Save `originalUrl`, `previewUrl`, `tilesBaseUrl`, width, columns, and rows together after storage succeeds.
 5. On failure, return the upload error without changing the scene's existing panorama fields.
 
 Panorama readiness is derived from the complete stored asset fields. Upload progress and errors remain request state because ingestion is synchronous.
 
-The backend must never perform panorama slicing. One preview resize is the only server-side image processing step.
+Slicing remains synchronous inside the upload request. Temporary upload and generated tile files are always cleaned after success or failure.
 
 ### Storage Boundary
 
 Use the existing Cloudinary configuration through `VirtualTourStorageService`:
 
-- Upload the validated original, generated preview, and 32 unchanged slices to public Cloudinary assets under `public/virtual-tour/scenes`.
+- Upload the validated original, generated preview, and 32 generated slices to public Cloudinary assets under `public/virtual-tour/scenes`.
 - Keep the storage service boundary so the panorama service and database remain storage-agnostic.
 - Preserve the exact slice names in Cloudinary so the tiled viewer can request `0_0.jpg` through `3_7.jpg`.
 - Roll back assets from a partially failed Cloudinary package upload.
@@ -157,7 +155,7 @@ Use the existing Cloudinary configuration through `VirtualTourStorageService`:
 
 Do ingestion synchronously. Upload progress and failures stay in the frontend mutation state; panorama readiness is derived from the complete stored asset fields. Do not add a worker or queue.
 
-**Gate:** upload tests cover the original requirement, file type, ratio, direct slice naming/count validation, temporary-file cleanup, Cloudinary storage and rollback failure handling, and saved metadata. A real panorama renders from uploaded EquiSlice slices delivered by Cloudinary.
+**Gate:** upload tests cover the original requirement, file type, ratio, 8192px cap, generated slice names/count, temporary-file cleanup, Cloudinary storage and rollback failure handling, and saved metadata. A real uploaded panorama renders from generated Cloudinary tiles.
 
 ## Phase 3 — Admin Panorama Editor
 
@@ -174,11 +172,11 @@ Do ingestion synchronously. Upload progress and failures stay in the frontend mu
 ### UI States
 
 1. **Empty tour:** explanation plus **Create starting scene** form.
-2. **Scene selected:** compact connected-scene list, large panorama canvas, scene status, and Save/Preview/Publish/Hide actions. The editor and draft preview use the tiled adapter: show the lightweight preview immediately as the base image, then progressively load the visible EquiSlice tiles for full detail.
+2. **Scene selected:** compact connected-scene list, large panorama canvas, scene status, and Save/Preview/Publish/Hide actions. The editor and draft preview use the tiled adapter: show the lightweight preview immediately as the base image, then progressively load the visible generated tiles for full detail.
 3. **Add hotspot mode:** choose Navigation or Information, then click the panorama; the editor captures coordinates without displaying numeric fields.
 4. **Hotspot selected:** the right inspector edits that hotspot instead of showing generic scene details.
 5. **Create connected scene:** collect the clicked hotspot position and new scene details, then create and link both atomically before requesting the panorama upload.
-6. **Uploading/failed:** disable conflicting actions and show mutation progress/error recovery. The upload form requests the original panorama and provides a multi-file/drop area for all 32 slices, with a short link/instruction for creating the fixed 8x4 grid.
+6. **Uploading/failed:** disable conflicting actions and show mutation progress/error recovery. The upload form requests one original panorama; after transfer completes it indicates that backend processing is still running.
 
 Hotspot inspector fields:
 
@@ -239,7 +237,7 @@ Review these files in order:
 
 - Review the Prisma models and migrations for constraints, relations, defaults, and unnecessary fields.
 - Review controllers, DTOs, pipes, services, and guards for project consistency and clear responsibilities.
-- Review panorama ingestion: one original, 32 slices, temporary disk handling, validation, preview generation, Cloudinary upload, rollback, and cleanup.
+- Review panorama ingestion: one original, backend preview/tile generation, temporary disk handling, validation, Cloudinary upload, rollback, and cleanup.
 - Review scene and hotspot lifecycle rules, publish validation, authorization, errors, and deletion conflicts.
 - Review development environment safety and confirm production database endpoints cannot be used accidentally.
 
@@ -358,7 +356,7 @@ npx prisma validate
 - Split Navigation and Information API methods and request types so each endpoint receives its DTO directly without a generic hotspot type or runtime property removal.
 - Added focused Navigation and Information editor components for mutations, payload construction, visual movement, destination/arrival actions, and delete-target selection. The shared hotspot inspector now only chooses and frames the correct editor.
 - Limited the admin store to state shared across sibling components: hotspot selection plus panorama-upload, scene-delete, and hotspot-delete targets. WebGL, placement, arrival, preview, unsaved workflow, and form state remain local.
-- Made panorama upload, scene deletion, and hotspot deletion standalone store-controlled dialogs. The panorama dialog shell and specialized 33-file upload form are separate components.
+- Made panorama upload, scene deletion, and hotspot deletion standalone store-controlled dialogs. The panorama dialog shell and specialized single-file upload form are separate components.
 - Centralized scene-status presentation and removed manual field validation, obsolete generic hotspot methods, repeated state setters, and dead request-shaping helpers.
 
 Review these files from data flow to UI:
@@ -438,7 +436,7 @@ Manually test:
 
 - The application no longer references the legacy local panorama route; runtime panorama uploads and delivery use Cloudinary only. The existing tracked panorama fixtures remain available for local upload-package testing.
 - Review the final diff for secrets, generated panorama files, debug code, unrelated edits, and stale dependencies.
-- Align the existing capstone manuscript with the verified implementation, including the original-plus-32-slices workflow, Cloudinary storage, hotspot management, optional arrival views, and API-driven guest viewer.
+- Align the existing capstone manuscript with the verified implementation, including the single-panorama backend-slicing workflow, Cloudinary storage, hotspot management, optional arrival views, and API-driven guest viewer.
 - Record final test results. Screenshots are optional capstone evidence and are not a development-completion requirement.
 - Commit the reviewed work by logical area when possible. Never include `.env.development.local`, generated panorama files, or production secrets.
 
@@ -459,8 +457,8 @@ Final review results:
 - Clear a saved arrival override when a Navigation hotspot is redirected to a different destination.
 - Corrected scene-deletion copy so it no longer claims that Cloudinary assets are deleted.
 - Updated the local panorama generator to emit the current `{row}_{column}.jpg` slice names.
-- Aligned `README.md` with local-only development database protection, explicit integration flags, Cloudinary setup, and the original-plus-32-slices workflow.
-- Backend virtual-tour tests pass: 6 suites and 35 tests.
+- Aligned `README.md` with local-only development database protection, explicit integration flags, Cloudinary setup, and the single-panorama backend-slicing workflow.
+- Backend virtual-tour tests pass: 6 suites and 33 tests.
 - Shared Cloudinary media-policy tests pass: 1 suite and 51 tests.
 - Backend build, targeted implementation lint, Prisma validation, and Prisma generation pass.
 - Frontend production build and targeted virtual-tour lint pass. Repository-wide lint still reports pre-existing issues outside the virtual-tour scope and strict lint errors in legacy test mocks.
@@ -470,7 +468,7 @@ Final review results:
 
 - Admin manages the tour entirely inside the existing AdminLayout.
 - Scenes are created from the starting-scene flow or through Navigation hotspots.
-- Panorama upload produces a preview and ingests the user-created EquiSlice tiles without server-side slicing.
+- Panorama upload produces the preview and fixed 8x4 JPG tiles synchronously on the backend.
 - Both hotspot types are editable on the panorama.
 - Guest viewer is fully API-driven and exposes published content only.
 - Local development cannot modify the production database; Cloudinary media uploads are enabled only when explicitly configured.

@@ -213,8 +213,8 @@ const VirtualTourPanoramaCanvas = ({
           Add this scene’s panorama
         </h2>
         <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-          Upload the original panorama and its 32 EquiSlice files before placing
-          hotspots.
+          Upload one equirectangular panorama before placing hotspots. The
+          detailed viewer tiles are created automatically.
         </p>
         <Button className="mt-5" onClick={onOpenUpload}>
           <Upload className="size-4" /> Upload panorama
