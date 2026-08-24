@@ -1,10 +1,6 @@
 import { getVirtualTourMarkerConfigs } from "@/components/pageComponents/VirtualTour/tourMarkers";
 import { getConnectedSceneIds } from "@/components/pageComponents/VirtualTour/tourNavigation";
-import {
-    getVirtualTourMarker,
-    VIRTUAL_TOUR_CONFIG,
-    VIRTUAL_TOUR_SCENES,
-} from "@/lib/constant/VIRTUAL_TOUR.constant";
+import { VIRTUAL_TOUR_CONFIG } from "@/lib/constant/VIRTUAL_TOUR.constant";
 import type { Viewer } from "@photo-sphere-viewer/core";
 import { MarkersPlugin } from "@photo-sphere-viewer/markers-plugin";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -15,13 +11,14 @@ import type {
     SceneId,
     SceneTransitionMode,
     TourPosition,
+    VirtualTour,
 } from "@/types/virtual-tour.type";
 
-export const useVirtualTourViewer = () => {
+export const useVirtualTourViewer = (tour: VirtualTour) => {
     const viewerRef = useRef<Viewer | null>(null);
     const tourFrameRef = useRef<HTMLDivElement | null>(null);
     const preloadedSceneIdsRef = useRef(new Set<SceneId>());
-    const [currentSceneId, setCurrentSceneId] = useState<SceneId>("outside");
+    const [currentSceneId, setCurrentSceneId] = useState<SceneId>(tour.startingSceneId);
     const [isViewerReady, setIsViewerReady] = useState(false);
     const [isCompactMarkers, setIsCompactMarkers] = useState(() =>
         window.matchMedia(VIRTUAL_TOUR_CONFIG.mobileMarkerMediaQuery).matches,
@@ -31,6 +28,8 @@ export const useVirtualTourViewer = () => {
     const [sceneTransitionMode, setSceneTransitionMode] = useState<SceneTransitionMode>("zoom-fade");
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [zoomLevel, setZoomLevel] = useState<number>(VIRTUAL_TOUR_CONFIG.defaultZoomLevel);
+
+    const currentScene = tour.scenes[currentSceneId] || tour.scenes[tour.startingSceneId];
 
     useEffect(() => {
         const handleFullscreenChange = () => {
@@ -62,42 +61,35 @@ export const useVirtualTourViewer = () => {
     }, []);
 
     useEffect(() => {
-        if (!isViewerReady) {
-            return;
-        }
+        if (!isViewerReady || !currentScene) return;
 
         viewerRef.current
             ?.getPlugin<MarkersPlugin>(MarkersPlugin)
             ?.setMarkers(
                 getVirtualTourMarkerConfigs(
-                    VIRTUAL_TOUR_SCENES[currentSceneId],
+                    currentScene,
                     infoDisplayMode,
                     isCompactMarkers,
                 ),
             );
-    }, [currentSceneId, infoDisplayMode, isCompactMarkers, isViewerReady]);
+    }, [currentScene, infoDisplayMode, isCompactMarkers, isViewerReady]);
 
     useEffect(() => {
-        if (!isViewerReady) {
-            return;
-        }
+        if (!isViewerReady || !currentScene) return;
 
         let isCancelled = false;
         const preloadConnectedScenePreviews = () => {
-            if (isCancelled || !viewerRef.current) {
-                return;
-            }
+            if (isCancelled || !viewerRef.current) return;
 
-            for (const sceneId of getConnectedSceneIds(VIRTUAL_TOUR_SCENES[currentSceneId])) {
-                if (preloadedSceneIdsRef.current.has(sceneId)) {
-                    continue;
-                }
+            for (const sceneId of getConnectedSceneIds(currentScene)) {
+                const connectedScene = tour.scenes[sceneId];
+                if (!connectedScene || preloadedSceneIdsRef.current.has(sceneId)) continue;
 
                 preloadedSceneIdsRef.current.add(sceneId);
                 void viewerRef.current.textureLoader
-                    .preloadPanorama(VIRTUAL_TOUR_SCENES[sceneId].panorama)
+                    .preloadPanorama(connectedScene.panorama)
                     .catch(() => {
-                        // Preview preloading is optional; normal scene loading remains available.
+                        // Preloading is optional; normal scene loading remains available.
                     });
             }
         };
@@ -117,7 +109,7 @@ export const useVirtualTourViewer = () => {
             isCancelled = true;
             clearTimeout(timeoutId);
         };
-    }, [currentSceneId, isViewerReady]);
+    }, [currentScene, isViewerReady, tour.scenes]);
 
     const handleZoomIn = useCallback(
         () => viewerRef.current?.zoomIn(VIRTUAL_TOUR_CONFIG.zoomControlStep),
@@ -146,9 +138,7 @@ export const useVirtualTourViewer = () => {
     const handleFullscreenToggle = useCallback(async () => {
         const frame = tourFrameRef.current;
 
-        if (!frame) {
-            return;
-        }
+        if (!frame) return;
 
         try {
             if (document.fullscreenElement === frame) {
@@ -164,15 +154,14 @@ export const useVirtualTourViewer = () => {
     const loadScene = useCallback(async (
         sceneId: SceneId,
         markerPosition: TourPosition,
+        targetPosition: TourPosition | null,
         transitionMode: SceneTransitionMode,
     ) => {
         const viewer = viewerRef.current;
-        const scene = VIRTUAL_TOUR_SCENES[sceneId];
+        const scene = tour.scenes[sceneId];
         const markersPlugin = viewer?.getPlugin<MarkersPlugin>(MarkersPlugin);
 
-        if (!viewer || !markersPlugin) {
-            return;
-        }
+        if (!viewer || !markersPlugin || !scene) return;
 
         const initialZoom = viewer.getZoomLevel();
         const tooZoomedIn =
@@ -185,7 +174,7 @@ export const useVirtualTourViewer = () => {
         if (tooZoomedIn) {
             await viewer.animate({
                 zoom: VIRTUAL_TOUR_CONFIG.defaultZoomLevel,
-                speed: VIRTUAL_TOUR_CONFIG.resetZoomSpeed,
+                speed: VIRTUAL_TOUR_CONFIG.resetZoomDuration,
             });
         }
 
@@ -196,62 +185,58 @@ export const useVirtualTourViewer = () => {
             easing: "inOutSine",
         });
 
-        const didLoad = transitionMode === "zoom-fade"
-            ? (await Promise.all([
-                viewer.animate({
-                    zoom: VIRTUAL_TOUR_CONFIG.forwardZoomLevel,
-                    speed: VIRTUAL_TOUR_CONFIG.forwardZoomSpeed,
-                }),
-                viewer.setPanorama(scene.panorama, {
-                    transition: VIRTUAL_TOUR_CONFIG.sceneTransition,
-                    showLoader: false,
-                }),
-            ]))[1]
-            : await viewer.setPanorama(scene.panorama, {
-                transition: VIRTUAL_TOUR_CONFIG.sceneTransition,
-                showLoader: false,
-            });
-
         if (transitionMode === "zoom-fade") {
-            await viewer.animate({ zoom: targetZoom, speed: VIRTUAL_TOUR_CONFIG.resetZoomSpeed });
+            await viewer.animate({
+                zoom: VIRTUAL_TOUR_CONFIG.forwardZoomLevel,
+                speed: VIRTUAL_TOUR_CONFIG.forwardZoomDuration,
+            });
         }
 
-        if (didLoad) {
-            setCurrentSceneId(sceneId);
+        const didLoad = await viewer.setPanorama(scene.panorama, {
+            transition: VIRTUAL_TOUR_CONFIG.sceneTransition,
+            showLoader: false,
+            position: targetPosition || scene.initialPosition,
+        });
+
+        if (didLoad && transitionMode === "zoom-fade") {
+            await viewer.animate({
+                zoom: targetZoom,
+                speed: VIRTUAL_TOUR_CONFIG.resetZoomDuration,
+            });
         }
-    }, []);
+
+        if (didLoad) setCurrentSceneId(sceneId);
+    }, [tour.scenes]);
 
     useEffect(() => {
-        if (!isViewerReady) {
-            return;
-        }
+        if (!isViewerReady || !currentScene) return;
 
         const markersPlugin = viewerRef.current?.getPlugin<MarkersPlugin>(MarkersPlugin);
-
-        if (!markersPlugin) {
-            return;
-        }
+        if (!markersPlugin) return;
 
         const handleMarkerSelect = (event: { type: string; marker?: { id: string } }) => {
-            if (event.type !== "select-marker" || !event.marker) {
-                return;
-            }
+            if (event.type !== "select-marker" || !event.marker) return;
 
-            const marker = getVirtualTourMarker(event.marker.id);
+            const marker = currentScene.markers.find((item) => item.id === event.marker?.id);
 
             if (marker?.kind === "info" && infoDisplayMode === "panel") {
                 setSelectedMarker(marker.detail);
             }
 
             if (marker?.kind === "navigation") {
-                void loadScene(marker.targetSceneId, marker.position, sceneTransitionMode);
+                void loadScene(
+                    marker.targetSceneId,
+                    marker.position,
+                    marker.targetPosition,
+                    sceneTransitionMode,
+                );
             }
         };
 
         markersPlugin.addEventListener("select-marker", handleMarkerSelect);
 
         return () => markersPlugin.removeEventListener("select-marker", handleMarkerSelect);
-    }, [infoDisplayMode, isViewerReady, loadScene, sceneTransitionMode]);
+    }, [currentScene, infoDisplayMode, isViewerReady, loadScene, sceneTransitionMode]);
 
     const handleViewerReady = useCallback((instance: Viewer) => {
         viewerRef.current = instance;
@@ -260,6 +245,7 @@ export const useVirtualTourViewer = () => {
     }, []);
 
     return {
+        currentScene,
         handleFullscreenToggle,
         handleInfoDisplayModeChange,
         handleViewerReady,

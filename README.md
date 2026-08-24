@@ -188,25 +188,28 @@ John Mickos Capstone/
 ### Prerequisites
 - Node.js 20.19+ or 22.12+
 - npm
-- PostgreSQL database with pgvector support, such as Neon
+- Local PostgreSQL with the `vector` extension enabled for development
 
 ### Installation and Run
 
 **1. Backend**
 
-Create `backend/.env` and configure the database and RAG integration:
+Copy `backend/.env.example` to `backend/.env.development.local`. Development
+loads this local override first and refuses hosted database connections, which
+prevents local work from modifying the production database.
 
 ```env
-DATABASE_URL=
+NODE_ENV=development
+DATABASE_URL=postgresql://YOUR_USER:YOUR_PASSWORD@localhost:5432/jmport_dev?schema=public
+DATABASE_DIRECT_URL=postgresql://YOUR_USER:YOUR_PASSWORD@localhost:5432/jmport_dev?schema=public
 
-RAG_ENABLED=true
+EMAIL_ENABLED=false
+PUSH_NOTIFICATIONS_ENABLED=false
+MEDIA_UPLOADS_ENABLED=false
+RAG_ENABLED=false
+
+# Add only when the corresponding development integration is enabled.
 GEMINI_API_KEY=
-
-# Optional defaults
-GEMINI_MODEL=gemini-2.5-flash-lite
-GEMINI_EMBEDDING_MODEL=gemini-embedding-2
-RAG_SIMILARITY_THRESHOLD=0.55
-RAG_PROVIDER_TIMEOUT_MS=8000
 ```
 
 Then install the backend, generate Prisma Client, apply the existing migrations, and start the API:
@@ -219,7 +222,10 @@ npx prisma migrate deploy
 npm run start:dev
 ```
 
-The migrations enable pgvector and create the `KnowledgeDocument` and `KnowledgeChunk` tables. `GEMINI_API_KEY` is required to publish documents and generate Gemini responses. `RAG_ENABLED=true` activates retrieval for the guest chatbot; when disabled, the chatbot returns its local fallback. The remaining RAG values already have the defaults shown above.
+The migrations enable pgvector and create the application tables, including the
+virtual-tour, knowledge-document, and knowledge-chunk records. `GEMINI_API_KEY`
+is required only when `RAG_ENABLED=true`; otherwise the chatbot uses its local
+fallback.
 
 ### Cloudinary signed uploads
 
@@ -233,9 +239,11 @@ Image uploads require two **signed** Cloudinary upload presets with identical fi
 
 Accommodation, menu-item, add-on, and payment-method QR images use the public preset. Payment proofs, staff-report evidence, and maintenance evidence use the private preset.
 
-Add these values to `backend/.env`:
+Add these values to `backend/.env.development.local` when media testing is
+needed:
 
 ```env
+MEDIA_UPLOADS_ENABLED=true
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
@@ -244,6 +252,12 @@ CLOUDINARY_PRIVATE_UPLOAD_PRESET=
 ```
 
 Web and mobile clients obtain all Cloudinary upload parameters from the authenticated backend endpoint. The signature binds the preset, public ID, and delivery type. Their old unsigned upload presets should be disabled only after both clients have been updated and verified.
+
+Virtual-tour panoramas use the same Cloudinary account but follow a separate
+admin upload flow. Upload one JPG or PNG equirectangular original with an
+approximately 2:1 ratio and exactly 32 JPG slices named `0_0.jpg` through
+`3_7.jpg` from an 8x4 EquiSlice export. The backend generates only the
+lightweight WebP preview; it does not slice the panorama.
 
 **2. Frontend**
 ```bash

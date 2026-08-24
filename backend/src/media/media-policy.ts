@@ -9,6 +9,7 @@ export enum MediaPurpose {
   STAFF_REPORT_PROOF = 'STAFF_REPORT_PROOF',
   MAINTENANCE_ISSUE = 'MAINTENANCE_ISSUE',
   MAINTENANCE_RESOLUTION = 'MAINTENANCE_RESOLUTION',
+  VIRTUAL_TOUR_INFO = 'VIRTUAL_TOUR_INFO',
 }
 
 export type MediaVisibility = 'public' | 'private';
@@ -69,5 +70,11 @@ export const MEDIA_POLICIES: Record<MediaPurpose, MediaPolicy> = {
     visibility: 'private',
     deliveryType: 'authenticated',
     allowedRoles: [Role.ADMIN, Role.MAINTENANCE_STAFF],
+  },
+  [MediaPurpose.VIRTUAL_TOUR_INFO]: {
+    publicIdPrefix: 'public/virtual-tour/info',
+    visibility: 'public',
+    deliveryType: 'upload',
+    allowedRoles: [Role.ADMIN],
   },
 };

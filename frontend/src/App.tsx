@@ -53,6 +53,7 @@ const AdminSettings = lazy(() => import('./page/Admin/Settings'));
 const AddStaff = lazy(() => import('./page/Admin/Staff-Management/AddStaff'));
 const StaffManagement = lazy(() => import('./page/Admin/Staff-Management/StaffManagement'));
 const Knowledge = lazy(() => import('./page/Admin/Knowledge/Knowledge'));
+const VirtualTourManagement = lazy(() => import('./page/Admin/VirtualTourManagement'));
 const StaffLayout = lazy(() => import('./page/Staff/StaffLayout'));
 const MaintenanceAssignedTickets = lazy(() => import('./page/Staff/Maintenance/AssignedTickets'));
 const MaintenanceHistory = lazy(() => import('./page/Staff/Maintenance/History'));
@@ -245,6 +246,10 @@ const router = createBrowserRouter([
           {
             path: 'knowledge',
             element: <Knowledge />,
+          },
+          {
+            path: 'virtual-tour',
+            element: <VirtualTourManagement />,
           },
           {
             path: 'settings',

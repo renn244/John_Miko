@@ -2,6 +2,7 @@ import BookingReportDocumentationsSection from "@/components/common/BookingRepor
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
+import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,12 +15,9 @@ import getCheckInOut from "@/lib/getCheckInOut";
 import { formatPeso } from "@/lib/utils";
 import type { BookingWithAccommodationAndPreOrderAndPayment } from "@/types/booking.types";
 import {
-    ArrowLeft,
-    BedDouble,
     Calendar,
     CheckCircle,
     Clock3,
-    CreditCard,
     FileText,
     Mail,
     Phone,
@@ -27,8 +25,8 @@ import {
     PlusCircle,
     Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router";
 
 const getPaymentTypeColor = (paymentType: "Full" | "Partial") => {
     switch (paymentType) {
@@ -111,13 +109,8 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
     const preOrders = booking.preOrders ?? [];
     const stayLabel = booking.stayOption?.label ?? booking.stayOptionLabelSnapshot ?? booking.timeSlot ?? "Stay";
 
-    const addOnSubTotal = useMemo(() => {
-        return addOns.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    }, [addOns]);
-
-    const preOrderSubTotal = useMemo(() => {
-        return preOrders.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    }, [preOrders]);
+    const addOnSubTotal = addOns.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const preOrderSubTotal = preOrders.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
     const addOnAmountForDisplay = booking.payment?.addOnAmount ?? addOnSubTotal;
     const preOrderAmountForDisplay = booking.payment?.preOrderAmount ?? preOrderSubTotal;
@@ -155,22 +148,13 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
     const { mutateAsync: rejectPayment, isPending: isRejecting } = useRejectPaymentMutation(paymentId);
 
     return (
-        <div className="mx-auto max-w-7xl space-y-5">
-            <div className="space-y-3">
-                <Link
-                    to="/admin/booking"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                    <ArrowLeft className="size-4" />
-                    Back to Bookings
-                </Link>
-
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="min-w-0">
-                        <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Booking Details</h1>
-                        <p className="mt-1 break-all text-sm text-muted-foreground">{booking.referenceCode ?? "N/A"}</p>
-                    </div>
-
+        <div className="mx-auto max-w-7xl space-y-6">
+            <AdminPageHeader
+                backTo="/admin/booking"
+                backLabel="Back to bookings"
+                title="Booking Details"
+                description={booking.referenceCode ?? "N/A"}
+                actions={
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge
                             className="border"
@@ -193,14 +177,13 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                             {booking.paymentType} Payment
                         </Badge>
                     </div>
-                </div>
-            </div>
+                }
+            />
 
-            <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
-                <div className="space-y-5">
+            <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+                <div className="space-y-6">
                     <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
-                        <div className="mb-4 flex items-center gap-2">
-                            <BedDouble className="size-5 text-primary" />
+                        <div className="mb-4">
                             <h2 className="text-base font-semibold text-foreground md:text-lg">Booking Information</h2>
                         </div>
 
@@ -251,8 +234,7 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                     </Card>
 
                     <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
-                        <div className="mb-4 flex items-center gap-2">
-                            <Users className="size-5 text-primary" />
+                        <div className="mb-4">
                             <h2 className="text-base font-semibold text-foreground md:text-lg">Guest Information</h2>
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
@@ -311,10 +293,9 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                         )}
                     </Card>
 
-                    <div className="grid gap-5 xl:grid-cols-2">
+                    <div className="grid gap-6 xl:grid-cols-2">
                         <Card className="h-full gap-0 rounded-xl border bg-card p-5 shadow-sm">
-                            <div className="mb-4 flex items-center gap-2">
-                                <PlusCircle className="size-5 text-primary" />
+                            <div className="mb-4">
                                 <h2 className="text-base font-semibold text-foreground md:text-lg">Add-on Services</h2>
                             </div>
                             <div className="flex flex-1 flex-col">
@@ -356,8 +337,7 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                         </Card>
 
                         <Card className="h-full gap-0 rounded-xl border bg-card p-5 shadow-sm">
-                            <div className="mb-4 flex items-center gap-2">
-                                <Pizza className="size-5 text-primary" />
+                            <div className="mb-4">
                                 <h2 className="text-base font-semibold text-foreground md:text-lg">Pre-orders</h2>
                             </div>
                             <div className="flex flex-1 flex-col">
@@ -404,10 +384,9 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                     </Card>
                 </div>
 
-                <div className="space-y-5 xl:sticky xl:top-6">
+                <div className="space-y-6 xl:sticky xl:top-6">
                     <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
-                        <div className="mb-4 flex items-center gap-2">
-                            <CreditCard className="size-5 text-primary" />
+                        <div className="mb-4">
                             <h2 className="text-base font-semibold text-foreground md:text-lg">Payment Summary</h2>
                         </div>
                         {payment ? (
@@ -457,10 +436,7 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
 
                     <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                                <FileText className="size-5 text-primary" />
-                                <h2 className="text-base font-semibold text-foreground md:text-lg">Payment Review</h2>
-                            </div>
+                            <h2 className="text-base font-semibold text-foreground md:text-lg">Payment Review</h2>
                             {payment ? (
                                 <Badge
                                     className="border"

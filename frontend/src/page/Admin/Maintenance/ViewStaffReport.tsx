@@ -1,6 +1,7 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
 import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
+import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import StaffReportReviewCard from "@/components/pageComponents/Admin/Maintenance/StaffReportReviewCard";
 import {
     formatStaffReportType,
@@ -9,16 +10,14 @@ import {
     getStaffReportTypeClasses,
 } from "@/components/pageComponents/Admin/Maintenance/staffReportDisplay";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
 import { useGetStaffReportByIdQuery } from "@/hooks/admin/staff-report.hook";
 import getCheckInOut from "@/lib/getCheckInOut";
 import { format } from "date-fns";
-import { ArrowLeft, Calendar, FileText, ImageIcon, User2 } from "lucide-react";
 import { useMemo } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const ViewStaffReport = () => {
     const { id } = useParams<{ id: string }>();
@@ -76,15 +75,13 @@ const ViewStaffReportContent = ({ reportId }: { reportId: string }) => {
 
     return (
         <div className="mx-auto max-w-7xl space-y-6">
-            <div className="flex items-center gap-4">
-                <Button asChild size="icon" variant="outline" aria-label="Back to staff reports">
-                    <Link to="/admin/maintenance?tab=staff-reports">
-                        <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-                    </Link>
-                </Button>
-
-                <div className="flex-1">
-                    <div className="mb-2 flex flex-wrap gap-2">
+            <AdminPageHeader
+                backTo="/admin/maintenance?tab=staff-reports"
+                backLabel="Back to staff reports"
+                title="Staff Report Details"
+                description={`${report.title} · ${report.id} · Submitted ${format(new Date(report.createdAt), "MMM dd, yyyy, h:mm a")}`}
+                actions={
+                    <div className="flex flex-wrap items-center gap-2">
                         <Badge className={getStaffReportTypeClasses(report.type)}>
                             {formatStaffReportType(report.type)}
                         </Badge>
@@ -95,28 +92,21 @@ const ViewStaffReportContent = ({ reportId }: { reportId: string }) => {
                             {report.status}
                         </Badge>
                     </div>
-                    <h1 className="text-2xl font-bold md:text-3xl">{report.title}</h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        {report.id} · Submitted{" "}
-                        {format(new Date(report.createdAt), "MMM dd, yyyy, h:mm a")}
-                    </p>
-                </div>
-            </div>
+                }
+            />
 
-            <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_360px]">
+            <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
                 <div className="space-y-6">
-                    <Card className="gap-0 p-6">
-                        <div className="mb-4 flex items-center gap-2">
-                            <FileText className="h-5 w-5 text-primary" />
-                            <h2 className="text-lg font-bold">Report Description</h2>
+                    <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
+                        <div className="mb-4">
+                            <h2 className="text-base font-semibold text-foreground md:text-lg">Report Description</h2>
                         </div>
                         <p className="leading-7 text-foreground/90">{report.description}</p>
                     </Card>
 
-                    <Card className="gap-0 p-6">
-                        <div className="mb-4 flex items-center gap-2">
-                            <ImageIcon className="h-5 w-5 text-primary" />
-                            <h2 className="text-lg font-bold">Proof Photos</h2>
+                    <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
+                        <div className="mb-4 flex items-center justify-between gap-3">
+                            <h2 className="text-base font-semibold text-foreground md:text-lg">Proof Photos</h2>
                             <Badge variant="outline">{report.proofImages.length}</Badge>
                         </div>
 
@@ -125,7 +115,7 @@ const ViewStaffReportContent = ({ reportId }: { reportId: string }) => {
                                 <ViewPhotoDialog key={imageUrl} imageUrl={imageUrl}>
                                     <button
                                         type="button"
-                                        className="group relative overflow-hidden rounded-2xl border bg-muted text-left"
+                                        className="group relative overflow-hidden rounded-xl border bg-muted text-left"
                                     >
                                         <img
                                             src={imageUrl}
@@ -142,13 +132,12 @@ const ViewStaffReportContent = ({ reportId }: { reportId: string }) => {
                     </Card>
 
                     {booking && reservationSchedule && (
-                        <Card className="gap-0 p-6">
-                            <div className="mb-4 flex items-center gap-2">
-                                <Calendar className="h-5 w-5 text-primary" />
-                                <h2 className="text-lg font-bold">Linked Booking</h2>
+                        <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
+                            <div className="mb-4">
+                                <h2 className="text-base font-semibold text-foreground md:text-lg">Linked Booking</h2>
                             </div>
 
-                            <div className="rounded-2xl border bg-primary/5 p-5">
+                            <div className="rounded-xl border bg-primary/5 p-5">
                                 <div className="mb-4">
                                     <p className="font-semibold text-primary">{booking.referenceCode ?? "—"}</p>
                                     <p className="text-sm text-muted-foreground">
@@ -197,10 +186,9 @@ const ViewStaffReportContent = ({ reportId }: { reportId: string }) => {
                 </div>
 
                 <div className="space-y-6">
-                    <Card className="gap-0 p-6">
-                        <div className="mb-4 flex items-center gap-2">
-                            <User2 className="h-5 w-5 text-primary" />
-                            <h2 className="text-lg font-bold">Reporter</h2>
+                    <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
+                        <div className="mb-4">
+                            <h2 className="text-base font-semibold text-foreground md:text-lg">Reporter</h2>
                         </div>
 
                         <div className="space-y-2">
@@ -211,10 +199,9 @@ const ViewStaffReportContent = ({ reportId }: { reportId: string }) => {
                         </div>
                     </Card>
 
-                    <Card className="gap-0 p-6">
-                        <div className="mb-4 flex items-center gap-2">
-                            <FileText className="h-5 w-5 text-primary" />
-                            <h2 className="text-lg font-bold">Details</h2>
+                    <Card className="gap-0 rounded-xl border bg-card p-5 shadow-sm">
+                        <div className="mb-4">
+                            <h2 className="text-base font-semibold text-foreground md:text-lg">Details</h2>
                         </div>
 
                         <div className="space-y-4 text-sm">
