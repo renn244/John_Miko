@@ -117,7 +117,7 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
                     </div>
                 </div>
 
-                <div className="grid max-h-[34rem] grid-cols-1 gap-4 overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] sm:grid-cols-2 [&::-webkit-scrollbar]:hidden">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {isLoading
                         ? null
                         : services?.map((service) => {
