@@ -136,7 +136,10 @@ export class VirtualTourPanoramaService {
           })
           .jpeg({
             quality: VIRTUAL_TOUR_TILE_QUALITY,
-            chromaSubsampling: '4:2:0',
+            // Keep full chroma detail in the high-resolution tiles. 4:2:0 is
+            // efficient for photographs but visibly softens coloured edges
+            // and fine resort details inside a panorama viewer.
+            chromaSubsampling: '4:4:4',
           })
           .toFile(path);
         tiles.push({ filename, path });
