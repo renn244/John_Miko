@@ -128,7 +128,7 @@ export class AccommodationService {
                     }
                 },
                 ...getPaginationArgs(page, limit),
-                orderBy: { createdAt: 'desc' },
+                orderBy: { name: 'asc' },
             }),
             this.prisma.accommodation.count({ where })
         ])

@@ -34,6 +34,11 @@ import { useNavigate } from "react-router";
 
 type StayFilter = "DayStay" | "Overnight" | "22 Hours" | "12 Hours";
 
+const stayFilterDurationHours: Partial<Record<StayFilter, number>> = {
+    "22 Hours": 22,
+    "12 Hours": 12,
+};
+
 const typeOptions: Array<{ value: Accommodation["type"] | "All"; label: string }> = [
     { value: "All", label: "All" },
     { value: "Room", label: "Room" },
@@ -67,9 +72,11 @@ const AccommodationList = () => {
         if (!selectedStay) return data?.data ?? [];
 
         const normalizedSelected = selectedStay.toLowerCase().replace(/\s/g, "");
+        const durationHours = stayFilterDurationHours[selectedStay];
 
         return (data?.data ?? []).filter((accommodation) =>
             accommodation.stayOptions?.some((option) =>
+                (durationHours !== undefined && option.durationHours === durationHours) ||
                 `${option.label} ${option.code} ${option.durationHours ?? ""}`
                     .toLowerCase()
                     .replace(/\s/g, "")
