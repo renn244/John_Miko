@@ -5,6 +5,7 @@ import { Link, NavLink } from "react-router";
 import { Button } from "../ui/button";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
 import SetClosureDialog from "../pageComponents/Admin/Closure/SetClosureDialog";
+import GuestLoginDialog from "./GuestLoginDialog";
 import ProfileMenu, { MobileProfileMenu } from "./ProfileMenu";
 
 const NavBar = () => {
@@ -58,11 +59,7 @@ const NavBar = () => {
                         {/* Right Side */}
                         <div className="flex items-center gap-3">
                             <div className="hidden md:block">
-                                {user ? <ProfileMenu /> : (
-                                    <Button asChild>
-                                        <Link to="/login">Login</Link>
-                                    </Button>
-                                )}
+                                {user ? <ProfileMenu /> : <GuestLoginDialog trigger={<Button>Login</Button>} />}
                             </div>
 
                             <div className="md:hidden">
@@ -121,9 +118,13 @@ const NavBar = () => {
 
                                             <div className="mt-4">
                                                 {user ? <MobileProfileMenu onSelect={() => setIsOpen(false)} /> : (
-                                                    <Link to="/login" onClick={() => setIsOpen(false)}>
-                                                        <Button className="h-11 w-full">Login</Button>
-                                                    </Link>
+                                                    <GuestLoginDialog
+                                                        trigger={
+                                                            <Button className="h-11 w-full" onClick={() => setIsOpen(false)}>
+                                                                Login
+                                                            </Button>
+                                                        }
+                                                    />
                                                 )}
                                             </div>
                                         </nav>

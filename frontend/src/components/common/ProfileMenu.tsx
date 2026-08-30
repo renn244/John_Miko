@@ -5,6 +5,7 @@ import { ClipboardCheck, FolderKanban, History, Lock, LogOutIcon, Settings } fro
 import { Link } from "react-router";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import GuestLoginDialog from "./GuestLoginDialog";
 import UserAvatar from "./UserAvatar";
 
 const ProfileMenu = () => {
@@ -25,11 +26,7 @@ const ProfileMenu = () => {
                         {isStaffRole(user.role) && <StaffMenu role={user.role} />}
                     </DropdownMenuContent>
                 </DropdownMenu>
-            ) : (
-                <Button asChild>
-                    <Link to="/login">Login</Link>
-                </Button>
-            )}
+            ) : <GuestLoginDialog trigger={<Button>Login</Button>} />}
         </div>
     )
 }
@@ -44,9 +41,9 @@ export const MobileProfileMenu = ({ onSelect }: MobileProfileMenuProps) => {
 
     if (!user) {
         return (
-            <Button asChild className="h-11 w-full">
-                <Link to="/login" onClick={onSelect}>Login</Link>
-            </Button>
+            <GuestLoginDialog
+                trigger={<Button className="h-11 w-full" onClick={onSelect}>Login</Button>}
+            />
         );
     }
 

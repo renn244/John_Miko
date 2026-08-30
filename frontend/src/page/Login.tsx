@@ -23,16 +23,12 @@ export default function Login() {
               <h1 className="mt-4 text-3xl font-bold tracking-normal text-foreground">
                 Welcome Back
               </h1>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Sign in to access your resort operations workspace.
+              </p>
             </div>
 
-            <LoginForm />
-
-            <p className="mt-5 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <Link to="/signup-guest" className="font-medium text-primary hover:underline">
-                Register as Guest
-              </Link>
-            </p>
+            <LoginForm mode="internal" />
 
             <div className="my-5 border-t" />
 
@@ -62,7 +58,7 @@ const ResortImagePanel = () => (
     <div className="absolute inset-x-0 bottom-0 p-5 text-white sm:p-7">
       <p className="text-sm font-semibold">John Miko&apos;s Place</p>
       <p className="mt-2 max-w-sm text-sm leading-6 text-white/90">
-        Sign in to access your guest account or staff operations workspace.
+        Secure access for the John Miko&apos;s Place operations team.
       </p>
     </div>
   </div>
