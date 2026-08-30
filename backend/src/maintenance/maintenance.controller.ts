@@ -88,9 +88,9 @@ export class MaintenanceController {
         return this.maintenanceService.completeMaintenance(user, id, body);
     }
 
-    @Patch(':id/close')
-    @Roles(Role.ADMIN)
-    async closeMaintenance(@Param('id') id: string) {
-        return this.maintenanceService.closeMaintenance(id);
+    @Patch(':id/reopen')
+    @Roles(Role.ADMIN, Role.MAINTENANCE_STAFF)
+    async reopenMaintenance(@User() user: UserSession, @Param('id') id: string) {
+        return this.maintenanceService.reopenMaintenance(user, id);
     }
 }

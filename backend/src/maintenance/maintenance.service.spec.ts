@@ -1,4 +1,9 @@
 import { NotFoundException } from '@nestjs/common';
+
+jest.mock('@nestjs/schedule', () => ({
+  Cron: () => () => undefined,
+}));
+
 import { MaintenanceService } from './maintenance.service';
 
 describe('MaintenanceService', () => {
@@ -10,6 +15,8 @@ describe('MaintenanceService', () => {
       count: jest.fn(),
       findMany: jest.fn(),
       findFirst: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
     },
     user: {
       findMany: jest.fn(),
@@ -224,5 +231,52 @@ describe('MaintenanceService', () => {
       }),
     }));
     expect(result).not.toHaveProperty('summary');
+  });
+
+  it('automatically closes tickets completed more than seven days ago', async () => {
+    prisma.maintenance.updateMany.mockResolvedValue({ count: 2 });
+    const now = new Date('2026-08-30T12:00:00.000Z');
+
+    await expect(service.autoCloseCompletedTickets(now)).resolves.toEqual({ count: 2 });
+
+    expect(prisma.maintenance.updateMany).toHaveBeenCalledWith({
+      where: {
+        status: 'Completed',
+        resolvedAt: { lte: new Date('2026-08-23T12:00:00.000Z') },
+      },
+      data: {
+        status: 'Closed',
+        closedAt: now,
+      },
+    });
+  });
+
+  it('reopens a completed ticket for its assigned maintenance staff member', async () => {
+    prisma.maintenance.findUnique.mockResolvedValue({
+      id: 'maintenance-1',
+      status: 'Completed',
+      assignedToId: 'staff-1',
+    });
+    prisma.maintenance.update.mockResolvedValue({
+      id: 'maintenance-1',
+      status: 'InProgress',
+      resolvedAt: null,
+    });
+
+    await expect(
+      service.reopenMaintenance(
+        { id: 'staff-1', role: 'MAINTENANCE_STAFF', email: 'staff@example.com' } as any,
+        'maintenance-1',
+      ),
+    ).resolves.toEqual({
+      id: 'maintenance-1',
+      status: 'InProgress',
+      resolvedAt: null,
+    });
+
+    expect(prisma.maintenance.update).toHaveBeenCalledWith({
+      where: { id: 'maintenance-1' },
+      data: { status: 'InProgress', resolvedAt: null },
+    });
   });
 });

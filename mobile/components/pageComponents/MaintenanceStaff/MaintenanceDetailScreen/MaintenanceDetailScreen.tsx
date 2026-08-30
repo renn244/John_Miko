@@ -10,6 +10,7 @@ import StatusChip, { type StatusChipTone } from '@/components/ui/status-chip';
 import {
     useAssignedMaintenanceById,
     useCompleteAssignedMaintenance,
+    useReopenAssignedMaintenance,
     useStartAssignedMaintenance,
 } from '@/hooks/maintenance.hook';
 import { toast } from '@/lib/toast';
@@ -84,14 +85,15 @@ export default function MaintenanceDetailScreen({
   const detailQuery = useAssignedMaintenanceById(maintenanceIdParam);
   const startMutation = useStartAssignedMaintenance();
   const completeMutation = useCompleteAssignedMaintenance(maintenanceIdParam ?? "");
+  const reopenMutation = useReopenAssignedMaintenance();
 
   const [resolutionNotes, setResolutionNotes] = useState("");
   const [resolutionProofImages, setResolutionProofImages] = useState<string[]>([]);
   const [activeIssueImageIndex, setActiveIssueImageIndex] = useState<number | null>(null);
 
   const handleComplete = () => {
-    if (resolutionNotes.trim().length < 20) {
-      toast.error("Resolution notes must be at least 20 characters.");
+    if (!resolutionNotes.trim()) {
+      toast.error("Resolution notes are required.");
       return;
     }
 
@@ -288,12 +290,8 @@ export default function MaintenanceDetailScreen({
                 placeholderTextColor="#9FA8B1"
                 multiline
                 textAlignVertical="top"
-                maxLength={400}
                 className="min-h-32 rounded-xl border border-neutral-soft-grey-1 bg-white px-4 py-3 text-base text-neutral-dark-1"
               />
-              <Text className="text-right text-sm text-neutral-grey-1">
-                {resolutionNotes.length}/400
-              </Text>
             </View>
 
             <View className="gap-3">
@@ -328,6 +326,32 @@ export default function MaintenanceDetailScreen({
               ) : (
                 <Text className="font-sans-semibold text-lg text-white">
                   Mark as completed
+                </Text>
+              )}
+            </Button>
+          </OperationalCard>
+        ) : null}
+
+        {maintenance.status === "Completed" ? (
+          <OperationalCard contentClassName="gap-4 border-amber-200 bg-amber-50 px-4 py-4">
+            <View className="gap-2">
+              <Text className="font-sans-bold text-lg text-neutral-dark-1">
+                Seven-day observation period
+              </Text>
+              <Text className="text-base leading-6 text-neutral-dark-1">
+                This ticket closes automatically seven days after completion. Reopen it if the problem returns or was not fully fixed.
+              </Text>
+            </View>
+            <Button
+              variant="outline"
+              disabled={reopenMutation.isPending}
+              onPress={() => reopenMutation.mutate(maintenance.id)}
+            >
+              {reopenMutation.isPending ? (
+                <ActivityIndicator color="#0E33F3" />
+              ) : (
+                <Text className="font-sans-semibold text-lg text-primary">
+                  Reopen ticket
                 </Text>
               )}
             </Button>

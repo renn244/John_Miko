@@ -90,11 +90,11 @@ export const maintenanceApi = {
 
         return response.data as Maintenance;
     },
-    closeMaintenance: async (id: string) => {
-        const response = await apiClient.patch(`/maintenance/${id}/close`);
+    reopenMaintenance: async (id: string) => {
+        const response = await apiClient.patch(`/maintenance/${id}/reopen`);
         
         if(response.status >= 400) {
-            throw new Error(response.data.message || 'An error occured while closing the maintenance ticket.');
+            throw new Error(response.data.message || 'An error occurred while reopening the maintenance ticket.');
         }
 
         return response.data as Maintenance;        

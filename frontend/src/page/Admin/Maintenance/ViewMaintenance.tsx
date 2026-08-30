@@ -17,8 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import {
-  useClosedMaintenanceMutation,
   useGetMaintenancebyId,
+  useReopenMaintenanceMutation,
   useStartMaintnenanceMutation,
 } from "@/hooks/admin/maintenance.hook";
 import { cn } from "@/lib/utils";
@@ -27,8 +27,8 @@ import type { Maintenance } from "@/types/admin/maintenance.type";
 import {
   Check,
   Edit,
-  Lock,
   Play,
+  RotateCcw,
 } from "lucide-react";
 import { type ReactNode, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
@@ -69,7 +69,7 @@ const ViewMaintenance = () => {
 const ViewMaintenanceContent = ({ maintenance }: { maintenance: Maintenance }) => {
   const setCompleteId = useMaintenanceStore((state) => state.setCompleteId);
   const startMutation = useStartMaintnenanceMutation();
-  const closeMutation = useClosedMaintenanceMutation();
+  const reopenMutation = useReopenMaintenanceMutation();
   const [selectedImage, setSelectedImage] = useState(maintenance.imagesUrl?.[0] ?? null);
 
   const activityItems = useMemo(
@@ -269,14 +269,20 @@ const ViewMaintenanceContent = ({ maintenance }: { maintenance: Maintenance }) =
               ) : null}
 
               {maintenance.status === "Completed" ? (
-                <Button
-                  className="w-full"
-                  disabled={closeMutation.isPending}
-                  onClick={() => closeMutation.mutate(maintenance.id)}
-                >
-                  <Lock className="size-4" />
-                  Close Ticket
-                </Button>
+                <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <p className="text-sm leading-5 text-amber-950">
+                    This ticket will close automatically seven days after it was marked complete. Reopen it if the issue returns.
+                  </p>
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                    disabled={reopenMutation.isPending}
+                    onClick={() => reopenMutation.mutate(maintenance.id)}
+                  >
+                    <RotateCcw className="size-4" />
+                    Reopen Ticket
+                  </Button>
+                </div>
               ) : null}
             </div>
           </Card>

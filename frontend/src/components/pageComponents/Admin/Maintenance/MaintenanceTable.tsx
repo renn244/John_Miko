@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useClosedMaintenanceMutation, useGetMaintenancesQuery, useStartMaintnenanceMutation } from "@/hooks/admin/maintenance.hook";
+import { useGetMaintenancesQuery, useReopenMaintenanceMutation, useStartMaintnenanceMutation } from "@/hooks/admin/maintenance.hook";
 import { useMaintenanceSearch } from "@/hooks/admin/maintenance.search";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
 import { format } from "date-fns";
-import { Check, Edit, Eye, Lock, MoreHorizontal, Play } from "lucide-react";
+import { Check, Edit, Eye, MoreHorizontal, Play, RotateCcw } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 
 const getStatusColor = (status: "Pending" | "InProgress" | "Completed" | "Closed") => {
@@ -41,7 +41,7 @@ const MaintenanceTable = () => {
     const navigate = useNavigate();
 
     const startMutation = useStartMaintnenanceMutation();
-    const closeMutation = useClosedMaintenanceMutation();
+    const reopenMutation = useReopenMaintenanceMutation();
 
     const { search, status, priority, page, limit, updatePage } = useMaintenanceSearch();
     const { data, isLoading } = useGetMaintenancesQuery({ 
@@ -156,9 +156,9 @@ const MaintenanceTable = () => {
                                             )}
 
                                             {ticket.status === "Completed" && (
-                                                <DropdownMenuItem disabled={closeMutation.isPending} onClick={() => closeMutation.mutate(ticket.id)}>
-                                                    <Lock className="h-4 w-4" />
-                                                    Close Ticket
+                                                <DropdownMenuItem disabled={reopenMutation.isPending} onClick={() => reopenMutation.mutate(ticket.id)}>
+                                                    <RotateCcw className="h-4 w-4" />
+                                                    Reopen Ticket
                                                 </DropdownMenuItem>
                                             )}
                                         </DropdownMenuContent>
