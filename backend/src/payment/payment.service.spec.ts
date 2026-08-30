@@ -163,4 +163,34 @@ describe('PaymentService', () => {
       },
     });
   });
+
+  it('records a refund for an approved payment after its booking is cancelled', async () => {
+    prisma.payment.findUnique.mockResolvedValue({
+      id: 'payment-1',
+      status: 'Approved',
+      amountPaid: 5000,
+      booking: { status: 'Cancelled' },
+    });
+    prisma.payment.update.mockResolvedValue({ id: 'payment-1', status: 'Refunded' });
+
+    await expect(
+      service.refundPayment(
+        'payment-1',
+        'Booking was cancelled by the resort.',
+        'https://example.com/private/refund-proof.jpg',
+        'admin-1',
+      ),
+    ).resolves.toEqual({ id: 'payment-1', status: 'Refunded' });
+
+    expect(prisma.payment.update).toHaveBeenCalledWith({
+      where: { id: 'payment-1' },
+      data: expect.objectContaining({
+        status: 'Refunded',
+        refundReason: 'Booking was cancelled by the resort.',
+        refundProofImageUrl: 'https://example.com/private/refund-proof.jpg',
+        refundedById: 'admin-1',
+        refundedAt: expect.any(Date),
+      }),
+    });
+  });
 });

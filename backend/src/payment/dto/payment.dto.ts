@@ -36,3 +36,14 @@ export class RejectPaymentDto {
     @IsString()
     rejectionNote!: string;
 }
+
+export class RefundPaymentDto {
+    @IsNotEmpty({ message: 'Refund reason is required' })
+    @IsString()
+    refundReason!: string;
+
+    @IsNotEmpty({ message: 'Refund proof is required' })
+    @IsString()
+    @IsUrl()
+    refundProofImageUrl!: string;
+}

@@ -5,7 +5,7 @@ import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
-import { RejectPaymentDto } from './dto/payment.dto';
+import { RefundPaymentDto, RejectPaymentDto } from './dto/payment.dto';
 import { PaymentService } from './payment.service';
 
 @Controller('payment')
@@ -55,5 +55,20 @@ export class PaymentController {
         @User() user: UserSession
     ) {
         return this.paymentService.rejectPayment(id, body.rejectionNote, user.id);
+    }
+
+    @Patch(':id/refund')
+    @Roles(Role.ADMIN)
+    async refundPayment(
+        @Param('id') id: string,
+        @Body() body: RefundPaymentDto,
+        @User() user: UserSession,
+    ) {
+        return this.paymentService.refundPayment(
+            id,
+            body.refundReason,
+            body.refundProofImageUrl,
+            user.id,
+        );
     }
 }

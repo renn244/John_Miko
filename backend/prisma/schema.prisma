@@ -52,6 +52,7 @@ model User {
   assignedMaintenances Maintenance[] @relation("AssignedMaintenanceStaff")
 
   verifiedPayments Payment[]
+  refundedPayments Payment[] @relation("RefundedBy")
 
   knowledgeDocuments KnowledgeDocument[] @relation("KnowledgeDocumentAuthor")
 
@@ -223,6 +224,7 @@ enum PaymentStatus {
   Pending
   Approved
   Rejected
+  Refunded
 }
 
 model PaymentMethod {
@@ -267,6 +269,11 @@ model Payment {
   referenceNumber String?       @unique
   proofImageUrl   String?
   rejectionNote   String?
+  refundReason    String?
+  refundProofImageUrl String?
+  refundedAt      DateTime?
+  refundedById    String?
+  refundedBy      User?         @relation("RefundedBy", fields: [refundedById], references: [id])
   verifiedAt      DateTime?
   verifiedById    String?
   verifiedBy      User?         @relation(fields: [verifiedById], references: [id])

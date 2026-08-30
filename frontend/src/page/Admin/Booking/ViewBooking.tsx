@@ -1,6 +1,8 @@
 import BookingReportDocumentationsSection from "@/components/common/BookingReportDocumentationsSection";
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
+import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
+import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 import ViewPhotoDialog from "@/components/common/ViewPhotoDialog";
 import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useGetBookingById } from "@/hooks/admin/booking.hook";
-import { useApprovePaymentMutation, useRejectPaymentMutation } from "@/hooks/admin/payment.hook";
+import { useApprovePaymentMutation, useRefundPaymentMutation, useRejectPaymentMutation } from "@/hooks/admin/payment.hook";
 import getCheckInOut from "@/lib/getCheckInOut";
 import { formatPeso } from "@/lib/utils";
 import type { BookingWithAccommodationAndPreOrderAndPayment } from "@/types/booking.types";
@@ -37,12 +39,14 @@ const getPaymentTypeColor = (paymentType: "Full" | "Partial") => {
     }
 };
 
-const getPaymentStatusColor = (status?: "Pending" | "Approved" | "Rejected") => {
+const getPaymentStatusColor = (status?: "Pending" | "Approved" | "Rejected" | "Refunded") => {
     switch (status) {
         case "Approved":
             return { bg: "#D1FAE5", text: "#059669", border: "#A7F3D0" };
         case "Rejected":
             return { bg: "#FEE2E2", text: "#DC2626", border: "#FCA5A5" };
+        case "Refunded":
+            return { bg: "#EDE9FE", text: "#6D28D9", border: "#C4B5FD" };
         default:
             return { bg: "#FEF3C7", text: "#D97706", border: "#FCD34D" };
     }
@@ -104,6 +108,9 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
 
     const [isRejectOpen, setIsRejectOpen] = useState(false);
     const [rejectionNote, setRejectionNote] = useState("");
+    const [isRefundOpen, setIsRefundOpen] = useState(false);
+    const [refundReason, setRefundReason] = useState("");
+    const [refundProofImageUrl, setRefundProofImageUrl] = useState("");
 
     const addOns = booking.addOns ?? [];
     const preOrders = booking.preOrders ?? [];
@@ -146,6 +153,8 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
 
     const { mutateAsync: approvePayment, isPending: isApproving } = useApprovePaymentMutation(paymentId);
     const { mutateAsync: rejectPayment, isPending: isRejecting } = useRejectPaymentMutation(paymentId);
+    const { mutateAsync: refundPayment, isPending: isRefunding } = useRefundPaymentMutation(paymentId);
+    const canRefund = payment?.status === "Rejected" || (payment?.status === "Approved" && booking.status === "Cancelled");
 
     return (
         <div className="mx-auto max-w-7xl space-y-6">
@@ -493,6 +502,35 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                                     </div>
                                 )}
 
+                                {payment.status === "Refunded" && (
+                                    <div className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-sm text-violet-950">
+                                        <p className="mb-1 font-semibold text-violet-800">
+                                            {formatPeso(payment.amountPaid)} refund recorded
+                                        </p>
+                                        <p>{payment.refundReason}</p>
+                                        {payment.refundProofImageUrl && (
+                                            <div className="mt-3">
+                                                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-violet-800">
+                                                    Refund Proof
+                                                </p>
+                                                <ViewPhotoDialog imageUrl={payment.refundProofImageUrl}>
+                                                    <img
+                                                        src={payment.refundProofImageUrl}
+                                                        alt="Refund proof"
+                                                        className="h-36 w-full rounded-lg border border-violet-200 object-cover"
+                                                    />
+                                                </ViewPhotoDialog>
+                                            </div>
+                                        )}
+                                        {payment.refundedAt && (
+                                            <p className="mt-2 text-xs text-violet-700">
+                                                Recorded on {new Date(payment.refundedAt).toLocaleString()}
+                                                {payment.refundedBy?.name ? ` by ${payment.refundedBy.name}` : ""}.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
                                 {payment.verifiedAt && (
                                     <p className="text-xs text-muted-foreground">
                                         Verified on {new Date(payment.verifiedAt).toLocaleString()}
@@ -518,6 +556,22 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                                             onClick={() => setIsRejectOpen(true)}
                                         >
                                             Reject Payment
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {canRefund && (
+                                    <div className="space-y-2 border-t pt-4">
+                                        <p className="text-sm text-muted-foreground">
+                                            Record the return of {formatPeso(payment.amountPaid)} to the guest.
+                                        </p>
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            className="w-full"
+                                            onClick={() => setIsRefundOpen(true)}
+                                        >
+                                            Record Refund
                                         </Button>
                                     </div>
                                 )}
@@ -564,6 +618,76 @@ const BookingViewContent = ({ booking }: { booking: BookingWithAccommodationAndP
                             }}
                         >
                             {isRejecting ? <LoadingSpinner /> : "Reject Payment"}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={isRefundOpen}
+                onOpenChange={(open) => {
+                    setIsRefundOpen(open);
+                    if (!open) {
+                        setRefundReason("");
+                        setRefundProofImageUrl("");
+                    }
+                }}
+            >
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Record Refund</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground">
+                            Confirm that {formatPeso(payment?.amountPaid ?? 0)} has been returned to the guest. This records the refund; it does not send money through a payment provider.
+                        </p>
+                        <Textarea
+                            rows={4}
+                            value={refundReason}
+                            onChange={(event) => setRefundReason(event.target.value)}
+                            placeholder="Explain why the payment was refunded..."
+                        />
+                        <div>
+                            <p className="text-sm font-medium">
+                                Refund proof <span className="text-destructive">*</span>
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Upload the receipt or screenshot confirming the return of funds.
+                            </p>
+                            <div className="mt-3">
+                                {refundProofImageUrl ? (
+                                    <CloudinaryPreview
+                                        images={[{ url: refundProofImageUrl }]}
+                                        itemClassName="max-w-44"
+                                        onRemove={() => setRefundProofImageUrl("")}
+                                    />
+                                ) : (
+                                    <CloudinaryUpload
+                                        purpose="REFUND_PROOF"
+                                        onSuccess={setRefundProofImageUrl}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                        <Button variant="outline" type="button" onClick={() => setIsRefundOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={!refundReason.trim() || !refundProofImageUrl || isRefunding}
+                            onClick={async () => {
+                                if (!paymentId) return;
+                                await refundPayment({ refundReason, refundProofImageUrl });
+                                setIsRefundOpen(false);
+                                setRefundReason("");
+                                setRefundProofImageUrl("");
+                            }}
+                        >
+                            {isRefunding ? <LoadingSpinner /> : "Record Refund"}
                         </Button>
                     </div>
                 </DialogContent>

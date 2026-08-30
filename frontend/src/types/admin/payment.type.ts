@@ -25,7 +25,7 @@ export type RevenueAnalyticsApiItem = {
 export type PaymentOverviewRecord = {
     id: string;
     bookingId: string;
-    status: 'Pending' | 'Approved' | 'Rejected';
+    status: 'Pending' | 'Approved' | 'Rejected' | 'Refunded';
     referenceNumber?: string | null;
     proofImageUrl?: string | null;
     amountPaid: number;

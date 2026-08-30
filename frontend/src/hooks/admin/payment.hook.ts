@@ -53,3 +53,17 @@ export const useRejectPaymentMutation = (paymentId: string) => {
         }
     })
 }
+
+export const useRefundPaymentMutation = (paymentId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['payment', 'refund', paymentId],
+        mutationFn: (data: { refundReason: string; refundProofImageUrl: string }) =>
+            paymentApi.refundPayment(paymentId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['payment'] });
+            queryClient.invalidateQueries({ queryKey: ['booking', 'admin'] });
+        }
+    })
+}

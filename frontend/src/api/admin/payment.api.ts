@@ -43,6 +43,15 @@ export const paymentApi = {
 
         return response.data;
     },
+    refundPayment: async (id: string, data: { refundReason: string; refundProofImageUrl: string }) => {
+        const response = await apiClient.patch(`/payment/${id}/refund`, data);
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while recording the refund');
+        }
+
+        return response.data;
+    },
     getPaymentOverview: async (date?: string) => {
         const response = await apiClient.get('/payment/overview', {
             params: { date }
