@@ -44,8 +44,8 @@ const ReportForm = ({
 
   const submit = () => {
     if (!title.trim()) return setError("Add a clear report title.");
-    if (description.trim().length < 20) {
-      return setError("Description must be at least 20 characters.");
+    if (!description.trim()) {
+      return setError("Description is required.");
     }
     if (!proofImages.length) return setError("Add at least one proof image.");
 
@@ -102,12 +102,8 @@ const ReportForm = ({
             disabled={create.isPending}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Describe what happened and what needs attention."
-            maxLength={400}
             className="min-h-32 font-normal placeholder:font-normal"
           />
-          <span className="text-right text-xs font-normal text-muted-foreground">
-            {description.length}/400
-          </span>
         </label>
       </section>
 
