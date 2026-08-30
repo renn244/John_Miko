@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { AuthSessionCacheService } from 'src/auth/auth-session-cache.service';
-import { Role } from 'src/generated/prisma/enums';
+import { MaintenanceStatus, Role, UserStatus } from 'src/generated/prisma/enums';
 import { UserWhereInput } from 'src/generated/prisma/models';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
@@ -31,11 +31,15 @@ export class StaffManagementService {
     }
 
     async createStaff(body: CreateStaffDto) {
-        const existingStaffUser = await this.prisma.user.findFirst({ 
+        const existingStaffUser = await this.prisma.user.findUnique({
             where: { email: body.email }
         })
 
         if(existingStaffUser) {
+            if (existingStaffUser.deletedAt && this.manageableRoles.includes(existingStaffUser.role as typeof this.manageableRoles[number])) {
+                throw new ConflictException('A deleted staff account already uses this email. Restore it to continue.');
+            }
+
             throw new ValidationException({
                 field: 'email',
                 message: ['email already exists!']
@@ -73,6 +77,7 @@ export class StaffManagementService {
     async getStaffs(query: getStaffsQueryDto) {
 
         const where: UserWhereInput = {
+            deletedAt: null,
             OR: [
                 { name: { contains: query.search || "", mode: 'insensitive' } },
                 { id: { contains: query.search || "", mode: 'insensitive' } }
@@ -101,6 +106,7 @@ export class StaffManagementService {
             where: {
                 id: id,
                 role: { in: [...this.manageableRoles] },
+                deletedAt: null,
             },
             omit: {
                 password: true
@@ -112,6 +118,23 @@ export class StaffManagementService {
         }
 
         return staffUser
+    }
+
+    async getRestoreCandidate(email: string) {
+        const deletedStaff = await this.prisma.user.findFirst({
+            where: {
+                email,
+                deletedAt: { not: null },
+                role: { in: [...this.manageableRoles] },
+            },
+            select: { id: true },
+        });
+
+        if (!deletedStaff) {
+            throw new NotFoundException('Deleted staff user not found');
+        }
+
+        return deletedStaff;
     }
 
     async updateStaffRole(id: string, body: UpdateStaffRole) {
@@ -183,5 +206,83 @@ export class StaffManagementService {
         });
     
         return reactivatedStaffUser
+    }
+
+    async deleteStaff(id: string) {
+        await this.getStaffById(id);
+
+        const deletedAt = new Date();
+        const deletedStaff = await this.prisma.$transaction(async (transaction) => {
+            await transaction.maintenance.updateMany({
+                where: {
+                    assignedToId: id,
+                    status: { in: [MaintenanceStatus.Pending, MaintenanceStatus.InProgress] },
+                },
+                data: { assignedToId: null },
+            });
+
+            return transaction.user.update({
+                where: { id },
+                data: {
+                    status: UserStatus.INACTIVE,
+                    deletedAt,
+                    expoPushToken: null,
+                },
+                omit: { password: true },
+            });
+        });
+
+        await this.authSessionCache.invalidate(id);
+
+        return deletedStaff;
+    }
+
+    async restoreStaff(id: string, body: CreateStaffDto) {
+        const deletedStaff = await this.prisma.user.findFirst({
+            where: {
+                id,
+                deletedAt: { not: null },
+                role: { in: [...this.manageableRoles] },
+            },
+        });
+
+        if (!deletedStaff) {
+            throw new NotFoundException('Deleted staff user not found');
+        }
+
+        if (deletedStaff.email !== body.email) {
+            throw new ValidationException({
+                field: 'email',
+                message: ['email must match the deleted staff account'],
+            });
+        }
+
+        const rawPassword = this.generateRandomPassword(body.name);
+        const password = await bcrypt.hash(rawPassword, 10);
+        const restoredStaff = await this.prisma.user.update({
+            where: { id },
+            data: {
+                name: body.name,
+                contactNo: body.contactNo,
+                role: body.role,
+                expertise: body.role === Role.MAINTENANCE_STAFF ? body.expertise : null,
+                password,
+                status: UserStatus.ACTIVE,
+                deletedAt: null,
+                expoPushToken: null,
+            },
+            omit: { password: true },
+        });
+
+        await this.authSessionCache.invalidate(id);
+        await this.staffManagementEmailService.sendRestoredEmail({
+            name: restoredStaff.name,
+            email: restoredStaff.email,
+            role: restoredStaff.role,
+            expertise: restoredStaff.expertise,
+            temporaryPassword: rawPassword,
+        });
+
+        return restoredStaff;
     }
 }

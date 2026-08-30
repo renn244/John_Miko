@@ -39,6 +39,15 @@ export const staffManagementApi = {
 
         return response.data as StaffUser;
     },
+    getRestoreCandidate: async (email: string) => {
+        const response = await apiClient.get('/staff-management/restore-candidate', { params: { email } });
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'A deleted staff account could not be found.');
+        }
+
+        return response.data as { id: string };
+    },
     updateStaffRole: async (id: string, data: UpdateStaffRoleDto) => {
         const response = await apiClient.patch(`/staff-management/${id}/role`, data);
 
@@ -66,6 +75,28 @@ export const staffManagementApi = {
 
         if(response.status >= 400) {
             throw new Error(response.data.message || 'An error occurred while reactivating the staff user.');
+        }
+
+        return response.data as StaffUser;
+    },
+    deleteStaff: async (id: string) => {
+        const response = await apiClient.patch(`/staff-management/${id}/delete`);
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while deleting the staff user.');
+        }
+
+        return response.data as StaffUser;
+    },
+    restoreStaff: async (id: string, data: CreateStaffDto) => {
+        const response = await apiClient.patch(`/staff-management/${id}/restore`, data);
+
+        if(response.status === 400) {
+            throw new ValidationError(response.data);
+        }
+
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while restoring the staff user.');
         }
 
         return response.data as StaffUser;

@@ -55,7 +55,7 @@ export class AuthService {
             });
         }
 
-        if(user.status === "INACTIVE") {
+        if(user.deletedAt || user.status === "INACTIVE") {
             throw new ForbiddenException("Your account is deactivated!")
         }
 
@@ -98,6 +98,11 @@ export class AuthService {
     }
 
     async updateProfile(user: UserSession, body: UpdateProfileDto) {
+        const currentUser = await this.userService.findUserById(user.id);
+        if (!currentUser || currentUser.deletedAt) {
+            throw new BadRequestException("Deleted user is not allowed to update profile.")
+        }
+
         const existingUser = await this.userService.findUserByEmail(body.email);
 
         if(existingUser?.status === "INACTIVE") {

@@ -35,6 +35,7 @@ model User {
   password      String
   role          Role                  @default(GUEST)
   status        UserStatus            @default(ACTIVE)
+  deletedAt     DateTime?
   expertise     MaintenanceExpertise?
   expoPushToken String?
 
@@ -54,6 +55,8 @@ model User {
   knowledgeDocuments KnowledgeDocument[] @relation("KnowledgeDocumentAuthor")
 
   createdAt DateTime @default(now())
+
+  @@index([role, status, deletedAt])
 }
 
 model PasswordResetToken {

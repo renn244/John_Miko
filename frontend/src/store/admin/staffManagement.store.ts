@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { CreateStaffDto } from "@/types/admin/staff-management.type";
 
 type staffManagementStore = {
     isChangeRoleOpen: boolean;
@@ -15,6 +16,14 @@ type staffManagementStore = {
     setIsReactivateOpen: (open: boolean) => void;
     reactivateId: string | undefined;
     setReactivateId: (id: string | undefined) => void;
+
+    isDeleteOpen: boolean;
+    setIsDeleteOpen: (open: boolean) => void;
+    deleteId: string | undefined;
+    setDeleteId: (id: string | undefined) => void;
+
+    restoreRequest: { staffId: string; data: CreateStaffDto } | undefined;
+    setRestoreRequest: (request: { staffId: string; data: CreateStaffDto } | undefined) => void;
 }
 
 export const useStaffManagementStore = create<staffManagementStore>((set) => ({
@@ -83,4 +92,29 @@ export const useStaffManagementStore = create<staffManagementStore>((set) => ({
             isReactivateOpen: id === undefined ? false : true,
         })
     },
+
+    isDeleteOpen: false,
+    setIsDeleteOpen: (open) => {
+        set((state) => {
+            if (open && state.deleteId === undefined) {
+                console.warn("Cannot open without deleteId");
+                return state;
+            }
+
+            return {
+                isDeleteOpen: open,
+                deleteId: state.deleteId,
+            };
+        });
+    },
+    deleteId: undefined,
+    setDeleteId: (id) => {
+        set({
+            deleteId: id,
+            isDeleteOpen: id !== undefined,
+        })
+    },
+
+    restoreRequest: undefined,
+    setRestoreRequest: (request) => set({ restoreRequest: request }),
 }))

@@ -51,9 +51,33 @@ export class StaffManagementEmailService {
                 email: params.email,
                 role: this.formatRole(params.role),
                 expertise: params.expertise,
-                temporaryPassword: params.temporaryPassword,
-                loginUrl: this.getStaffLoginUrl(),
+            temporaryPassword: params.temporaryPassword,
+            accountAction: 'created',
+            loginUrl: this.getStaffLoginUrl(),
             }
+        });
+    }
+
+    async sendRestoredEmail(params: {
+        name?: string | null;
+        email: string;
+        role: Role;
+        expertise?: MaintenanceExpertise | null;
+        temporaryPassword: string;
+    }) {
+        await this.emailService.sendEmail({
+            to: params.email,
+            subject: 'Your Staff Account Has Been Restored',
+            template: 'staffCreated',
+            context: {
+                name: this.getDisplayName(params.name),
+                email: params.email,
+                role: this.formatRole(params.role),
+                expertise: params.expertise,
+                temporaryPassword: params.temporaryPassword,
+                accountAction: 'restored',
+                loginUrl: this.getStaffLoginUrl(),
+            },
         });
     }
 

@@ -1,7 +1,8 @@
 import { staffManagementApi } from "@/api/admin/staff-management.api";
-import type { GetStaffsQuery, StaffStats, UpdateStaffRoleDto } from "@/types/admin/staff-management.type";
+import type { CreateStaffDto, GetStaffsQuery, StaffStats, UpdateStaffRoleDto } from "@/types/admin/staff-management.type";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 export const useCreateStaffMutation = () => {
     const navigate = useNavigate();
@@ -76,6 +77,38 @@ export const useReactivateStaffMutation = (id: string | undefined | null) => {
             queryClient.invalidateQueries({ queryKey: ['staff-management', 'stats'] });
             queryClient.invalidateQueries({ queryKey: ['staff-management', 'byId', id] });
         }
+    })
+}
+
+export const useDeleteStaffMutation = (id: string | undefined | null) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['staff-management', 'delete', id],
+        mutationFn: () => staffManagementApi.deleteStaff(id || ""),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['staff-management', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['staff-management', 'stats'] });
+            queryClient.removeQueries({ queryKey: ['staff-management', 'byId', id] });
+        },
+        onError: (error) => toast.error(error.message),
+    })
+}
+
+export const useRestoreStaffMutation = () => {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['staff-management', 'restore'],
+        mutationFn: ({ id, data }: { id: string; data: CreateStaffDto }) =>
+            staffManagementApi.restoreStaff(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['staff-management', 'list'] });
+            queryClient.invalidateQueries({ queryKey: ['staff-management', 'stats'] });
+            navigate('/admin/staff-management');
+        },
+        onError: (error) => toast.error(error.message),
     })
 }
 

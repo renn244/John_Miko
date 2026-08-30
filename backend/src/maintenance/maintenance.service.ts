@@ -472,6 +472,7 @@ export class MaintenanceService {
             where: {
                 role: Role.MAINTENANCE_STAFF,
                 status: UserStatus.ACTIVE,
+                deletedAt: null,
                 expertise,
             },
             select: {

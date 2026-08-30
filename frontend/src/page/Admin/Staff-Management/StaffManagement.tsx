@@ -2,6 +2,7 @@ import ChangeStaffRoleDialog from "@/components/pageComponents/Admin/StaffManage
 import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
 import DeactivateStaffDialog from "@/components/pageComponents/Admin/StaffManagement/DeactivateStaffDialog";
 import ReactivateStaffDialog from "@/components/pageComponents/Admin/StaffManagement/ReactivateStaffDialog";
+import DeleteStaffDialog from "@/components/pageComponents/Admin/StaffManagement/DeleteStaffDialog";
 import StaffStatistics from "@/components/pageComponents/Admin/StaffManagement/StaffStatistics";
 import StaffTable from "@/components/pageComponents/Admin/StaffManagement/StaffTable";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ const StaffManagement = () => {
       <ChangeStaffRoleDialog />
       <DeactivateStaffDialog />
       <ReactivateStaffDialog />
+      <DeleteStaffDialog />
     </div>
   );
 };
