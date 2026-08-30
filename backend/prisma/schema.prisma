@@ -36,6 +36,7 @@ model User {
   role          Role                  @default(GUEST)
   status        UserStatus            @default(ACTIVE)
   deletedAt     DateTime?
+  profileImageUrl String?
   expertise     MaintenanceExpertise?
   expoPushToken String?
 

@@ -9,7 +9,7 @@ type UserAvatarProps = {
 const UserAvatar = ({ avatarUrl, name, ...avatarProps }: UserAvatarProps) => {
     return (
         <Avatar size="lg" {...avatarProps}>
-            <AvatarImage src={avatarUrl} alt={name} />
+            <AvatarImage src={avatarUrl} alt={name} className="object-cover" />
             <AvatarFallback>{name ? name.charAt(0) : "A"}</AvatarFallback>
         </Avatar>
     )

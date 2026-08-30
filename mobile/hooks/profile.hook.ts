@@ -61,6 +61,29 @@ export const useUpdateProfileMutation = <T extends FieldValues>(setError: UseFor
   });
 };
 
+export const useUpdateProfileImageMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["auth", "update-profile-image"],
+    mutationFn: async (profileImageUrl: string | null) => {
+      const response = await apiClient.patch("/auth/profile-image", { profileImageUrl });
+      if (response.status >= 400) {
+        throw new Error(response.data?.message || "Unable to save profile picture.");
+      }
+      return response.data as ProfileResponse;
+    },
+    onSuccess: async () => {
+      toast.success("Profile picture updated successfully.");
+      await queryClient.invalidateQueries({ queryKey: ["auth", "profile"] });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Unable to save profile picture.");
+    },
+  });
+};
+
+
 export const useChangePasswordMutation = <T extends FieldValues>(setError: UseFormSetError<T>) => {
   return useMutation({
     mutationKey: ["auth", "change-password"],

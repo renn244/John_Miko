@@ -26,6 +26,7 @@ export type AuthUser = {
     contactNo: string;
     role: StaffRole;
     status: UserStatus;
+    profileImageUrl: string | null;
 };
 
 export type LoginResponse = {

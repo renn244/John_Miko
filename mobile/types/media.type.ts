@@ -6,7 +6,8 @@ export type MediaPurpose =
   | "PAYMENT_PROOF"
   | "STAFF_REPORT_PROOF"
   | "MAINTENANCE_ISSUE"
-  | "MAINTENANCE_RESOLUTION";
+  | "MAINTENANCE_RESOLUTION"
+  | "PROFILE_AVATAR";
 
 export type UploadSignatureResponse = {
   cloudName: string;

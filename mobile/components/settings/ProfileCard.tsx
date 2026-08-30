@@ -1,4 +1,5 @@
 import { ProfileResponse } from '@/types/auth.type';
+import { Image } from 'expo-image';
 import { Mail, Phone } from 'lucide-react-native';
 import React, { ReactNode } from 'react';
 import { Text, View } from 'react-native';
@@ -27,11 +28,20 @@ const ProfileCard = ({
     return (
         <OperationalCard contentClassName="gap-4 px-5 py-5">
             <View className="flex-row items-center gap-4">
-                <View className="h-16 w-16 items-center justify-center rounded-xl bg-primary">
-                <Text className="font-sans-bold text-2xl text-white">
-                    {getInitials(user.name)}
-                </Text>
-                </View>
+                {user.profileImageUrl ? (
+                    <Image
+                      source={{ uri: user.profileImageUrl }}
+                      contentFit="cover"
+                      className="h-16 w-16 rounded-full bg-primary"
+                      accessibilityLabel={`${user.name || "Staff member"} profile picture`}
+                    />
+                ) : (
+                    <View className="h-16 w-16 items-center justify-center rounded-full bg-primary">
+                      <Text className="font-sans-bold text-2xl text-white">
+                        {getInitials(user.name)}
+                      </Text>
+                    </View>
+                )}
                 <View className="flex-1 gap-2">
                     <View className="flex-row flex-wrap items-center gap-2">
                         <Text

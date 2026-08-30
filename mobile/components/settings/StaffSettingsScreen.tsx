@@ -15,6 +15,7 @@ import {
 } from "lucide-react-native";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import ProfileCard from "./ProfileCard";
+import ProfilePhotoControl from "./ProfilePhotoControl";
 
 type StaffSettingsScreenProps = {
   replayGuideTargetProps?: RoleTourTargetProps;
@@ -76,6 +77,8 @@ const StaffSettingsScreen = ({
         </View>
 
         <ProfileCard user={user} />
+
+        <ProfilePhotoControl user={user} />
 
         <ProfileDetailsForm user={user} />
 

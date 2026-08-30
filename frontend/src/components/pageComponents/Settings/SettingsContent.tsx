@@ -1,4 +1,5 @@
 import { GuestCard, GuestDivider, GuestInfoChip } from "@/components/guest";
+import ProfileAvatarControl from "@/components/pageComponents/Settings/ProfileAvatarControl";
 import ChangePasswordForm from "@/forms/Settings/ChangePasswordForm";
 import ProfileSettingsForm from "@/forms/Settings/ProfileSettingsForm";
 import type { UserProfileDto } from "@/types/auth.types";
@@ -20,6 +21,16 @@ const SettingsContent = ({ user }: SettingsContentProps) => {
     return (
         <div className="grid gap-5 lg:grid-cols-[1fr_320px] lg:items-start">
             <div className="space-y-5">
+                <GuestCard accent>
+                    <div className="mb-5">
+                        <h2 className="text-xl font-bold tracking-normal">Profile Photo</h2>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                            Add or update the photo shown with your account.
+                        </p>
+                    </div>
+                    <ProfileAvatarControl user={user} />
+                </GuestCard>
+
                 <GuestCard accent>
                     <div className="mb-5">
                         <h2 className="text-xl font-bold tracking-normal">

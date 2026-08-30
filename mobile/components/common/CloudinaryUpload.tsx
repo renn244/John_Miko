@@ -14,6 +14,7 @@ type CloudinaryUploadProps = {
   onError?: (error: Error) => void;
   onUploadingChange?: (isUploading: boolean) => void;
   disabled?: boolean;
+  label?: string;
 };
 
 type ImageSource = "camera" | "library";
@@ -24,6 +25,7 @@ export function CloudinaryUpload({
   onError,
   onUploadingChange,
   disabled,
+  label = "Add proof photo",
 }: CloudinaryUploadProps) {
   const { upload, reset, status, progress } = useCloudinaryUpload();
   const isUploading = status === "uploading";
@@ -52,7 +54,7 @@ export function CloudinaryUpload({
     try {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (!permission.granted) {
-        toast.error("Camera permission is required to take a proof photo.");
+        toast.error("Camera permission is required to take a photo.");
         return;
       }
 
@@ -71,7 +73,7 @@ export function CloudinaryUpload({
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        toast.error("Photo permission is required to select a proof image.");
+        toast.error("Photo permission is required to select an image.");
         return;
       }
 
@@ -131,7 +133,7 @@ export function CloudinaryUpload({
               <ImagePlus size={20} color="#0E33F3" />
             </View>
             <Text className="font-sans-semibold text-base text-primary">
-              Add proof photo
+              {label}
             </Text>
           </>
         )}
@@ -149,7 +151,7 @@ export function CloudinaryUpload({
       <AppBottomSheet
         open={sourceSheetOpen}
         onClose={handleSourceSheetClose}
-        title="Add proof photo"
+        title={label}
       >
         <Text className="text-base text-neutral-grey-1">
           Choose where to get the photo.
