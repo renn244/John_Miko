@@ -2,14 +2,6 @@ import { paymentApi } from "@/api/admin/payment.api"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 
-export const useGetPaymentReports = (date?: string) => {
-    return useQuery({
-        queryKey: ['payment', 'report', date],
-        queryFn: () => paymentApi.getPaymentReports(date),
-        refetchOnWindowFocus: false
-    })
-}
-
 export const useGetPaymentOverviewQuery = (date?: string) => {
     return useQuery({
         queryKey: ['payment', 'overview', date],

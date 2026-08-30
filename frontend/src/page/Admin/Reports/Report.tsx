@@ -1,7 +1,9 @@
 import AccommodationBreakdown from "@/components/pageComponents/Admin/Reports/AccommodationBreakdown";
+import DailyMetrics from "@/components/pageComponents/Admin/Reports/DailyMetrics";
 import GuestFeedback from "@/components/pageComponents/Admin/Reports/GuestFeedback";
 import MaintenanceTickets from "@/components/pageComponents/Admin/Reports/MaintenanceTickets";
 import PrivateBookingStatusPanel from "@/components/pageComponents/Admin/Reports/PrivateBookingStatusPanel";
+import ReportExportMenu from "@/components/pageComponents/Admin/Reports/ReportExportMenu";
 import RevenueBreakdown from "@/components/pageComponents/Admin/Reports/RevenueBreakdown";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -31,29 +33,32 @@ const Report = () => {
                     </p>
                 </div>
 
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            className="w-full justify-start text-left font-normal sm:w-auto md:min-w-64"
-                        >
-                            <CalendarIcon className="size-4" />
-                            {format(selectedDate, "PPP")}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                        <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            disabled={{ after: today }}
-                            onSelect={(date) => {
-                                if (date) {
-                                    setSelectedDate(date);
-                                }
-                            }}
-                        />
-                    </PopoverContent>
-                </Popover>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start text-left font-normal sm:w-auto md:min-w-64"
+                            >
+                                <CalendarIcon className="size-4" />
+                                {format(selectedDate, "PPP")}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="end">
+                            <Calendar
+                                mode="single"
+                                selected={selectedDate}
+                                disabled={{ after: today }}
+                                onSelect={(date) => {
+                                    if (date) {
+                                        setSelectedDate(date);
+                                    }
+                                }}
+                            />
+                        </PopoverContent>
+                    </Popover>
+                    <ReportExportMenu selectedDate={selectedDate} />
+                </div>
             </header>
 
             {showStatusOnly ? (
@@ -63,7 +68,7 @@ const Report = () => {
             ) : (
                 <>
                     <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-                        <PrivateBookingStatusPanel selectedDate={selectedDate} />
+                        <DailyMetrics selectedDate={selectedDate} />
                         <RevenueBreakdown selectedDate={selectedDate} />
                     </section>
 

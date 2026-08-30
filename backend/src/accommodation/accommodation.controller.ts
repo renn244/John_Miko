@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { Role } from 'src/generated/prisma/enums';
-import { DateReportQueryDto } from 'src/lib/dto/date-report.query';
 import { Public } from 'src/lib/decorators/Public.decorator';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
@@ -39,12 +38,6 @@ export class AccommodationController {
     @Get('options')
     async getAccommodationOptions() {
         return this.accommodationService.getAccommodationOptions();
-    }
-
-    @Roles(Role.ADMIN)
-    @Get('report')
-    async getAccommodationReport(@Query() query: DateReportQueryDto) {
-        return this.accommodationService.getAccommodationReports(query.date);
     }
 
     @Public()

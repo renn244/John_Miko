@@ -1,5 +1,5 @@
 import StatisticCards from "@/components/ui/StatisticCards";
-import { useGetStaffReportReportsQuery } from "@/hooks/admin/staff-report.hook";
+import { useGetStaffActivityReportQuery } from "@/hooks/admin/report.hook";
 import { CheckCircle2, Clock3, FileText, XCircle } from "lucide-react";
 
 const reportSummaryCards = [
@@ -34,7 +34,7 @@ const reportSummaryCards = [
 ] as const;
 
 const StaffReportSummaryCards = () => {
-    const { data, isLoading } = useGetStaffReportReportsQuery();
+    const { data, isLoading } = useGetStaffActivityReportQuery();
 
     return (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

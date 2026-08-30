@@ -29,12 +29,6 @@ export class FeedbackController {
     }
 
     @Roles(Role.ADMIN)
-    @Get('report')
-    async getFeedbackReport(@Query() query: DateReportQueryDto) {
-        return this.feedbackService.getFeedbackReport(query.date);
-    }
-
-    @Roles(Role.ADMIN)
     @Get('stats')
     async getFeedbackStats() {
         return this.feedbackService.getFeedbackStats();

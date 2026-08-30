@@ -4,8 +4,7 @@ import {
     type ChartConfig,
 } from "@/components/ui/chart";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
-import { useGetMaintenanceReportQuery } from "@/hooks/admin/maintenance.hook";
-import { useGetStaffReportReportsQuery } from "@/hooks/admin/staff-report.hook";
+import { useGetMaintenanceReportQuery, useGetStaffActivityReportQuery } from "@/hooks/admin/report.hook";
 import { toDateOnly } from "@/lib/date.util";
 import { LogIn, LogOut, Wrench } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
@@ -22,7 +21,7 @@ const maintenanceColors = ["#F59E0B", "#10B981"];
 const MaintenanceTickets = ({ selectedDate }: { selectedDate: Date }) => {
     const selectedDateValue = toDateOnly(selectedDate);
     const { data: maintenance, isLoading: maintenanceLoading } = useGetMaintenanceReportQuery(selectedDateValue);
-    const { data: report, isLoading: staffLoading } = useGetStaffReportReportsQuery(selectedDateValue);
+    const { data: report, isLoading: staffLoading } = useGetStaffActivityReportQuery(selectedDateValue);
 
     if (maintenanceLoading || staffLoading) {
         return (

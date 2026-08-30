@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { CompleteMaintenanceDto, CreateMaintenanceDto, GetMaintenancesQuery, GetMaintenanceStats, Maintenance, MaintenanceOverview, MaintenanceReport, UpdateMaintenanceDto } from "@/types/admin/maintenance.type";
+import type { CompleteMaintenanceDto, CreateMaintenanceDto, GetMaintenancesQuery, GetMaintenanceStats, Maintenance, MaintenanceOverview, UpdateMaintenanceDto } from "@/types/admin/maintenance.type";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const maintenanceApi = {
@@ -17,19 +17,6 @@ export const maintenanceApi = {
 
         return response.data as Maintenance;
     },
-    getMaintenanceReport: async (date?: string) => {
-        const response = await apiClient.get('/maintenance/report', {
-            params: {
-                date
-            }
-        })
-
-        if(response.status >= 400) {
-            throw new Error(response.data.message || 'An error occurred while fetching the maintenance report')
-        }
-
-        return response.data as MaintenanceReport;
-    }, 
     getMaintenances: async (query: GetMaintenancesQuery) => {
         const response = await apiClient.get('/maintenance', { params: query });
 

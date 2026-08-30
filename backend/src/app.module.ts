@@ -25,6 +25,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { getEnvironmentFiles } from './config/environment';
 import { VirtualTourModule } from './virtual-tour/virtual-tour.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { VirtualTourModule } from './virtual-tour/virtual-tour.module';
     ChatbotModule,
     NotificationsModule,
     VirtualTourModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

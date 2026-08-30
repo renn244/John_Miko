@@ -28,12 +28,6 @@ export class MaintenanceController {
         return this.maintenanceService.getMaintenances(query);
     }
 
-    @Get('report')
-    @Roles(Role.ADMIN)
-    async getMaintenanceReport(@Query() query: DateReportQueryDto) {
-        return this.maintenanceService.getMaintenanceReport(query.date);
-    }
-
     @Get('stats')
     @Roles(Role.ADMIN)
     async getMaintenanceStats() {

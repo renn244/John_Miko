@@ -4,7 +4,7 @@ import {
     type ChartConfig,
 } from "@/components/ui/chart";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
-import { useGetAccommodationReportQuery } from "@/hooks/admin/accommodation.hook";
+import { useGetAccommodationReportQuery } from "@/hooks/admin/report.hook";
 import { toDateOnly } from "@/lib/date.util";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 

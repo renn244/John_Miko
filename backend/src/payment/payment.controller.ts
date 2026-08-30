@@ -29,12 +29,6 @@ export class PaymentController {
         return this.paymentService.getRevenueAnalytics();
     }
 
-    @Get('report')
-    @Roles(Role.ADMIN)
-    async getPaymentReport(@Query() query: DateReportQueryDto) {
-        return this.paymentService.getPaymentReportBreakdown(query.date);
-    }
-
     @Get('overview')
     @Roles(Role.ADMIN)
     async getPaymentOverview(@Query() query: DateReportQueryDto) {

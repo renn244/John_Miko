@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import type { PaymentOverview, PaymentReportBreakdown, RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
+import type { PaymentOverview, RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
 import type { PaymentRecord } from "@/types/payment.type";
 
 export const paymentApi = {
@@ -42,19 +42,6 @@ export const paymentApi = {
         }
 
         return response.data;
-    },
-    getPaymentReports: async (date?: string) => {
-        const response = await apiClient.get('/payment/report', {
-            params: {
-                date
-            }
-        })
-
-        if(response.status >= 401) {
-            throw new Error(response.data.message || 'An error occured while fetching the payment report')
-        }
-
-        return response.data as PaymentReportBreakdown;
     },
     getPaymentOverview: async (date?: string) => {
         const response = await apiClient.get('/payment/overview', {

@@ -4,7 +4,7 @@ import {
     type ChartConfig,
 } from "@/components/ui/chart";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
-import { useGetFeedbackReportQuery } from "@/hooks/admin/feedback.hook";
+import { useGetFeedbackReportQuery } from "@/hooks/admin/report.hook";
 import { toDateOnly } from "@/lib/date.util";
 import { Star } from "lucide-react";
 import { Label, Pie, PieChart } from "recharts";
