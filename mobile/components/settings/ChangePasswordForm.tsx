@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/Button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import OperationalCard from "@/components/ui/operational-card";
 import { PasswordInput } from "@/components/ui/passwordInput";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { useChangePasswordMutation } from "@/hooks/profile.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LockKeyhole, ShieldCheck } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { z } from "zod";
 
 const changePasswordSchema = z.object({
@@ -134,7 +135,7 @@ const ChangePasswordForm = () => {
           className="rounded-md"
         >
           {isChangingPassword ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <LoadingIndicator tone="inverse" />
           ) : (
             <Text className="font-sans-semibold text-base text-white">
               Update Password

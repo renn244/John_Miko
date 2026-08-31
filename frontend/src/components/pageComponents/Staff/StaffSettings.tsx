@@ -1,4 +1,5 @@
 import UserAvatar from "@/components/common/UserAvatar";
+import ProfileAvatarControl from "@/components/pageComponents/Settings/ProfileAvatarControl";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/context/AuthContext";
 import ChangePasswordForm from "@/forms/Settings/ChangePasswordForm";
@@ -28,7 +29,7 @@ const StaffSettings = ({ roleLabel }: StaffSettingsProps) => {
       <section className="rounded-xl border bg-card p-5 shadow-sm">
         <div className="flex items-start gap-4">
           <UserAvatar
-            avatarUrl=""
+            avatarUrl={user.profileImageUrl ?? ""}
             name={user.name || user.email}
             className="size-16 shrink-0"
           />
@@ -56,6 +57,16 @@ const StaffSettings = ({ roleLabel }: StaffSettingsProps) => {
             {user.status}
           </span>
         </div>
+      </section>
+
+      <section className="rounded-xl border bg-card p-5 shadow-sm">
+        <div className="mb-5">
+          <h2 className="text-xl font-bold text-foreground">Profile photo</h2>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Add or update the photo shown with your account.
+          </p>
+        </div>
+        <ProfileAvatarControl user={user} />
       </section>
 
       <section className="rounded-xl border bg-card p-5 shadow-sm">

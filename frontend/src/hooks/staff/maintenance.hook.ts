@@ -103,3 +103,15 @@ export const useCompleteAssignedMaintenance = (id: string) => {
     onError: (error) => toast.error(error.message),
   });
 };
+
+export const useReopenAssignedMaintenance = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: staffMaintenanceApi.reopenAssignedMaintenance,
+    onSuccess: async (_, id) => {
+      toast.success("Ticket reopened and returned to in progress.");
+      await invalidateAssignedMaintenance(queryClient, id);
+    },
+    onError: (error) => toast.error(error.message),
+  });
+};

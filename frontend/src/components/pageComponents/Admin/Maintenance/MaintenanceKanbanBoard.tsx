@@ -10,13 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  useClosedMaintenanceMutation,
   useGetMaintenancesQuery,
+  useReopenMaintenanceMutation,
   useStartMaintnenanceMutation,
 } from "@/hooks/admin/maintenance.hook";
 import { useMaintenanceStore } from "@/store/admin/maintenance.store";
 import type { Maintenance } from "@/types/admin/maintenance.type";
-import { Check, Edit, Eye, Lock, MoreHorizontal, Play } from "lucide-react";
+import { Check, Edit, Eye, MoreHorizontal, Play, RotateCcw } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import {
@@ -36,7 +36,7 @@ const MaintenanceKanbanBoard = () => {
   const [mobileStatus, setMobileStatus] = useState<ActiveMaintenanceStatus>("Pending");
 
   const startMutation = useStartMaintnenanceMutation();
-  const closeMutation = useClosedMaintenanceMutation();
+  const reopenMutation = useReopenMaintenanceMutation();
 
   const { data, isLoading } = useGetMaintenancesQuery({
     page: 1,
@@ -113,11 +113,11 @@ const MaintenanceKanbanBoard = () => {
         ) : null}
         {ticket.status === "Completed" ? (
           <DropdownMenuItem
-            disabled={closeMutation.isPending}
-            onClick={() => closeMutation.mutate(ticket.id)}
+            disabled={reopenMutation.isPending}
+            onClick={() => reopenMutation.mutate(ticket.id)}
           >
-            <Lock className="size-4" />
-            Close Ticket
+            <RotateCcw className="size-4" />
+            Reopen Ticket
           </DropdownMenuItem>
         ) : null}
       </DropdownMenuContent>

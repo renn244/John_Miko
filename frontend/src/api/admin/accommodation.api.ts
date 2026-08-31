@@ -1,6 +1,6 @@
 import apiClient from "@/lib/apiClient";
 import { ValidationError } from "@/lib/handleNestError";
-import type { Accommodation, AccommodationOption, AccommodationReport, AccommodationStats, CreateAccommodationDto, GetAccommodationQuery, UpdateAccommodationDto } from "@/types/admin/accommodation.type";
+import type { Accommodation, AccommodationOption, AccommodationStats, CreateAccommodationDto, GetAccommodationQuery, UpdateAccommodationDto } from "@/types/admin/accommodation.type";
 import type { PaginatedResponse } from "@/types/pagination.type";
 
 export const accommodationApi = {
@@ -16,19 +16,6 @@ export const accommodationApi = {
         }
 
         return response.data as Accommodation;
-    },
-    getAccommodationReports: async (date?: string) => {
-        const response = await apiClient.get('/accommodation/report', {
-            params: {
-                date
-            }
-        });
-
-        if(response.status >= 400) {
-            throw new Error(response.data.message || 'Unexpected Error')
-        }
-
-        return response.data as AccommodationReport;
     },
     getAccommodationStats: async () => {
         const response = await apiClient.get('/accommodation/stats');

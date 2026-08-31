@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { AuthSessionCacheModule } from './auth/auth-session-cache.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -25,6 +26,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { getEnvironmentFiles } from './config/environment';
 import { VirtualTourModule } from './virtual-tour/virtual-tour.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { VirtualTourModule } from './virtual-tour/virtual-tour.module';
       ],
       errorMessage: 'Too many requests. Please try again later.',
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     AuthSessionCacheModule,
     AuthModule,
@@ -65,6 +68,7 @@ import { VirtualTourModule } from './virtual-tour/virtual-tour.module';
     ChatbotModule,
     NotificationsModule,
     VirtualTourModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}

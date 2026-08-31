@@ -1,11 +1,12 @@
 import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateResortReport } from "@/hooks/staff/resort.hook";
 import type { ReportSeverity, ReportType } from "@/types/staff/resort.type";
-import { Camera, CheckCircle2, LoaderCircle } from "lucide-react";
+import { Camera, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { reportTypeLabels } from "./resortDisplay";
 
@@ -44,8 +45,8 @@ const ReportForm = ({
 
   const submit = () => {
     if (!title.trim()) return setError("Add a clear report title.");
-    if (description.trim().length < 20) {
-      return setError("Description must be at least 20 characters.");
+    if (!description.trim()) {
+      return setError("Description is required.");
     }
     if (!proofImages.length) return setError("Add at least one proof image.");
 
@@ -102,12 +103,8 @@ const ReportForm = ({
             disabled={create.isPending}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Describe what happened and what needs attention."
-            maxLength={400}
             className="min-h-32 font-normal placeholder:font-normal"
           />
-          <span className="text-right text-xs font-normal text-muted-foreground">
-            {description.length}/400
-          </span>
         </label>
       </section>
 
@@ -195,7 +192,7 @@ const ReportForm = ({
         onClick={submit}
       >
         {create.isPending ? (
-          <LoaderCircle className="size-4 animate-spin" />
+          <LoadingSpinner className="size-4" />
         ) : (
           "Submit report"
         )}

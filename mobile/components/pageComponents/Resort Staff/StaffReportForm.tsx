@@ -9,6 +9,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import OperationalCard from "@/components/ui/operational-card";
 import StatusChip from "@/components/ui/status-chip";
 import { useCreateStaffReport } from "@/hooks/staffReports.hook";
@@ -19,7 +20,6 @@ import { Camera, CheckCircle2, TriangleAlert } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
   Pressable,
   Text,
   TextInput,
@@ -33,8 +33,7 @@ const reportSchema = z.object({
   description: z
     .string()
     .trim()
-    .min(20, "Description must be at least 20 characters")
-    .max(400, "Description must be at most 400 characters"),
+    .min(1, "Description is required"),
   severity: z.enum(["Low", "Medium", "High"]),
   type: z.enum(["checkIn", "checkOut", "maintenance"]),
   proofImages: z
@@ -207,7 +206,6 @@ export default function StaffReportForm({
                   placeholderTextColor="#9FA8B1"
                   multiline
                   textAlignVertical="top"
-                  maxLength={400}
                   editable={!isSubmitting}
                   className={`min-h-32 rounded-lg border bg-white px-4 py-3 text-lg text-neutral-dark-1 ${
                     errors.description
@@ -215,19 +213,13 @@ export default function StaffReportForm({
                       : "border-neutral-soft-grey-1"
                   }`}
                 />
-                <View className="flex-row justify-between gap-3">
-                  <FieldError
-                    className="flex-1"
-                    errors={
-                      errors.description
-                        ? [{ message: errors.description.message }]
-                        : []
-                    }
-                  />
-                  <Text className="text-sm text-neutral-grey-1">
-                    {field.value.length}/400
-                  </Text>
-                </View>
+                <FieldError
+                  errors={
+                    errors.description
+                      ? [{ message: errors.description.message }]
+                      : []
+                  }
+                />
               </Field>
             )}
           />
@@ -365,7 +357,7 @@ export default function StaffReportForm({
       >
         {isSubmitting ? (
           <>
-            <ActivityIndicator color="#FFFFFF" />
+            <LoadingIndicator tone="inverse" />
             <Text className="font-sans-semibold text-base text-white">
               Submitting...
             </Text>

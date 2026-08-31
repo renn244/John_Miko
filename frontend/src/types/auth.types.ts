@@ -53,6 +53,7 @@ export type UserProfileDto = {
     contactNo: string;
     role: UserRole;
     status: UserStatus;
+    profileImageUrl: string | null;
 }
 
 export type UpdateProfileDto = {

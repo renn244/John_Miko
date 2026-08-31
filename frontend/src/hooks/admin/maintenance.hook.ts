@@ -27,15 +27,6 @@ export const useGetMaintenancesQuery = (query: GetMaintenancesQuery) => {
     });
 }
 
-export const useGetMaintenanceReportQuery = (date?: string) => {
-    return useQuery({
-        queryKey: ['maintenance', 'report', date],
-        queryFn: () => maintenanceApi.getMaintenanceReport(date),
-        refetchOnWindowFocus: false,
-        placeholderData: (prev) => prev
-    })
-}
-
 export const useGetMaintenanceStatsQuery = () => {
     return useQuery({
         queryKey: ['maintenance', 'stats'],
@@ -107,12 +98,12 @@ export const useCompleteMaintenanceMutation = (id: string | undefined | null) =>
     })
 }
 
-export const useClosedMaintenanceMutation = () => {
+export const useReopenMaintenanceMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationKey: ['maintenance', 'close'],
-        mutationFn: (id: string) => maintenanceApi.closeMaintenance(id),
+        mutationKey: ['maintenance', 'reopen'],
+        mutationFn: (id: string) => maintenanceApi.reopenMaintenance(id),
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({ queryKey: ['maintenance', 'list'] });
             queryClient.invalidateQueries({ queryKey: ['maintenance', 'byId', id] });

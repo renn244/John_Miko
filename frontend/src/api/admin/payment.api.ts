@@ -1,5 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import type { PaymentOverview, PaymentReportBreakdown, RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
+import type { PaymentOverview, RevenueAnalyticsApiItem } from "@/types/admin/payment.type";
 import type { PaymentRecord } from "@/types/payment.type";
 
 export const paymentApi = {
@@ -43,18 +43,14 @@ export const paymentApi = {
 
         return response.data;
     },
-    getPaymentReports: async (date?: string) => {
-        const response = await apiClient.get('/payment/report', {
-            params: {
-                date
-            }
-        })
+    refundPayment: async (id: string, data: { refundReason: string; refundProofImageUrl: string }) => {
+        const response = await apiClient.patch(`/payment/${id}/refund`, data);
 
-        if(response.status >= 401) {
-            throw new Error(response.data.message || 'An error occured while fetching the payment report')
+        if(response.status >= 400) {
+            throw new Error(response.data.message || 'An error occurred while recording the refund');
         }
 
-        return response.data as PaymentReportBreakdown;
+        return response.data;
     },
     getPaymentOverview: async (date?: string) => {
         const response = await apiClient.get('/payment/overview', {

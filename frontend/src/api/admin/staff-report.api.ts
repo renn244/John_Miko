@@ -1,20 +1,7 @@
-import type { GetStaffReportsAdminQuery, PaginatedStaffReports, ReviewStaffReportDto, StaffReport, StaffReportOverview, StaffReportSummary } from "@/types/admin/staff-report.type";
+import type { GetStaffReportsAdminQuery, PaginatedStaffReports, ReviewStaffReportDto, StaffReport, StaffReportOverview } from "@/types/admin/staff-report.type";
 import apiClient from "@/lib/apiClient"
 
 export const staffReportApi = {
-    getStaffReportReports: async (date?: string) => {
-        const response = await apiClient.get('/staff-reports/report', {
-            params: {
-                date
-            }
-        })
-
-        if(response.status >= 400) {
-            throw new Error(response.data.message || 'An error occured while fething the reports')
-        }
-
-        return response.data as StaffReportSummary
-    },
     getStaffReportOverview: async (date?: string) => {
         const response = await apiClient.get('/staff-reports/overview', {
             params: { date }

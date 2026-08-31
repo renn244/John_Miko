@@ -58,6 +58,10 @@ describe('MediaService', () => {
     );
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it.each(allowedCases)('allows %s uploads for %s', (purpose, role) => {
     expect(() =>
       service.createUploadSignature(createUser(role), purpose),
@@ -149,6 +153,17 @@ describe('MediaService', () => {
     const second = service.createUploadSignature(user, MediaPurpose.MENU_ITEM);
 
     expect(first.publicId).not.toBe(second.publicId);
+  });
+
+  it('uses the standard unique public-media path for avatars', () => {
+    const user = createUser(Role.GUEST);
+    const result = service.createUploadSignature(user, MediaPurpose.PROFILE_AVATAR);
+
+    expect(result).toMatchObject({
+      visibility: 'public',
+      deliveryType: 'upload',
+    });
+    expect(result.publicId).toMatch(/^public\/profile-avatars\/[0-9a-f-]{36}$/);
   });
 
   it('fails safely when required Cloudinary configuration is missing', () => {

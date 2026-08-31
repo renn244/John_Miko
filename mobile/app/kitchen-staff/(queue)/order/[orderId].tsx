@@ -6,6 +6,7 @@ import PreOrderItemList from "@/components/pageComponents/Kitchen Staff/PreOrder
 import { Button } from "@/components/ui/Button";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import DetailPageHeader from "@/components/ui/detail-page-header";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import ScreenState from "@/components/ui/screen-state";
 import {
   useKitchenOrderById
@@ -16,7 +17,6 @@ import {
   ClipboardList
 } from "lucide-react-native";
 import {
-  ActivityIndicator,
   ScrollView,
   Text,
   View
@@ -104,7 +104,7 @@ const LoadingState = ({
         title="Kitchen order"
       />
       <View className="flex-1 items-center justify-center gap-3 px-6">
-        <ActivityIndicator />
+        <LoadingIndicator />
         <Text className="text-center text-base text-neutral-grey-1">
           Loading order details...
         </Text>

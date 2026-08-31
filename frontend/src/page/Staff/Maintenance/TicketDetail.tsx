@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useAssignedMaintenanceById,
   useCompleteAssignedMaintenance,
+  useReopenAssignedMaintenance,
   useStartAssignedMaintenance,
 } from "@/hooks/staff/maintenance.hook";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,7 @@ import type {
   AssignedMaintenanceDetail,
   MaintenanceStatus,
 } from "@/types/staff/maintenance.type";
-import { AlertTriangle, ArrowLeft, Check, ImageIcon, Play } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, ImageIcon, Play, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
@@ -31,6 +32,7 @@ const TicketDetail = () => {
   const query = useAssignedMaintenanceById(id);
   const start = useStartAssignedMaintenance();
   const complete = useCompleteAssignedMaintenance(id || "");
+  const reopen = useReopenAssignedMaintenance();
   const [notes, setNotes] = useState("");
   const [proofs, setProofs] = useState<string[]>([]);
   const goBack = () =>
@@ -68,7 +70,7 @@ const TicketDetail = () => {
 
   const ticket = query.data;
   const submitCompletion = () => {
-    if (notes.trim().length < 20 || !proofs.length) return;
+    if (!notes.trim() || !proofs.length) return;
     complete.mutate({
       resolutionNotes: notes.trim(),
       resolutionProofImages: proofs,
@@ -123,6 +125,12 @@ const TicketDetail = () => {
               onNotesChange={setNotes}
               onProofsChange={setProofs}
               onSubmit={submitCompletion}
+            />
+          ) : null}
+          {ticket.status === "Completed" ? (
+            <ObservationAction
+              isPending={reopen.isPending}
+              onReopen={() => reopen.mutate(ticket.id)}
             />
           ) : null}
           {ticket.resolutionNotes ? (
@@ -294,13 +302,9 @@ const CompletionForm = ({
     <Textarea
       value={notes}
       onChange={(event) => onNotesChange(event.target.value)}
-      maxLength={400}
       placeholder="Describe actions taken..."
       className="min-h-32"
     />
-    <p className="text-right text-xs text-muted-foreground">
-      {notes.length}/400
-    </p>
     <CloudinaryUpload
       purpose="MAINTENANCE_RESOLUTION"
       onSuccess={(url) => onProofsChange([...proofs, url])}
@@ -315,11 +319,30 @@ const CompletionForm = ({
     />
     <Button
       className="w-full"
-      disabled={isPending || notes.trim().length < 20 || !proofs.length}
+      disabled={isPending || !notes.trim() || !proofs.length}
       onClick={onSubmit}
     >
       <Check className="size-4" />
       {isPending ? "Completing..." : "Mark as completed"}
+    </Button>
+  </section>
+);
+
+const ObservationAction = ({
+  isPending,
+  onReopen,
+}: {
+  isPending: boolean;
+  onReopen: () => void;
+}) => (
+  <section className="rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+    <h2 className="font-bold text-amber-950">Seven-day observation period</h2>
+    <p className="mt-2 text-sm leading-6 text-amber-900">
+      This ticket will close automatically seven days after completion. Reopen it if the problem returns or was not fully fixed.
+    </p>
+    <Button className="mt-4 w-full" variant="outline" disabled={isPending} onClick={onReopen}>
+      <RotateCcw className="size-4" />
+      {isPending ? "Reopening..." : "Reopen ticket"}
     </Button>
   </section>
 );

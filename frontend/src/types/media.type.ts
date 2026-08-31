@@ -4,10 +4,12 @@ export type MediaPurpose =
     | "ADD_ON_SERVICE"
     | "PAYMENT_METHOD_QR"
     | "PAYMENT_PROOF"
+    | "REFUND_PROOF"
     | "STAFF_REPORT_PROOF"
     | "MAINTENANCE_ISSUE"
     | "MAINTENANCE_RESOLUTION"
-    | "VIRTUAL_TOUR_INFO";
+    | "VIRTUAL_TOUR_INFO"
+    | "PROFILE_AVATAR";
 
 export type UploadSignatureResponse = {
     cloudName: string;

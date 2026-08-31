@@ -6,6 +6,7 @@ import ScreenState from "@/components/ui/screen-state";
 import { useSession } from "@/context/SessionContext";
 import { type RoleTourTargetProps, useRoleTour } from "@/context/RoleTourContext";
 import { useProfileQuery } from "@/hooks/profile.hook";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import type { TourScrollViewProps } from "@/hooks/roleTours/useTourScrollContainer";
 import { getRoleRoute } from "@/lib/roleRoutes";
 import { useRouter } from "expo-router";
@@ -13,8 +14,9 @@ import {
   AlertTriangle,
   CircleHelp,
 } from "lucide-react-native";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import ProfileCard from "./ProfileCard";
+import ProfilePhotoControl from "./ProfilePhotoControl";
 
 type StaffSettingsScreenProps = {
   replayGuideTargetProps?: RoleTourTargetProps;
@@ -77,6 +79,8 @@ const StaffSettingsScreen = ({
 
         <ProfileCard user={user} />
 
+        <ProfilePhotoControl user={user} />
+
         <ProfileDetailsForm user={user} />
 
         <ChangePasswordForm />
@@ -112,7 +116,7 @@ const LoadingState = () => {
   return (
     <CustomSafeAreaView className="flex-1 bg-neutral-soft-grey-3">
       <View className="flex-1 items-center justify-center gap-4">
-        <ActivityIndicator size="large" />
+        <LoadingIndicator size="large" />
         <Text className="text-lg text-neutral-dark-2">
           Loading account...
         </Text>

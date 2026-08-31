@@ -1,6 +1,7 @@
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import OperationalCard from "@/components/ui/operational-card";
 import ScreenState from "@/components/ui/screen-state";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { useAssignedMaintenanceSummary, useAssignedMaintenances } from "@/hooks/maintenance.hook";
 import useDebouncedValue from "@/lib/useDebounce";
 import {
@@ -10,7 +11,6 @@ import {
 } from "lucide-react-native";
 import { useCallback, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   View
@@ -91,7 +91,7 @@ export default function AssignedMaintenanceListScreen({
         ListFooterComponent={
           query.isFetchingNextPage ? (
             <View className="py-4">
-              <ActivityIndicator />
+              <LoadingIndicator />
             </View>
           ) : null
         }

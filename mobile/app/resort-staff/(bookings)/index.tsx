@@ -3,6 +3,7 @@ import BookingListFilter from "@/components/pageComponents/Resort Staff/BookingL
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import ScreenState from "@/components/ui/screen-state";
 import StatusChip from "@/components/ui/status-chip";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { useStaffBookings } from "@/hooks/staffBookings.hook";
 import { useStaffReportsBookingFilterStore } from "@/store/staffReportsBooking.store";
 import { useRoleTourAutoStart } from "@/hooks/roleTours/useRoleTourAutoStart";
@@ -10,7 +11,6 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { SearchX, WifiOff } from "lucide-react-native";
 import { useMemo } from "react";
 import {
-  ActivityIndicator,
   RefreshControl,
   SectionList,
   Text,
@@ -103,7 +103,7 @@ export default function ResortStaffBookingsScreen() {
           onEndReachedThreshold={0.35}
           ListFooterComponent={
             query.isFetchingNextPage ? (
-              <ActivityIndicator className="py-5" />
+              <LoadingIndicator className="py-5" />
             ) : null
           }
           ListEmptyComponent={
@@ -121,7 +121,7 @@ export default function ResortStaffBookingsScreen() {
 
 const LoadingState = () => (
   <View className="flex-1 items-center justify-center gap-3">
-    <ActivityIndicator size="large" />
+    <LoadingIndicator size="large" />
     <Text className="text-base text-neutral-grey-1">
       Loading bookings...
     </Text>

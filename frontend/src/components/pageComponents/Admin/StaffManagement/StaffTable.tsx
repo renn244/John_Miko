@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { useStaffManagementStore } from "@/store/admin/staffManagement.store";
 import type { StaffRole, StaffUser } from "@/types/admin/staff-management.type";
 import { format } from "date-fns";
-import { MoreHorizontal, UserCheck, UserCog, UserMinus } from "lucide-react";
+import { MoreHorizontal, Trash2, UserCheck, UserCog, UserMinus } from "lucide-react";
 
 const getRoleLabel = (role: StaffRole) => {
     switch (role) {
@@ -50,6 +50,7 @@ const StaffTable = () => {
     const setChangeRoleId = useStaffManagementStore((state) => state.setChangeRoleId);
     const setDeactivateId = useStaffManagementStore((state) => state.setDeactivateId);
     const setReactivateId = useStaffManagementStore((state) => state.setReactivateId);
+    const setDeleteId = useStaffManagementStore((state) => state.setDeleteId);
 
     const { search, role, status, page, limit, updatePage } = useStaffManagementSearch();
     const { data, isLoading, error, refetch, isRefetching } = useGetStaffsQuery({
@@ -158,6 +159,11 @@ const StaffTable = () => {
                                                     <UserCheck className="size-4" />
                                                     {isInactive ? "Reactivate" : "Already Active"}
                                                 </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => setDeleteId(staff.id)} variant="destructive">
+                                                    <Trash2 className="size-4" />
+                                                    Delete Staff
+                                                </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </div>
@@ -254,6 +260,11 @@ const StaffTable = () => {
                                                         >
                                                             <UserMinus className="h-4 w-4" />
                                                             {isInactive ? "Already Inactive" : "Deactivate"}
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem onClick={() => setDeleteId(staff.id)} variant="destructive">
+                                                            <Trash2 className="h-4 w-4" />
+                                                            Delete Staff
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem
                                                         onClick={() => setReactivateId(staff.id)}

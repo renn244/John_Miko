@@ -6,6 +6,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import OperationalCard from "@/components/ui/operational-card";
 import { useUpdateProfileMutation } from "@/hooks/profile.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
@@ -14,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Phone, UserRound } from "lucide-react-native";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { z } from "zod";
 
 const profileSchema = z.object({
@@ -146,7 +147,7 @@ const ProfileDetailsForm = ({ user }: ProfileDetailsFormProps) => {
           className="rounded-md"
         >
           {isSavingProfile ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <LoadingIndicator tone="inverse" />
           ) : (
             <Text className="font-sans-semibold text-base text-white">
               Save Changes

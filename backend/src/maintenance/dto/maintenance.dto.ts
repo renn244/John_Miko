@@ -1,5 +1,5 @@
 import { OmitType, PartialType } from "@nestjs/mapped-types";
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, MinLength } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from "class-validator";
 import { MaintenanceExpertise, MaintenancePriority } from "src/generated/prisma/enums";
 
 export class CreateMaintenanceDto {
@@ -15,8 +15,6 @@ export class CreateMaintenanceDto {
 
     @IsNotEmpty()
     @IsString()
-    @MinLength(10, { message: 'Description must be at least 10 characters long' })
-    @MaxLength(400, { message: 'Description must be at most 400 characters long' })
     description!: string;
 
     @IsNotEmpty()
@@ -35,8 +33,6 @@ export class UpdateMaintenanceDto extends PartialType(CreateMaintenanceDto) {}
 export class CompleteMaintenanceDto {
     @IsNotEmpty()
     @IsString()
-    @MinLength(3, { message: 'Resolution notes must be at least 3 characters long' })
-    @MaxLength(400, { message: 'Resolution notes must be at most 400 characters long' })
     resolutionNotes!: string;
 
     @IsArray({ message: 'resolutionProofImages must be an array' })

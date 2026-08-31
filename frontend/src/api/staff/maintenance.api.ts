@@ -69,4 +69,10 @@ export const staffMaintenanceApi = {
       );
     return response.data as AssignedMaintenanceDetail;
   },
+  reopenAssignedMaintenance: async (id: string) => {
+    const response = await apiClient.patch(`/maintenance/${id}/reopen`);
+    if (response.status >= 400)
+      throw new Error(response.data?.message || "Unable to reopen maintenance.");
+    return response.data as AssignedMaintenanceDetail;
+  },
 };

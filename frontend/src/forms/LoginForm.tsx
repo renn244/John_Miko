@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select"
 import { useLoginMutation } from "@/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
+import type { UserRole } from "@/types/auth.types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch, type FieldError as HookFormFieldError } from "react-hook-form"
 import { Link } from "react-router"
@@ -28,6 +29,20 @@ const LoginSchema = z.object({
 })
 
 type LoginSchemaType = z.infer<typeof LoginSchema>
+
+type LoginFormMode = "guest" | "internal";
+
+type LoginFormProps = {
+    mode: LoginFormMode;
+    showAccountContext?: boolean;
+};
+
+const INTERNAL_LOGIN_ROLES: readonly Exclude<UserRole, "GUEST">[] = [
+    "ADMIN",
+    "MAINTENANCE_STAFF",
+    "KITCHEN_STAFF",
+    "RESORT_STAFF",
+];
 
 const LOGIN_CONTEXT = {
     GUEST: {
@@ -52,7 +67,8 @@ const LOGIN_CONTEXT = {
     },
 } as const;
 
-const LoginForm = () => {
+const LoginForm = ({ mode, showAccountContext = true }: LoginFormProps) => {
+    const isGuestLogin = mode === "guest";
     const {
         handleSubmit,
         control,
@@ -61,7 +77,7 @@ const LoginForm = () => {
     } = useForm<LoginSchemaType>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            userRole: "GUEST",
+            userRole: isGuestLogin ? "GUEST" : "ADMIN",
             email: "",
             password: "",
             rememberMe: false,
@@ -84,7 +100,8 @@ const LoginForm = () => {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Controller
+            {!isGuestLogin ? (
+                <Controller
                     name="userRole"
                     control={control}
                     render={({ field, fieldState }) => (
@@ -95,11 +112,11 @@ const LoginForm = () => {
                                     <SelectValue placeholder="Select account type" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="GUEST">Guest</SelectItem>
-                                    <SelectItem value="ADMIN">Administrator</SelectItem>
-                                    <SelectItem value="MAINTENANCE_STAFF">Maintenance Staff</SelectItem>
-                                    <SelectItem value="KITCHEN_STAFF">Kitchen Staff</SelectItem>
-                                    <SelectItem value="RESORT_STAFF">Resort Staff</SelectItem>
+                                    {INTERNAL_LOGIN_ROLES.map((role) => (
+                                        <SelectItem key={role} value={role}>
+                                            {LOGIN_CONTEXT[role].label.replace(" account", "")}
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                             {fieldState.invalid && (
@@ -107,16 +124,19 @@ const LoginForm = () => {
                             )}
                         </Field>
                     )}
-            />
+                />
+            ) : null}
 
-            <div aria-live="polite">
-                <p className="text-sm font-semibold text-foreground">
-                    {context.label}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    {context.description}
-                </p>
-            </div>
+            {showAccountContext ? (
+                <div aria-live="polite">
+                    <p className="text-sm font-semibold text-foreground">
+                        {context.label}
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                        {context.description}
+                    </p>
+                </div>
+            ) : null}
 
             <Controller 
             name="email"
@@ -180,7 +200,7 @@ const LoginForm = () => {
 
                 <Link
                 to="/forgot-password"
-                className="font-medium text-primary hover:underline underline-offset-2"
+                className="whitespace-nowrap font-medium text-primary hover:underline underline-offset-2"
                 >
                     Forgot Password?
                 </Link>

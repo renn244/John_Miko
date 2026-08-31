@@ -22,7 +22,7 @@ import {
   resetPasswordDto,
 } from './dto/forgotPassword.dto';
 import { ForgotPasswordService } from './forgotPassword.service';
-import { UpdateProfileDto } from './dto/updateProfile.dto';
+import { UpdateProfileDto, UpdateProfileImageDto } from './dto/updateProfile.dto';
 import { UserModule } from 'src/user/user.module';
 import { UpdatePasswordDto } from './dto/changePassword.dto';
 import { PushTokenDto } from './dto/push-token.dto';
@@ -99,6 +99,15 @@ export class AuthController {
     @Body() body: UpdateProfileDto,
   ) {
     return this.authService.updateProfile(user, body);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('profile-image')
+  async updateProfileImage(
+    @User() user: UserSession,
+    @Body() body: UpdateProfileImageDto,
+  ) {
+    return this.authService.updateProfileImage(user, body.profileImageUrl);
   }
 
   @UseGuards(AuthGuard)

@@ -130,3 +130,18 @@ export const useChangePasswordMutation = <T extends FieldValues>(setError: UseFo
         }
     })
 }
+
+export const useUpdateProfileImageMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (profileImageUrl: string | null) => authApi.updateProfileImage(profileImageUrl),
+        onSuccess: async () => {
+            toast.success("Profile picture updated successfully.");
+            await queryClient.invalidateQueries({ queryKey: ['user'] });
+        },
+        onError: (err) => {
+            toast.error(err instanceof Error ? err.message : "Unable to save profile picture.");
+        },
+    });
+}

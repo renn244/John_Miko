@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength, ValidateIf } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateIf } from "class-validator";
 import { ClosureType } from "src/generated/prisma/enums";
 import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
 import { toDateOnly } from "src/lib/utils/date.util";
@@ -23,7 +23,5 @@ export class CreateClosureDto {
     @ValidateIf(o => o.type === ClosureType.Close)
     @IsNotEmpty({ message: 'reason is required when type is Close' })
     @IsString()
-    @MinLength(10)
-    @MaxLength(200)
     reason!: string;
 }

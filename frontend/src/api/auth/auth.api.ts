@@ -96,6 +96,15 @@ export const authApi = {
 
         return response.data as UserProfileDto;
     },
+    updateProfileImage: async (profileImageUrl: string | null) => {
+        const response = await apiClient.patch('/auth/profile-image', { profileImageUrl });
+
+        if (response.status >= 400) {
+            throw new Error(response.data.message || "Unable to update profile picture.");
+        }
+
+        return response.data as UserProfileDto;
+    },
     changePassword: async (data: ChangePasswordDto) => {
         const response = await apiClient.patch('/auth/change-password', data);
 

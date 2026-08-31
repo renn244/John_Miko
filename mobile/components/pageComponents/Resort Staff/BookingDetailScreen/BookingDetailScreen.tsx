@@ -1,5 +1,6 @@
 import { reportTypeLabels } from "@/components/pageComponents/Resort Staff/reportDisplay";
 import { Button } from "@/components/ui/Button";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import CustomSafeAreaView from "@/components/ui/CustomSafeAreaView";
 import DetailPageHeader from "@/components/ui/detail-page-header";
 import ScreenState from "@/components/ui/screen-state";
@@ -10,7 +11,7 @@ import type { ReportStatus, ReportType } from "@/types/staffReport.type";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AlertTriangle } from "lucide-react-native";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { AccommodationDetailsCard } from "./AccommodationDetailsCard";
 import { GuestDetailsCard } from "./GuestDetailsCard";
 import { LinkedReportActionsCard } from "./LinkedReportActionsCard";
@@ -75,7 +76,7 @@ export default function BookingDetailScreen({
           title="Booking details"
         />
         <View className="flex-1 items-center justify-center gap-3 px-6">
-          <ActivityIndicator size="large" />
+          <LoadingIndicator size="large" />
           <Text className="text-base text-neutral-grey-1">
             Loading booking details...
           </Text>

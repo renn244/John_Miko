@@ -8,5 +8,6 @@ import { StaffReportsService } from './staff-reports.service';
   imports: [MaintenanceModule, NotificationsModule],
   controllers: [StaffReportsController],
   providers: [StaffReportsService],
+  exports: [StaffReportsService],
 })
 export class StaffReportsModule {}

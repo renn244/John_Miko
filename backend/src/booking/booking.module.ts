@@ -11,6 +11,7 @@ import { ClosureModule } from 'src/closure/closure.module';
 @Module({
   providers: [BookingService, BookingEmailService],
   controllers: [BookingController],
-  imports: [PreOrderModule, ServicesModule, PaymentModule, ClosureModule, EmailModule]
+  imports: [PreOrderModule, ServicesModule, PaymentModule, ClosureModule, EmailModule],
+  exports: [BookingService],
 })
 export class BookingModule {}

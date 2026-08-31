@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { Prisma } from 'src/generated/prisma/client';
 import { PaymentStatus, PaymentType } from 'src/generated/prisma/enums';
@@ -467,6 +467,47 @@ export class PaymentService {
         await this.paymentEmailService.sendRejectedEmail(updatedPayment.id);
 
         return updatedPayment;
+    }
+
+    async refundPayment(
+        id: string,
+        refundReason: string,
+        refundProofImageUrl: string,
+        refundedById: string,
+    ) {
+        const payment = await this.prisma.payment.findUnique({
+            where: { id },
+            include: {
+                booking: {
+                    select: { status: true },
+                },
+            },
+        });
+
+        if (!payment) {
+            throw new NotFoundException('Payment not found');
+        }
+
+        const canRefund =
+            payment.status === PaymentStatus.Rejected ||
+            (payment.status === PaymentStatus.Approved && payment.booking.status === 'Cancelled');
+
+        if (!canRefund) {
+            throw new BadRequestException(
+                'Only rejected payments or payments for cancelled bookings can be refunded.',
+            );
+        }
+
+        return this.prisma.payment.update({
+            where: { id },
+            data: {
+                status: PaymentStatus.Refunded,
+                refundReason: refundReason.trim(),
+                refundProofImageUrl,
+                refundedAt: new Date(),
+                refundedById,
+            },
+        });
     }
 
     async addExtraFees() {

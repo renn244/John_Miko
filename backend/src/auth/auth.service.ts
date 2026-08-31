@@ -55,7 +55,7 @@ export class AuthService {
             });
         }
 
-        if(user.status === "INACTIVE") {
+        if(user.deletedAt || user.status === "INACTIVE") {
             throw new ForbiddenException("Your account is deactivated!")
         }
 
@@ -88,7 +88,8 @@ export class AuthService {
                 name: true,
                 role: true,
                 contactNo: true,
-                status: true
+                status: true,
+                profileImageUrl: true,
             }
         });
 
@@ -98,6 +99,11 @@ export class AuthService {
     }
 
     async updateProfile(user: UserSession, body: UpdateProfileDto) {
+        const currentUser = await this.userService.findUserById(user.id);
+        if (!currentUser || currentUser.deletedAt) {
+            throw new BadRequestException("Deleted user is not allowed to update profile.")
+        }
+
         const existingUser = await this.userService.findUserByEmail(body.email);
 
         if(existingUser?.status === "INACTIVE") {
@@ -125,6 +131,27 @@ export class AuthService {
         await this.authSessionCache.invalidate(user.id);
 
         return updatedUser;
+    }
+
+    async updateProfileImage(user: UserSession, profileImageUrl: string | null) {
+        const currentUser = await this.userService.findUserById(user.id);
+        if (!currentUser || currentUser.deletedAt) {
+            throw new BadRequestException("Deleted user is not allowed to update profile.")
+        }
+
+        return this.prisma.user.update({
+            where: { id: user.id },
+            data: { profileImageUrl },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                contactNo: true,
+                status: true,
+                profileImageUrl: true,
+            },
+        });
     }
 
     async updatePassword(user: UserSession, body: UpdatePasswordDto) {

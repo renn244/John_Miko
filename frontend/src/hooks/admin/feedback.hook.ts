@@ -11,14 +11,6 @@ export const useGetFeedbacksQuery = (query: { page: number, limit: number, searc
     })
 }
 
-export const useGetFeedbackReportQuery = (date?: string) => {
-    return useQuery({
-        queryKey:  ['feedback', 'report', date],
-        queryFn: () => feedbackApi.getFeedbackReport(date),
-        refetchOnWindowFocus: false
-    })
-}
-
 export const useGetFeedbackOverviewQuery = (date?: string) => {
     return useQuery({
         queryKey: ['feedbacks', 'overview', date],

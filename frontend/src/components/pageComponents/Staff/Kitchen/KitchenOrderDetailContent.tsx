@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,7 @@ import {
   useUpdateKitchenItemStatus,
 } from "@/hooks/staff/kitchen-order.hook";
 import type { KitchenOrder } from "@/types/staff/kitchen-order.type";
-import { CalendarDays, LoaderCircle, Mail, Phone } from "lucide-react";
+import { CalendarDays, Mail, Phone } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { formatKitchenDate, kitchenStatusClassName } from "./kitchenDisplay";
 import { KitchenOrderMeta } from "./KitchenOrderMeta";
@@ -180,7 +181,7 @@ const MealItems = ({
                 }
               >
                 {itemLoading ? (
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <LoadingSpinner className="size-4" />
                 ) : isComplete ? (
                   "Undo"
                 ) : (
@@ -315,7 +316,7 @@ const CompleteAllDialog = ({
           onClick={onConfirm}
         >
           {isPending ? (
-            <LoaderCircle className="size-4 animate-spin" />
+            <LoadingSpinner className="size-4" />
           ) : (
             "Mark all done"
           )}

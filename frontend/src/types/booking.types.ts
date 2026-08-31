@@ -146,10 +146,18 @@ export type BookingWithAccommodationAndPreOrder = {
 export type BookingWithAccommodationAndPreOrderAndPayment = {
     payment: {
         id: string,
-        status: 'Pending' | 'Approved' | 'Rejected',
+        status: 'Pending' | 'Approved' | 'Rejected' | 'Refunded',
         referenceNumber?: string | null,
         proofImageUrl?: string | null,
         rejectionNote?: string | null,
+        refundReason?: string | null,
+        refundProofImageUrl?: string | null,
+        refundedAt?: string | null,
+        refundedBy?: {
+            id: string,
+            name?: string | null,
+            email?: string | null,
+        } | null,
         verifiedAt?: string | null,
         method?: {
             id: string,
@@ -188,7 +196,7 @@ export type BookingOverviewSummary = {
     };
     payment?: {
         id: string;
-        status: 'Pending' | 'Approved' | 'Rejected';
+        status: 'Pending' | 'Approved' | 'Rejected' | 'Refunded';
         amountPaid: number;
         amountToPaid: number;
         totalAmount: number;

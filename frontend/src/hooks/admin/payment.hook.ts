@@ -2,14 +2,6 @@ import { paymentApi } from "@/api/admin/payment.api"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 
-export const useGetPaymentReports = (date?: string) => {
-    return useQuery({
-        queryKey: ['payment', 'report', date],
-        queryFn: () => paymentApi.getPaymentReports(date),
-        refetchOnWindowFocus: false
-    })
-}
-
 export const useGetPaymentOverviewQuery = (date?: string) => {
     return useQuery({
         queryKey: ['payment', 'overview', date],
@@ -58,6 +50,20 @@ export const useRejectPaymentMutation = (paymentId: string) => {
             queryClient.invalidateQueries({ queryKey: ['payment', 'list'] });
             queryClient.invalidateQueries({ queryKey: ['booking', 'admin'] });
             queryClient.invalidateQueries({ queryKey: ['booking', 'admin', 'byId'] });
+        }
+    })
+}
+
+export const useRefundPaymentMutation = (paymentId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['payment', 'refund', paymentId],
+        mutationFn: (data: { refundReason: string; refundProofImageUrl: string }) =>
+            paymentApi.refundPayment(paymentId, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['payment'] });
+            queryClient.invalidateQueries({ queryKey: ['booking', 'admin'] });
         }
     })
 }

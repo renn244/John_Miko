@@ -35,6 +35,8 @@ model User {
   password      String
   role          Role                  @default(GUEST)
   status        UserStatus            @default(ACTIVE)
+  deletedAt     DateTime?
+  profileImageUrl String?
   expertise     MaintenanceExpertise?
   expoPushToken String?
 
@@ -50,10 +52,13 @@ model User {
   assignedMaintenances Maintenance[] @relation("AssignedMaintenanceStaff")
 
   verifiedPayments Payment[]
+  refundedPayments Payment[] @relation("RefundedBy")
 
   knowledgeDocuments KnowledgeDocument[] @relation("KnowledgeDocumentAuthor")
 
   createdAt DateTime @default(now())
+
+  @@index([role, status, deletedAt])
 }
 
 model PasswordResetToken {
@@ -219,6 +224,7 @@ enum PaymentStatus {
   Pending
   Approved
   Rejected
+  Refunded
 }
 
 model PaymentMethod {
@@ -263,6 +269,11 @@ model Payment {
   referenceNumber String?       @unique
   proofImageUrl   String?
   rejectionNote   String?
+  refundReason    String?
+  refundProofImageUrl String?
+  refundedAt      DateTime?
+  refundedById    String?
+  refundedBy      User?         @relation("RefundedBy", fields: [refundedById], references: [id])
   verifiedAt      DateTime?
   verifiedById    String?
   verifiedBy      User?         @relation(fields: [verifiedById], references: [id])

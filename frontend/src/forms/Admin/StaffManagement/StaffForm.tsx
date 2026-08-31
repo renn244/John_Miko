@@ -66,7 +66,7 @@ const StaffForm = ({ onsubmit, oncancel, className, ...props }: StaffFormProps) 
                 return;
             }
 
-            toast.error("An unexpected error occurred. Please try again.");
+            toast.error(error instanceof Error ? error.message : "An unexpected error occurred. Please try again.");
         } finally {
             setIsLoading(false);
         }

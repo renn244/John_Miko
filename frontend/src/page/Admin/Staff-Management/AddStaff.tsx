@@ -1,12 +1,19 @@
 import { Button } from "@/components/ui/button";
 import StaffForm from "@/forms/Admin/StaffManagement/StaffForm";
 import { useCreateStaffMutation } from "@/hooks/admin/staff-management.hook";
+import { staffManagementApi } from "@/api/admin/staff-management.api";
+import RestoreDeletedStaffDialog from "@/components/pageComponents/Admin/StaffManagement/RestoreDeletedStaffDialog";
+import { useStaffManagementStore } from "@/store/admin/staffManagement.store";
 import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
+
+const RESTORE_REQUIRED_MESSAGE = "A deleted staff account already uses this email. Restore it to continue.";
 
 const AddStaff = () => {
     const navigate = useNavigate();
     const { mutateAsync: createStaff } = useCreateStaffMutation();
+    const setRestoreRequest = useStaffManagementStore((state) => state.setRestoreRequest);
 
     return (
         <div className="mx-auto max-w-7xl space-y-6">
@@ -28,12 +35,26 @@ const AddStaff = () => {
 
             <StaffForm
             onsubmit={async (data) => {
-                await createStaff(data);
-                
-                return 
+                try {
+                    await createStaff(data);
+                } catch (error) {
+                    if (
+                        error instanceof Error
+                        && error.message === RESTORE_REQUIRED_MESSAGE
+                    ) {
+                        const candidate = await staffManagementApi.getRestoreCandidate(data.email);
+                        toast.info(error.message);
+                        setRestoreRequest({ staffId: candidate.id, data });
+                        return;
+                    }
+
+                    throw error;
+                }
             }}
             oncancel={() => navigate('/admin/staff-management')}
             />
+
+            <RestoreDeletedStaffDialog />
         </div>
     )
 }

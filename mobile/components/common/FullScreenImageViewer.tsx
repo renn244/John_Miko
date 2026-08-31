@@ -1,11 +1,11 @@
 import { Image } from "expo-image";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { Gallery } from "react-native-zoom-toolkit";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ImageOff, X } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Modal,
   Pressable,
   StatusBar,
@@ -44,7 +44,7 @@ function GalleryImage({ imageUrl }: { imageUrl: string }) {
 
       {loadState === "loading" ? (
         <View className="absolute items-center justify-center gap-3">
-          <ActivityIndicator color="#FFFFFF" size="large" />
+          <LoadingIndicator tone="inverse" size="large" />
           <Text className="text-sm text-white">Loading photo…</Text>
         </View>
       ) : null}

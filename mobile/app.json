@@ -59,8 +59,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow JMPort staff app to select proof photos for reports.",
-          "cameraPermission": "Allow JMPort staff app to take proof photos for reports."
+          "photosPermission": "Allow JMPort staff app to select photos for profile pictures and work reports.",
+          "cameraPermission": "Allow JMPort staff app to take photos for profile pictures and work reports."
         }
       ]
     ],

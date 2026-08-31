@@ -12,6 +12,7 @@ import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import type { AccommodationStayOption } from "@/types/admin/accommodation.type";
 import { ArrowRight, Calendar, Info } from "lucide-react";
 import { Link, useNavigate } from "react-router";
+import GuestLoginDialog from "@/components/common/GuestLoginDialog";
 
 type AccommodationSideBookingProps = {
     accommodation: {
@@ -123,9 +124,7 @@ const AccommodationSideBooking = ({
                         <ArrowRight className="size-4" />
                     </Button>
                 ) : (
-                    <Button asChild className="w-full">
-                        <Link to="/login">Login to Book</Link>
-                    </Button>
+                    <GuestLoginDialog trigger={<Button className="w-full">Login to Book</Button>} />
                 )}
                 <Button asChild variant="ghost" className="w-full">
                     <Link to="/accommodation">Back to Accommodations</Link>

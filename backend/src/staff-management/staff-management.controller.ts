@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CreateStaffDto, UpdateStaffRole } from './dto/staff-management.dto';
+import { getRestoreCandidateQueryDto } from './query/getRestoreCandidate.query';
 import { getStaffsQueryDto } from './query/getStaffs.query';
 import { StaffManagementService } from './staff-management.service';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
@@ -26,6 +27,12 @@ export class StaffManagementController {
     }
 
     @Roles('ADMIN')
+    @Get('restore-candidate')
+    async getRestoreCandidate(@Query() query: getRestoreCandidateQueryDto) {
+        return this.staffManagementService.getRestoreCandidate(query.email);
+    }
+
+    @Roles('ADMIN')
     @Get(':id')
     async getStaffById(@Param('id') id: string) {
         return this.staffManagementService.getStaffById(id);
@@ -47,5 +54,17 @@ export class StaffManagementController {
     @Patch(':id/reactivate')
     async reactivtedStaff(@Param('id') id: string) {
         return this.staffManagementService.reactivateStaff(id);
+    }
+
+    @Roles('ADMIN')
+    @Patch(':id/delete')
+    async deleteStaff(@Param('id') id: string) {
+        return this.staffManagementService.deleteStaff(id);
+    }
+
+    @Roles('ADMIN')
+    @Patch(':id/restore')
+    async restoreStaff(@Param('id') id: string, @Body() body: CreateStaffDto) {
+        return this.staffManagementService.restoreStaff(id, body);
     }
 }

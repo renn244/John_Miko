@@ -5,6 +5,7 @@ import {
 import OperationalCard from "@/components/ui/operational-card";
 import ScreenState from "@/components/ui/screen-state";
 import StatusChip from "@/components/ui/status-chip";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { useMyStaffReports } from "@/hooks/staffReports.hook";
 import { useStaffReportsFilterStore } from "@/store/staffReportsFilter.store";
 import type {
@@ -20,7 +21,6 @@ import {
 } from "lucide-react-native";
 import { useCallback, useMemo } from "react";
 import {
-    ActivityIndicator,
     RefreshControl,
     SectionList,
     Text,
@@ -80,7 +80,7 @@ const ReportsList = () => {
     return (
         query.isLoading ? (
             <View className="flex-1 items-center justify-center gap-3">
-                <ActivityIndicator size="large" />
+                <LoadingIndicator size="large" />
                 <Text className="text-base text-neutral-grey-1">
                     Loading reports...
                 </Text>
@@ -128,7 +128,7 @@ const ReportsList = () => {
             onEndReachedThreshold={0.35}
             ListFooterComponent={
                 query.isFetchingNextPage ? (
-                    <ActivityIndicator className="py-5" />
+                    <LoadingIndicator className="py-5" />
                 ) : null
             }
             ListEmptyComponent={

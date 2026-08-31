@@ -665,6 +665,16 @@ export class BookingService {
                         referenceNumber: true,
                         proofImageUrl: true,
                         rejectionNote: true,
+                        refundReason: true,
+                        refundProofImageUrl: true,
+                        refundedAt: true,
+                        refundedBy: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
                         verifiedAt: true,
                         method: {
                             select: {

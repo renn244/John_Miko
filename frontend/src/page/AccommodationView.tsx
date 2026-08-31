@@ -5,6 +5,7 @@ import {
     GuestContainer,
     GuestDivider,
     GuestInfoChip,
+    guestLayout,
     GuestPageShell,
 } from "@/components/guest";
 import AccommodationSideBooking from "@/components/pageComponents/Accommodation/AccommodationSideBooking";
@@ -12,13 +13,16 @@ import Chatbot from "@/components/pageComponents/Chatbot";
 import { Button } from "@/components/ui/button";
 import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
 import { formatStayOptionRange } from "@/lib/stayOptionTime";
-import { formatPeso } from "@/lib/utils";
+import { cn, formatPeso } from "@/lib/utils";
+import { useBookingSelectStore } from "@/store/booking/useBookingSelect";
 import { BedDouble, CheckCircle2, Home, ParkingCircle, Utensils, Users, Waves } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 const AccommodationView = () => {
     const { id } = useParams<{ id: string }>();
     const { data: accommodation, isLoading, error } = useGetAccommodationByIdQuery(id);
+    const bookingType = useBookingSelectStore((state) => state.bookingType);
+    const setStayOption = useBookingSelectStore((state) => state.setStayOption);
 
     if (isLoading) {
         return (
@@ -127,37 +131,47 @@ const AccommodationView = () => {
                                 Available Stay Options & Rates
                             </h2>
                             <div className="grid gap-3 md:grid-cols-3">
-                                {activeStayOptions.map((stayOption, index) => (
-                                    <GuestCard
-                                        key={stayOption.id}
-                                        className={
-                                            index === 0
-                                                ? "border-primary bg-primary/10"
-                                                : "shadow-none"
-                                        }
-                                    >
-                                        <div className="flex items-start justify-between gap-4">
-                                            <h3 className="text-lg font-bold">{stayOption.label}</h3>
-                                            <CheckCircle2
-                                                className={
-                                                    index === 0
-                                                        ? "size-5 text-primary"
-                                                        : "size-5 text-muted-foreground"
-                                                }
-                                            />
-                                        </div>
-                                        <p className="mt-2 text-sm text-muted-foreground">
-                                            {formatStayOptionRange(stayOption)}
-                                        </p>
-                                        <GuestDivider className="my-4" />
-                                        <p className="text-2xl font-extrabold">
-                                            {formatPeso(accommodation.price)}
-                                            <span className="ml-1 text-xs font-normal text-muted-foreground">
-                                                /stay
-                                            </span>
-                                        </p>
-                                    </GuestCard>
-                                ))}
+                                {activeStayOptions.map((stayOption) => {
+                                    const isSelected = bookingType === stayOption.id;
+
+                                    return (
+                                        <button
+                                            key={stayOption.id}
+                                            type="button"
+                                            aria-pressed={isSelected}
+                                            onClick={() => setStayOption(stayOption)}
+                                            className={cn(
+                                                guestLayout.card,
+                                                guestLayout.cardPadding,
+                                                "w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+                                                isSelected
+                                                    ? "border-primary bg-primary/10"
+                                                    : "shadow-none hover:border-primary/50 hover:bg-muted/40"
+                                            )}
+                                        >
+                                            <div className="flex items-start justify-between gap-4">
+                                                <h3 className="text-lg font-bold">{stayOption.label}</h3>
+                                                <CheckCircle2
+                                                    className={
+                                                        isSelected
+                                                            ? "size-5 text-primary"
+                                                            : "size-5 text-muted-foreground"
+                                                    }
+                                                />
+                                            </div>
+                                            <p className="mt-2 text-sm text-muted-foreground">
+                                                {formatStayOptionRange(stayOption)}
+                                            </p>
+                                            <GuestDivider className="my-4" />
+                                            <p className="text-2xl font-extrabold">
+                                                {formatPeso(accommodation.price)}
+                                                <span className="ml-1 text-xs font-normal text-muted-foreground">
+                                                    /stay
+                                                </span>
+                                            </p>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </section>
 

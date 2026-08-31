@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { Prisma } from 'src/generated/prisma/client';
 import {
     MaintenanceExpertise,
@@ -19,12 +20,34 @@ import {
 import { GetMaintenanceDto } from './query/getMaintenance.dto';
 import { PushNotificationService } from 'src/notifications/push-notification.service';
 
+const OBSERVATION_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
+
 @Injectable()
-export class MaintenanceService {
+export class MaintenanceService implements OnModuleInit {
     constructor(
         private readonly prisma: PrismaService,
         private readonly pushNotifications: PushNotificationService,
     ) {}
+
+    async onModuleInit() {
+        await this.autoCloseCompletedTickets();
+    }
+
+    @Cron('0 */15 * * * *')
+    async autoCloseCompletedTickets(now = new Date()) {
+        const observationCutoff = new Date(now.getTime() - OBSERVATION_PERIOD_MS);
+
+        return this.prisma.maintenance.updateMany({
+            where: {
+                status: MaintenanceStatus.Completed,
+                resolvedAt: { lte: observationCutoff },
+            },
+            data: {
+                status: MaintenanceStatus.Closed,
+                closedAt: now,
+            },
+        });
+    }
 
     async createMaintenance(_user: UserSession, body: CreateMaintenanceDto) {
         const assignedToId = await this.selectAssignee(body.expertise);
@@ -289,21 +312,21 @@ export class MaintenanceService {
         return updatedMaintenance;
     }
 
-    async closeMaintenance(id: string) {
+    async reopenMaintenance(user: UserSession, id: string) {
         const maintenance = await this.findOrThrow(id);
+        this.assertCanManageMaintenance(user, maintenance);
 
-        if(maintenance.status !== 'Completed') {
-            throw new BadRequestException("Only completed maintenance tickets can be closed");
+        if (maintenance.status !== MaintenanceStatus.Completed) {
+            throw new BadRequestException('Only completed maintenance tickets can be reopened during observation');
         }
 
-        const updatedMaintenance = await this.prisma.maintenance.update({
+        return this.prisma.maintenance.update({
             where: { id },
             data: {
-                status: 'Closed',
-            }
-        })
-
-        return updatedMaintenance;
+                status: MaintenanceStatus.InProgress,
+                resolvedAt: null,
+            },
+        });
     }
 
     async getAssignedActiveMaintenances(user: UserSession, query: GetMaintenanceDto) {
@@ -472,6 +495,7 @@ export class MaintenanceService {
             where: {
                 role: Role.MAINTENANCE_STAFF,
                 status: UserStatus.ACTIVE,
+                deletedAt: null,
                 expertise,
             },
             select: {

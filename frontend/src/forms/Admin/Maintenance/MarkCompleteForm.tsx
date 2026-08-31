@@ -14,10 +14,7 @@ import { toast } from "sonner"
 import z from "zod"
 
 const MarkCompleteSchema = z.object({
-    resolutionNotes: z.string()
-      .nonempty("Resolution notes are required")
-      .min(20, "Resolution notes must be at least 20 characters")
-      .max(400, "Resolution notes must be less than 500 characters"),
+    resolutionNotes: z.string().trim().min(1, "Resolution notes are required"),
     resolutionProofImages: z.array(z.url("Invalid URL format"))
       .min(1, "At least one proof image is required")
       .max(3, "A maximum of three proof images is allowed"),

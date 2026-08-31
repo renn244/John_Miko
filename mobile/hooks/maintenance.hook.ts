@@ -133,3 +133,30 @@ export const useCompleteAssignedMaintenance = (maintenanceId?: string) => {
     },
   });
 };
+
+export const useReopenAssignedMaintenance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["maintenance", "assigned", "reopen"],
+    mutationFn: async (maintenanceId: string) => {
+      const response = await apiClient.patch(`/maintenance/${maintenanceId}/reopen`);
+
+      if (response.status >= 400) {
+        throw new Error(response.data?.message || "Failed to reopen maintenance");
+      }
+
+      return response.data as AssignedMaintenanceDetail;
+    },
+    onSuccess: async (data) => {
+      toast.success("Ticket reopened and returned to in progress.");
+      await queryClient.invalidateQueries({ queryKey: ["maintenance", "assigned"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["maintenance", "assigned", "detail", data.id],
+      });
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to reopen maintenance");
+    },
+  });
+};

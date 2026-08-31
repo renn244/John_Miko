@@ -4,7 +4,7 @@ import {
     type ChartConfig,
 } from "@/components/ui/chart";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
-import { useGetPaymentReports } from "@/hooks/admin/payment.hook";
+import { useGetRevenueReportQuery } from "@/hooks/admin/report.hook";
 import { toDateOnly } from "@/lib/date.util";
 import { formatPeso } from "@/lib/utils";
 import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
@@ -19,7 +19,7 @@ const chartConfig = {
 const revenueColors = ["#1E73BE", "#16A34A", "#D97706", "#0EA5E9", "#7C3AED"];
 
 const RevenueBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
-    const { data, isLoading } = useGetPaymentReports(toDateOnly(selectedDate));
+    const { data, isLoading } = useGetRevenueReportQuery(toDateOnly(selectedDate));
 
     if (isLoading) {
         return (
@@ -98,7 +98,7 @@ const RevenueBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
                 </div>
             </div>
 
-            <div className="mt-5 h-72 w-full">
+            <div className="mt-5 h-56 w-full">
                 {!hasAnyRevenue ? (
                     <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border/70 bg-muted/20 text-sm text-muted-foreground">
                         No revenue collected on this date.

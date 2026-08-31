@@ -63,10 +63,11 @@ export class AuthGuard implements CanActivate {
           email: true,
           role: true,
           status: true,
+          deletedAt: true,
         },
       });
 
-      if (!userRecord || userRecord.status !== UserStatus.ACTIVE) {
+      if (!userRecord || userRecord.deletedAt || userRecord.status !== UserStatus.ACTIVE) {
         throw new UnauthorizedException('Session is no longer valid');
       }
 

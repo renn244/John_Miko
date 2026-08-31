@@ -6,10 +6,12 @@ export enum MediaPurpose {
   ADD_ON_SERVICE = 'ADD_ON_SERVICE',
   PAYMENT_METHOD_QR = 'PAYMENT_METHOD_QR',
   PAYMENT_PROOF = 'PAYMENT_PROOF',
+  REFUND_PROOF = 'REFUND_PROOF',
   STAFF_REPORT_PROOF = 'STAFF_REPORT_PROOF',
   MAINTENANCE_ISSUE = 'MAINTENANCE_ISSUE',
   MAINTENANCE_RESOLUTION = 'MAINTENANCE_RESOLUTION',
   VIRTUAL_TOUR_INFO = 'VIRTUAL_TOUR_INFO',
+  PROFILE_AVATAR = 'PROFILE_AVATAR',
 }
 
 export type MediaVisibility = 'public' | 'private';
@@ -53,6 +55,12 @@ export const MEDIA_POLICIES: Record<MediaPurpose, MediaPolicy> = {
     deliveryType: 'authenticated',
     allowedRoles: [Role.GUEST, Role.ADMIN],
   },
+  [MediaPurpose.REFUND_PROOF]: {
+    publicIdPrefix: 'private/refund-proofs',
+    visibility: 'private',
+    deliveryType: 'authenticated',
+    allowedRoles: [Role.ADMIN],
+  },
   [MediaPurpose.STAFF_REPORT_PROOF]: {
     publicIdPrefix: 'private/staff-reports',
     visibility: 'private',
@@ -76,5 +84,17 @@ export const MEDIA_POLICIES: Record<MediaPurpose, MediaPolicy> = {
     visibility: 'public',
     deliveryType: 'upload',
     allowedRoles: [Role.ADMIN],
+  },
+  [MediaPurpose.PROFILE_AVATAR]: {
+    publicIdPrefix: 'public/profile-avatars',
+    visibility: 'public',
+    deliveryType: 'upload',
+    allowedRoles: [
+      Role.ADMIN,
+      Role.GUEST,
+      Role.KITCHEN_STAFF,
+      Role.RESORT_STAFF,
+      Role.MAINTENANCE_STAFF,
+    ],
   },
 };

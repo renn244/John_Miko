@@ -5,6 +5,7 @@ import { ClipboardCheck, FolderKanban, History, Lock, LogOutIcon, Settings } fro
 import { Link } from "react-router";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import GuestLoginDialog from "./GuestLoginDialog";
 import UserAvatar from "./UserAvatar";
 
 const ProfileMenu = () => {
@@ -16,7 +17,7 @@ const ProfileMenu = () => {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="rounded-full focus-visible:rounded-full">
-                            <UserAvatar avatarUrl={""} name={user.name || user.email} />
+                            <UserAvatar avatarUrl={user.profileImageUrl ?? ""} name={user.name || user.email} />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -25,11 +26,7 @@ const ProfileMenu = () => {
                         {isStaffRole(user.role) && <StaffMenu role={user.role} />}
                     </DropdownMenuContent>
                 </DropdownMenu>
-            ) : (
-                <Button asChild>
-                    <Link to="/login">Login</Link>
-                </Button>
-            )}
+            ) : <GuestLoginDialog trigger={<Button>Login</Button>} />}
         </div>
     )
 }
@@ -44,9 +41,9 @@ export const MobileProfileMenu = ({ onSelect }: MobileProfileMenuProps) => {
 
     if (!user) {
         return (
-            <Button asChild className="h-11 w-full">
-                <Link to="/login" onClick={onSelect}>Login</Link>
-            </Button>
+            <GuestLoginDialog
+                trigger={<Button className="h-11 w-full" onClick={onSelect}>Login</Button>}
+            />
         );
     }
 
@@ -67,7 +64,7 @@ export const MobileProfileMenu = ({ onSelect }: MobileProfileMenuProps) => {
     return (
         <section className="border-t pt-5" aria-label="Account">
             <div className="flex items-center gap-3 px-1">
-                <UserAvatar avatarUrl="" name={user.name || user.email} />
+                <UserAvatar avatarUrl={user.profileImageUrl ?? ""} name={user.name || user.email} />
                 <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-foreground">
                         {user.name || user.email}

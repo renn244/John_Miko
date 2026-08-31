@@ -1,5 +1,6 @@
 import AuthScreenShell from "@/components/auth/AuthScreenShell";
 import { Button } from "@/components/ui/Button";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { PasswordInput } from "@/components/ui/passwordInput";
 import { useResetPasswordMutation } from "@/hooks/auth.hook";
@@ -10,7 +11,6 @@ import { AlertTriangle, CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-re
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import {
-    ActivityIndicator,
     Pressable,
     Text,
     View
@@ -260,7 +260,7 @@ export default function ResetPassword() {
                                 })}
                                 >
                                     {isPending ? (
-                                        <ActivityIndicator color="#FFFFFF" />
+                                        <LoadingIndicator tone="inverse" />
                                     ) : (
                                         <Text className="text-white font-sans-semibold text-lg">
                                             Update Password

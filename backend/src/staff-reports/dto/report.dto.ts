@@ -11,7 +11,6 @@ import {
   IsString,
   IsUrl,
   Max,
-  MaxLength,
   Min,
   MinLength,
   ValidateIf,
@@ -37,8 +36,6 @@ export class CreateReportDto {
 
   @IsNotEmpty({ message: 'description is required' })
   @IsString()
-  @MinLength(20, { message: 'description must be more than 20 letters' })
-  @MaxLength(400, { message: 'description must be less than or equal ot 400' })
   description!: string;
 
   @IsArray({ message: 'proofImages must be an array' })
@@ -118,10 +115,6 @@ export class ReviewReportDto {
   @ValidateIf((body: ReviewReportDto) => body.status === ReportStatus.Rejected)
   @IsNotEmpty({ message: 'rejectionNote is required when rejecting a report' })
   @IsString()
-  @MinLength(3, { message: 'rejectionNote must be at least 3 characters long' })
-  @MaxLength(400, {
-    message: 'rejectionNote must be at most 400 characters long',
-  })
   rejectionNote?: string;
 
   @ValidateIf((body: ReviewReportDto) => body.status === ReportStatus.Approved)
