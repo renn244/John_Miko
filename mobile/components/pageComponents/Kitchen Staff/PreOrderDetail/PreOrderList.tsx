@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button';
+import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import OperationalCard from '@/components/ui/operational-card';
 import StatusChip from '@/components/ui/status-chip';
 import { useCompleteAllKitchenItemsMutation, useUpdateKitchenItemStatusMutation } from '@/hooks/kitchenOrders.hook';
@@ -6,7 +7,7 @@ import { KitchenOrder, KitchenOrderStatus } from '@/types/kitchenOrder.type';
 import { useRouter } from 'expo-router';
 import { UtensilsCrossed } from 'lucide-react-native';
 import React, { useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
 
 type PreOrderListProps = {
     order: KitchenOrder
@@ -158,8 +159,8 @@ const PreOrderItemList = ({
                                         className={isCompleted ? "px-4" : "px-5"}
                                     >
                                         {isLoadingThisItem ? (
-                                            <ActivityIndicator
-                                                color={isCompleted ? "#111827" : "#FFFFFF"}
+                                            <LoadingIndicator
+                                                tone={isCompleted ? "dark" : "inverse"}
                                             />
                                         ) : (
                                             <Text

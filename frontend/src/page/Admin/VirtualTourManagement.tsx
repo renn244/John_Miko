@@ -1,4 +1,5 @@
 import AdminPageHeader from "@/components/pageComponents/Admin/AdminPageHeader";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import {
   VirtualTourArrivalInspector,
   VirtualTourArrivalToolbar,
@@ -25,7 +26,6 @@ import type {
   PanoramaPosition,
 } from "@/types/admin/virtual-tour.type";
 import type { Viewer } from "@photo-sphere-viewer/core";
-import { LoaderCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -106,7 +106,7 @@ const VirtualTourManagement = () => {
   if (tourQuery.isLoading) {
     return (
       <div className="flex min-h-96 items-center justify-center" role="status">
-        <LoaderCircle className="size-6 animate-spin text-primary" />
+        <LoadingSpinner className="size-6 text-primary" />
         <span className="sr-only">Loading virtual tour editor</span>
       </div>
     );

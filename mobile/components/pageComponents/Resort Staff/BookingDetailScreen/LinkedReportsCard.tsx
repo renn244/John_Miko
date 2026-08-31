@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/Button";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import OperationalCard from "@/components/ui/operational-card";
 import SectionTitle from "@/components/ui/section-title";
 import StatusChip, { type StatusChipTone } from "@/components/ui/status-chip";
 import type { StaffReport, ReportType, ReportStatus } from "@/types/staffReport.type";
 import { ClipboardList } from "lucide-react-native";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 type LinkedReportsCardProps = {
   reports: StaffReport[];
@@ -36,7 +37,7 @@ export function LinkedReportsCard({
       <SectionTitle title="My linked reports" />
 
       {isLoading ? (
-        <ActivityIndicator className="py-3" />
+        <LoadingIndicator className="py-3" />
       ) : hasError ? (
         <View className="gap-3">
           <Text className="text-base text-neutral-grey-1">
@@ -80,7 +81,7 @@ export function LinkedReportsCard({
               onPress={onLoadMore}
             >
               {isFetchingNextPage ? (
-                <ActivityIndicator />
+                <LoadingIndicator />
               ) : (
                 <Text className="font-sans-semibold text-base text-primary">
                   Load more reports

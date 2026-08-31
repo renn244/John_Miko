@@ -9,6 +9,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import OperationalCard from "@/components/ui/operational-card";
 import StatusChip from "@/components/ui/status-chip";
 import { useCreateStaffReport } from "@/hooks/staffReports.hook";
@@ -19,7 +20,6 @@ import { Camera, CheckCircle2, TriangleAlert } from "lucide-react-native";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-  ActivityIndicator,
   Pressable,
   Text,
   TextInput,
@@ -357,7 +357,7 @@ export default function StaffReportForm({
       >
         {isSubmitting ? (
           <>
-            <ActivityIndicator color="#FFFFFF" />
+            <LoadingIndicator tone="inverse" />
             <Text className="font-sans-semibold text-base text-white">
               Submitting...
             </Text>

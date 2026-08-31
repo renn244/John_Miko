@@ -1,5 +1,6 @@
 import AuthScreenShell from "@/components/auth/AuthScreenShell";
 import { Button } from "@/components/ui/Button";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { useSession } from "@/context/SessionContext";
 import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,6 @@ import { useRouter, type RelativePathString } from "expo-router";
 import { CheckCircle2, LockKeyhole, Mail, UsersRound } from "lucide-react-native";
 import { Controller, useForm } from "react-hook-form";
 import {
-    ActivityIndicator,
     Pressable,
     Text,
     View
@@ -178,7 +178,7 @@ export default function Login() {
                         })}
                         >
                             {isPending ? (
-                                <ActivityIndicator color="#FFFFFF" />
+                                <LoadingIndicator tone="inverse" />
                             ) : (
                                 <Text className="text-white font-sans-semibold text-lg">
                                     Login

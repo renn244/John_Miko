@@ -1,11 +1,12 @@
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 import { Button } from "@/components/ui/Button";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import OperationalCard from "@/components/ui/operational-card";
 import { useUpdateProfileImageMutation } from "@/hooks/profile.hook";
 import type { ProfileResponse } from "@/types/auth.type";
 import { Trash2 } from "lucide-react-native";
 import { useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 type ProfilePhotoControlProps = {
   user: ProfileResponse;
@@ -39,7 +40,7 @@ const ProfilePhotoControl = ({ user }: ProfilePhotoControlProps) => {
           disabled={isBusy}
           onPress={() => updateProfileImage(null)}
         >
-          {isSaving ? <ActivityIndicator color="#FFFFFF" /> : <Trash2 size={18} color="#FFFFFF" />}
+          {isSaving ? <LoadingIndicator tone="inverse" /> : <Trash2 size={18} color="#FFFFFF" />}
           <Text className="font-sans-semibold text-base text-white">Remove photo</Text>
         </Button>
       ) : null}

@@ -4,6 +4,7 @@ import { FullScreenImageViewer } from '@/components/common/FullScreenImageViewer
 import { Button } from '@/components/ui/Button';
 import CustomSafeAreaView from '@/components/ui/CustomSafeAreaView';
 import DetailPageHeader from '@/components/ui/detail-page-header';
+import { LoadingIndicator } from '@/components/ui/loading-indicator';
 import OperationalCard from '@/components/ui/operational-card';
 import ScreenState from '@/components/ui/screen-state';
 import StatusChip, { type StatusChipTone } from '@/components/ui/status-chip';
@@ -19,7 +20,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AlertTriangle, SearchX } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { ChevronStepper } from './ChevronStepper';
 import { MaintenanceSkeletonCard, MaintenanceSkeletonTimeline } from './MaintenanceDetailSkeleton';
 import { ResolutionDetails } from './ResolutionDetails';
@@ -264,7 +265,7 @@ export default function MaintenanceDetailScreen({
             onPress={() => startMutation.mutate(maintenance.id)}
           >
             {startMutation.isPending ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <LoadingIndicator tone="inverse" />
             ) : (
               <Text className="font-sans-semibold text-lg text-white">
                 Start maintenance
@@ -322,7 +323,7 @@ export default function MaintenanceDetailScreen({
 
             <Button disabled={completeMutation.isPending} onPress={handleComplete}>
               {completeMutation.isPending ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <LoadingIndicator tone="inverse" />
               ) : (
                 <Text className="font-sans-semibold text-lg text-white">
                   Mark as completed
@@ -348,7 +349,7 @@ export default function MaintenanceDetailScreen({
               onPress={() => reopenMutation.mutate(maintenance.id)}
             >
               {reopenMutation.isPending ? (
-                <ActivityIndicator color="#0E33F3" />
+                <LoadingIndicator />
               ) : (
                 <Text className="font-sans-semibold text-lg text-primary">
                   Reopen ticket

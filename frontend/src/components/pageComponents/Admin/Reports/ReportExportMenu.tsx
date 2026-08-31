@@ -1,5 +1,6 @@
 import { reportApi } from "@/api/admin/report.api";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -9,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toDateOnly } from "@/lib/date.util";
-import { Download, FileSpreadsheet, FileText, LoaderCircle } from "lucide-react";
+import { Download, FileSpreadsheet, FileText } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -56,7 +57,7 @@ const ReportExportMenu = ({ selectedDate }: { selectedDate: Date }) => {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button className="w-full sm:w-auto" disabled={Boolean(exportingFormat)}>
-                    {exportingFormat ? <LoaderCircle className="animate-spin" /> : <Download />}
+                    {exportingFormat ? <LoadingSpinner className="size-4" /> : <Download />}
                     {exportingFormat ? "Preparing export..." : "Export report"}
                 </Button>
             </DropdownMenuTrigger>

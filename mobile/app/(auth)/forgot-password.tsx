@@ -1,5 +1,6 @@
 import AuthScreenShell from "@/components/auth/AuthScreenShell";
 import { Button } from "@/components/ui/Button";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { Field, FieldError, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,7 +14,6 @@ import { CheckCircle2, Mail, ShieldCheck } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
-    ActivityIndicator,
     Pressable,
     Text,
     View
@@ -147,7 +147,7 @@ export default function ForgotPassword() {
                                 })}
                                 >
                                     {isSending ? (
-                                        <ActivityIndicator color="#FFFFFF" />
+                                        <LoadingIndicator tone="inverse" />
                                     ) : (
                                         <Text className="text-white font-sans-semibold text-lg">
                                             Send Reset Link
@@ -184,7 +184,7 @@ export default function ForgotPassword() {
                                 disabled={isResending}
                                 >
                                     {isResending ? (
-                                        <ActivityIndicator color="#FFFFFF" />
+                                        <LoadingIndicator tone="inverse" />
                                     ) : (
                                         <Text className="text-white font-sans-semibold text-base">
                                             Resend Email

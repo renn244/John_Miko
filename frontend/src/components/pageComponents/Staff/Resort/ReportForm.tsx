@@ -1,11 +1,12 @@
 import { CloudinaryPreview } from "@/components/common/CloudinaryPreview";
 import { CloudinaryUpload } from "@/components/common/CloudinaryUpload";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateResortReport } from "@/hooks/staff/resort.hook";
 import type { ReportSeverity, ReportType } from "@/types/staff/resort.type";
-import { Camera, CheckCircle2, LoaderCircle } from "lucide-react";
+import { Camera, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { reportTypeLabels } from "./resortDisplay";
 
@@ -191,7 +192,7 @@ const ReportForm = ({
         onClick={submit}
       >
         {create.isPending ? (
-          <LoaderCircle className="size-4 animate-spin" />
+          <LoadingSpinner className="size-4" />
         ) : (
           "Submit report"
         )}

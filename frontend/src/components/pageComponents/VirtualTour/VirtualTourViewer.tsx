@@ -1,12 +1,13 @@
 import { createVirtualTour } from "@/components/pageComponents/VirtualTour/tourNavigation";
 import { Button } from "@/components/ui/button";
+import LoadingSpinner from "@/components/ui/loadingSpinner";
 import { useGetPublicVirtualTourQuery } from "@/hooks/virtual-tour.hook";
 import { useVirtualTourViewer } from "@/hooks/useVirtualTourViewer";
 import { VIRTUAL_TOUR_CONFIG } from "@/lib/constant/VIRTUAL_TOUR.constant";
 import type { VirtualTour } from "@/types/virtual-tour.type";
 import { EquirectangularTilesAdapter } from "@photo-sphere-viewer/equirectangular-tiles-adapter";
 import { MarkersPlugin } from "@photo-sphere-viewer/markers-plugin";
-import { LoaderCircle, MapPinned, RotateCcw } from "lucide-react";
+import { MapPinned, RotateCcw } from "lucide-react";
 import { useMemo } from "react";
 import type { PluginConfig } from "react-photo-sphere-viewer";
 import { ReactPhotoSphereViewer } from "react-photo-sphere-viewer";
@@ -31,7 +32,7 @@ type ViewerStateProps = {
 const ViewerState = ({ message, title, loading = false, onRetry }: ViewerStateProps) => (
     <div className="virtual-tour-frame flex h-[80vh] min-h-120 flex-col items-center justify-center rounded-xl border bg-card p-6 text-center shadow-sm">
         <span className="flex size-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            {loading ? <LoaderCircle className="size-6 animate-spin" /> : <MapPinned className="size-6" />}
+            {loading ? <LoadingSpinner className="size-6" /> : <MapPinned className="size-6" />}
         </span>
         <h2 className="mt-4 text-xl font-semibold text-foreground">{title}</h2>
         <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{message}</p>
