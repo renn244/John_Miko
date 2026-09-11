@@ -21,7 +21,7 @@ import { z } from "zod";
 const profileSchema = z.object({
   name: z.string().trim().nonempty("Name is required"),
   email: z.string().email("Email is required").nonempty("Email is required"),
-  contactNo: z.string().trim().nonempty("Contact number is required"),
+  contactNo: z.string().nonempty("Contact number is required").regex(/^[0-9]{10,15}$/, "Contact number must contain 10–15 digits only (no spaces or symbols)"),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;

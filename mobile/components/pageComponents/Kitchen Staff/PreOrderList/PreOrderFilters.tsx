@@ -22,6 +22,8 @@ export default function PreOrderFilters() {
   const search = useKitchenPreOrdersFilterStore((s) => s.search);
   const date = useKitchenPreOrdersFilterStore((s) => s.date);
   const status = useKitchenPreOrdersFilterStore((s) => s.status);
+  const scope = useKitchenPreOrdersFilterStore((s) => s.scope);
+  const setScope = useKitchenPreOrdersFilterStore((s) => s.setScope);
   const setSearch = useKitchenPreOrdersFilterStore((s) => s.setSearch);
   const setDate = useKitchenPreOrdersFilterStore((s) => s.setDate);
   const setStatus = useKitchenPreOrdersFilterStore((s) => s.setStatus);
@@ -37,6 +39,16 @@ export default function PreOrderFilters() {
 
   return (
     <>
+      <View className="flex-row flex-wrap gap-2">
+        {([{ value: 'active', label: 'Today & upcoming' }, { value: 'history', label: 'History' }] as const).map(option => (
+          <Pressable key={option.value} accessibilityRole="button"
+            accessibilityState={{ selected: scope === option.value }}
+            onPress={() => setScope(option.value)}
+            className={`rounded-full border px-4 py-2 ${scope === option.value ? 'border-primary bg-primary' : 'border-neutral-soft-grey-1 bg-white'}`}>
+            <Text className={`font-sans-semibold text-sm ${scope === option.value ? 'text-white' : 'text-neutral-dark-2'}`}>{option.label}</Text>
+          </Pressable>
+        ))}
+      </View>
       <View className="flex-row items-center gap-2">
         <View className="flex-1">
           <Input

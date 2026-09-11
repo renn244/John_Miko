@@ -1,4 +1,5 @@
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, Outlet } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
 import { lazy } from 'react';
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { useAuthContext } from "./context/AuthContext";

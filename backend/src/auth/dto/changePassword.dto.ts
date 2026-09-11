@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString } from "class-validator";
 import { IsMatch } from "src/lib/customValidator/isMatch";
+import { AccountPassword } from './account-password.decorator';
 
 export class UpdatePasswordDto {
     @IsNotEmpty()
@@ -8,6 +9,7 @@ export class UpdatePasswordDto {
 
     @IsNotEmpty()
     @IsString()
+    @AccountPassword()
     newPassword!: string;
 
     @IsNotEmpty()

@@ -29,6 +29,7 @@ export type KitchenOrder = {
 };
 
 export type GetKitchenOrdersQuery = {
+    scope?: 'active' | 'history';
     search?: string;
     date?: string; // YYYY-MM-DD
     status?: KitchenOrderStatus;

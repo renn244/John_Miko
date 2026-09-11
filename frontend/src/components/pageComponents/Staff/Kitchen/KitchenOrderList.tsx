@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import StatisticCards from "@/components/ui/StatisticCards";
+import { Badge } from "@/components/ui/badge";
 import { useKitchenOrders } from "@/hooks/staff/kitchen-order.hook";
 import useDebounce from "@/lib/useDebounce";
 import type { KitchenOrderStatus } from "@/types/staff/kitchen-order.type";
@@ -78,31 +78,16 @@ const KitchenOrderList = () => {
         />
       </div>
       <div className="hidden space-y-5 lg:block">
-        <div className="grid grid-cols-3 gap-4">
-          <StatisticCards
-            title="All orders"
-            stat={orders.length}
-            Icon={<ClipboardList />}
-            isLoading={query.isLoading}
-            accentClassName="border-l-primary"
-            iconContainerClassName="bg-primary"
-          />
-          <StatisticCards
-            title="Pending"
-            stat={pendingOrders.length}
-            Icon={<Clock3 />}
-            isLoading={query.isLoading}
-            accentClassName="border-l-amber-500"
-            iconContainerClassName="bg-amber-500"
-          />
-          <StatisticCards
-            title="Completed"
-            stat={completedOrders.length}
-            Icon={<CheckCircle2 />}
-            isLoading={query.isLoading}
-            accentClassName="border-l-emerald-500"
-            iconContainerClassName="bg-emerald-500"
-          />
+        <div className="flex flex-wrap items-center gap-2" aria-label="Kitchen queue summary" aria-busy={query.isLoading}>
+          <Badge variant="secondary">
+            <ClipboardList /> All orders {query.isLoading || query.isError ? "—" : orders.length}
+          </Badge>
+          <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+            <Clock3 /> Pending {query.isLoading || query.isError ? "—" : pendingOrders.length}
+          </Badge>
+          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800">
+            <CheckCircle2 /> Completed {query.isLoading || query.isError ? "—" : completedOrders.length}
+          </Badge>
         </div>
         <AdminFilterLayout
           search={
