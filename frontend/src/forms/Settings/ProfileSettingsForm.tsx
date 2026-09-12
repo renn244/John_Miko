@@ -13,8 +13,8 @@ import z from "zod";
 
 const ProfileSettingsSchema = z.object({
     name: z.string().trim().nonempty("Name is required"),
-    email: z.string().trim().nonempty("Email is required"),
-    contactNo: z.string().trim().nonempty("Contact number is required"),
+    email: z.string().trim().nonempty("Email is required").email("Enter a valid email address"),
+    contactNo: z.string().nonempty("Contact number is required").regex(/^[0-9]{10,15}$/, "Contact number must contain 10–15 digits only (no spaces or symbols)"),
 });
 
 type ProfileSettingsSchemaType = z.infer<typeof ProfileSettingsSchema>;
@@ -55,7 +55,7 @@ const ProfileSettingsForm = ({ user }: ProfileSettingsFormProps) => {
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
             <Controller
                 name="name"

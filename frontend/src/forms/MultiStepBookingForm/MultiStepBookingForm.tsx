@@ -89,11 +89,10 @@ const MultiStepBookingForm = ({
     const resetBookingSelection = useBookingSelectStore((state) => state.reset);
 
     const navigateAfterConfirmation = (destination: string) => {
-        navigate(destination);
-
-        // Let the destination render before clearing the persisted selection.
-        // Clearing it first makes the current Booking page redirect to accommodation.
-        window.setTimeout(resetBookingSelection, 0);
+        // Commit the destination before clearing selection: the mounted Booking
+        // page redirects to Accommodation whenever its selection is missing.
+        navigate(destination, { replace: true, flushSync: true });
+        resetBookingSelection();
     };
 
     const form = useForm<multiStepBookingFormSchema>({

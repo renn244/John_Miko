@@ -138,7 +138,7 @@ const BookingCard = ({ booking, className,  variant="default", style, ...props }
                                     </div>
                                 )}
 
-                                {variant === "default"  && (
+                                {variant === "default" && (booking.feedback || booking.status === "Completed" || booking.status === "Cancelled") && (
                                     <Button asChild variant={booking.feedback ? "outline" : "default"} size="sm">
                                         <Link to={booking.feedback ? `/feedback/edit/${booking.feedback.id}` : `/feedback/${booking.id}`}>
                                             {booking.feedback ? "Edit Feedback" : "Submit Feedback"}

@@ -64,6 +64,24 @@ const CreateFeedback = () => {
         );
     }
 
+    if (booking.status !== "Completed" && booking.status !== "Cancelled") {
+        return (
+            <GuestPageShell>
+                <NavBar />
+                <GuestContainer className="flex-1 space-y-4 py-6">
+                    <h1 className="text-2xl font-bold">Feedback is not available yet</h1>
+                    <p className="text-muted-foreground">
+                        You can submit feedback once your booking is completed or cancelled.
+                        Payment approval alone does not make a booking eligible.
+                    </p>
+                    <Button asChild variant="outline">
+                        <Link to="/my-bookings">Back to My Bookings</Link>
+                    </Button>
+                </GuestContainer>
+            </GuestPageShell>
+        );
+    }
+
     return (
         <GuestPageShell>
             <NavBar />

@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
 
 describe('FeedbackService', () => {
@@ -15,8 +15,40 @@ describe('FeedbackService', () => {
   let service: FeedbackService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     service = new FeedbackService(prisma);
+  });
+
+  const guest = { id: 'guest-1', role: 'GUEST', email: 'guest@example.com' } as any;
+  const submission = { bookingId: 'booking-1', rating: 5, comment: 'Great stay' };
+
+  it.each(['Completed', 'Cancelled'])('allows feedback for an owned %s booking', async (status) => {
+    prisma.booking.findUnique.mockResolvedValue({ id: 'booking-1', userId: guest.id, status });
+    prisma.feedback.create.mockResolvedValue({ id: 'feedback-1', ...submission });
+
+    await expect(service.createFeedback(guest, submission)).resolves.toEqual({ id: 'feedback-1', ...submission });
+    expect(prisma.feedback.create).toHaveBeenCalledWith({ data: { userId: guest.id, ...submission } });
+  });
+
+  it.each(['Pending', 'Confirmed'])('rejects feedback for an owned %s booking', async (status) => {
+    prisma.booking.findUnique.mockResolvedValue({ id: 'booking-1', userId: guest.id, status });
+
+    await expect(service.createFeedback(guest, submission)).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.feedback.create).not.toHaveBeenCalled();
+  });
+
+  it.each(['Completed', 'Cancelled'])('rejects another guest\'s %s booking', async (status) => {
+    prisma.booking.findUnique.mockResolvedValue({ id: 'booking-1', userId: 'guest-2', status });
+
+    await expect(service.createFeedback(guest, submission)).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.feedback.create).not.toHaveBeenCalled();
+  });
+
+  it('returns not found without creating feedback for a missing booking', async () => {
+    prisma.booking.findUnique.mockResolvedValue(null);
+
+    await expect(service.createFeedback(guest, submission)).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.feedback.create).not.toHaveBeenCalled();
   });
 
   it('rejects feedback for bookings without an owning user account', async () => {

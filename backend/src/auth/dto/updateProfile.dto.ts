@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumberString, IsOptional, IsString, IsUrl, ValidateIf } from "class-validator";
+import { IsEmail, IsNotEmpty, Matches, IsOptional, IsString, IsUrl, ValidateIf } from "class-validator";
 
 
 export class UpdateProfileDto {
@@ -12,7 +12,8 @@ export class UpdateProfileDto {
     email!: string;
 
     @IsNotEmpty()
-    @IsNumberString()
+    @IsString()
+    @Matches(/^[0-9]{10,15}$/, { message: 'Contact number must contain 10–15 digits only (no spaces or symbols)' })
     contactNo!: string
 }
 

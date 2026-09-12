@@ -81,6 +81,11 @@ export class PreOrderService {
     }
 
     async getPreOrders(query: GetAllPreOrdesQuery) {
+        // bookingDate is a SQL DATE, represented at UTC midnight; derive its
+        // comparison date from the resort's UTC+8 calendar, not the server zone.
+        const today = new Date(new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10));
+        const scopeDate = query.scope === 'active' ? { gte: today }
+            : query.scope === 'history' ? { lt: today } : undefined;
         const preOrders = query.status === PreOrderStatus.Completed
             ? {
                 some: {},
@@ -100,7 +105,9 @@ export class PreOrderService {
                         { referenceCode: { contains: query.search, mode: 'insensitive' } },
                     ]
                 } : {}),
-                ...(query.date ? { bookingDate: query.date } : {})
+                ...(scopeDate || query.date ? {
+                    bookingDate: { ...scopeDate, ...(query.date ? { equals: query.date } : {}) },
+                } : {})
             },
             select: {
                 id: true,
@@ -117,7 +124,7 @@ export class PreOrderService {
                     }
                 }
             },
-            orderBy: { bookingDate: 'desc' }
+            orderBy: { bookingDate: query.scope === 'active' ? 'asc' : 'desc' }
         })
 
         return bookings.map((booking) => ({

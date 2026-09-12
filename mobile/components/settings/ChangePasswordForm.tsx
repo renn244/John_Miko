@@ -13,7 +13,12 @@ import { z } from "zod";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().nonempty("Current password is required"),
-  newPassword: z.string().nonempty("New password is required"),
+  newPassword: z.string().nonempty("New password is required")
+        .min(8, "Password must be at least 8 characters")
+        .regex(/[a-z]/, "Password must contain a lowercase letter")
+        .regex(/[A-Z]/, "Password must contain an uppercase letter")
+        .regex(/\d/, "Password must contain a number")
+        .regex(/[^A-Za-z0-9]/, "Password must contain a special character"),
   confirmPassword: z.string().nonempty("Confirm password is required"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords must match",
@@ -58,7 +63,7 @@ const ChangePasswordForm = () => {
           Change password
         </Text>
         <Text className="text-base text-neutral-grey-1">
-          Ensure your account is using a long, random password to stay secure.
+          Use at least 8 characters with uppercase and lowercase letters, a number, and a special character.
         </Text>
       </View>
 

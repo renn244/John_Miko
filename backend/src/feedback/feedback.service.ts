@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { getSingleDayRange } from 'src/lib/utils/date.util';
@@ -25,6 +25,10 @@ export class FeedbackService {
 
         if(!booking.userId || booking.userId !== user.id) {
             throw new ForbiddenException('You can only leave feedback for your own bookings');
+        }
+
+        if (booking.status !== 'Completed' && booking.status !== 'Cancelled') {
+            throw new BadRequestException('Feedback is available only for completed or cancelled bookings');
         }
 
         const feedback = await this.prisma.feedback.create({

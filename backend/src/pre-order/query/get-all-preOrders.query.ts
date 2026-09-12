@@ -5,6 +5,10 @@ import { toDateOnly } from "src/lib/utils/date.util";
 
 export class GetAllPreOrdesQuery {
     @IsOptional()
+    @IsEnum(['active', 'history'])
+    scope?: 'active' | 'history';
+
+    @IsOptional()
     @IsString()
     search?: string;
 

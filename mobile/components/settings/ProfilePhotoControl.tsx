@@ -6,6 +6,7 @@ import { useUpdateProfileImageMutation } from "@/hooks/profile.hook";
 import type { ProfileResponse } from "@/types/auth.type";
 import { Trash2 } from "lucide-react-native";
 import { useState } from "react";
+import { toast } from "@/lib/toast";
 import { Text, View } from "react-native";
 
 type ProfilePhotoControlProps = {
@@ -22,7 +23,7 @@ const ProfilePhotoControl = ({ user }: ProfilePhotoControlProps) => {
       <View className="gap-1">
         <Text className="font-sans-bold text-xl text-neutral-dark-1">Profile photo</Text>
         <Text className="text-base text-neutral-grey-1">
-          Upload a photo to personalize your account. It displays as a centered circle.
+          Choose a JPG, PNG, or WebP image up to 10 MB. It displays as a centered circle.
         </Text>
       </View>
 
@@ -32,7 +33,10 @@ const ProfilePhotoControl = ({ user }: ProfilePhotoControlProps) => {
         disabled={isBusy}
         onUploadingChange={setIsUploading}
         onSuccess={(profileImageUrl) => updateProfileImage(profileImageUrl)}
+        onError={(error) => toast.error(error.message)}
       />
+
+      {isSaving ? <Text accessibilityLiveRegion="polite">Saving profile photo...</Text> : null}
 
       {user.profileImageUrl ? (
         <Button

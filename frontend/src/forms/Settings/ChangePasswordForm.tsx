@@ -11,7 +11,12 @@ import z from "zod";
 
 const ChangePasswordSchema = z.object({
     currentPassword: z.string().nonempty("Current password is required"),
-    newPassword: z.string().nonempty("New password is required"),
+    newPassword: z.string().nonempty("New password is required")
+        .min(8, "Password must be at least 8 characters")
+        .regex(/[a-z]/, "Password must contain a lowercase letter")
+        .regex(/[A-Z]/, "Password must contain an uppercase letter")
+        .regex(/\d/, "Password must contain a number")
+        .regex(/[^A-Za-z0-9]/, "Password must contain a special character"),
     confirmPassword: z.string().nonempty("Confirm password is required"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords must match",
@@ -77,7 +82,7 @@ const ChangePasswordForm = () => {
                             aria-invalid={fieldState.invalid}
                             {...field}
                         />
-                        <FieldDescription>Use a password different from your current one.</FieldDescription>
+                        <FieldDescription>Use at least 8 characters with uppercase and lowercase letters, a number, and a special character. Choose a password different from your current one.</FieldDescription>
                         {fieldState.invalid && (
                             <FieldError errors={getErrorMessages(fieldState.error)} />
                         )}

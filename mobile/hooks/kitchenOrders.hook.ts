@@ -60,6 +60,7 @@ const getKitchenStatus = (items: KitchenOrderItem[]): KitchenOrderStatus => {
 const fetchKitchenOrders = async (query?: GetKitchenOrdersQuery) => {
   const response = await apiClient.get("/pre-order", {
     params: {
+      scope: query?.scope,
       search: query?.search || undefined,
       date: query?.date || undefined,
       status: query?.status || undefined,

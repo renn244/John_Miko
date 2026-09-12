@@ -27,35 +27,25 @@ const ProfileCard = ({
 }: ProfileCardProps) => {
     return (
         <OperationalCard contentClassName="gap-4 px-5 py-5">
-            <View className="flex-row items-center gap-4">
+            <View className="flex-row items-start gap-4">
                 {user.profileImageUrl ? (
                     <Image
                       source={{ uri: user.profileImageUrl }}
                       contentFit="cover"
-                      className="h-16 w-16 rounded-full bg-primary"
+                      className="h-16 w-16 shrink-0 rounded-full bg-primary"
                       accessibilityLabel={`${user.name || "Staff member"} profile picture`}
                     />
                 ) : (
-                    <View className="h-16 w-16 items-center justify-center rounded-full bg-primary">
+                    <View className="h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary">
                       <Text className="font-sans-bold text-2xl text-white">
                         {getInitials(user.name)}
                       </Text>
                     </View>
                 )}
-                <View className="flex-1 gap-2">
-                    <View className="flex-row flex-wrap items-center gap-2">
-                        <Text
-                        className="max-w-36 font-sans-bold text-xl text-neutral-dark-1"
-                        numberOfLines={1}
-                        >
-                            {user.name || "Staff Member"}
-                        </Text>
-                        <StatusChip
-                        label={roleLabels[user.role]}
-                        tone="info"
-                        size="sm"
-                        />
-                    </View>
+                <View className="min-w-0 flex-1 gap-2">
+                    <Text className="font-sans-bold text-xl text-neutral-dark-1">
+                        {user.name || "Staff Member"}
+                    </Text>
                     <InfoLine
                         icon={<Mail size={14} color="#6B7580" />}
                         text={user.email}
@@ -65,11 +55,16 @@ const ProfileCard = ({
                         text={user.contactNo}
                     />
                 </View>
+            </View>
+            <View className="flex-row flex-wrap items-center gap-2">
+                <StatusChip label={roleLabels[user.role]} tone="info" size="sm" className="max-w-full" textClassName="shrink" />
                 <StatusChip
                     label={user.status}
                     tone={user.status === "ACTIVE" ? "approved" : "rejected"}
                     size="sm"
                     uppercase
+                    className="max-w-full"
+                    textClassName="shrink"
                 />
             </View>
         </OperationalCard>
@@ -82,7 +77,6 @@ function InfoLine({ icon, text }: { icon: ReactNode; text: string }) {
       {icon}
       <Text
         className="flex-1 text-base text-neutral-grey-1"
-        numberOfLines={1}
       >
         {text}
       </Text>

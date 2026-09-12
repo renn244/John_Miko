@@ -170,6 +170,13 @@ export class AuthService {
             })
         }
 
+        if (body.currentPassword === body.newPassword) {
+            throw new ValidationException({
+                field: 'newPassword',
+                message: ['New password must be different from your current password'],
+            });
+        }
+
         const hashedNewPassword = await bcrypt.hash(body.newPassword, 10);
         const updatedUser = await this.prisma.user.update({
             where: { id: user.id },

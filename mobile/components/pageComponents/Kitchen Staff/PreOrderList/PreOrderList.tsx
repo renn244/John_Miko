@@ -21,6 +21,7 @@ const PreOrderList = () => {
     const search = useKitchenPreOrdersFilterStore((s) => s.search);
     const date = useKitchenPreOrdersFilterStore((s) => s.date);
     const status = useKitchenPreOrdersFilterStore((s) => s.status);
+    const scope = useKitchenPreOrdersFilterStore((s) => s.scope);
 
     const debouncedSearch = useDebouncedValue(search.trim(), 350);
     const debouncedDate = useDebouncedValue(date.trim(), 350);
@@ -39,6 +40,7 @@ const PreOrderList = () => {
         error,
         refetch,
     } = useKitchenOrders({
+        scope,
         search: debouncedSearch || undefined,
         date: dateParam,
         status,
@@ -82,7 +84,9 @@ const PreOrderList = () => {
                         description={
                             error
                                 ? "There was a problem connecting to the kitchen display system."
-                                : "Try changing the search, date, or status filter."
+                                : scope === 'active'
+                                    ? "Only today's and upcoming service dates appear here. For past orders, switch to History."
+                                    : "Past service dates appear here. Try changing the search, date, or status filter."
                         }
                         actionLabel={error ? "Retry" : undefined}
                         onAction={error ? () => refetch() : undefined}
