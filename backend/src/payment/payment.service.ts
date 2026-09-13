@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { Prisma } from 'src/generated/prisma/client';
 import { PaymentStatus, PaymentType } from 'src/generated/prisma/enums';
@@ -9,6 +9,7 @@ import { PaymentEmailService } from './payment-email.service';
 
 @Injectable()
 export class PaymentService {
+    private readonly logger = new Logger(PaymentService.name);
     private static readonly PRIVATE_CLOSURE_REVENUE = 35000;
 
     constructor(
@@ -498,7 +499,7 @@ export class PaymentService {
             );
         }
 
-        return this.prisma.payment.update({
+        const updatedPayment = await this.prisma.payment.update({
             where: { id },
             data: {
                 status: PaymentStatus.Refunded,
@@ -508,6 +509,13 @@ export class PaymentService {
                 refundedById,
             },
         });
+
+        try {
+            await this.paymentEmailService.sendRefundedEmail(updatedPayment.id);
+        } catch {
+            this.logger.error(`Refund saved for payment ${updatedPayment.id}, but its notification email failed.`);
+        }
+        return updatedPayment;
     }
 
     async addExtraFees() {

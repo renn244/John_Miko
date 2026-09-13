@@ -14,6 +14,8 @@ describe('staffCreated email template', () => {
 
     expect(rendered).toContain('<table role="presentation"');
     expect(rendered).toContain('Temporary password');
+    expect(rendered).toContain('Open Staff Login');
+    expect(rendered).toContain('href="https://portal.example.test/login"');
     expect(rendered).not.toContain('display: flex');
     expect(rendered).not.toContain('justify-content: space-between');
   });

@@ -51,7 +51,7 @@ export const useForgotPasswordMutation = <T extends FieldValues>(setError: UseFo
     return useMutation({
         mutationKey: ['auth', 'forgot-password'],
         mutationFn: async (data: ForgotPasswordRequest) => {
-            const response = await apiClient.post('/auth/forgotPassword', data);
+            const response = await apiClient.post('/auth/forgotPassword', { ...data, platform: 'mobile' });
 
             if (response.status === 400) {
                 throw new ValidationError(response.data || "Validation Error");
@@ -82,7 +82,7 @@ export const useResendForgotPasswordMutation = () => {
     return useMutation({
         mutationKey: ['auth', 'resend-forgot-password'],
         mutationFn: async (data: ForgotPasswordRequest) => {
-            const response = await apiClient.post('/auth/resendForgotPassword', data);
+            const response = await apiClient.post('/auth/resendForgotPassword', { ...data, platform: 'mobile' });
 
             if (response.status === 400) {
                 throw new ValidationError(response.data || "Validation Error");

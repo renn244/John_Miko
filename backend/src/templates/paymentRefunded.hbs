@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Refund Recorded</title>
+  </head>
+  <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f8fafc;">
+      <tr>
+        <td align="center" style="padding: 40px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 560px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;">
+            <tr>
+              <td style="padding: 36px 40px 20px; border-bottom: 1px solid #e2e8f0;">
+                {{#if logoUrl}}
+                <img src="{{logoUrl}}" alt="John Miko's Place" width="160" style="display: block; width: 160px; max-width: 100%; height: auto; margin: 0 0 18px; border: 0; outline: none; text-decoration: none;" />
+                {{else}}
+                <div style="font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b; margin-bottom: 18px;">John Miko's Place</div>
+                {{/if}}
+                <div style="font-size: 22px; font-weight: 700; line-height: 1.3; color: #0f172a;">
+                  Refund recorded
+                </div>
+                <div style="margin-top: 8px; font-size: 14px; line-height: 1.6; color: #475569;">
+                  Hi{{#if guestName}} {{guestName}}{{/if}}, the resort has recorded a refund for your booking.
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 28px 40px;">
+                <div style="display: inline-block; background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 6px 12px; font-size: 12px; color: #047857; margin-bottom: 18px;">
+                  Refund recorded
+                </div>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 18px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                  <tr>
+                    <td style="padding: 16px;">
+                      <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 10px;">Refund Information</div>
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                          <td style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #64748b; vertical-align: top;">Booking Reference</td>
+                          <td align="right" style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #0f172a; font-weight: 600; vertical-align: top; word-break: break-word;">{{bookingReference}}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #64748b; vertical-align: top;">Refund amount</td>
+                          <td align="right" style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #0f172a; font-weight: 600; vertical-align: top; word-break: break-word;">{{refundAmount}}</td>
+                        </tr>
+                        <tr>
+                          <td style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #64748b; vertical-align: top;">Recorded (Philippine time)</td>
+                          <td align="right" style="padding-top: 8px; font-size: 13px; line-height: 1.6; color: #0f172a; font-weight: 600; vertical-align: top; word-break: break-word;">{{refundedAt}}</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 18px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                  <tr>
+                    <td style="padding: 16px;">
+                      <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 10px;">Refund reason</div>
+                      <div style="font-size: 13px; line-height: 1.6; color: #475569; white-space: pre-wrap; word-break: break-word;">{{refundReason}}</div>
+                    </td>
+                  </tr>
+                </table>
+
+                {{#if myBookingsUrl}}
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top: 18px;">
+                  <tr>
+                    <td align="center" bgcolor="#2563eb" style="border-radius: 10px;">
+                      <a href="{{myBookingsUrl}}" style="display: block; padding: 14px 18px; font-size: 14px; font-weight: 700; color: #ffffff; text-decoration: none;">View My Bookings</a>
+                    </td>
+                  </tr>
+                </table>
+                {{/if}}
+
+                <div style="margin-top: 16px; font-size: 12px; line-height: 1.7; color: #64748b;">
+                  Sign in to My Bookings and expand your booking to view the recorded refund and its proof. Contact the resort if you need clarification.
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 18px 40px; border-top: 1px solid #e2e8f0; background-color: #f8fafc; font-size: 12px; line-height: 1.6; color: #64748b;">
+                This email was sent regarding booking reference {{bookingReference}}.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

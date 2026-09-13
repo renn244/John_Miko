@@ -92,6 +92,27 @@ export class PaymentEmailService {
         });
     }
 
+    async sendRefundedEmail(paymentId: string) {
+        const payment = await this.getPaymentEmailContext(paymentId);
+        if (!payment || payment.status !== 'Refunded') return;
+
+        await this.emailService.sendEmail({
+            to: payment.booking.email,
+            subject: 'Refund recorded for your booking',
+            template: 'paymentRefunded',
+            context: {
+                guestName: payment.booking.guestName,
+                bookingReference: payment.booking.referenceCode ?? payment.booking.id,
+                refundAmount: formatCurrencyPhp(payment.amountPaid),
+                refundReason: payment.refundReason || 'Reason unavailable',
+                refundedAt: payment.refundedAt
+                    ? new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' }).format(payment.refundedAt)
+                    : 'Date unavailable',
+                myBookingsUrl: getFrontendMyBookingsUrl(),
+            },
+        });
+    }
+
     async sendRejectedEmail(paymentId: string) {
         const payment = await this.getPaymentEmailContext(paymentId);
 

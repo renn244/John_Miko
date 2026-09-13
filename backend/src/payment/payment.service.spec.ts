@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 
 describe('PaymentService', () => {
@@ -18,6 +19,7 @@ describe('PaymentService', () => {
   const paymentEmailService = {
     sendApprovedEmail: jest.fn(),
     sendRejectedEmail: jest.fn(),
+    sendRefundedEmail: jest.fn(),
   } as any;
 
   let service: PaymentService;
@@ -193,4 +195,40 @@ describe('PaymentService', () => {
       }),
     });
   });
+  it('sends the refund notification only after saving', async () => {
+    prisma.payment.findUnique.mockResolvedValue({ id: 'payment-1', status: 'Rejected', booking: { status: 'Cancelled' } });
+    prisma.payment.update.mockImplementationOnce(async () => {
+      expect(paymentEmailService.sendRefundedEmail).not.toHaveBeenCalled();
+      return { id: 'payment-1', status: 'Refunded' };
+    });
+    await service.refundPayment('payment-1', 'Reason', 'proof', 'admin');
+    expect(paymentEmailService.sendRefundedEmail).toHaveBeenCalledTimes(1);
+    expect(paymentEmailService.sendRefundedEmail).toHaveBeenCalledWith('payment-1');
+  });
+
+  it('keeps the saved refund successful when email delivery fails', async () => {
+    prisma.payment.findUnique.mockResolvedValue({ id: 'payment-1', status: 'Rejected', booking: { status: 'Cancelled' } });
+    prisma.payment.update.mockResolvedValue({ id: 'payment-1', status: 'Refunded' });
+    paymentEmailService.sendRefundedEmail.mockRejectedValueOnce(new Error('Email unavailable'));
+    const log = jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    try {
+      await expect(service.refundPayment('payment-1', 'Reason', 'proof', 'admin')).resolves.toEqual({ id: 'payment-1', status: 'Refunded' });
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('notification email failed'));
+    } finally { log.mockRestore(); }
+  });
+
+  it('rejects another request for an already refunded payment without emailing', async () => {
+    prisma.payment.findUnique.mockResolvedValue({ status: 'Refunded', booking: { status: 'Cancelled' } });
+    await expect(service.refundPayment('payment-1', 'Reason', 'proof', 'admin')).rejects.toThrow('Only rejected payments');
+    expect(prisma.payment.update).not.toHaveBeenCalled();
+    expect(paymentEmailService.sendRefundedEmail).not.toHaveBeenCalled();
+  });
+
+  it('does not email when the refund cannot be saved', async () => {
+    prisma.payment.findUnique.mockResolvedValue({ status: 'Rejected', booking: { status: 'Cancelled' } });
+    prisma.payment.update.mockRejectedValueOnce(new Error('Save failed'));
+    await expect(service.refundPayment('payment-1', 'Reason', 'proof', 'admin')).rejects.toThrow('Save failed');
+    expect(paymentEmailService.sendRefundedEmail).not.toHaveBeenCalled();
+  });
+
 });
