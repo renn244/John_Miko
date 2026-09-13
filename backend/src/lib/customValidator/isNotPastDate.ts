@@ -10,13 +10,13 @@ export function isNotPastDate(validationOptions?: ValidationOptions) {
             options: validationOptions,
             validator: {
                 validate(value: Date | string, args: ValidationArguments) {
-                    const currentDate = toDateOnly(new Date());
+                    const currentDate = toDateOnly(new Date(Date.now()));
                     const bookingDate = toDateOnly(value);
 
                     return bookingDate >= currentDate;
                 },
                 defaultMessage(args: ValidationArguments) {
-                    return `${args.property} must not be a past date`;
+                    return `${args.property} cannot be in the past`;
                 }
             },
         })

@@ -1,7 +1,8 @@
 import { Transform, Type } from "class-transformer";
-import { ArrayUnique, IsArray, IsDate, IsEmail, IsEnum, IsInt, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, Min, ValidateNested } from "class-validator";
+import { OmitType } from "@nestjs/mapped-types";
+import { ArrayUnique, IsArray, IsDate, IsEmail, IsEmpty, IsEnum, IsInt, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, IsUrl, Matches, Min, ValidateNested } from "class-validator";
 import { BookingStatus, PaymentType } from "src/generated/prisma/enums";
-import { isNotPastDate } from "src/lib/customValidator/isNotPastDate";
+import { isAtLeastThreeDaysAhead } from "src/lib/customValidator/isAtLeastThreeDaysAhead";
 import { toDateOnly } from "src/lib/utils/date.util";
 
 export class PreOrderItemDto {
@@ -69,7 +70,7 @@ export class CreateBookingDto {
     @Type(() => Date)
     @IsDate({ message: "Check-in date must be a valid date" })
     @IsNotEmpty({ message: "Check-in date is required" })
-    @isNotPastDate({ message: "Check-in date cannot be in the past" })
+    @isAtLeastThreeDaysAhead({ message: "Check-in date must be at least 3 days ahead" })
     checkIn!: Date;
 
     @IsArray()
@@ -150,7 +151,7 @@ export class CreateManualBookingDto {
     @Type(() => Date)
     @IsDate({ message: "Check-in date must be a valid date" })
     @IsNotEmpty({ message: "Check-in date is required" })
-    @isNotPastDate({ message: "Check-in date cannot be in the past" })
+    @isAtLeastThreeDaysAhead({ message: "Check-in date must be at least 3 days ahead" })
     checkIn!: Date;
 
     @IsArray()
@@ -170,6 +171,18 @@ export class CreateManualBookingDto {
     @IsNotEmpty({ message: "Payment type is required" })
     @IsEnum(PaymentType, { message: "Payment type must be either 'full' or 'partial'" })
     paymentType!: PaymentType;
+
+}
+
+export class CreateWalkInBookingDto extends OmitType(CreateManualBookingDto, ['preOrderItems', 'checkIn', 'paymentType'] as const) {
+    @Transform(({ value }) => toDateOnly(value))
+    @Type(() => Date)
+    @IsDate({ message: 'Check-in date must be a valid date' })
+    @IsNotEmpty({ message: 'Check-in date is required' })
+    checkIn!: Date;
+
+    @IsEmpty({ message: 'Pre-ordered menu items are not available for walk-ins' })
+    preOrderItems?: never;
 }
 
 export class RescheduleBookingDto {
@@ -177,7 +190,7 @@ export class RescheduleBookingDto {
     @Type(() => Date)
     @IsDate({ message: "Booking date must be a valid date" })
     @IsNotEmpty({ message: "Booking date is required" })
-    @isNotPastDate({ message: "Booking date cannot be in the past" })
+    @isAtLeastThreeDaysAhead({ message: "Booking date must be at least 3 days ahead" })
     bookingDate!: Date;
 
     @IsString()

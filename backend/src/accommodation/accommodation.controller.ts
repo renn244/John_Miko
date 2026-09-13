@@ -40,6 +40,12 @@ export class AccommodationController {
         return this.accommodationService.getAccommodationOptions();
     }
 
+    @Roles(Role.ADMIN)
+    @Get('retired')
+    async getRetiredAccommodations(@Query() query: GetAccommodationQueryDto) {
+        return this.accommodationService.getAccommodations(query, true);
+    }
+
     @Public()
     @Get(':id')
     async getAccommodationById(@Param('id') id: string) {
@@ -52,10 +58,15 @@ export class AccommodationController {
         return this.accommodationService.updateAccommodation(id, body);
     }
 
-    // should be archived actually
     @Roles(Role.ADMIN)
     @Delete(':id')
     async deleteAccommodation(@Param('id') id: string) {
-        return this.accommodationService.deleteAccommodation(id);
+        return this.accommodationService.retireAccommodation(id);
+    }
+
+    @Roles(Role.ADMIN)
+    @Patch(':id/restore')
+    async restoreAccommodation(@Param('id') id: string) {
+        return this.accommodationService.restoreAccommodation(id);
     } 
 }

@@ -1,6 +1,7 @@
+import { getBookingStayWindow } from 'src/lib/utils/booking-stay.util';
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { AccommodationStayOption, Prisma } from 'src/generated/prisma/client';
-import { BookingStatus } from 'src/generated/prisma/enums';
+import { BookingSource, BookingStatus } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
 import { ValidationException } from 'src/lib/exception/ValidationException';
 import { toDateOnly } from 'src/lib/utils/date.util';
@@ -10,7 +11,7 @@ import { PaymentService } from 'src/payment/payment.service';
 import { PreOrderService } from 'src/pre-order/pre-order.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BookingServicesService } from 'src/services/booking-services.service';
-import { ChangeStatusDto, CreateBookingDto, CreateManualBookingDto, RescheduleBookingDto } from './dto/booking.dto';
+import { ChangeStatusDto, CreateBookingDto, CreateManualBookingDto, CreateWalkInBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 import { ClosureService } from 'src/closure/closure.service';
 import { BookingEmailService } from './booking-email.service';
@@ -75,6 +76,14 @@ export class BookingService {
         return stayOption;
     }
 
+    private assertBookingDateIsThreeDaysAhead(bookingDate: Date) {
+        const earliestDate = toDateOnly(new Date(Date.now()));
+        earliestDate.setUTCDate(earliestDate.getUTCDate() + 3);
+        if (toDateOnly(bookingDate) < earliestDate) {
+            throw new BadRequestException('Booking date must be at least 3 days ahead.');
+        }
+    }
+
     private async ensureBookingSlotAvailable(
         accommodationId: string,
         checkIn: Date,
@@ -104,10 +113,12 @@ export class BookingService {
 
     async bookAccommodation(body: CreateBookingDto, user: UserSession) {
 
+        this.assertBookingDateIsThreeDaysAhead(body.checkIn);
+
         // this sohuld be on the accommodation module
         const accommodation = await this.prisma.accommodation.findUnique({ where: { id: body.accommodationId } })
 
-        if(!accommodation) {
+        if(!accommodation || accommodation.retiredAt) {
             throw new NotFoundException('Accommodation not found')
         }
 
@@ -169,9 +180,28 @@ export class BookingService {
     }
 
     async createManualBooking(body: CreateManualBookingDto, user: UserSession) {
+        return this.createAdminBooking(body, user, BookingSource.Manual, true);
+    }
+
+    async createWalkInBooking(body: CreateWalkInBookingDto, user: UserSession) {
+        return this.createAdminBooking(
+            { ...body, checkIn: toDateOnly(new Date(Date.now())), paymentType: 'Full' },
+            user,
+            BookingSource.WalkIn,
+            false,
+        );
+    }
+
+    private async createAdminBooking(
+        body: CreateManualBookingDto,
+        user: UserSession,
+        source: BookingSource,
+        enforceThreeDayRule: boolean,
+    ) {
+        if (enforceThreeDayRule) this.assertBookingDateIsThreeDaysAhead(body.checkIn);
         const accommodation = await this.prisma.accommodation.findUnique({ where: { id: body.accommodationId } });
 
-        if(!accommodation) {
+        if(!accommodation || accommodation.retiredAt) {
             throw new NotFoundException('Accommodation not found');
         }
 
@@ -206,7 +236,8 @@ export class BookingService {
                 stayOption,
                 accommodation.isGuestFeeWaived,
                 txprisma,
-                'Confirmed'
+                'Confirmed',
+                source,
             );
             const newBooking = await this.attachReferenceCode(createdBooking, txprisma);
 
@@ -268,7 +299,8 @@ export class BookingService {
         stayOption: AccommodationStayOption,
         isGuestFeeWaived: boolean,
         tx: Prisma.TransactionClient,
-        status: BookingStatus = 'Pending'
+        status: BookingStatus = 'Pending',
+        source: BookingSource = BookingSource.Online,
     ) {
         const totalNumberofGuest = body.seniorGuests + body.adultGuests + body.kidGuests
 
@@ -291,7 +323,8 @@ export class BookingService {
                 kidGuests: body.kidGuests,
                 adultGuests: body.adultGuests,
                 seniorGuest: body.seniorGuests,
-                status
+                status,
+                source,
             }
         })
           
@@ -792,6 +825,7 @@ export class BookingService {
     }
 
     async rescheduleBooking(bookingId: string, body: RescheduleBookingDto) {
+        this.assertBookingDateIsThreeDaysAhead(body.bookingDate);
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId },
             include: {
@@ -859,6 +893,7 @@ export class BookingService {
         const booking = await this.prisma.booking.findUnique({
             where: { id: bookingId },
             include: {
+                stayOption: true,
                 accommodation: {
                     select: {
                         name: true,
@@ -870,6 +905,22 @@ export class BookingService {
 
         if(!booking) {
             throw new NotFoundException('Booking not found');
+        }
+
+        if (body.status === BookingStatus.Completed) {
+            if (booking.status !== BookingStatus.Confirmed) {
+                throw new BadRequestException('Only confirmed bookings can be marked Completed.');
+            }
+            if (!(booking.stayOption?.startTime instanceof Date) || !Number.isFinite(booking.stayOption.startTime.getTime())
+                || !(booking.stayOption.endTime instanceof Date) || !Number.isFinite(booking.stayOption.endTime.getTime())) {
+                throw new BadRequestException('Stay schedule is unavailable. Cannot complete this booking.');
+            }
+            const window = getBookingStayWindow({ bookingDate: booking.bookingDate, ...booking.stayOption });
+            const availableAt = Math.max(window.checkIn.getTime(), window.checkOut.getTime() - 2 * 60 * 60 * 1000);
+            if (Date.now() < availableAt) {
+                const time = new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', dateStyle: 'medium', timeStyle: 'short' }).format(availableAt);
+                throw new BadRequestException(`Completion is available from ${time} (Philippine time).`);
+            }
         }
 
         const updatedBooking = await this.prisma.booking.update({

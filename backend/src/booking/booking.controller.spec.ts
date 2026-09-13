@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Role } from 'src/generated/prisma/enums';
+import { ROLES_KEY } from 'src/lib/decorators/Roles.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { BookingController } from './booking.controller';
@@ -36,5 +38,9 @@ describe('BookingController', () => {
 
     await expect(controller.getBookingOverview({ date })).resolves.toBe(overview);
     expect(bookingService.getBookingOverview).toHaveBeenCalledWith(date);
+  });
+  it('restricts online booking and My Bookings endpoints to guests', () => {
+    expect(Reflect.getMetadata(ROLES_KEY, BookingController.prototype.bookAccommodation)).toEqual([Role.GUEST]);
+    expect(Reflect.getMetadata(ROLES_KEY, BookingController.prototype.GetBookingsByUser)).toEqual([Role.GUEST]);
   });
 });

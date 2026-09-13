@@ -90,6 +90,7 @@ model Accommodation {
   isGuestFeeWaived Boolean           @default(false)
 
   amenities String[] @default([])
+  retiredAt DateTime?
 
   stayOptions AccommodationStayOption[]
   closures    Closure[]
@@ -97,6 +98,8 @@ model Accommodation {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([retiredAt])
 }
 
 model AccommodationStayOption {
@@ -169,6 +172,12 @@ enum BookingStatus {
   Completed
 }
 
+enum BookingSource {
+  Online
+  Manual
+  WalkIn
+}
+
 model Booking {
   id            String  @id @default(cuid())
   referenceCode String? @unique
@@ -207,6 +216,7 @@ model Booking {
   guestFeeWaivedSnapshot    Boolean                 @default(false)
 
   status      BookingStatus @default(Pending)
+  source      BookingSource @default(Online)
   paymentType PaymentType
   payment     Payment?
 
@@ -218,6 +228,7 @@ model Booking {
   @@index([status])
   @@index([bookingDate, status])
   @@index([bookingDate, stayOptionId])
+  @@index([source])
 }
 
 enum PaymentStatus {

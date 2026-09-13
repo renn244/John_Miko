@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { BookingService } from './booking.service';
 
 describe('BookingService', () => {
@@ -25,6 +25,7 @@ describe('BookingService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(Date, "now").mockReturnValue(new Date("2026-06-24T00:00:00Z").getTime());
     preOrderService.createBulkPreOrder.mockResolvedValue({ total: 450 });
     bookingServicesService.createBulk.mockResolvedValue({ total: 700 });
     service = new BookingService(
@@ -36,6 +37,8 @@ describe('BookingService', () => {
       bookingEmailService,
     );
   });
+
+  afterEach(() => jest.restoreAllMocks());
 
   it('creates manual bookings without linking a user account', async () => {
     prisma.accommodation.findUnique.mockResolvedValue({
@@ -64,6 +67,8 @@ describe('BookingService', () => {
           code: 'overnight',
           label: 'Overnight',
           durationHours: 22,
+          startTime: new Date("1970-01-01T14:00:00Z"),
+          endTime: new Date("1970-01-01T12:00:00Z"),
         }),
       },
       booking: {
@@ -74,7 +79,7 @@ describe('BookingService', () => {
         })),
         update: jest.fn().mockImplementation(async ({ where, data }) => ({
           id: where.id,
-          bookingDate: new Date('2026-06-25T00:00:00.000Z'),
+          bookingDate: new Date('2026-06-27T00:00:00.000Z'),
           ...data,
         })),
       },
@@ -101,7 +106,7 @@ describe('BookingService', () => {
           { addOnServiceId: 'addon-1', quantity: 1 },
         ],
         stayOptionId: 'stay-1',
-        checkIn: new Date('2026-06-25'),
+        checkIn: new Date('2026-06-27'),
         paymentType: 'Full',
       },
       { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
@@ -115,6 +120,7 @@ describe('BookingService', () => {
           email: 'guest@example.com',
           contactNo: '09123456789',
           status: 'Confirmed',
+          source: 'Manual',
         }),
       }),
     );
@@ -160,12 +166,63 @@ describe('BookingService', () => {
           seniorGuests: 0,
           kidGuests: 0,
           stayOptionId: 'stay-1',
-          checkIn: new Date('2026-06-25'),
+          checkIn: new Date('2026-06-27'),
           paymentType: 'Partial',
         },
         { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
       ),
-    ).rejects.toBeInstanceOf(NotFoundException);
+  ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('requires a booking date at least three days ahead', async () => {
+    await expect(
+      service.createManualBooking(
+        {
+          accommodationId: 'acc-1',
+          name: 'Juan Dela Cruz',
+          email: 'guest@example.com',
+          contactNo: '09123456789',
+          adultGuests: 1,
+          seniorGuests: 0,
+          kidGuests: 0,
+          stayOptionId: 'stay-1',
+          checkIn: new Date('2026-06-26'),
+          paymentType: 'Full',
+        },
+        { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('records a walk-in for today without applying the three-day rule', async () => {
+    prisma.accommodation.findUnique.mockResolvedValue({
+      id: 'acc-1', name: 'Villa 1', type: 'Room', price: 2000, imageUrl: '', capacity: 6,
+      description: '', amenities: [], isGuestFeeWaived: false, retiredAt: null,
+    });
+    closureService.validateClosureDate.mockResolvedValue(false);
+    paymentService.createManualPayment.mockResolvedValue({ paymentId: 'pay-1', referenceNumber: 'REF-1' });
+    paymentService.sendApprovedPaymentEmail.mockResolvedValue(undefined);
+    const tx = {
+      accommodationStayOption: { findFirst: jest.fn().mockResolvedValue({ id: 'stay-1', code: 'daystay', label: 'Day stay', durationHours: 10 }) },
+      booking: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockImplementation(async ({ data }) => ({ id: 'booking-1', ...data })),
+        update: jest.fn().mockImplementation(async ({ where, data }) => ({ id: where.id, bookingDate: new Date('2026-06-24T00:00:00.000Z'), ...data })),
+      },
+      bookedAccommodation: { create: jest.fn() },
+    };
+    prisma.$transaction.mockImplementation(async (callback: (txArg: typeof tx) => Promise<unknown>) => callback(tx));
+
+    await service.createWalkInBooking({
+      accommodationId: 'acc-1', name: 'Walk-in guest', email: 'walkin@example.com', contactNo: '09123456789',
+      adultGuests: 1, seniorGuests: 0, kidGuests: 0, stayOptionId: 'stay-1',
+      checkIn: new Date('2026-06-30'),
+    }, { id: 'admin-1', role: 'ADMIN' } as any);
+
+    expect(tx.booking.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({
+      bookingDate: new Date('2026-06-24T00:00:00.000Z'), source: 'WalkIn', status: 'Confirmed',
+    }) }));
+    expect(paymentService.sendApprovedPaymentEmail).toHaveBeenCalledWith('pay-1');
   });
 
   it('returns booking overview data from booking-owned queries', async () => {
@@ -261,4 +318,13 @@ describe('BookingService', () => {
       } as any),
     ).resolves.toBe(booking);
   });
+  it('returns recorded refund proof only to the booking owner or admin', async () => {
+    const booking = { id: 'booking-refund', userId: 'owner', payment: { status: 'Refunded', refundReason: 'Cancelled', refundProofImageUrl: 'private-proof', refundedAt: new Date() } };
+    prisma.booking.findUnique.mockResolvedValue(booking);
+    await expect(service.getBookingById(booking.id, { id: 'owner', role: 'GUEST' } as any)).resolves.toEqual(booking);
+    await expect(service.getBookingById(booking.id, { id: 'admin', role: 'ADMIN' } as any)).resolves.toEqual(booking);
+    await expect(service.getBookingById(booking.id, { id: 'other', role: 'GUEST' } as any)).rejects.toThrow(ForbiddenException);
+    expect(prisma.booking.findUnique).toHaveBeenCalledWith(expect.objectContaining({ include: expect.objectContaining({ payment: expect.objectContaining({ select: expect.objectContaining({ refundProofImageUrl: true }) }) }) }));
+  });
+
 });
