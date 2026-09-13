@@ -1,60 +1,60 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { lazy } from 'react';
-import ProtectedRoute from "./components/common/ProtectedRoute";
-import { useAuthContext } from "./context/AuthContext";
+import ProtectedRoute from "./features/auth/components/ProtectedRoute";
+import { useAuthContext } from "./features/auth/context/AuthContext";
 import USER_ROLES from './lib/constant/USER_ROLES.constant';
-import About from './page/About';
-import AccommodationList from './page/AccommodationList';
-import AccommodationView from './page/AccommodationView';
-import AdminLayout from "./page/Admin/AdminLayout";
-import Amenities from './page/Amenities';
-import BookingFlow from './page/Booking';
+import About from './features/public/about/pages/AboutPage';
+import AccommodationList from './features/public/accommodations/pages/AccommodationListPage';
+import AccommodationView from './features/public/accommodations/pages/AccommodationViewPage';
+import AdminLayout from "./features/admin/layout/components/AdminLayout";
+import Amenities from './features/public/amenities/pages/AmenitiesPage';
+import BookingFlow from './features/public/bookings/pages/BookingPage';
 import ForbiddenPage from './page/Forbidden';
 import ForgotPassword from "./page/ForgotPassword";
-import CreateFeedback from './page/Guest/CreateFeedback';
-import EditFeedback from './page/Guest/EditFeedback';
-import MyBookings from './page/Guest/MyBookings';
-import Home from "./page/Home";
+import CreateFeedback from './features/public/feedback/pages/CreateFeedbackPage';
+import EditFeedback from './features/public/feedback/pages/EditFeedbackPage';
+import MyBookings from './features/public/bookings/pages/MyBookingsPage';
+import Home from "./features/public/home/pages/HomePage";
 import Login from "./page/Login";
-import Menu from './page/Menu';
+import Menu from './features/public/menu/pages/MenuPage';
 import NotFoundPage from './page/NotFound';
 import ResetPassword from "./page/ResetPassword";
 import RouteErrorPage from './page/RouteError';
 import Settings from './page/Settings';
 import SignUpGuest from "./page/SignUpGuest";
-import VirtualTour from './page/VirtualTour';
+import VirtualTour from './features/public/virtual-tour/pages/VirtualTourPage';
 
 const RouterRoot = () => <Outlet />;
-const Accommodation = lazy(() => import('./page/Admin/Accommodation/Accommodation'));
-const AddAccommodation = lazy(() => import('./page/Admin/Accommodation/AddAccommodation'));
-const EditAccommodation = lazy(() => import('./page/Admin/Accommodation/EditAccommodation'));
-const AddAddOnService = lazy(() => import('./page/Admin/AddOnService/AddAddOnService'));
-const AddOnService = lazy(() => import('./page/Admin/AddOnService/AddOnService'));
-const EditAddOnService = lazy(() => import('./page/Admin/AddOnService/EditAddOnService'));
-const AddBooking = lazy(() => import('./page/Admin/Booking/AddBooking'));
-const Booking = lazy(() => import('./page/Admin/Booking/Booking'));
-const ViewBooking = lazy(() => import('./page/Admin/Booking/ViewBooking'));
-const Feedback = lazy(() => import('./page/Admin/Feedback/Feedback'));
-const GuestManagement = lazy(() => import('./page/Admin/Guest-Management/GuestManagement'));
-const AddMaintenance = lazy(() => import('./page/Admin/Maintenance/AddMaintenance'));
-const EditMaintenance = lazy(() => import('./page/Admin/Maintenance/EditMaintenance'));
-const Maintenance = lazy(() => import('./page/Admin/Maintenance/Maintenance'));
-const ViewMaintenance = lazy(() => import('./page/Admin/Maintenance/ViewMaintenance'));
-const ViewStaffReport = lazy(() => import('./page/Admin/Maintenance/ViewStaffReport'));
-const AddMenuItem = lazy(() => import('./page/Admin/MenuItem/AddMenuItem'));
-const EditMenuItem = lazy(() => import('./page/Admin/MenuItem/EditMenuItem'));
-const MenuItem = lazy(() => import('./page/Admin/MenuItem/MenuItem'));
-const Overview = lazy(() => import('./page/Admin/Overview'));
-const AddPaymentMethod = lazy(() => import('./page/Admin/PaymentMethods/AddPaymentMethod'));
-const EditPaymentMethod = lazy(() => import('./page/Admin/PaymentMethods/EditPaymentMethod'));
-const PaymentMethods = lazy(() => import('./page/Admin/PaymentMethods/PaymentMethods'));
-const Report = lazy(() => import('./page/Admin/Reports/Report'));
-const AdminSettings = lazy(() => import('./page/Admin/Settings'));
-const AddStaff = lazy(() => import('./page/Admin/Staff-Management/AddStaff'));
-const StaffManagement = lazy(() => import('./page/Admin/Staff-Management/StaffManagement'));
-const Knowledge = lazy(() => import('./page/Admin/Knowledge/Knowledge'));
-const VirtualTourManagement = lazy(() => import('./page/Admin/VirtualTourManagement'));
+const Accommodation = lazy(() => import('./features/admin/accommodations/pages/Accommodation'));
+const AddAccommodation = lazy(() => import('./features/admin/accommodations/pages/AddAccommodation'));
+const EditAccommodation = lazy(() => import('./features/admin/accommodations/pages/EditAccommodation'));
+const AddAddOnService = lazy(() => import('./features/admin/add-on-services/pages/AddAddOnService'));
+const AddOnService = lazy(() => import('./features/admin/add-on-services/pages/AddOnService'));
+const EditAddOnService = lazy(() => import('./features/admin/add-on-services/pages/EditAddOnService'));
+const AddBooking = lazy(() => import('./features/admin/bookings/pages/AddBooking'));
+const Booking = lazy(() => import('./features/admin/bookings/pages/Booking'));
+const ViewBooking = lazy(() => import('./features/admin/bookings/pages/ViewBooking'));
+const Feedback = lazy(() => import('./features/admin/feedback/pages/Feedback'));
+const GuestManagement = lazy(() => import('./features/admin/guest-management/pages/GuestManagement'));
+const AddMaintenance = lazy(() => import('./features/admin/maintenance/pages/AddMaintenance'));
+const EditMaintenance = lazy(() => import('./features/admin/maintenance/pages/EditMaintenance'));
+const Maintenance = lazy(() => import('./features/admin/maintenance/pages/Maintenance'));
+const ViewMaintenance = lazy(() => import('./features/admin/maintenance/pages/ViewMaintenance'));
+const ViewStaffReport = lazy(() => import('./features/admin/staff-reports/pages/ViewStaffReport'));
+const AddMenuItem = lazy(() => import('./features/admin/menu-items/pages/AddMenuItem'));
+const EditMenuItem = lazy(() => import('./features/admin/menu-items/pages/EditMenuItem'));
+const MenuItem = lazy(() => import('./features/admin/menu-items/pages/MenuItem'));
+const Overview = lazy(() => import('./features/admin/overview/pages/Overview'));
+const AddPaymentMethod = lazy(() => import('./features/admin/payment-methods/pages/AddPaymentMethod'));
+const EditPaymentMethod = lazy(() => import('./features/admin/payment-methods/pages/EditPaymentMethod'));
+const PaymentMethods = lazy(() => import('./features/admin/payment-methods/pages/PaymentMethods'));
+const Report = lazy(() => import('./features/admin/reports/pages/Report'));
+const AdminSettings = lazy(() => import('./features/admin/settings/pages/Settings'));
+const AddStaff = lazy(() => import('./features/admin/staff-management/pages/AddStaff'));
+const StaffManagement = lazy(() => import('./features/admin/staff-management/pages/StaffManagement'));
+const Knowledge = lazy(() => import('./features/admin/knowledge/pages/Knowledge'));
+const VirtualTourManagement = lazy(() => import('./features/admin/virtual-tour/pages/VirtualTourManagement'));
 const StaffLayout = lazy(() => import('./page/Staff/StaffLayout'));
 const MaintenanceAssignedTickets = lazy(() => import('./page/Staff/Maintenance/AssignedTickets'));
 const MaintenanceHistory = lazy(() => import('./page/Staff/Maintenance/History'));
@@ -128,7 +128,7 @@ const router = createBrowserRouter([
       {
         path: '/booking/:accommodationId',
         element: (
-          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST]}>
             <BookingFlow />
           </ProtectedRoute>
         )
@@ -136,7 +136,7 @@ const router = createBrowserRouter([
       {
         path: '/my-bookings',
         element: (
-          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST, USER_ROLES.ADMIN]}>
+          <ProtectedRoute rolesAllowed={[USER_ROLES.GUEST]}>
             <MyBookings />
           </ProtectedRoute>
         )
@@ -188,6 +188,7 @@ const router = createBrowserRouter([
             children: [
               { index: true, element: <Booking /> },
               { path: 'add', element: <AddBooking /> },
+              { path: 'walk-in', element: <AddBooking walkIn /> },
               { path: ':id', element: <ViewBooking /> },
             ]
           },

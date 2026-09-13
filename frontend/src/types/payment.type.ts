@@ -1,5 +1,5 @@
-import type { PaymentMethod } from "@/types/payment-method.type";
-import type { AccommodationStayOption } from "./admin/accommodation.type";
+import type { PaymentMethod } from "@/features/shared/payment-methods/types/payment-method.type";
+import type { AccommodationStayOption } from "@/features/shared/accommodations/types/accommodation.type";
 
 export type PaymentStatus = 'Pending' | 'Approved' | 'Rejected' | 'Refunded';
 

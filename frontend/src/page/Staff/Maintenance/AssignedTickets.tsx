@@ -1,4 +1,4 @@
-import AssignedMaintenanceList from "@/components/pageComponents/Staff/Maintenance/AssignedMaintenanceList";
+import AssignedMaintenanceList from "@/features/staff/maintenance/components/AssignedMaintenanceList";
 
 const AssignedTickets = () => {
   return (

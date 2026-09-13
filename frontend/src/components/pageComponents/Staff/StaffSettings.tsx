@@ -1,9 +1,9 @@
 import UserAvatar from "@/components/common/UserAvatar";
-import ProfileAvatarControl from "@/components/pageComponents/Settings/ProfileAvatarControl";
+import ProfileAvatarControl from "@/features/shared/settings/components/ProfileAvatarControl";
 import { Button } from "@/components/ui/button";
-import { useAuthContext } from "@/context/AuthContext";
-import ChangePasswordForm from "@/forms/Settings/ChangePasswordForm";
-import ProfileSettingsForm from "@/forms/Settings/ProfileSettingsForm";
+import { useAuthContext } from "@/features/auth/context/AuthContext";
+import ChangePasswordForm from "@/features/shared/settings/forms/ChangePasswordForm";
+import ProfileSettingsForm from "@/features/shared/settings/forms/ProfileSettingsForm";
 import { LogOut, Mail, Phone } from "lucide-react";
 
 type StaffSettingsProps = {

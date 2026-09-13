@@ -1,6 +1,6 @@
 import ProfileMenu from "@/components/common/ProfileMenu";
 import { Button } from "@/components/ui/button";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/features/auth/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
 import { Suspense, useState } from "react";

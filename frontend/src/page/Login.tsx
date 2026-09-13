@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
-import LoginForm from "@/forms/LoginForm";
+import LoginForm from "@/features/auth/forms/LoginForm";
 
 const loginHeroImage =
   "https://images.unsplash.com/photo-1729707691048-722c1acf5c51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsdXh1cnklMjBiZWFjaCUyMHJlc29ydCUyMHBvb2x8ZW58MXx8fHwxNzcyMDk4MDA5fDA&ixlib=rb-4.1.0&q=80&w=1600";

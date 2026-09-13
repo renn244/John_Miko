@@ -1,7 +1,8 @@
-import { useGetBookingsByAccommodationQuery } from "@/hooks/booking.hook";
+import { useGetBookingsByAccommodationQuery } from "@/features/shared/bookings/hooks/useBookingAvailability";
 import type { ComponentProps } from "react";
 import { Calendar } from "../ui/calendar";
-import { useGetClosuresQuery } from "@/hooks/admin/closure.hook";
+import { useGetClosuresQuery } from "@/features/shared/closures/hooks/useClosureAvailability";
+import { addDays, startOfDay } from "date-fns";
 
 type AvailabilityCalendarProps = {
     className?: string;
@@ -25,7 +26,7 @@ const AvailabilityCalendar = ({ className, accommodationId, ...props }: Availabi
         className={className}
         mode="single"
         disabled={[
-            { before: new Date() },
+            { before: startOfDay(addDays(new Date(), 3)) },
             ...fullyBookedDates,
             ...closedDates
         ]}

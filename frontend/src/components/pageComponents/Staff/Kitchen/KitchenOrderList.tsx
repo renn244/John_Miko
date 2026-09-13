@@ -1,7 +1,7 @@
 import {
   AdminClearFiltersButton,
   AdminFilterLayout,
-} from "@/components/pageComponents/Admin/AdminFilterLayout";
+} from "@/features/admin/layout/components/AdminFilterLayout";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";

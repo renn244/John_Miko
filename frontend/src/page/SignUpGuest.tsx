@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 
 import { Button } from "@/components/ui/button";
-import SignUpGuestForm from "@/forms/SignUpGuestForm";
+import SignUpGuestForm from "@/features/auth/forms/SignUpGuestForm";
 
 const signUpHeroImage =
   "https://images.unsplash.com/photo-1572331165267-854da2b10ccc?auto=format&fit=crop&w=1600&q=80";

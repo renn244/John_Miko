@@ -7,7 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import type { BookingReportDocumentation } from "@/types/booking.types";
+import type { BookingReportDocumentation } from "@/features/shared/bookings/types/booking.type";
 import { ChevronLeft, ChevronRight, CircleAlert, CircleCheckBig } from "lucide-react";
 import { useMemo, useState } from "react";
 

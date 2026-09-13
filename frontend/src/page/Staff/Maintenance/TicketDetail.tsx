@@ -7,7 +7,7 @@ import {
   getMaintenancePriorityChipClassName,
   getMaintenanceStatusChipClassName,
   getMaintenanceStatusLabel,
-} from "@/components/pageComponents/Staff/Maintenance/maintenanceDisplay";
+} from "@/features/staff/maintenance/components/maintenanceDisplay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,12 +16,12 @@ import {
   useCompleteAssignedMaintenance,
   useReopenAssignedMaintenance,
   useStartAssignedMaintenance,
-} from "@/hooks/staff/maintenance.hook";
+} from "@/features/staff/maintenance/hooks/useStaffMaintenance";
 import { cn } from "@/lib/utils";
 import type {
   AssignedMaintenanceDetail,
   MaintenanceStatus,
-} from "@/types/staff/maintenance.type";
+} from "@/features/staff/maintenance/types/maintenance.type";
 import { AlertTriangle, ArrowLeft, Check, ImageIcon, Play, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";

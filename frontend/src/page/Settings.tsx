@@ -1,7 +1,7 @@
-import NavBar from "@/components/common/NavBar";
-import { GuestContainer, GuestPageShell } from "@/components/guest";
-import SettingsContent from "@/components/pageComponents/Settings/SettingsContent";
-import { useAuthContext } from "@/context/AuthContext";
+import NavBar from "@/features/public/layout/components/NavBar";
+import { GuestContainer, GuestPageShell } from "@/features/public/layout/components/guest";
+import SettingsContent from "@/features/shared/settings/components/SettingsContent";
+import { useAuthContext } from "@/features/auth/context/AuthContext";
 
 const Settings = () => {
     const { user } = useAuthContext();

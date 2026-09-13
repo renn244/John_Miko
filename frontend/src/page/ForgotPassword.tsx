@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import ForgotPasswordForm, { type forgotPasswordSchemaType } from "@/forms/ForgotPasswordForm";
-import { useResendForgotPasswordMutation } from "@/hooks/auth.hook";
+import ForgotPasswordForm, { type forgotPasswordSchemaType } from "@/features/auth/forms/ForgotPasswordForm";
+import { useResendForgotPasswordMutation } from "@/features/auth/hooks/auth.hook";
 import { CheckCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";

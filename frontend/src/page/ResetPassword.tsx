@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
-import ResetPasswordForm from "@/forms/ResetPasswordForm";
+import ResetPasswordForm from "@/features/auth/forms/ResetPasswordForm";
 import { CheckCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";

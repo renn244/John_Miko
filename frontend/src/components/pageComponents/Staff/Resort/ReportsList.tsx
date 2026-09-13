@@ -1,4 +1,4 @@
-import { AdminClearFiltersButton } from "@/components/pageComponents/Admin/AdminFilterLayout";
+import { AdminClearFiltersButton } from "@/features/admin/layout/components/AdminFilterLayout";
 import { Button } from "@/components/ui/button";
 import {
   Select,
