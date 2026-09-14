@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useGetAvailableServicesForBookingQuery } from "@/features/shared/add-on-services/hooks/useAvailableAddOnServices";
+import type { AddOnService } from "@/features/shared/add-on-services/types/add-on-service.type";
 import { toDateOnly } from "@/lib/date.util";
 import { formatPeso } from "@/lib/utils";
-import type { AddOnService } from "@/features/shared/add-on-services/types/add-on-service.type";
 import { ChevronDown, Minus, Package, Plus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -23,9 +23,7 @@ const ManualAddOnSelector = ({ bookingDate, stayOptionId, onSubtotalChange }: Ma
 
     const bookingDateValue = bookingDate ? toDateOnly(bookingDate) : null;
     const stayKey = bookingDateValue && stayOptionId ? `${bookingDateValue}:${stayOptionId}` : null;
-    const query = bookingDateValue && stayOptionId
-        ? { bookingDate: bookingDateValue, stayOptionId }
-        : null;
+    const query = bookingDateValue && stayOptionId ? { bookingDate: bookingDateValue, stayOptionId } : null;
     const { data: services, isLoading, isError } = useGetAvailableServicesForBookingQuery(query);
 
     useEffect(() => {

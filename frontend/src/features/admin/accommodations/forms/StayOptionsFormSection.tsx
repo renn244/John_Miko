@@ -1,12 +1,12 @@
 import FormSection from "@/components/common/FormSection";
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import type { Accommodation } from "@/features/shared/accommodations/types/accommodation.type";
 import {
     ACCOMMODATION_STAY_OPTION_PRESET_MODE,
     type AccommodationStayOptionPresetMode,
 } from "@/lib/constant/ACCOMMODATION_STAY_OPTION_PRESETS.constant";
 import { formatStayOptionRange } from "@/lib/stayOptionTime";
-import type { Accommodation } from "@/features/shared/accommodations/types/accommodation.type";
 import { useState } from "react";
 import { useFieldArray, type Control, type FieldErrors, type UseFormSetValue } from "react-hook-form";
 import type { AccommodationFormValues } from "./accommodationForm.schema";

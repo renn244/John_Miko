@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useGetMenuItemCategoriesQuery, useGetMenuItemsQuery } from "@/features/shared/menu-items/hooks/useMenuItemQueries";
-import { formatPeso } from "@/lib/utils";
 import type { MenuItem } from "@/features/shared/menu-items/types/menu-item.type";
+import { formatPeso } from "@/lib/utils";
 import { ChevronDown, Minus, Pizza, Plus, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
@@ -14,6 +14,7 @@ type ManualPreOrderSelectorProps = {
 const ManualPreOrderSelector = ({ onSubtotalChange }: ManualPreOrderSelectorProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState<string>();
+
     const { control } = useFormContext<ManualBookingFormValues>();
     const { fields, append, remove, update } = useFieldArray({ control, name: "preOrderItems" });
     const { data: categories, isError: categoriesError } = useGetMenuItemCategoriesQuery();
