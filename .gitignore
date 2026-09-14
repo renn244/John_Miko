@@ -14,5 +14,7 @@ node_modules/*
 assets/
 tools/
 
-BOOKING_SAFEGUARDS_TEST_CHECKLIST.md
-./TODO_FIXES.md
+/BOOKING_SAFEGUARDS_TEST_CHECKLIST.md
+/TODO_FIXES.md
+/FUTURE_FEATURES.md
+/frontend-file-tree.txt
