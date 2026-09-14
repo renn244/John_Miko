@@ -1,6 +1,5 @@
 import apiClient from "@/lib/apiClient";
-import type { PaymentOverview, RevenueAnalyticsApiItem } from "@/features/admin/payments/types/payment.type";
-import type { PaymentRecord } from "@/types/payment.type";
+import type { PaymentOverview, PaymentRecord, RevenueAnalyticsApiItem } from "@/features/admin/payments/types/payment.type";
 
 export const paymentApi = {
     getPayments: async () => {
