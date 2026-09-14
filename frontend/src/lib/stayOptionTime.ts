@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import type { AccommodationStayOption } from "@/types/admin/accommodation.type";
+import type { AccommodationStayOption } from "@/features/shared/accommodations/types/accommodation.type";
 
 export type StayOptionTimeValue = string | null | undefined;
 export type StayOptionTimeInput = {

@@ -1,4 +1,4 @@
-import type { CreateAccommodationDto } from "@/types/admin/accommodation.type";
+import type { CreateAccommodationDto } from "@/features/shared/accommodations/types/accommodation.type";
 
 export const ACCOMMODATION_STAY_OPTION_PRESET_MODE = {
     DAYSTAY_OVERNIGHT: "preset_daystay_overnight",

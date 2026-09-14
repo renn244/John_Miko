@@ -7,7 +7,7 @@ import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { BookingService } from './booking.service';
-import { ChangeStatusDto, CreateBookingDto, CreateManualBookingDto, RescheduleBookingDto } from './dto/booking.dto';
+import { ChangeStatusDto, CreateBookingDto, CreateManualBookingDto, CreateWalkInBookingDto, RescheduleBookingDto } from './dto/booking.dto';
 import { GetBookingsByUserQuery, GetBookingsQuery, GetStaffBookingsQuery } from './query/getBookings.query';
 
 @Controller('booking')
@@ -19,7 +19,7 @@ export class BookingController {
 
     // update or invalidate the cache when a new booking is made, 
     @Post()
-    @Roles(Role.GUEST, Role.ADMIN)
+    @Roles(Role.GUEST)
     async bookAccommodation(@Body() body: CreateBookingDto, @User() user: UserSession) {
         return this.bookingService.bookAccommodation(body, user)
     }
@@ -28,6 +28,12 @@ export class BookingController {
     @Roles(Role.ADMIN)
     async createManualBooking(@Body() body: CreateManualBookingDto, @User() user: UserSession) {
         return this.bookingService.createManualBooking(body, user);
+    }
+
+    @Post('walk-in')
+    @Roles(Role.ADMIN)
+    async createWalkInBooking(@Body() body: CreateWalkInBookingDto, @User() user: UserSession) {
+        return this.bookingService.createWalkInBooking(body, user);
     }
     
     @Get()
@@ -75,7 +81,7 @@ export class BookingController {
     }
 
     @Get('byUser')
-    @Roles(Role.GUEST, Role.ADMIN)
+    @Roles(Role.GUEST)
     async GetBookingsByUser(@User() user: UserSession, @Query() query: GetBookingsByUserQuery) {
         return this.bookingService.getBookingsByUser(user, query)
     }

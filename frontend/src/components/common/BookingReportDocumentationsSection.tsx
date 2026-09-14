@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { BookingReportDocumentation } from "@/types/booking.types";
+import type { BookingReportDocumentation } from "@/features/shared/bookings/types/booking.type";
 import { CalendarDays, Eye, FileText, User2 } from "lucide-react";
 import { useMemo, useState } from "react";
 

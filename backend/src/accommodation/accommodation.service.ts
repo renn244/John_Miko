@@ -1,5 +1,5 @@
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { BookingStatus } from 'src/generated/prisma/enums';
 import { toDateOnly } from 'src/lib/utils/date.util';
@@ -48,9 +48,9 @@ export class AccommodationService {
 
     async getAccommodationStats() {
         const [total, grouped] = await Promise.all([
-            this.prisma.accommodation.count(),
+            this.prisma.accommodation.count({ where: { retiredAt: null } }),
             this.prisma.accommodation.groupBy({
-                by: ['type'],
+                by: ['type'], where: { retiredAt: null },
                 _count: { type: true },
             })
         ]);
@@ -66,13 +66,14 @@ export class AccommodationService {
 
     async getAccommodationOptions() {
         const optionsAccommodation = await this.prisma.accommodation.findMany({
+            where: { retiredAt: null },
             select: { id: true, name: true }
         })
         
         return optionsAccommodation;
     }
 
-    async getAccommodations(query: GetAccommodationQueryDto) {
+    async getAccommodations(query: GetAccommodationQueryDto, retiredOnly = false) {
         const { search, page, limit, date, ...rest } = cleanPrismaWhere(query);
 
         if (date) {
@@ -91,6 +92,7 @@ export class AccommodationService {
 
         const where: Prisma.AccommodationWhereInput = {
             ...rest,
+            retiredAt: retiredOnly ? { not: null } : null,
             name: { contains: search, mode: 'insensitive' as const },
             ...(date ? {
                 closures: { none: { date } },
@@ -141,8 +143,16 @@ export class AccommodationService {
 
     async getAccommodationReports(date?: Date) {
         const reportDate = toDateOnly(date ?? new Date())
+        const nextReportDate = new Date(reportDate);
+        nextReportDate.setUTCDate(nextReportDate.getUTCDate() + 1);
 
         const accommodations = await this.prisma.accommodation.findMany({
+            where: {
+                OR: [
+                    { retiredAt: null },
+                    { retiredAt: { gte: nextReportDate } },
+                ],
+            },
             select: {
                 type: true,
                 bookings: {
@@ -199,8 +209,8 @@ export class AccommodationService {
     }
 
     async getAccommodationById(id: string) {
-        const accommodation = await this.prisma.accommodation.findUnique({
-            where: { id },
+        const accommodation = await this.prisma.accommodation.findFirst({
+            where: { id, retiredAt: null },
             include: {
                 stayOptions: {
                     where: { isActive: true },
@@ -222,8 +232,35 @@ export class AccommodationService {
         return accommodation;
     }
 
-    async deleteAccommodation(id: string) {
-        const accommodation = await this.prisma.accommodation.delete({ where: { id } });
+    async retireAccommodation(id: string) {
+        const accommodation = await this.prisma.accommodation.findUnique({ where: { id } });
+        if (!accommodation) throw new NotFoundException('Accommodation not found');
+        if (accommodation.retiredAt) return accommodation;
+
+        const upcomingBookings = await this.prisma.booking.count({
+            where: {
+                accommodationId: id,
+                bookingDate: { gte: toDateOnly(new Date(Date.now())) },
+                status: { in: [BookingStatus.Pending, BookingStatus.Confirmed] },
+            },
+        });
+        if (upcomingBookings) {
+            throw new BadRequestException('Reschedule or cancel upcoming bookings before retiring this accommodation.');
+        }
+
+        const retired = await this.prisma.accommodation.update({
+            where: { id },
+            data: { retiredAt: new Date() },
+        });
+        await this.cache.del(CATALOG_CACHE_KEY);
+        return retired;
+    }
+
+    async restoreAccommodation(id: string) {
+        const accommodation = await this.prisma.accommodation.update({
+            where: { id },
+            data: { retiredAt: null },
+        });
         await this.cache.del(CATALOG_CACHE_KEY);
         return accommodation;
     }

@@ -53,7 +53,7 @@ export class ReportsController {
   @Roles(Role.ADMIN)
   async exportReport(
     @Query() query: ExportReportQueryDto,
-    @Res({ passthrough: true }) response: Response,
+    @Res() response: Response,
   ) {
     const report = await this.reportsService.exportReport(query.date, query.format);
     response.setHeader('Content-Type', report.contentType);
@@ -62,6 +62,6 @@ export class ReportsController {
       `attachment; filename="${report.fileName}"`,
     );
     response.setHeader('Cache-Control', 'no-store');
-    return report.buffer;
+    response.send(report.buffer);
   }
 }

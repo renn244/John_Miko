@@ -57,14 +57,14 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
   async ForgotPassword(@Body() body: forgotPasswordDto) {
-    return this.forgotPasswordService.forgetPassword(body.email);
+    return this.forgotPasswordService.forgetPassword(body.email, body.platform);
   }
 
   @Post('resendForgotPassword')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 3, ttl: 60_000 } })
   async ResendForgotPassword(@Body() body: resendForgotPasswordDto) {
-    return this.forgotPasswordService.resendForgotPassword(body.email);
+    return this.forgotPasswordService.resendForgotPassword(body.email, body.platform);
   }
 
   @Post('resetPassword')

@@ -1,5 +1,5 @@
-import { useGetAccommodationByIdQuery } from "@/hooks/admin/accommodation.hook";
-import { useGetBookingsByAccommodationQuery } from "@/hooks/booking.hook";
+import { useGetAccommodationByIdQuery } from "@/features/shared/accommodations/hooks/useAccommodationQueries";
+import { useGetBookingsByAccommodationQuery } from "@/features/shared/bookings/hooks/useBookingAvailability";
 import { isSameDateOnly } from "@/lib/date.util";
 import { formatStayOptionRange } from "@/lib/stayOptionTime";
 import { cn } from "@/lib/utils";
@@ -43,6 +43,7 @@ const AvailabilityStayType = ({ checkInDate, accommodationId, className, invalid
                             </FieldDescription>
                         </FieldContent>
                         <RadioGroupItem
+                        disabled={!checkInDate}
                         value={stayOption.id}
                         id={`form-rhf-radiogroup-${stayOption.id}`}
                         aria-invalid={invalid}

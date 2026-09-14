@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, IsOptional, IsIn } from "class-validator";
 import { IsMatch } from "src/lib/customValidator/isMatch";
 import { AccountPassword } from './account-password.decorator';
 
@@ -7,6 +7,10 @@ export class forgotPasswordDto {
     @IsString()
     @IsEmail({}, { message: "Invalid email" })
     email!: string;
+
+    @IsOptional()
+    @IsIn(['web', 'mobile'])
+    platform?: 'web' | 'mobile';
 }
 
 export class resendForgotPasswordDto {
@@ -14,6 +18,10 @@ export class resendForgotPasswordDto {
     @IsString()
     @IsEmail({}, { message: "Invalid email" })
     email!: string;
+
+    @IsOptional()
+    @IsIn(['web', 'mobile'])
+    platform?: 'web' | 'mobile';
 }
 
 export class resetPasswordDto {

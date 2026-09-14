@@ -1,11 +1,11 @@
-import { useAuthContext } from "@/context/AuthContext";
-import { useClosureAdminStore } from "@/store/admin/closureAdmin.store";
-import { isStaffRole, type StaffRole } from "@/types/auth.types";
+import { useAuthContext } from "@/features/auth/context/AuthContext";
+import { useClosureAdminStore } from "@/features/admin/closures/store/closureAdmin.store";
+import { isStaffRole, type StaffRole } from "@/features/auth/types/auth.types";
 import { ClipboardCheck, FolderKanban, History, Lock, LogOutIcon, Settings } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import GuestLoginDialog from "./GuestLoginDialog";
+import GuestLoginDialog from "@/features/auth/components/GuestLoginDialog";
 import UserAvatar from "./UserAvatar";
 
 const ProfileMenu = () => {

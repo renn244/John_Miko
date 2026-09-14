@@ -18,6 +18,7 @@ async function bootstrap() {
 
   app.enableCors({
     allowedHeaders: '*',
+    exposedHeaders: ['Content-Disposition'],
     origin: allowedFrontendOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });

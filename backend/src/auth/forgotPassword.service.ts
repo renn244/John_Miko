@@ -48,7 +48,7 @@ export class ForgotPasswordService {
     }
 
     // do we also need to add roles validation for here later on
-    private async generateAndSendResetToken(email: string) {
+    private async generateAndSendResetToken(email: string, platform?: 'web' | 'mobile') {
         const user = await this.userService.findUserByEmail(email);
 
         if (!user) {
@@ -66,7 +66,7 @@ export class ForgotPasswordService {
             }
         });
 
-        const isMobileUser = this.userService.isMobileUserByRole(user.role)
+        const isMobileUser = platform ? platform === 'mobile' : this.userService.isMobileUserByRole(user.role)
         const confirmationUrl = isMobileUser 
             ? this.buildMobileResetRedirectUrl(rawToken)
             : this.buildResetUrl(process.env.FRONTEND_URL, rawToken)
@@ -88,12 +88,12 @@ export class ForgotPasswordService {
         }
     }
 
-    async forgetPassword(email: string) {
-        return this.generateAndSendResetToken(email);
+    async forgetPassword(email: string, platform?: 'web' | 'mobile') {
+        return this.generateAndSendResetToken(email, platform);
     }
 
-    async resendForgotPassword(email: string) {
-        return this.generateAndSendResetToken(email);
+    async resendForgotPassword(email: string, platform?: 'web' | 'mobile') {
+        return this.generateAndSendResetToken(email, platform);
     }
 
     async resetPassword({ token, newPassword }: resetPasswordDto) {

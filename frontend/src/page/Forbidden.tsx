@@ -1,8 +1,8 @@
-import Footer from "@/components/common/Footer";
-import NavBar from "@/components/common/NavBar";
-import { GuestContainer, GuestPageShell } from "@/components/guest";
+import Footer from "@/features/public/layout/components/Footer";
+import NavBar from "@/features/public/layout/components/NavBar";
+import { GuestContainer, GuestPageShell } from "@/features/public/layout/components/guest";
 import StatusPageCard from "@/components/common/StatusPageCard";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/features/auth/context/AuthContext";
 import { cn } from "@/lib/utils";
 
 type ForbiddenPageProps = {

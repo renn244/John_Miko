@@ -26,7 +26,15 @@ export class StaffManagementEmailService {
     }
 
     private getStaffLoginUrl() {
-        const baseUrl = process.env.MOBILE_URL || process.env.FRONTEND_URL;
+        // Azure may expose the web allowlist through FRONTEND_URLS, while the
+        // mobile URL can be a non-clickable `jmport://` deep link. Staff email
+        // should always direct recipients to the web sign-in screen first.
+        const configuredWebUrl = process.env.FRONTEND_URL
+            || process.env.FRONTEND_URLS
+                ?.split(',')
+                .map((url) => url.trim())
+                .find(Boolean);
+        const baseUrl = configuredWebUrl || process.env.MOBILE_URL;
 
         if (!baseUrl) {
             return undefined;

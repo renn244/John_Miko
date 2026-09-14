@@ -42,8 +42,12 @@ const ProfileCard = ({
                       </Text>
                     </View>
                 )}
-                <View className="min-w-0 flex-1 gap-2">
-                    <Text className="font-sans-bold text-xl text-neutral-dark-1">
+                <View className="flex-1 gap-2" style={{ minWidth: 0 }}>
+                    <Text
+                        className="font-sans-bold text-xl text-neutral-dark-1"
+                        style={{ flexShrink: 1 }}
+                        numberOfLines={2}
+                    >
                         {user.name || "Staff Member"}
                     </Text>
                     <InfoLine
