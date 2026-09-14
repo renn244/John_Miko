@@ -20,7 +20,19 @@ type bookingAdminStore = {
     setIsMarkCancelOpen: (open: boolean) => void;
     markCancelBookingId: string | undefined;
     setMarkCancelBookingId: (id: string | undefined) => void;
-}
+
+    isRejectPaymentOpen: boolean;
+    setIsRejectPaymentOpen: (open: boolean) => void;
+    rejectPaymentId: string | undefined;
+    setRejectPaymentId: (id: string | undefined) => void;
+
+    isRefundPaymentOpen: boolean;
+    setIsRefundPaymentOpen: (open: boolean) => void;
+    refundPayment: { id: string; amountPaid: number } | undefined;
+    setRefundPayment: (
+        payment: { id: string; amountPaid: number } | undefined,
+    ) => void;
+};
 
 export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
     isViewOpen: false,
@@ -52,7 +64,7 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
                 console.warn("Cannot open without rescheduleBookingId");
                 return state;
             }
-            
+
             return {
                 isRescheduleOpen: open,
                 rescheduleBookingId: state.rescheduleBookingId,
@@ -74,7 +86,7 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
                 console.warn("Cannot open without markCompletedBookingId");
                 return state;
             }
-            
+
             return {
                 isMarkCompletedOpen: open,
                 markCompletedBookingId: state.markCompletedBookingId,
@@ -110,4 +122,48 @@ export const useBookingAdminStore = create<bookingAdminStore>((set) => ({
             isMarkCancelOpen: id === undefined ? false : true,
         });
     },
-}))
+
+    isRejectPaymentOpen: false,
+    setIsRejectPaymentOpen: (open) => {
+        set((state) => {
+            if (open && state.rejectPaymentId === undefined) {
+                console.warn("Cannot open without rejectPaymentId");
+                return state;
+            }
+
+            return {
+                isRejectPaymentOpen: open,
+                rejectPaymentId: state.rejectPaymentId,
+            };
+        });
+    },
+    rejectPaymentId: undefined,
+    setRejectPaymentId: (id) => {
+        set({
+            rejectPaymentId: id,
+            isRejectPaymentOpen: id !== undefined,
+        });
+    },
+
+    isRefundPaymentOpen: false,
+    setIsRefundPaymentOpen: (open) => {
+        set((state) => {
+            if (open && state.refundPayment === undefined) {
+                console.warn("Cannot open without refundPayment");
+                return state;
+            }
+
+            return {
+                isRefundPaymentOpen: open,
+                refundPayment: state.refundPayment,
+            };
+        });
+    },
+    refundPayment: undefined,
+    setRefundPayment: (payment) => {
+        set({
+            refundPayment: payment,
+            isRefundPaymentOpen: payment !== undefined,
+        });
+    },
+}));
