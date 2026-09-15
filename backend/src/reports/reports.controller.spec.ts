@@ -8,14 +8,13 @@ jest.mock('./reports.service', () => ({
 import { ReportsController } from './reports.controller';
 
 describe('ReportsController', () => {
-  it('sends an Excel export as raw binary instead of serializing its Buffer as JSON', async () => {
-    const buffer = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+  it('sends a CSV export as raw binary instead of serializing its Buffer as JSON', async () => {
+    const buffer = Buffer.from('report_date,section');
     const reportsService = {
       exportReport: jest.fn().mockResolvedValue({
         buffer,
-        contentType:
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        fileName: 'john-mikos-place-report-2026-09-13.xlsx',
+        contentType: 'text/csv; charset=utf-8',
+        fileName: 'john-mikos-place-report-2026-09-13.csv',
       }),
     } as unknown as ReportsService;
     const response = {
@@ -24,15 +23,15 @@ describe('ReportsController', () => {
     } as unknown as Response;
     const controller = new ReportsController(reportsService);
 
-    await controller.exportReport({ format: 'xlsx' }, response);
+    await controller.exportReport({}, response);
 
     expect(response.setHeader).toHaveBeenCalledWith(
       'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/csv; charset=utf-8',
     );
     expect(response.setHeader).toHaveBeenCalledWith(
       'Content-Disposition',
-      'attachment; filename="john-mikos-place-report-2026-09-13.xlsx"',
+      'attachment; filename="john-mikos-place-report-2026-09-13.csv"',
     );
     expect(response.send).toHaveBeenCalledWith(buffer);
   });

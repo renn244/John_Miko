@@ -6,7 +6,7 @@ import { MaintenanceModule } from 'src/maintenance/maintenance.module';
 import { PaymentModule } from 'src/payment/payment.module';
 import { StaffReportsModule } from 'src/staff-reports/staff-reports.module';
 import { ReportsController } from './reports.controller';
-import { ReportsExportService } from './reports-export.service';
+import { ReportsCsvExportService } from './reports-csv-export.service';
 import { ReportsService } from './reports.service';
 
 @Module({
@@ -19,6 +19,9 @@ import { ReportsService } from './reports.service';
     StaffReportsModule,
   ],
   controllers: [ReportsController],
-  providers: [ReportsService, ReportsExportService],
+  providers: [
+    ReportsService,
+    ReportsCsvExportService,
+  ],
 })
 export class ReportsModule {}
