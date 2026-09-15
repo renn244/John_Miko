@@ -1,7 +1,7 @@
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
-import { BookingStatus } from 'src/generated/prisma/enums';
+import { AccommodationType, BookingStatus } from 'src/generated/prisma/enums';
 import { toDateOnly } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
@@ -9,6 +9,31 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CATALOG_CACHE_KEY } from 'src/rag/catalog-search.service';
 import { CreateAccommodationDto, UpdateAccommodationDto } from './dto/accommodation.dto';
 import { GetAccommodationQueryDto } from './query/get-accommodations-query.dto';
+
+type StayOptionReport = {
+    label: string;
+    booked: number;
+    pending: number;
+    available: number;
+    totalSlots: number;
+};
+
+type AccommodationCategoryReport = {
+    booked: number;
+    pending: number;
+    available: number;
+    totalSlots: number;
+    stayOptions: Record<string, StayOptionReport>;
+};
+
+type AccommodationReportAccumulator = {
+    cottages: AccommodationCategoryReport;
+    room: AccommodationCategoryReport;
+    eventHalls: AccommodationCategoryReport;
+    occupancyRate: number;
+    totalSlots: number;
+    totalAvailable: number;
+};
 
 @Injectable()
 export class AccommodationService {
@@ -146,65 +171,168 @@ export class AccommodationService {
         const nextReportDate = new Date(reportDate);
         nextReportDate.setUTCDate(nextReportDate.getUTCDate() + 1);
 
+        const globalClosure = await this.prisma.closure.findFirst({
+            where: { accommodationId: null, date: reportDate },
+            select: { id: true },
+        });
+
+        if (globalClosure) {
+            return this.formatAccommodationReport(this.createEmptyAccommodationReport());
+        }
+
         const accommodations = await this.prisma.accommodation.findMany({
             where: {
                 OR: [
                     { retiredAt: null },
                     { retiredAt: { gte: nextReportDate } },
                 ],
+                closures: { none: { date: reportDate } },
             },
             select: {
                 type: true,
-                bookings: {
+                stayOptions: {
                     where: {
-                        bookingDate: reportDate,
-                        status: {
-                            in: ['Confirmed', 'Completed'],
-                        },
+                        isActive: true,
                     },
+                    orderBy: { sortOrder: 'asc' },
                     select: {
-                        id: true,
-                        numberOfGuests: true,
-                        stayOptionLabelSnapshot: true,
+                        label: true,
+                        bookings: {
+                            where: {
+                                bookingDate: reportDate,
+                                status: {
+                                    in: [
+                                        BookingStatus.Pending,
+                                        BookingStatus.Confirmed,
+                                        BookingStatus.Completed,
+                                    ],
+                                },
+                            },
+                            select: { status: true },
+                        },
                     },
                 },
             }
         });
 
-        const reportPerRoom = accommodations.reduce((acc, item) => {
-            const type = item.type === 'EventHall'
-                ? 'eventHalls'
-                : item.type === 'Room'
-                ? 'room'
-                : 'cottages';
+        const report = this.createEmptyAccommodationReport();
 
-            const isOccupied = item.bookings.length > 0;
+        accommodations.forEach((accommodation) => {
+            const category = this.getAccommodationReportCategory(
+                report,
+                accommodation.type,
+            );
 
-            acc[type].total += 1;
-
-            if (isOccupied) {
-                acc[type].occupied += 1;
-            } else {
-                acc[type].free += 1;
-            }
-
-            return acc;
-        }, {
-            cottages: { occupied: 0, free: 0, total: 0 },
-            room: { occupied: 0, free: 0, total: 0 },
-            eventHalls: { occupied: 0, free: 0, total: 0 },
+            accommodation.stayOptions.forEach((stayOption) => {
+                this.recordStayOption(
+                    category,
+                    stayOption.label,
+                    stayOption.bookings[0]?.status,
+                );
+            });
         });
 
-        const { total, occupied, free } = Object.values(reportPerRoom)
-            .reduce((sum, occ) => ({ 
-                total: sum.total + occ.total, occupied: sum.occupied + occ.occupied, free: sum.free + occ.free 
-            }), { total: 0, occupied: 0, free: 0 })
+        const totals = this.calculateAccommodationReportTotals(report);
+
+        return this.formatAccommodationReport({
+            ...report,
+            ...totals,
+        });
+    }
+
+    private getAccommodationReportCategory(
+        report: AccommodationReportAccumulator,
+        type: AccommodationType,
+    ) {
+        if (type === AccommodationType.EventHall) return report.eventHalls;
+        if (type === AccommodationType.Room) return report.room;
+
+        return report.cottages;
+    }
+
+    private recordStayOption(
+        category: AccommodationCategoryReport,
+        label: string,
+        status?: BookingStatus,
+    ) {
+        const option = category.stayOptions[label] ?? {
+            label,
+            booked: 0,
+            pending: 0,
+            available: 0,
+            totalSlots: 0,
+        };
+
+        option.totalSlots += 1;
+        category.totalSlots += 1;
+
+        if (status === BookingStatus.Confirmed || status === BookingStatus.Completed) {
+            option.booked += 1;
+            category.booked += 1;
+        } else if (status === BookingStatus.Pending) {
+            option.pending += 1;
+            category.pending += 1;
+        } else {
+            option.available += 1;
+            category.available += 1;
+        }
+
+        category.stayOptions[label] = option;
+    }
+
+    private calculateAccommodationReportTotals(report: AccommodationReportAccumulator) {
+        const { totalSlots, booked, available } = [
+            report.cottages,
+            report.room,
+            report.eventHalls,
+        ].reduce(
+            (sum, category) => ({
+                totalSlots: sum.totalSlots + category.totalSlots,
+                booked: sum.booked + category.booked,
+                available: sum.available + category.available,
+            }),
+            { totalSlots: 0, booked: 0, available: 0 },
+        );
 
         return {
-            ...reportPerRoom,
-            occupancyRate: Math.round((occupied / total) * 100),
-            totalCapacity: total,
-            totalFree: free
+            occupancyRate: totalSlots > 0 ? Math.round((booked / totalSlots) * 100) : 0,
+            totalSlots,
+            totalAvailable: available,
+        };
+    }
+
+    private createEmptyAccommodationReport(): AccommodationReportAccumulator {
+        const category = () => ({
+            booked: 0,
+            pending: 0,
+            available: 0,
+            totalSlots: 0,
+            stayOptions: {},
+        });
+
+        return {
+            cottages: category(),
+            room: category(),
+            eventHalls: category(),
+            occupancyRate: 0,
+            totalSlots: 0,
+            totalAvailable: 0,
+        };
+    }
+
+    private formatAccommodationReport(report: AccommodationReportAccumulator) {
+        const formatCategory = (category: AccommodationCategoryReport) => ({
+            ...category,
+            stayOptions: Object.values(category.stayOptions),
+        });
+
+        return {
+            cottages: formatCategory(report.cottages),
+            room: formatCategory(report.room),
+            eventHalls: formatCategory(report.eventHalls),
+            occupancyRate: report.occupancyRate,
+            totalSlots: report.totalSlots,
+            totalAvailable: report.totalAvailable,
         };
     }
 

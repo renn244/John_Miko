@@ -78,21 +78,35 @@ export type AccommodationOption = {
 
 export type AccommodationReport = {
     cottages: {
-        occupied: number;
-        free: number;
-        total: number;
+        booked: number;
+        pending: number;
+        available: number;
+        totalSlots: number;
+        stayOptions: AccommodationStayOptionReport[];
     };
     room: {
-        occupied: number;
-        free: number;
-        total: number;
+        booked: number;
+        pending: number;
+        available: number;
+        totalSlots: number;
+        stayOptions: AccommodationStayOptionReport[];
     };
     eventHalls: {
-        occupied: number;
-        free: number;
-        total: number;
+        booked: number;
+        pending: number;
+        available: number;
+        totalSlots: number;
+        stayOptions: AccommodationStayOptionReport[];
     };
     occupancyRate: number;
-    totalCapacity: number;
-    totalFree: number;
+    totalSlots: number;
+    totalAvailable: number;
+}
+
+export type AccommodationStayOptionReport = {
+    label: string;
+    booked: number;
+    pending: number;
+    available: number;
+    totalSlots: number;
 }

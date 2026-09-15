@@ -6,7 +6,6 @@ import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { DateReportQueryDto } from 'src/lib/dto/date-report.query';
 import { ReportsService } from './reports.service';
-import { ExportReportQueryDto } from './dto/export-report.query';
 
 @Controller('reports')
 @UseGuards(AuthGuard, RolesGuard)
@@ -52,10 +51,10 @@ export class ReportsController {
   @Get('export')
   @Roles(Role.ADMIN)
   async exportReport(
-    @Query() query: ExportReportQueryDto,
+    @Query() query: DateReportQueryDto,
     @Res() response: Response,
   ) {
-    const report = await this.reportsService.exportReport(query.date, query.format);
+    const report = await this.reportsService.exportReport(query.date);
     response.setHeader('Content-Type', report.contentType);
     response.setHeader(
       'Content-Disposition',

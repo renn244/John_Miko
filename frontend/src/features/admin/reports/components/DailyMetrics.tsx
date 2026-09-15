@@ -32,7 +32,7 @@ const DailyMetrics = ({ selectedDate }: { selectedDate: Date }) => {
             iconContainerClassName: "bg-blue-500",
         },
         {
-            title: "Occupancy",
+            title: "Stay-option occupancy",
             stat: occupancyValue,
             Icon: <BedDouble />,
             isLoading: dailyMetrics.isLoading,
