@@ -9,12 +9,16 @@ import { toDateOnly } from "@/lib/date.util";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 const chartConfig = {
-    occupied: {
-        label: "Occupied",
+    booked: {
+        label: "Booked stays",
         color: "#1E73BE",
     },
-    free: {
-        label: "Free",
+    pending: {
+        label: "Pending holds",
+        color: "#FDE68A",
+    },
+    available: {
+        label: "Available slots",
         color: "#DCEAFE",
     },
 } satisfies ChartConfig;
@@ -51,25 +55,31 @@ const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
     const chartData = [
         {
             label: "Rooms",
-            occupied: data.room.occupied,
-            free: data.room.free,
-            total: data.room.total,
+            booked: data.room.booked,
+            pending: data.room.pending,
+            available: data.room.available,
+            totalSlots: data.room.totalSlots,
+            stayOptions: data.room.stayOptions,
         },
         {
             label: "Cottages",
-            occupied: data.cottages.occupied,
-            free: data.cottages.free,
-            total: data.cottages.total,
+            booked: data.cottages.booked,
+            pending: data.cottages.pending,
+            available: data.cottages.available,
+            totalSlots: data.cottages.totalSlots,
+            stayOptions: data.cottages.stayOptions,
         },
         {
             label: "Event Halls",
-            occupied: data.eventHalls.occupied,
-            free: data.eventHalls.free,
-            total: data.eventHalls.total,
+            booked: data.eventHalls.booked,
+            pending: data.eventHalls.pending,
+            available: data.eventHalls.available,
+            totalSlots: data.eventHalls.totalSlots,
+            stayOptions: data.eventHalls.stayOptions,
         },
     ];
 
-    const hasAnyCapacity = chartData.some((item) => item.total > 0);
+    const hasAnySlots = chartData.some((item) => item.totalSlots > 0);
 
     return (
         <div className="rounded-xl border border-border/70 bg-card p-5 shadow-sm">
@@ -79,13 +89,13 @@ const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
                         Accommodation Breakdown
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                        Occupied and free capacity across accommodation types.
+                        Booked, pending, and available stay options across accommodation types.
                     </p>
                 </div>
 
                 <div className="text-right">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        Occupancy Rate
+                        Stay-option rate
                     </p>
                     <p className="mt-1 text-2xl font-bold tracking-tight text-foreground">
                         {data.occupancyRate}%
@@ -94,9 +104,9 @@ const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
             </div>
 
             <div className="mt-5 h-72 w-full">
-                {!hasAnyCapacity ? (
+                {!hasAnySlots ? (
                     <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-border/70 bg-muted/20 text-sm text-muted-foreground">
-                        No accommodation capacity configured.
+                        No available stay options configured.
                     </div>
                 ) : (
                     <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
@@ -125,7 +135,12 @@ const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
                                     if (!item) return null;
                                     const accentColor = accommodationTypeColors[item.label] ?? "#1E73BE";
                                     const occupancyRate =
-                                        item.total > 0 ? Math.round((item.occupied / item.total) * 100) : 0;
+                                        item.totalSlots > 0
+                                            ? Math.round((item.booked / item.totalSlots) * 100)
+                                            : 0;
+                                    const visibleStayOptions = item.stayOptions.filter(
+                                        (stayOption) => stayOption.totalSlots > 0,
+                                    );
 
                                     return (
                                         <div className="grid min-w-44 gap-2 rounded-lg border border-border/60 bg-background px-3 py-2 text-xs shadow-xl">
@@ -140,49 +155,79 @@ const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
                                             </div>
                                             <div className="grid gap-1">
                                                 <div className="flex items-center justify-between gap-4">
-                                                    <span className="text-muted-foreground">Occupied</span>
+                                                    <span className="text-muted-foreground">Booked stays</span>
                                                     <span className="font-medium text-foreground">
-                                                        {item.occupied}
+                                                        {item.booked}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between gap-4">
-                                                    <span className="text-muted-foreground">Free</span>
+                                                    <span className="text-muted-foreground">Pending holds</span>
                                                     <span className="font-medium text-foreground">
-                                                        {item.free}
+                                                        {item.pending}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between gap-4">
-                                                    <span className="text-muted-foreground">Capacity</span>
+                                                    <span className="text-muted-foreground">Available slots</span>
                                                     <span className="font-medium text-foreground">
-                                                        {item.total}
+                                                        {item.available}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <span className="text-muted-foreground">Total slots</span>
+                                                    <span className="font-medium text-foreground">
+                                                        {item.totalSlots}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="border-t border-border/60 pt-2">
                                                 <div className="flex items-center justify-between gap-4">
                                                     <span className="font-medium text-foreground">
-                                                        Occupancy Rate
+                                                        Stay-option rate
                                                     </span>
                                                     <span className="font-semibold text-foreground">
                                                         {occupancyRate}%
                                                     </span>
                                                 </div>
                                             </div>
+                                            {visibleStayOptions.length > 0 && (
+                                                <div className="grid gap-1 border-t border-border/60 pt-2">
+                                                    {visibleStayOptions.map((stayOption) => (
+                                                        <div
+                                                            key={stayOption.label}
+                                                            className="flex items-center justify-between gap-4"
+                                                        >
+                                                            <span className="text-muted-foreground">
+                                                                {stayOption.label}
+                                                            </span>
+                                                            <span className="font-medium text-foreground">
+                                                                {stayOption.booked} booked / {stayOption.pending} pending / {stayOption.available} available
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 }}
                             />
                             <Bar
-                                dataKey="occupied"
-                                stackId="capacity"
-                                fill="var(--color-occupied)"
+                                dataKey="booked"
+                                stackId="slots"
+                                fill="var(--color-booked)"
                                 radius={[6, 0, 0, 6]}
                                 barSize={24}
                             />
                             <Bar
-                                dataKey="free"
-                                stackId="capacity"
-                                fill="var(--color-free)"
+                                dataKey="pending"
+                                stackId="slots"
+                                fill="var(--color-pending)"
+                                radius={0}
+                                barSize={24}
+                            />
+                            <Bar
+                                dataKey="available"
+                                stackId="slots"
+                                fill="var(--color-available)"
                                 radius={[0, 6, 6, 0]}
                                 barSize={24}
                             />
@@ -194,10 +239,10 @@ const AccommodationBreakdown = ({ selectedDate }: { selectedDate: Date }) => {
             <div className="mt-4 rounded-lg bg-muted/30 px-4 py-3">
                 <div className="flex items-center justify-between gap-4">
                     <span className="text-sm text-muted-foreground">
-                        Total capacity
+                        Total stay slots
                     </span>
                     <span className="text-sm font-semibold text-foreground">
-                        {data.totalCapacity} units
+                        {data.totalSlots} slots
                     </span>
                 </div>
             </div>
