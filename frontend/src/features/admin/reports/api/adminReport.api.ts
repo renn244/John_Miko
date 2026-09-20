@@ -25,9 +25,9 @@ export const reportApi = {
     getMaintenance: (date?: string) => getReport<MaintenanceReport>("/reports/maintenance", date),
     getFeedback: (date?: string) => getReport<FeedbackReport>("/reports/feedback", date),
     getStaffActivity: (date?: string) => getReport<StaffReportSummary>("/reports/staff-activity", date),
-    exportReport: async (date: string, format: "csv" | "xlsx") => {
+    exportReport: async (date: string) => {
         const response = await apiClient.get("/reports/export", {
-            params: { date, format },
+            params: { date },
             responseType: "blob",
         });
 
@@ -46,7 +46,7 @@ export const reportApi = {
 
         const contentDisposition = String(response.headers["content-disposition"] || "");
         const fileNameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
-        const fallbackName = `john-mikos-place-report-${date.slice(0, 10)}.${format}`;
+        const fallbackName = `john-mikos-place-report-${date.slice(0, 10)}.csv`;
 
         return {
             blob: response.data as Blob,

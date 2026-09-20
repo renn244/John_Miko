@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useGetAccommodationsQuery } from "@/features/shared/accommodations/hooks/useAccommodationQueries";
+import { useGetMenuItemsQuery } from "@/features/shared/menu-items/hooks/useMenuItemQueries";
 import { RESORT_OPERATIONAL_INFO } from "@/lib/constant/RESORT_OPERATIONAL_INFO.constant";
 import { formatPeso } from "@/lib/utils";
 import type { Accommodation } from "@/features/shared/accommodations/types/accommodation.type";
@@ -118,30 +119,6 @@ const fallbackAccommodations: Pick<
     },
 ];
 
-const foodItems = [
-    {
-        name: "Sinigang na Baboy",
-        description: "Classic tamarind soup.",
-        price: 450,
-        imageUrl:
-            "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=300&q=80",
-    },
-    {
-        name: "Lechon Kawali",
-        description: "Crispy pork belly strips.",
-        price: 380,
-        imageUrl:
-            "https://images.unsplash.com/photo-1617093727343-374698b1b08d?auto=format&fit=crop&w=300&q=80",
-    },
-    {
-        name: "Halo-Halo Special",
-        description: "Refreshing mixed dessert.",
-        price: 180,
-        imageUrl:
-            "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=300&q=80",
-    },
-];
-
 const whyCards = [
     {
         title: "Easy Online Booking",
@@ -239,12 +216,20 @@ const getStayLabels = (accommodation: Pick<Accommodation, "stayOptions">) =>
 const Home = () => {
     const [dayUseHours, overnightHours] = RESORT_OPERATIONAL_INFO.operatingHours;
     const { data: accommodationsResponse } = useGetAccommodationsQuery({ page: 1, limit: 3 });
+    const { data: menuItemsResponse } = useGetMenuItemsQuery({
+        availability: "Available",
+        page: 1,
+        limit: 4,
+    });
     const accommodations = accommodationsResponse?.data?.length
         ? accommodationsResponse.data.slice(0, 3)
         : fallbackAccommodations;
+    const menuItems = menuItemsResponse?.data ?? [];
 
     const featuredAccommodation = accommodations[0];
     const sideAccommodations = accommodations.slice(1, 3);
+    const featuredMenuItem = menuItems[0];
+    const sideMenuItems = menuItems.slice(1, 4);
 
     return (
         <GuestPageShell className="bg-background">
@@ -406,8 +391,9 @@ const Home = () => {
                 </GuestSection>
             </GuestContainer>
 
-            <div className="bg-muted/45">
-                <GuestContainer>
+            {featuredMenuItem && (
+                <div className="bg-muted/45">
+                    <GuestContainer>
                     <GuestSection
                         compact
                         title="Pre-Order Filipino Favorites"
@@ -416,30 +402,34 @@ const Home = () => {
                         <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
                             <div className="relative min-h-[300px] overflow-hidden rounded-xl border shadow-sm">
                                 <img
-                                    src="https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?auto=format&fit=crop&w=1200&q=80"
-                                    alt="Filipino feast platter"
+                                    src={featuredMenuItem.imageUrl}
+                                    alt={featuredMenuItem.name}
                                     className="absolute inset-0 size-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/35 to-transparent" />
                                 <div className="relative z-10 flex min-h-[300px] flex-col justify-end p-5 text-white">
                                     <GuestInfoChip className="w-fit border-primary bg-primary text-primary-foreground">
-                                        Chef&apos;s Special Combo
+                                        {featuredMenuItem.category}
                                     </GuestInfoChip>
-                                    <h3 className="mt-3 text-2xl font-bold">Feast Platter</h3>
+                                    <h3 className="mt-3 text-2xl font-bold">{featuredMenuItem.name}</h3>
                                     <p className="mt-1 max-w-md text-sm text-white/85">
-                                        A generous serving of crispy pata, kare-kare, and adobo. Perfect for
-                                        sharing with the group.
+                                        {featuredMenuItem.description}
                                     </p>
                                     <div className="mt-4 flex items-center gap-3">
-                                        <p className="font-bold">{formatPeso(1850)}</p>
-                                        <Button asChild size="sm" variant="outline">
-                                            <Link to="/accommodation">Add to Stay</Link>
+                                        <p className="font-bold">{formatPeso(featuredMenuItem.price)}</p>
+                                        <Button
+                                            asChild
+                                            size="sm"
+                                            variant="outline"
+                                            className="border-white/80 bg-white text-foreground hover:bg-white/90 hover:text-foreground"
+                                        >
+                                            <Link to="/menu">View Menu</Link>
                                         </Button>
                                     </div>
                                 </div>
                             </div>
                             <div className="grid gap-3">
-                                {foodItems.map((item) => (
+                                {sideMenuItems.map((item) => (
                                     <GuestCard key={item.name} className="flex items-center gap-4 p-3">
                                         <img
                                             src={item.imageUrl}
@@ -482,8 +472,9 @@ const Home = () => {
                             </GuestCard>
                         </div>
                     </GuestSection>
-                </GuestContainer>
-            </div>
+                    </GuestContainer>
+                </div>
+            )}
 
             <GuestContainer>
                 <GuestSection
