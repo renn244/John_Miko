@@ -1,20 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { useGetMenuItemCategoriesQuery, useGetMenuItemsQuery } from "@/features/shared/menu-items/hooks/useMenuItemQueries";
+import { useGetMenuItemCategoriesQuery, useGetMenuItemsBulkQuery, useGetMenuItemsQuery } from "@/features/shared/menu-items/hooks/useMenuItemQueries";
 import { formatPeso } from "@/lib/utils";
 import type { MenuItem } from "@/features/shared/menu-items/types/menu-item.type";
 import { ArrowRight, Minus, Plus, ShoppingCart, X } from "lucide-react";
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type PreOrderFormProps = {
     setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review' | 'pre-order' | 'payment'>>,
-    changePreOrderTotal?: (total: number) => void;
 }
 
-const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps) => {
+const PreOrderForm = ({ setBookingStep }: PreOrderFormProps) => {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [menuItemCache, setMenuItemCache] = useState<Record<string, MenuItem>>({});
 
     const { control, reset, getValues } = useFormContext<multiStepBookingFormSchema>();
 
@@ -29,20 +27,15 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
         availability: 'Available'
     });
 
-    const menuItems = data?.data || []
-
-    useEffect(() => {
-        if (menuItems) {
-            setMenuItemCache(prev => {
-                const next = { ...prev };
-                menuItems.forEach(item => { next[item.id] = item; });
-                return next;
-            });
-        }
-    }, [menuItems]);
+    const menuItems = data?.data;
+    const { data: selectedMenuItems } = useGetMenuItemsBulkQuery(fields.map((field) => field.menuItemId));
+    const menuItemCache = useMemo<Record<string, MenuItem>>(() =>
+        Object.fromEntries(
+            [...(menuItems ?? []), ...(selectedMenuItems ?? [])].map((item) => [item.id, item]),
+        ),
+    [menuItems, selectedMenuItems]);
 
     const addToPreorder = (menuItem: MenuItem) => {
-        setMenuItemCache(prev => ({ ...prev, [menuItem.id]: menuItem }));
         const existingIndex = fields.findIndex((f) => f.menuItemId === menuItem.id);
         if (existingIndex === -1) {
             append({ menuItemId: menuItem.id, quantity: 1 });
@@ -80,7 +73,6 @@ const PreOrderForm = ({ setBookingStep, changePreOrderTotal }: PreOrderFormProps
             return acc + price * field.quantity;
         }, 0);
 
-        changePreOrderTotal?.(preOrderSub);
         return preOrderSub;
     }, [fields, menuItemCache]);
 
