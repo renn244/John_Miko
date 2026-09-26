@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { MenuIcon, Settings2Icon } from 'lucide-react-native';
+import { ClipboardList, History, Settings2Icon } from 'lucide-react-native';
 
 export default function KitchenStaffTabLayout() {
     return (
@@ -8,9 +8,20 @@ export default function KitchenStaffTabLayout() {
             name="(queue)"
             options={{
                 headerShown: false,
-                title: "Dashboard",
+                title: "Kitchen Queue",
                 tabBarIcon: ({ color, size }) => (
-                    <MenuIcon size={size} color={color} />
+                    <ClipboardList size={size} color={color} />
+                )
+            }}
+            />
+
+            <Tabs.Screen
+            name="(history)"
+            options={{
+                headerShown: false,
+                title: "History",
+                tabBarIcon: ({ color, size }) => (
+                    <History size={size} color={color} />
                 )
             }}
             />

@@ -3,6 +3,7 @@ import ScreenState from "@/components/ui/screen-state";
 import { useKitchenOrders } from "@/hooks/kitchenOrders.hook";
 import useDebouncedValue from "@/lib/useDebounce";
 import { useKitchenPreOrdersFilterStore } from "@/store/kitchenPreOrdersFilter.store";
+import type { KitchenOrderScope } from "@/types/kitchenOrder.type";
 import {
     AlertTriangle,
     ClipboardList
@@ -17,11 +18,14 @@ import {
 
 const isDateOnly = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
 
-const PreOrderList = () => {
+type PreOrderListProps = {
+    scope: KitchenOrderScope;
+};
+
+const PreOrderList = ({ scope }: PreOrderListProps) => {
     const search = useKitchenPreOrdersFilterStore((s) => s.search);
     const date = useKitchenPreOrdersFilterStore((s) => s.date);
     const status = useKitchenPreOrdersFilterStore((s) => s.status);
-    const scope = useKitchenPreOrdersFilterStore((s) => s.scope);
 
     const debouncedSearch = useDebouncedValue(search.trim(), 350);
     const debouncedDate = useDebouncedValue(date.trim(), 350);
@@ -59,7 +63,7 @@ const PreOrderList = () => {
             <FlatList
             data={filteredOrders}
             keyExtractor={(item) => item.bookingId}
-            renderItem={({ item }) => <PreOrderCard item={item} />}
+            renderItem={({ item }) => <PreOrderCard item={item} scope={scope} />}
             contentContainerStyle={{
                 paddingHorizontal: 20,
                 paddingBottom: 28,
