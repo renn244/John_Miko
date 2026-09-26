@@ -5,38 +5,42 @@ export type StaffStatus = "ACTIVE" | "INACTIVE";
 export type MaintenanceExpertise = "Electrical" | "Pool" | "Construction";
 
 export type StaffUser = {
-    id: string;
-    name: string | null;
-    email: string;
-    contactNo: string;
-    role: StaffRole;
-    expertise?: MaintenanceExpertise | null;
-    status: StaffStatus;
-    createdAt: string;
-}
+  id: string;
+  name: string | null;
+  email: string;
+  contactNo: string;
+  role: StaffRole;
+  expertise?: MaintenanceExpertise | null;
+  status: StaffStatus;
+  createdAt: string;
+};
+
+export type StaffCreationResult = StaffUser & {
+  temporaryPasswordEmailStatus: "sent" | "disabled" | "failed";
+};
 
 export type CreateStaffDto = {
-    name: string;
-    email: string;
-    contactNo: string;
-    role: StaffRole;
-    expertise?: MaintenanceExpertise;
-}
+  name: string;
+  email: string;
+  contactNo: string;
+  role: StaffRole;
+  expertise?: MaintenanceExpertise;
+};
 
 export type UpdateStaffRoleDto = {
-    role: StaffRole;
-    expertise?: MaintenanceExpertise;
-}
+  role: StaffRole;
+  expertise?: MaintenanceExpertise;
+};
 
 export type GetStaffsQuery = {
-    search?: string;
-    role?: StaffRole;
-    status?: StaffStatus;
-} & PaginationParams
+  search?: string;
+  role?: StaffRole;
+  status?: StaffStatus;
+} & PaginationParams;
 
 export type StaffStats = {
-    total: number;
-    kitchen: number;
-    resort: number;
-    maintenance: number;
-}
+  total: number;
+  kitchen: number;
+  resort: number;
+  maintenance: number;
+};
