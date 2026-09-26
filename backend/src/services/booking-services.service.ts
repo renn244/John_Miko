@@ -21,6 +21,7 @@ export class BookingServicesService {
         where: {
           id: { in: addOnServicesId },
           isActive: true,
+          deletedAt: null,
         },
       }),
       tx.booking.findFirst({

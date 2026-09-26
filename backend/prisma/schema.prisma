@@ -513,10 +513,13 @@ model AddOnService {
   price    Int
   quantity Int
   isActive Boolean @default(true)
+  deletedAt DateTime?
 
   Booking BookingAddOn[]
 
   createdAt DateTime @default(now())
+
+  @@index([deletedAt])
 }
 
 model Feedback {

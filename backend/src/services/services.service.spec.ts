@@ -44,8 +44,9 @@ describe('ServicesService', () => {
     addOnService: {
       create: jest.fn(),
       findMany: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
-      delete: jest.fn(),
+      aggregate: jest.fn(),
     },
     bookingAddOn: { findMany: jest.fn() },
     accommodationStayOption: { findFirst: jest.fn() },
@@ -77,7 +78,11 @@ describe('ServicesService', () => {
       },
     );
     prisma.bookingAddOn.findMany.mockImplementation(
-      async ({ where }: { where: { booking?: { bookingDate?: { gte: Date; lte: Date } } } }) => {
+      async ({
+        where,
+      }: {
+        where: { booking?: { bookingDate?: { gte: Date; lte: Date } } };
+      }) => {
         const gte = where.booking?.bookingDate?.gte?.toISOString();
         const lte = where.booking?.bookingDate?.lte?.toISOString();
 
@@ -135,12 +140,15 @@ describe('ServicesService', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('service-1');
+    expect(prisma.addOnService.findMany).toHaveBeenCalledWith({
+      where: { isActive: true, deletedAt: null },
+    });
   });
 
   it('invalidates the public catalog after add-on mutations', async () => {
     prisma.addOnService.create.mockResolvedValue(karaokeService);
     prisma.addOnService.update.mockResolvedValue(karaokeService);
-    prisma.addOnService.delete.mockResolvedValue(karaokeService);
+    prisma.addOnService.findFirst.mockResolvedValue(karaokeService);
 
     await service.createService({} as never);
     await service.updateService('service-1', {} as never);
@@ -149,5 +157,24 @@ describe('ServicesService', () => {
 
     expect(cache.del).toHaveBeenCalledTimes(4);
     expect(cache.del).toHaveBeenCalledWith(CATALOG_CACHE_KEY);
+  });
+
+  it('soft deletes an add-on service while retaining its record', async () => {
+    prisma.addOnService.findFirst.mockResolvedValue(karaokeService);
+    prisma.addOnService.update.mockResolvedValue({
+      ...karaokeService,
+      isActive: false,
+      deletedAt: new Date(),
+    });
+
+    await service.deleteService('service-1');
+
+    expect(prisma.addOnService.update).toHaveBeenCalledWith({
+      where: { id: 'service-1' },
+      data: {
+        deletedAt: expect.any(Date),
+        isActive: false,
+      },
+    });
   });
 });

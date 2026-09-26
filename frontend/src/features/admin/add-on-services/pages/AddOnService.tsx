@@ -3,6 +3,7 @@ import AdminPageHeader from "@/features/admin/layout/components/AdminPageHeader"
 import AddOnServiceList from "@/features/admin/add-on-services/components/AddOnServiceList";
 import AddOnServiceStatistics from "@/features/admin/add-on-services/components/AddOnServiceStatistics";
 import DeleteAddOnServiceDialog from "@/features/admin/add-on-services/components/DeleteAddOnServiceDialog";
+import AddOnServiceAvailabilityDialog from "@/features/admin/add-on-services/components/AddOnServiceAvailabilityDialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router";
@@ -30,6 +31,7 @@ const AddOnService = () => {
       <AddOnServiceList />
 
       <DeleteAddOnServiceDialog />
+      <AddOnServiceAvailabilityDialog />
     </div>
   );
 };

@@ -13,10 +13,11 @@ import { useGetAddOnServicesQuery } from "@/features/admin/add-on-services/hooks
 import { useAddOnServiceSearch } from "@/features/admin/add-on-services/hooks/useAddOnServiceSearch";
 import { formatPeso } from "@/lib/utils";
 import { useAddOnServiceAdminStore } from "@/features/admin/add-on-services/store/addOnServiceAdmin.store";
-import { Edit, Layers, MoreVertical, Package, Power, RotateCcw } from "lucide-react";
+import { Edit, Layers, MoreVertical, Package, Power, RotateCcw, Trash2 } from "lucide-react";
 import { Link } from "react-router";
 
 const AddOnServiceList = () => {
+    const setAvailabilityId = useAddOnServiceAdminStore((state) => state.setAvailabilityId);
     const setDeleteId = useAddOnServiceAdminStore((state) => state.setDeleteId);
 
     const { search, page, limit, updatePage } = useAddOnServiceSearch();
@@ -65,7 +66,7 @@ const AddOnServiceList = () => {
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
-                                            onClick={() => setDeleteId(service.id)}
+                                            onClick={() => setAvailabilityId(service.id)}
                                             variant={service.isActive ? "destructive" : "default"}
                                         >
                                             {service.isActive ? (
@@ -79,6 +80,10 @@ const AddOnServiceList = () => {
                                                     Reactivate
                                                 </>
                                             )}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setDeleteId(service.id)} variant="destructive">
+                                            <Trash2 className="h-4 w-4" />
+                                            Delete Service
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

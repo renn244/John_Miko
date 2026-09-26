@@ -1,14 +1,13 @@
 import ErrorDialog from "@/components/common/dialog/ErrorDialog";
 import NotFoundDialog from "@/components/common/dialog/NotFoundDialog";
-import AdminAvailabilityBadge from "@/components/common/AdminAvailabilityBadge";
 import AdminDecisionNotice from "@/components/common/AdminDecisionNotice";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
-import { useGetAddOnServiceById, useUpdateAddOnServiceAvailabilityMutation } from "@/features/admin/add-on-services/hooks/useAddOnServiceAdmin";
+import { useDeleteAddOnServiceMutation, useGetAddOnServiceById } from "@/features/admin/add-on-services/hooks/useAddOnServiceAdmin";
 import { useAddOnServiceAdminStore } from "@/features/admin/add-on-services/store/addOnServiceAdmin.store";
 import type { AddOnService } from "@/features/shared/add-on-services/types/add-on-service.type";
-import { AlertTriangle, Power, RotateCcw } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 
 const DeleteAddOnServiceDialog = () => {
     const isDeleteOpen = useAddOnServiceAdminStore((state) => state.isDeleteOpen);
@@ -44,26 +43,21 @@ const DeleteAddOnServiceDialog = () => {
 };
 
 const DeleteConfirmationAddOnService = ({ service }: { service: AddOnService }) => {
-    const setIsDeleteOpen = useAddOnServiceAdminStore((state) => state.setIsDeleteOpen);
-    const nextIsActive = !service.isActive;
-    const { mutateAsync: updateAvailability, isPending } = useUpdateAddOnServiceAvailabilityMutation(service.id);
+    const setDeleteId = useAddOnServiceAdminStore((state) => state.setDeleteId);
+    const { mutateAsync: deleteService, isPending } = useDeleteAddOnServiceMutation(service.id);
 
     return (
         <>
             <DialogHeader>
-                <DialogTitle>{service.isActive ? "Deactivate Add-on Service" : "Reactivate Add-on Service"}</DialogTitle>
+                <DialogTitle>Delete Add-on Service</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
                 <AdminDecisionNotice
-                    tone={service.isActive ? "warning" : "success"}
-                    icon={service.isActive ? AlertTriangle : RotateCcw}
-                    title={service.isActive ? "This service will be hidden from future bookings." : "This service will become bookable again."}
-                    description={
-                        service.isActive
-                            ? "Deactivating keeps booking history intact while removing the service from new guest selections."
-                            : "Reactivating makes the service visible again in guest add-on availability when stock allows."
-                    }
+                    tone="warning"
+                    icon={AlertTriangle}
+                    title="This cannot be restored through the admin app."
+                    description="Deleting removes this service from future bookings. Existing booking records, prices, and quantities remain intact."
                 />
 
                 <div className="bg-gray-50 p-4 rounded-lg border">
@@ -85,44 +79,33 @@ const DeleteConfirmationAddOnService = ({ service }: { service: AddOnService }) 
                             <span className="text-muted-foreground">Quantity:</span>
                             <span className="font-medium">{service.quantity}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Status:</span>
-                            <AdminAvailabilityBadge active={service.isActive} />
-                        </div>
                     </div>
                 </div>
 
                 <p className="text-sm font-medium text-muted-foreground">
-                    {service.isActive
-                        ? "Do you want to deactivate this add-on service?"
-                        : "Do you want to reactivate this add-on service?"}
+                    Do you want to permanently remove this add-on service from future bookings?
                 </p>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-4">
-                <Button type="button" onClick={() => setIsDeleteOpen(false)} variant="outline">
+                <Button type="button" onClick={() => setDeleteId(undefined)} variant="outline">
                     Cancel
                 </Button>
                 <Button
                     type="button"
-                    variant={service.isActive ? "warning" : "success"}
+                    variant="destructive"
                     onClick={async () => {
-                        await updateAvailability({ isActive: nextIsActive });
-                        setIsDeleteOpen(false);
+                        await deleteService();
+                        setDeleteId(undefined);
                     }}
                     disabled={isPending}
                 >
                     {isPending ? (
                         <LoadingSpinner />
-                    ) : service.isActive ? (
-                        <>
-                            <Power className="w-4 h-4" />
-                            Deactivate
-                        </>
                     ) : (
                         <>
-                            <RotateCcw className="w-4 h-4" />
-                            Reactivate
+                            <Trash2 className="w-4 h-4" />
+                            Delete Service
                         </>
                     )}
                 </Button>

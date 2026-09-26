@@ -69,7 +69,9 @@ export const useDeleteAddOnServiceMutation = (id: string) => {
         mutationFn: () => addOnServiceApi.deleteAddOnService(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["add-on-service", "list"] });
+            queryClient.invalidateQueries({ queryKey: ["add-on-service", "byId", id] });
             queryClient.invalidateQueries({ queryKey: ["add-on-service", "stats"] });
+            queryClient.invalidateQueries({ queryKey: ["add-on-service", "available"] });
         },
     });
 };
