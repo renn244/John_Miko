@@ -1,5 +1,5 @@
-import apiClient from "@/lib/apiClient";
-import { ACCESS_TOKEN_KEY, clearAccessToken, getAccessToken } from "@/lib/tokenStorage";
+import apiClient, { refreshAccessToken } from "@/lib/apiClient";
+import { broadcastLogout, clearAccessToken, getAccessToken, subscribeToLogout } from "@/lib/tokenStorage";
 import { isStaffRole, type StaffRole, type UserProfileDto } from "@/features/auth/types/auth.types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, type PropsWithChildren } from "react";
@@ -10,7 +10,7 @@ type AuthContextType = {
     isLoggedIn: boolean;
     isStaff: boolean;
     staffRole: StaffRole | null;
-    handleLogout: () => void;
+    handleLogout: () => Promise<void>;
 }
 
 const initialAuthContext: AuthContextType = {
@@ -19,7 +19,7 @@ const initialAuthContext: AuthContextType = {
     isLoggedIn: false,
     isStaff: false,
     staffRole: null,
-    handleLogout: () => {}
+    handleLogout: async () => {}
 }
 
 const AuthContext = createContext<AuthContextType>(initialAuthContext);
@@ -34,7 +34,7 @@ const AuthProvider = ({ children }: PropsWithChildren ) => {
     const { data: queriedUser, isLoading } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
-            if (!getAccessToken()) return null;
+            if (!getAccessToken() && !(await refreshAccessToken())) return null;
 
             try {
                 const response = await apiClient.get('/auth/profile');
@@ -63,18 +63,16 @@ const AuthProvider = ({ children }: PropsWithChildren ) => {
     }, [queryClient]);
 
     useEffect(() => {
-        const handleStorageChange = (event: StorageEvent) => {
-            if (event.key === ACCESS_TOKEN_KEY && event.newValue === null) {
-                clearAuthenticatedUser();
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
+        return subscribeToLogout(clearAuthenticatedUser);
     }, [clearAuthenticatedUser]);
 
-    const handleLogout = () => {
-        clearAccessToken();
+    const handleLogout = async () => {
+        try {
+            await apiClient.post('/auth/logout');
+        } finally {
+            clearAccessToken();
+            broadcastLogout();
+        }
         clearAuthenticatedUser();
     }
 

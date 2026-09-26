@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsBoolean, IsEmail, IsEnum, IsNumberString, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsEmail, IsEnum, IsIn, IsNotEmpty, IsNumberString, IsOptional, IsString } from "class-validator";
 import { Role } from "src/generated/prisma/client";
 import { NormalizeEmail } from "src/lib/decorators/NormalizeEmail.decorator";
 import { IsMatch } from "src/lib/customValidator/isMatch";
@@ -14,6 +14,10 @@ export class SignInDto {
     @IsString()
     password!: string;
 
+    @IsOptional()
+    @IsString()
+    turnstileToken?: string;
+
     @Transform(({ value }) => typeof value === "string" ? value.toUpperCase() : value)
     @IsEnum(Role, { message: "Invalid role" })
     userRole!: Role;
@@ -21,6 +25,10 @@ export class SignInDto {
     @IsOptional()
     @IsBoolean()
     rememberMe: boolean = false;
+
+    @IsOptional()
+    @IsIn(['web', 'mobile'])
+    platform?: 'web' | 'mobile' = 'web';
 }
 
 export class SignUpGuestDto {
@@ -42,4 +50,12 @@ export class SignUpGuestDto {
     @IsString()
     @IsMatch<SignUpGuestDto>("password", { message: "Confirm password must match password" })
     confirmPassword!: string
+
+    @IsString()
+    @IsNotEmpty({ message: 'Please complete the security check' })
+    turnstileToken!: string;
+
+    @IsOptional()
+    @IsIn(['web', 'mobile'])
+    platform?: 'web' | 'mobile' = 'web';
 }

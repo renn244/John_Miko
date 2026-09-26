@@ -4,13 +4,15 @@ import { Role } from 'src/generated/prisma/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { normalizeEmail } from 'src/lib/utils/normalizeEmail';
 
+type CreateGuestInput = Pick<SignUpGuestDto, 'email' | 'name' | 'contactNo' | 'password'>;
+
 @Injectable()
 export class UserService {
     constructor(
         private readonly prisma: PrismaService
     ) {}
 
-    async createUserGuest({ email, name, contactNo, password }: SignUpGuestDto) {
+    async createUserGuest({ email, name, contactNo, password }: CreateGuestInput) {
         return this.prisma.user.create({
             data: {
                 email: normalizeEmail(email),

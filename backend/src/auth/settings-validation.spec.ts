@@ -15,6 +15,7 @@ describe('Settings request validation and persistence', () => {
   const prisma = { user: { update: jest.fn() } };
   const users = { findUserById: jest.fn(), findUserByEmail: jest.fn() };
   const cache = { invalidate: jest.fn() };
+  const refreshSessions = { revokeAllForUser: jest.fn() };
   const validate = (body: unknown, metatype: any) => pipe.transform(body, { type: 'body', metatype });
 
   beforeEach(async () => {
@@ -23,7 +24,7 @@ describe('Settings request validation and persistence', () => {
     users.findUserById.mockImplementation(async () => saved);
     users.findUserByEmail.mockResolvedValue(null);
     prisma.user.update.mockImplementation(async ({ data }) => Object.assign(saved, data));
-    service = new AuthService(prisma as any, users as any, {} as any, cache as any);
+    service = new AuthService(prisma as any, users as any, cache as any, refreshSessions as any);
   });
 
   it.each(['+639123456789', '-09123456789', '12345678.90', '09123 456789', '0912345678a', '123456789', '1234567890123456', ''])('blocks contact %j before save', async (contactNo) => {

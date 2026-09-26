@@ -20,7 +20,6 @@ describe('UserService', () => {
       name: 'Nico',
       contactNo: '09171234567',
       password: 'HashedPassword123!',
-      confirmPassword: 'HashedPassword123!',
     });
 
     expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { email: 'nico@example.com' } });

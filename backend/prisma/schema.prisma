@@ -42,6 +42,7 @@ model User {
   expoPushToken String?
 
   forgotPasswordTokens PasswordResetToken[]
+  refreshSessions      AuthRefreshSession[]
 
   // for guests, this will be their bookings and feedbacks.
   bookings       Booking[]
@@ -60,6 +61,27 @@ model User {
   createdAt DateTime @default(now())
 
   @@index([role, status, deletedAt])
+}
+
+enum AuthSessionPlatform {
+  WEB
+  MOBILE
+}
+
+model AuthRefreshSession {
+  id        String              @id @default(cuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  platform  AuthSessionPlatform
+
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
 }
 
 model PasswordResetToken {
