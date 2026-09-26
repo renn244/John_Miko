@@ -64,7 +64,7 @@ const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
         label: "People",
         items: [
             { label: "Staff Management", icon: Users, path: "/admin/staff-management" },
-            { label: "User Management", icon: Users, path: "/admin/user-management" },
+            { label: "Guest Management", icon: Users, path: "/admin/guest-management" },
             { label: "Feedback", icon: MessageSquare, path: "/admin/feedback" },
         ],
     },
