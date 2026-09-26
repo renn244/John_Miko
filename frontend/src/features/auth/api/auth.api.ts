@@ -9,6 +9,7 @@ export const authApi = {
             password: data.password,
             userRole: data.userRole,
             rememberMe: data.rememberMe ?? false,
+            turnstileToken: data.turnstileToken,
         });
 
         if(response.status === 400) {

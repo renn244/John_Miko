@@ -3,6 +3,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import PasswordInput from "@/components/ui/passwordInput";
+import TurnstileWidget from "@/features/auth/components/TurnstileWidget";
 import { accountPasswordSchema, passwordRules } from "@/features/auth/lib/passwordValidation";
 import { useSignUpGuestMutation } from "@/features/auth/hooks/auth.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
@@ -19,7 +20,8 @@ const SignUpGuestSchema = z.object({
     contactNo: z.string()
         .nonempty("Contact No. is required"),
     password: accountPasswordSchema,
-    confirmPassword: z.string()
+    confirmPassword: z.string(),
+    turnstileToken: z.string().min(1, 'Please complete the security check'),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Password must match",
     path: ["confirmPassword"]
@@ -39,7 +41,8 @@ const SignUpGuestForm = () => {
             name: "",
             contactNo: "",
             password: "",
-            confirmPassword: ""
+            confirmPassword: "",
+            turnstileToken: "",
         },
         criteriaMode: "all"
     })
@@ -184,6 +187,19 @@ const SignUpGuestForm = () => {
                         <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
 
+                </Field>
+            )}
+            />
+
+            <Controller
+            name="turnstileToken"
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                    <TurnstileWidget onTokenChange={field.onChange} />
+                    {fieldState.invalid && (
+                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                    )}
                 </Field>
             )}
             />
