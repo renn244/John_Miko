@@ -8,6 +8,7 @@ generator client {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
   moduleFormat = "cjs"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -229,6 +230,7 @@ model Booking {
   @@index([bookingDate, status])
   @@index([bookingDate, stayOptionId])
   @@index([source])
+  @@unique([accommodationId, bookingDate, stayOptionId], name: "activeSlot", map: "Booking_active_slot_unique", where: raw("\"status\" <> 'Cancelled'"))
 }
 
 enum PaymentStatus {

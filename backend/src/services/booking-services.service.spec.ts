@@ -23,6 +23,7 @@ describe('BookingServicesService', () => {
 
   it('rejects add-on quantity when overlapping active bookings already consumed the remaining stock', async () => {
     const tx = {
+      $queryRaw: jest.fn().mockResolvedValue([]),
       addOnService: {
         findMany: jest.fn().mockResolvedValue([karaokeService]),
       },
@@ -63,5 +64,7 @@ describe('BookingServicesService', () => {
         tx,
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(tx.$queryRaw).toHaveBeenCalledTimes(1);
   });
 });
