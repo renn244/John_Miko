@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAccessToken } from "./tokenStorage";
+import { clearAccessToken, getAccessToken } from "./tokenStorage";
 
 const apiClient = axios.create({
     validateStatus: () => true,
@@ -18,6 +18,18 @@ apiClient.interceptors.request.use((config) => {
     return config;
 })
 
-// add alter interceptors for when response to refresh token if expired
+apiClient.interceptors.response.use((response) => {
+    const requestUsedAccessToken = Boolean(response.config.headers.Authorization);
+
+    if (response.status === 401 && requestUsedAccessToken) {
+        clearAccessToken();
+
+        if (window.location.pathname !== '/login') {
+            window.location.replace('/login');
+        }
+    }
+
+    return response;
+});
 
 export default apiClient;

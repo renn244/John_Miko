@@ -1,8 +1,8 @@
 import apiClient from "@/lib/apiClient";
-import { clearAccessToken, getAccessToken } from "@/lib/tokenStorage";
+import { ACCESS_TOKEN_KEY, clearAccessToken, getAccessToken } from "@/lib/tokenStorage";
 import { isStaffRole, type StaffRole, type UserProfileDto } from "@/features/auth/types/auth.types";
-import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext, type PropsWithChildren } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createContext, useCallback, useContext, useEffect, type PropsWithChildren } from "react";
 
 type AuthContextType = {
     user: UserProfileDto | null,
@@ -30,7 +30,8 @@ export const useAuthContext = () => {
 }
 
 const AuthProvider = ({ children }: PropsWithChildren ) => {
-    const { data: queriedUser, isLoading, refetch } = useQuery({
+    const queryClient = useQueryClient();
+    const { data: queriedUser, isLoading } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
             if (!getAccessToken()) return null;
@@ -56,9 +57,25 @@ const AuthProvider = ({ children }: PropsWithChildren ) => {
     const user = queriedUser ?? null;
     const staffRole = user && isStaffRole(user.role) ? user.role : null;
 
+    const clearAuthenticatedUser = useCallback(() => {
+        queryClient.cancelQueries({ queryKey: ['user'] });
+        queryClient.setQueryData(['user'], null);
+    }, [queryClient]);
+
+    useEffect(() => {
+        const handleStorageChange = (event: StorageEvent) => {
+            if (event.key === ACCESS_TOKEN_KEY && event.newValue === null) {
+                clearAuthenticatedUser();
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, [clearAuthenticatedUser]);
+
     const handleLogout = () => {
         clearAccessToken();
-        refetch();
+        clearAuthenticatedUser();
     }
 
     const value = {
