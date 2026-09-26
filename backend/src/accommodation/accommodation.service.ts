@@ -44,7 +44,7 @@ export class AccommodationService {
 
     async createAccommodation(body: CreateAccommodationDto) {
         const { stayOptions, ...accommodationData } = body;
-        
+
         const accommodation = await this.prisma.accommodation.create({
             data: {
                 ...accommodationData,
@@ -362,7 +362,9 @@ export class AccommodationService {
 
     async retireAccommodation(id: string) {
         const accommodation = await this.prisma.accommodation.findUnique({ where: { id } });
+
         if (!accommodation) throw new NotFoundException('Accommodation not found');
+
         if (accommodation.retiredAt) return accommodation;
 
         const upcomingBookings = await this.prisma.booking.count({
@@ -372,6 +374,7 @@ export class AccommodationService {
                 status: { in: [BookingStatus.Pending, BookingStatus.Confirmed] },
             },
         });
+
         if (upcomingBookings) {
             throw new BadRequestException('Reschedule or cancel upcoming bookings before retiring this accommodation.');
         }
@@ -380,7 +383,9 @@ export class AccommodationService {
             where: { id },
             data: { retiredAt: new Date() },
         });
+
         await this.cache.del(CATALOG_CACHE_KEY);
+
         return retired;
     }
 
@@ -389,7 +394,9 @@ export class AccommodationService {
             where: { id },
             data: { retiredAt: null },
         });
+
         await this.cache.del(CATALOG_CACHE_KEY);
+
         return accommodation;
     }
 }
