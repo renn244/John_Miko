@@ -24,6 +24,15 @@ describe('Password reset destinations and tokens', () => {
     process.env.PASSWORD_RESET_BRIDGE_URL = 'https://api.resort.example/';
     users.isMobileUserByRole.mockImplementation(role => ['KITCHEN_STAFF', 'RESORT_STAFF', 'MAINTENANCE_STAFF'].includes(role));
   });
+
+  it.each([forgotPasswordDto, resendForgotPasswordDto])('canonicalizes email for %p', async metatype => {
+    const dto = await pipe.transform(
+      { email: '  Nico@Example.COM ' },
+      { type: 'body', metatype },
+    );
+
+    expect(dto.email).toBe('nico@example.com');
+  });
   afterAll(() => {
     for (const key of keys) {
       if (previous[key] === undefined) delete process.env[key];

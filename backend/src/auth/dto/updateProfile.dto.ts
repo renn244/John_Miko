@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, Matches, IsOptional, IsString, IsUrl, ValidateIf } from "class-validator";
+import { NormalizeEmail } from 'src/lib/decorators/NormalizeEmail.decorator';
 
 
 export class UpdateProfileDto {
@@ -8,6 +9,7 @@ export class UpdateProfileDto {
 
     @IsNotEmpty()
     @IsString()
+    @NormalizeEmail()
     @IsEmail()
     email!: string;
 

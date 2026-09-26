@@ -21,8 +21,9 @@ import z from "zod"
 
 const LoginSchema = z.object({
     userRole: z.enum(['GUEST', 'ADMIN', 'MAINTENANCE_STAFF', 'KITCHEN_STAFF', 'RESORT_STAFF']),
-    email: z.string()
-        .nonempty('Email is required'),
+    email: z.string().trim()
+        .min(1, 'Email is required')
+        .email('Invalid email address'),
     password: z.string()
         .nonempty('Password is required'),
     rememberMe: z.boolean().optional(),

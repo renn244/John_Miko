@@ -1,10 +1,12 @@
 import { IsEmail, IsNotEmpty, IsString, IsOptional, IsIn } from "class-validator";
 import { IsMatch } from "src/lib/customValidator/isMatch";
 import { AccountPassword } from './account-password.decorator';
+import { NormalizeEmail } from 'src/lib/decorators/NormalizeEmail.decorator';
 
 export class forgotPasswordDto {
     @IsNotEmpty()
     @IsString()
+    @NormalizeEmail()
     @IsEmail({}, { message: "Invalid email" })
     email!: string;
 
@@ -16,6 +18,7 @@ export class forgotPasswordDto {
 export class resendForgotPasswordDto {
     @IsNotEmpty()
     @IsString()
+    @NormalizeEmail()
     @IsEmail({}, { message: "Invalid email" })
     email!: string;
 

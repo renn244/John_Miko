@@ -10,6 +10,7 @@ import { SignUpGuestDto } from './dto/auth.dto';
 import { UpdateProfileDto } from './dto/updateProfile.dto';
 import { UpdatePasswordDto } from './dto/changePassword.dto';
 import { AuthSessionCacheService } from './auth-session-cache.service';
+import { normalizeEmail } from 'src/lib/utils/normalizeEmail';
 
 @Injectable()
 export class AuthService {
@@ -123,7 +124,7 @@ export class AuthService {
             },
             data: {
                 name: body.name,
-                email: body.email,
+                email: normalizeEmail(body.email),
                 contactNo: body.contactNo
             }
         })

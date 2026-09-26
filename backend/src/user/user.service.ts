@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { SignUpGuestDto } from 'src/auth/dto/auth.dto';
 import { Role } from 'src/generated/prisma/enums';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { normalizeEmail } from 'src/lib/utils/normalizeEmail';
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,7 @@ export class UserService {
     async createUserGuest({ email, name, contactNo, password }: SignUpGuestDto) {
         return this.prisma.user.create({
             data: {
-                email,
+                email: normalizeEmail(email),
                 name,
                 contactNo,
                 password
@@ -29,7 +30,7 @@ export class UserService {
     }
 
     async findUserByEmail(email: string) {
-        return this.prisma.user.findUnique({  where: { email }  });
+        return this.prisma.user.findUnique({ where: { email: normalizeEmail(email) } });
     }
 
     isMobileUserByRole(role: Role) {

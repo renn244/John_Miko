@@ -32,9 +32,10 @@ describe('Settings request validation and persistence', () => {
   });
 
   it.each(['09123456789', '1234567890', '123456789012345'])('saves accepted contact %s without removing leading zeros', async (contactNo) => {
-    const dto = await validate({ email: user.email, contactNo, name: 'QA Staff' }, UpdateProfileDto);
+    const dto = await validate({ email: '  QA@Example.COM ', contactNo, name: 'QA Staff' }, UpdateProfileDto);
     await service.updateProfile(user, dto);
     expect(saved.contactNo).toBe(contactNo);
+    expect(saved.email).toBe('qa@example.com');
     expect(cache.invalidate).toHaveBeenCalledWith(user.id);
   });
 

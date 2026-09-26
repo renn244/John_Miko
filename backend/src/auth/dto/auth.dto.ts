@@ -1,10 +1,13 @@
 import { Transform } from "class-transformer";
 import { IsBoolean, IsEmail, IsEnum, IsNumberString, IsOptional, IsString } from "class-validator";
 import { Role } from "src/generated/prisma/client";
+import { NormalizeEmail } from "src/lib/decorators/NormalizeEmail.decorator";
 import { IsMatch } from "src/lib/customValidator/isMatch";
+import { AccountPassword } from './account-password.decorator';
 
 export class SignInDto {
     @IsString()
+    @NormalizeEmail()
     @IsEmail({}, { message: "Invalid email" })
     email!: string;
 
@@ -22,6 +25,7 @@ export class SignInDto {
 
 export class SignUpGuestDto {
     @IsString()
+    @NormalizeEmail()
     @IsEmail({}, { message: "Invalid email" })
     email!: string;
 
@@ -32,6 +36,7 @@ export class SignUpGuestDto {
     contactNo!: string;
 
     @IsString()
+    @AccountPassword()
     password!: string;
 
     @IsString()
