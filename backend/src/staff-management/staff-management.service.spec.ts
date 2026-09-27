@@ -28,8 +28,9 @@ describe('StaffManagementService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    prisma.$transaction.mockImplementation(async (callback: (transaction: unknown) => unknown) =>
-      callback({ user: prisma.user, maintenance: prisma.maintenance }),
+    prisma.$transaction.mockImplementation(
+      async (callback: (transaction: unknown) => unknown) =>
+        callback({ user: prisma.user, maintenance: prisma.maintenance }),
     );
     service = new StaffManagementService(
       prisma,
@@ -57,6 +58,96 @@ describe('StaffManagementService', () => {
     expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
+  it('canonicalizes staff email and sends a strong temporary password', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    emailService.sendCreatedEmail.mockResolvedValue({ status: 'sent' });
+    prisma.user.create.mockImplementation(async ({ data }: any) => ({
+      id: 'staff-2',
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      expertise: data.expertise,
+    }));
+
+    const createdStaff = await service.createStaff({
+      name: 'Maria Santos',
+      email: '  Maria@Example.COM ',
+      contactNo: '09171234567',
+      role: 'RESORT_STAFF',
+    });
+
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { email: 'maria@example.com' },
+    });
+    expect(prisma.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ email: 'maria@example.com' }),
+      }),
+    );
+    const temporaryPassword =
+      emailService.sendCreatedEmail.mock.calls[0][0].temporaryPassword;
+    expect(temporaryPassword).toEqual(expect.stringMatching(/[a-z]/));
+    expect(temporaryPassword).toEqual(expect.stringMatching(/[A-Z]/));
+    expect(temporaryPassword).toEqual(expect.stringMatching(/\d/));
+    expect(temporaryPassword).toEqual(expect.stringMatching(/[^A-Za-z0-9]/));
+    expect(temporaryPassword.length).toBeGreaterThanOrEqual(8);
+    expect(createdStaff.temporaryPasswordEmailStatus).toBe('sent');
+  });
+
+  it('keeps the staff account and reports a failed temporary-password email', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    prisma.user.create.mockResolvedValue({
+      id: 'staff-2',
+      name: 'Maria Santos',
+      email: 'maria@example.com',
+      role: 'RESORT_STAFF',
+      expertise: null,
+    });
+    emailService.sendCreatedEmail.mockRejectedValue(
+      new Error('Email unavailable'),
+    );
+
+    await expect(
+      service.createStaff({
+        name: 'Maria Santos',
+        email: 'maria@example.com',
+        contactNo: '09171234567',
+        role: 'RESORT_STAFF',
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        id: 'staff-2',
+        temporaryPasswordEmailStatus: 'failed',
+      }),
+    );
+  });
+
+  it('reports when email delivery is disabled for the current environment', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    prisma.user.create.mockResolvedValue({
+      id: 'staff-2',
+      name: 'Maria Santos',
+      email: 'maria@example.com',
+      role: 'RESORT_STAFF',
+      expertise: null,
+    });
+    emailService.sendCreatedEmail.mockResolvedValue({ status: 'disabled' });
+
+    await expect(
+      service.createStaff({
+        name: 'Maria Santos',
+        email: 'maria@example.com',
+        contactNo: '09171234567',
+        role: 'RESORT_STAFF',
+      }),
+    ).resolves.toEqual(
+      expect.objectContaining({
+        id: 'staff-2',
+        temporaryPasswordEmailStatus: 'disabled',
+      }),
+    );
+  });
+
   it('soft deletes staff and unassigns only pending and in-progress maintenance tickets', async () => {
     prisma.user.findFirst.mockResolvedValue({
       id: 'staff-1',
@@ -64,7 +155,11 @@ describe('StaffManagementService', () => {
       deletedAt: null,
     });
     prisma.maintenance.updateMany.mockResolvedValue({ count: 2 });
-    prisma.user.update.mockResolvedValue({ id: 'staff-1', deletedAt: new Date(), status: 'INACTIVE' });
+    prisma.user.update.mockResolvedValue({
+      id: 'staff-1',
+      deletedAt: new Date(),
+      status: 'INACTIVE',
+    });
 
     await service.deleteStaff('staff-1');
 
@@ -75,21 +170,25 @@ describe('StaffManagementService', () => {
       },
       data: { assignedToId: null },
     });
-    expect(prisma.user.update).toHaveBeenCalledWith(expect.objectContaining({
-      where: { id: 'staff-1' },
-      data: expect.objectContaining({
-        status: 'INACTIVE',
-        expoPushToken: null,
-        deletedAt: expect.any(Date),
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'staff-1' },
+        data: expect.objectContaining({
+          status: 'INACTIVE',
+          expoPushToken: null,
+          deletedAt: expect.any(Date),
+        }),
       }),
-    }));
+    );
     expect(authSessionCache.invalidate).toHaveBeenCalledWith('staff-1');
   });
 
-  it('finds the deleted staff record for an explicit restore flow', async () => {
+  it('finds the deleted staff record for an explicit restore flow regardless of email casing', async () => {
     prisma.user.findFirst.mockResolvedValue({ id: 'staff-1' });
 
-    await expect(service.getRestoreCandidate('maria@example.com')).resolves.toEqual({ id: 'staff-1' });
+    await expect(
+      service.getRestoreCandidate('  Maria@Example.COM '),
+    ).resolves.toEqual({ id: 'staff-1' });
     expect(prisma.user.findFirst).toHaveBeenCalledWith({
       where: {
         email: 'maria@example.com',
@@ -123,19 +222,23 @@ describe('StaffManagementService', () => {
       expertise: 'Electrical',
     });
 
-    expect(prisma.user.update).toHaveBeenCalledWith(expect.objectContaining({
-      where: { id: 'staff-1' },
-      data: expect.objectContaining({
-        status: 'ACTIVE',
-        deletedAt: null,
-        expoPushToken: null,
-        password: expect.any(String),
+    expect(prisma.user.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'staff-1' },
+        data: expect.objectContaining({
+          status: 'ACTIVE',
+          deletedAt: null,
+          expoPushToken: null,
+          password: expect.any(String),
+        }),
       }),
-    }));
-    expect(emailService.sendRestoredEmail).toHaveBeenCalledWith(expect.objectContaining({
-      email: 'maria@example.com',
-      temporaryPassword: expect.any(String),
-    }));
+    );
+    expect(emailService.sendRestoredEmail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'maria@example.com',
+        temporaryPassword: expect.any(String),
+      }),
+    );
     expect(authSessionCache.invalidate).toHaveBeenCalledWith('staff-1');
   });
 });

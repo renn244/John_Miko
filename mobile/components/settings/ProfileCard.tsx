@@ -30,9 +30,10 @@ const ProfileCard = ({
             <View className="flex-row items-start gap-4">
                 {user.profileImageUrl ? (
                     <Image
-                      source={{ uri: user.profileImageUrl }}
+                      source={user.profileImageUrl}
                       contentFit="cover"
                       className="h-16 w-16 shrink-0 rounded-full bg-primary"
+                      style={{ width: 64, height: 64, borderRadius: 32 }}
                       accessibilityLabel={`${user.name || "Staff member"} profile picture`}
                     />
                 ) : (

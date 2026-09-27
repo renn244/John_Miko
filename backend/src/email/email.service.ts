@@ -2,6 +2,10 @@ import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+export type EmailDeliveryResult = {
+  status: 'sent' | 'disabled';
+};
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
@@ -16,12 +20,12 @@ export class EmailService {
     to: string;
     template: string;
     context: ISendMailOptions['context'];
-  }) {
+  }): Promise<EmailDeliveryResult> {
     if (this.configService.get<string>('EMAIL_ENABLED') === 'false') {
       this.logger.debug(
         `Email delivery disabled; skipped "${params.subject}".`,
       );
-      return;
+      return { status: 'disabled' };
     }
 
     try {
@@ -43,6 +47,7 @@ export class EmailService {
       this.logger.log(
         `Email sent to ${params.to} with subject "${params.subject}"`,
       );
+      return { status: 'sent' };
     } catch (error) {
       console.error(error);
       this.logger.error(

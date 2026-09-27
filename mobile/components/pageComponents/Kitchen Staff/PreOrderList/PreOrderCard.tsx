@@ -1,6 +1,6 @@
 import OperationalCard from "@/components/ui/operational-card";
 import StatusChip from "@/components/ui/status-chip";
-import { KitchenOrder } from "@/types/kitchenOrder.type";
+import type { KitchenOrder, KitchenOrderScope } from "@/types/kitchenOrder.type";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
 import { CalendarDays, Clock, ShoppingBag } from "lucide-react-native";
@@ -8,6 +8,7 @@ import { Text, View } from "react-native";
 
 type PreOrderCardProps = {
   item: KitchenOrder;
+  scope: KitchenOrderScope;
 }
 
 const formatBookingReference = (referenceCode: string) =>
@@ -24,7 +25,7 @@ const getItemPreview = (order: KitchenOrder) => {
   return remaining > 0 ? `${preview} - +${remaining} more` : preview;
 };
 
-const PreOrderCard = ({ item }: PreOrderCardProps) => {
+const PreOrderCard = ({ item, scope }: PreOrderCardProps) => {
   const router = useRouter();
 
   const totalItems = (item.items ?? []).reduce((total, item) => total + (item.quantity || 0), 0);
@@ -37,7 +38,10 @@ const PreOrderCard = ({ item }: PreOrderCardProps) => {
     <OperationalCard
       onPress={() =>
         router.push({
-          pathname: "/kitchen-staff/order/[orderId]",
+          pathname:
+            scope === "active"
+              ? "/kitchen-staff/(queue)/order/[orderId]"
+              : "/kitchen-staff/(history)/order/[orderId]",
           params: { orderId: item.bookingId },
         })
       }

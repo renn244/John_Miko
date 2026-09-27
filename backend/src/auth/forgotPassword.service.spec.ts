@@ -12,7 +12,8 @@ describe('Password reset destinations and tokens', () => {
   };
   const email = { sendEmail: jest.fn() };
   const users = { findUserByEmail: jest.fn(), isMobileUserByRole: jest.fn() };
-  const service = new ForgotPasswordService(prisma as any, email as any, users as any);
+  const refreshSessions = { revokeAllForUser: jest.fn() };
+  const service = new ForgotPasswordService(prisma as any, email as any, users as any, refreshSessions as any);
   const pipe = new CustomValidationPipe();
   const keys = ['FRONTEND_URL', 'MOBILE_URL', 'PASSWORD_RESET_BRIDGE_URL'] as const;
   const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
@@ -23,6 +24,15 @@ describe('Password reset destinations and tokens', () => {
     process.env.MOBILE_URL = 'jmport://';
     process.env.PASSWORD_RESET_BRIDGE_URL = 'https://api.resort.example/';
     users.isMobileUserByRole.mockImplementation(role => ['KITCHEN_STAFF', 'RESORT_STAFF', 'MAINTENANCE_STAFF'].includes(role));
+  });
+
+  it.each([forgotPasswordDto, resendForgotPasswordDto])('canonicalizes email for %p', async metatype => {
+    const dto = await pipe.transform(
+      { email: '  Nico@Example.COM ' },
+      { type: 'body', metatype },
+    );
+
+    expect(dto.email).toBe('nico@example.com');
   });
   afterAll(() => {
     for (const key of keys) {
@@ -80,6 +90,7 @@ describe('Password reset destinations and tokens', () => {
     await expect(service.resetPassword(body)).resolves.toEqual({ message: 'Password changed successfully' });
     const saved = prisma.user.update.mock.calls[0][0];
     expect(await bcrypt.compare(body.newPassword, saved.data.password)).toBe(true);
+    expect(refreshSessions.revokeAllForUser).toHaveBeenCalledWith('user');
     expect(prisma.passwordResetToken.deleteMany).toHaveBeenCalledWith({ where: { userId: 'user' } });
     await expect(service.resetPassword(body)).rejects.toThrow('Invalid Token');
     expect(prisma.user.update).toHaveBeenCalledTimes(1);

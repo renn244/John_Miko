@@ -10,6 +10,7 @@ import USER_ROLES from "@/lib/constant/USER_ROLES.constant";
 import { formatStayOptionRange } from "@/lib/stayOptionTime";
 import { formatPeso } from "@/lib/utils";
 import { useBookingSelectStore } from "@/features/public/bookings/store/bookingSelect.store";
+import { clearBookingDraft } from "@/features/public/bookings/hooks/useBookingSessionDraft";
 import type { AccommodationStayOption } from "@/features/shared/accommodations/types/accommodation.type";
 import { ArrowRight, Calendar, Info } from "lucide-react";
 import { Link, useNavigate } from "react-router";
@@ -65,6 +66,7 @@ const AccommodationSideBooking = ({
                 accommodationId={accommodation.id}
                 selected={bookingDate}
                 onSelect={(date) => {
+                    clearBookingDraft();
                     setBookingDate(date);
                 }}
                 />
@@ -80,7 +82,10 @@ const AccommodationSideBooking = ({
                 {bookingDate ? (
                     <RadioGroup
                         value={bookingType || ""}
-                        onValueChange={(value) => setStayOption(activeStayOptions.find((stayOption) => stayOption.id === value))}
+                        onValueChange={(value) => {
+                            clearBookingDraft();
+                            setStayOption(activeStayOptions.find((stayOption) => stayOption.id === value));
+                        }}
                         className="gap-2"
                     >
                         {activeStayOptions

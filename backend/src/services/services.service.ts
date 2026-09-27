@@ -28,6 +28,7 @@ export class ServicesService {
     async getServices(query: GetServicesQueryDto) {
         const where: Prisma.AddOnServiceWhereInput = {
             name: { contains: query.search, mode: 'insensitive' },
+            deletedAt: null,
         }
 
         const [data, total] = await Promise.all([
@@ -59,7 +60,7 @@ export class ServicesService {
         }
 
         const services = await this.prisma.addOnService.findMany({
-            where: { isActive: true },
+            where: { isActive: true, deletedAt: null },
         });
         const previousDate = new Date(query.bookingDate);
         previousDate.setUTCDate(previousDate.getUTCDate() - 1);
@@ -135,8 +136,14 @@ export class ServicesService {
 
     async getServicesStats() {
         const [totalStocks, services] = await Promise.all([
-            this.prisma.addOnService.aggregate({ _sum: { quantity: true } }),
-            this.prisma.addOnService.findMany({ select: { quantity: true, price: true } })
+            this.prisma.addOnService.aggregate({
+                where: { deletedAt: null },
+                _sum: { quantity: true },
+            }),
+            this.prisma.addOnService.findMany({
+                where: { deletedAt: null },
+                select: { quantity: true, price: true },
+            })
         ])
 
         const totalValue = services.reduce(
@@ -152,7 +159,7 @@ export class ServicesService {
     
     async getServiceById(serviceId: string) {
         const service = await this.prisma.addOnService.findFirst({
-            where: { id: serviceId }
+            where: { id: serviceId, deletedAt: null }
         });
 
         if (!service) {
@@ -163,6 +170,8 @@ export class ServicesService {
     }
 
     async updateService(serviceId: string, body: UpdateServiceDto) {
+        await this.getServiceById(serviceId);
+
         const service = await this.prisma.addOnService.update({
             where: { id: serviceId },
             data: body
@@ -173,6 +182,8 @@ export class ServicesService {
     }
 
     async updateServiceAvailability(serviceId: string, isActive: boolean) {
+        await this.getServiceById(serviceId);
+
         const service = await this.prisma.addOnService.update({
             where: { id: serviceId },
             data: { isActive },
@@ -183,9 +194,14 @@ export class ServicesService {
     }
 
     async deleteService(serviceId: string) {
-        // should be jsut soft delete using flags in the database
-        const service = await this.prisma.addOnService.delete({
-            where: { id: serviceId }
+        await this.getServiceById(serviceId);
+
+        const service = await this.prisma.addOnService.update({
+            where: { id: serviceId },
+            data: {
+                deletedAt: new Date(),
+                isActive: false,
+            },
         })
 
         await this.cache.del(CATALOG_CACHE_KEY);

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClosureDto } from './dto/create-closure.dto';
@@ -11,6 +11,19 @@ export class ClosureService {
     ) {}
 
     async createClosure(body: CreateClosureDto) {
+        const existingBooking = await this.prisma.booking.findFirst({
+            where: {
+                bookingDate: body.date,
+                status: { notIn: ['Cancelled'] },
+                ...(body.accommodationId ? { accommodationId: body.accommodationId } : {}),
+            },
+            select: { id: true },
+        });
+
+        if (existingBooking) {
+            throw new ConflictException('Cannot create a closure on a date with active bookings');
+        }
+
         const newClosure = await this.prisma.closure.create({
             data: {
                 accommodationId: body.accommodationId,

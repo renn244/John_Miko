@@ -5,23 +5,20 @@ import { formatPeso } from "@/lib/utils";
 import { useBookingSelectStore } from "@/features/public/bookings/store/bookingSelect.store";
 import type { AddOnService } from "@/features/shared/add-on-services/types/add-on-service.type";
 import { ArrowRight, Minus, Package, Plus, ShoppingCart, X } from "lucide-react";
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, type Dispatch, type SetStateAction } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import type { multiStepBookingFormSchema } from "./MultiStepBookingForm";
 
 type AddOnServiceFormProps = {
     setBookingStep: Dispatch<SetStateAction<"form" | "add-on" | "review" | "pre-order" | "payment">>;
-    changeAddOnTotal?: (total: number) => void;
 };
 
-const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceFormProps) => {
+const AddOnServiceForm = ({ setBookingStep }: AddOnServiceFormProps) => {
     const bookingDate = useBookingSelectStore((s) => s.bookingDate);
     const stayOptionId = useBookingSelectStore((s) => s.bookingType);
 
     const query = bookingDate && stayOptionId ? { bookingDate: toDateOnly(bookingDate), stayOptionId } : null;
     const { data: services, isLoading } = useGetAvailableServicesForBookingQuery(query);
-
-    const [serviceCache, setServiceCache] = useState<Record<string, AddOnService>>({});
 
     const { control, reset, getValues } = useFormContext<multiStepBookingFormSchema>();
 
@@ -30,17 +27,9 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
         name: "addOnServices",
     });
 
-    useEffect(() => {
-        if (services) {
-            setServiceCache((prev) => {
-                const next = { ...prev };
-                services.forEach((service) => {
-                    next[service.id] = service;
-                });
-                return next;
-            });
-        }
-    }, [services]);
+    const serviceCache = useMemo<Record<string, AddOnService>>(() =>
+        Object.fromEntries((services ?? []).map((service) => [service.id, service])),
+    [services]);
 
     const getSelectedQuantity = (serviceId: string) => {
         const entry = fields.find((f) => f.addOnServiceId === serviceId);
@@ -48,8 +37,6 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
     };
 
     const addToSelection = (service: AddOnService) => {
-        setServiceCache((prev) => ({ ...prev, [service.id]: service }));
-
         const existingIndex = fields.findIndex((f) => f.addOnServiceId === service.id);
         const currentSelected = getSelectedQuantity(service.id);
         const maxAvailable = service.quantity;
@@ -101,7 +88,6 @@ const AddOnServiceForm = ({ setBookingStep, changeAddOnTotal }: AddOnServiceForm
             return acc + price * field.quantity;
         }, 0);
 
-        changeAddOnTotal?.(total);
         return total;
     }, [fields, serviceCache]);
 

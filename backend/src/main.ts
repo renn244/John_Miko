@@ -1,24 +1,21 @@
 import { NestFactory } from '@nestjs/core';
+import * as cookieParser from 'cookie-parser';
 import { AllExceptionFilter } from './AllExceptionFilter';
 import { AppModule } from './app.module';
 import { CustomValidationPipe } from './CustomValidationPipe';
+import { getAllowedFrontendOrigins } from './config/origins';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
   app.useGlobalPipes(new CustomValidationPipe());
   app.useGlobalFilters(new AllExceptionFilter());
 
-  const allowedFrontendOrigins = (
-    process.env.FRONTEND_URLS ??
-    process.env.FRONTEND_URL ??
-    'http://localhost:5173'
-  )
-    .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+  const allowedFrontendOrigins = getAllowedFrontendOrigins();
 
   app.enableCors({
-    allowedHeaders: '*',
+    allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Content-Disposition'],
+    credentials: true,
     origin: allowedFrontendOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });

@@ -6,6 +6,7 @@ export type AddOnService = {
     price: number;
     quantity: number;
     isActive: boolean;
+    deletedAt?: string | null;
     createdAt: string;
 }
 

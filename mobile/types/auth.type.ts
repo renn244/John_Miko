@@ -31,6 +31,7 @@ export type AuthUser = {
 
 export type LoginResponse = {
     accessToken: string;
+    refreshToken: string;
 };
 
 export type ForgotPasswordResponse = {

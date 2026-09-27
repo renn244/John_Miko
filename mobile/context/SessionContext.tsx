@@ -1,6 +1,7 @@
 import { InvalidSessionError } from "@/lib/auth/errors";
 import { fetchCurrentProfile } from "@/hooks/profile.hook";
-import { deleteAccessToken, getAccessToken } from "@/lib/tokenStorage";
+import { deleteAccessToken, deleteRefreshToken, getRefreshToken } from "@/lib/tokenStorage";
+import apiClient, { refreshAccessToken } from "@/lib/apiClient";
 import { unregisterPushNotifications } from "@/lib/pushNotifications";
 import type { AuthUser } from "@/types/auth.type";
 import { useQueryClient } from "@tanstack/react-query";
@@ -42,9 +43,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
     setSession({ status: "loading", user: null, error: null });
 
     try {
-      const token = await getAccessToken();
+      const token = await getRefreshToken();
 
       if (!token) {
+        setSession({ status: "unauthenticated", user: null, error: null });
+        return null;
+      }
+
+      const accessToken = await refreshAccessToken();
+      if (!accessToken) {
+        await deleteRefreshToken();
         setSession({ status: "unauthenticated", user: null, error: null });
         return null;
       }
@@ -56,7 +64,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
       return user;
     } catch (error) {
       if (error instanceof InvalidSessionError) {
-        await deleteAccessToken();
+        deleteAccessToken();
+        await deleteRefreshToken();
         queryClient.clear();
         setSession({ status: "unauthenticated", user: null, error: null });
         return null;
@@ -77,7 +86,13 @@ export function SessionProvider({ children }: PropsWithChildren) {
       }
     }
 
-    await deleteAccessToken();
+    const refreshToken = await getRefreshToken();
+    try {
+      await apiClient.post("/auth/mobile/logout", { refreshToken });
+    } finally {
+      deleteAccessToken();
+      await deleteRefreshToken();
+    }
     queryClient.clear();
     setSession({ status: "unauthenticated", user: null, error: null });
   }, [queryClient, session.user?.role]);

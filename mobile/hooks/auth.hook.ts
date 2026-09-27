@@ -1,7 +1,7 @@
 import apiClient from '@/lib/apiClient';
 import { handleNestError, ValidationError } from '@/lib/handleNestError';
 import { toast } from '@/lib/toast';
-import { saveAccessToken } from '@/lib/tokenStorage';
+import { saveAccessToken, saveRefreshToken } from '@/lib/tokenStorage';
 import type {
     ForgotPasswordRequest,
     ForgotPasswordResponse,
@@ -20,6 +20,7 @@ export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetErro
             const response = await apiClient.post('/auth/login', {
                 ...data,
                 rememberMe: true,
+                platform: 'mobile',
             });
 
             if (response.status === 400) {
@@ -34,6 +35,7 @@ export const useLoginMutation = <T extends FieldValues>(setError: UseFormSetErro
         },
         onSuccess: async (data) => {
             await saveAccessToken(data.accessToken);
+            await saveRefreshToken(data.refreshToken);
         },
         onError: (err) => {
             if (err instanceof ValidationError) {

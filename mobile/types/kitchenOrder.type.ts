@@ -4,6 +4,8 @@ export type KitchenOrderStatus =
     | "Pending"
     | "Completed";
 
+export type KitchenOrderScope = "active" | "history";
+
 export type KitchenOrderItem = {
     id: string;
     name: string;
@@ -29,7 +31,7 @@ export type KitchenOrder = {
 };
 
 export type GetKitchenOrdersQuery = {
-    scope?: 'active' | 'history';
+    scope?: KitchenOrderScope;
     search?: string;
     date?: string; // YYYY-MM-DD
     status?: KitchenOrderStatus;

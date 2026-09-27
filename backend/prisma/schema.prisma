@@ -8,6 +8,7 @@ generator client {
   provider     = "prisma-client"
   output       = "../src/generated/prisma"
   moduleFormat = "cjs"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -41,6 +42,7 @@ model User {
   expoPushToken String?
 
   forgotPasswordTokens PasswordResetToken[]
+  refreshSessions      AuthRefreshSession[]
 
   // for guests, this will be their bookings and feedbacks.
   bookings       Booking[]
@@ -59,6 +61,27 @@ model User {
   createdAt DateTime @default(now())
 
   @@index([role, status, deletedAt])
+}
+
+enum AuthSessionPlatform {
+  WEB
+  MOBILE
+}
+
+model AuthRefreshSession {
+  id        String              @id @default(cuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  platform  AuthSessionPlatform
+
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, revokedAt])
+  @@index([expiresAt])
 }
 
 model PasswordResetToken {
@@ -229,6 +252,7 @@ model Booking {
   @@index([bookingDate, status])
   @@index([bookingDate, stayOptionId])
   @@index([source])
+  @@unique([accommodationId, bookingDate, stayOptionId], name: "activeSlot", map: "Booking_active_slot_unique", where: raw("\"status\" <> 'Cancelled'"))
 }
 
 enum PaymentStatus {
@@ -489,10 +513,13 @@ model AddOnService {
   price    Int
   quantity Int
   isActive Boolean @default(true)
+  deletedAt DateTime?
 
   Booking BookingAddOn[]
 
   createdAt DateTime @default(now())
+
+  @@index([deletedAt])
 }
 
 model Feedback {

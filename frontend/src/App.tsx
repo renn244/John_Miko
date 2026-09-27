@@ -226,7 +226,7 @@ const router = createBrowserRouter([
             ]
           },
           {
-            path: 'user-management',
+            path: 'guest-management',
             children: [
               { index: true, element: <GuestManagement /> }
             ]

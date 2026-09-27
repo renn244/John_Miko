@@ -1,5 +1,6 @@
 import { MaintenanceExpertise, Role } from "src/generated/prisma/enums";
 import { IsEmail, IsEnum, IsIn, IsNotEmpty, IsNumberString, IsString, ValidateIf } from "class-validator";
+import { NormalizeEmail } from 'src/lib/decorators/NormalizeEmail.decorator';
 
 export class CreateStaffDto {
     @IsNotEmpty({ message: 'name is required!' })
@@ -8,6 +9,7 @@ export class CreateStaffDto {
 
     @IsNotEmpty({ message: 'email is required!' })
     @IsString()
+    @NormalizeEmail()
     @IsEmail({}, { message: 'invalid email!' })
     email!: string;
 

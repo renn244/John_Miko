@@ -5,6 +5,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { UserService } from "src/user/user.service";
 import { v4 as uuidv4 } from "uuid";
 import { resetPasswordDto } from "./dto/forgotPassword.dto";
+import { AuthRefreshSessionService } from './auth-refresh-session.service';
 
 @Injectable()
 export class ForgotPasswordService {
@@ -12,6 +13,7 @@ export class ForgotPasswordService {
         private readonly prisma: PrismaService,
         private readonly emailService: EmailService,
         private readonly userService: UserService,
+        private readonly authRefreshSessionService: AuthRefreshSessionService,
     ) {}
 
     private appendPath(baseUrl: string, path: string) {
@@ -115,6 +117,8 @@ export class ForgotPasswordService {
             where: { id: existingToken.userId },
             data: { password: hashedNewPassword }
         });
+
+        await this.authRefreshSessionService.revokeAllForUser(existingToken.userId);
 
         await this.prisma.passwordResetToken.deleteMany({ where: { userId: existingToken.userId } });
 

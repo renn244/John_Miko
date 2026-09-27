@@ -4,6 +4,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
 import PasswordInput from "@/components/ui/passwordInput"
+import TurnstileWidget from "@/features/auth/components/TurnstileWidget"
 import {
     Select,
     SelectContent,
@@ -21,11 +22,13 @@ import z from "zod"
 
 const LoginSchema = z.object({
     userRole: z.enum(['GUEST', 'ADMIN', 'MAINTENANCE_STAFF', 'KITCHEN_STAFF', 'RESORT_STAFF']),
-    email: z.string()
-        .nonempty('Email is required'),
+    email: z.string().trim()
+        .min(1, 'Email is required')
+        .email('Invalid email address'),
     password: z.string()
         .nonempty('Password is required'),
     rememberMe: z.boolean().optional(),
+    turnstileToken: z.string().min(1, 'Please complete the security check'),
 })
 
 type LoginSchemaType = z.infer<typeof LoginSchema>
@@ -81,6 +84,7 @@ const LoginForm = ({ mode, showAccountContext = true }: LoginFormProps) => {
             email: "",
             password: "",
             rememberMe: false,
+            turnstileToken: '',
         },
         criteriaMode: "all"
     })
@@ -176,6 +180,19 @@ const LoginForm = ({ mode, showAccountContext = true }: LoginFormProps) => {
                     )}
 
                     <FieldError errors={getErrorMessages(rootError)} />
+                </Field>
+            )}
+            />
+
+            <Controller
+            name="turnstileToken"
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                    <TurnstileWidget onTokenChange={field.onChange} />
+                    {fieldState.invalid && (
+                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                    )}
                 </Field>
             )}
             />

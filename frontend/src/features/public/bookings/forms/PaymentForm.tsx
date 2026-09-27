@@ -26,6 +26,8 @@ type PaymentFormProps = {
     setBookingStep: Dispatch<SetStateAction<"form" | "add-on" | "review" | "pre-order" | "payment">>;
     total: number;
     isLoading: boolean;
+    isValidationActive: boolean;
+    submitPayment: () => Promise<void>;
 };
 
 const PaymentSummaryLine = ({
@@ -45,13 +47,12 @@ const PaymentSummaryLine = ({
     </div>
 );
 
-const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => {
-    const { control, watch } = useFormContext<multiStepBookingFormSchema>();
+const PaymentForm = ({ setBookingStep, total, isLoading, isValidationActive, submitPayment }: PaymentFormProps) => {
+    const { control, watch, trigger } = useFormContext<multiStepBookingFormSchema>();
     const { data: paymentMethods, isLoading: isLoadingMethods } = useGetActivePaymentMethodsQuery();
 
     const paymentType = watch("paymentType");
     const paymentMethodId = watch("paymentMethodId");
-    const proofImageUrl = watch("proofImageUrl");
     const partial = Math.round(total / 2);
     const amountToPayNow = paymentType && (paymentType === "Full" ? total : partial);
     const amountToPayLater = paymentType && (paymentType === "Full" ? 0 : total - partial);
@@ -74,7 +75,10 @@ const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => 
                                         disabled={isLoading}
                                         name={field.name}
                                         value={field.value}
-                                        onValueChange={field.onChange}
+                                        onValueChange={(value) => {
+                                            field.onChange(value);
+                                            if (isValidationActive) void trigger('paymentType');
+                                        }}
                                         aria-invalid={fieldState.invalid}
                                         className="mt-3 flex gap-3"
                                     >
@@ -99,6 +103,7 @@ const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => 
                                                 <RadioGroupItem
                                                     value="Full"
                                                     id="full-payment"
+                                                    ref={field.ref}
                                                     aria-invalid={fieldState.invalid}
                                                 />
                                             </div>
@@ -172,7 +177,11 @@ const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => 
                                                         key={method.id}
                                                         type="button"
                                                         disabled={isLoading}
-                                                        onClick={() => field.onChange(method.id)}
+                                                        onClick={() => {
+                                                            field.onChange(method.id);
+                                                            if (isValidationActive) void trigger('paymentMethodId');
+                                                        }}
+                                                        ref={field.ref}
                                                         className={cn(
                                                             "rounded-lg border px-3 py-2 text-left text-sm transition",
                                                             isSelected
@@ -270,16 +279,22 @@ const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => 
 
                                     <div className="mt-3">
                                         {!field.value && (
-                                            <CloudinaryUpload
+                                                <CloudinaryUpload
                                                 purpose="PAYMENT_PROOF"
-                                                onSuccess={(url) => field.onChange(url)}
+                                                onSuccess={(url) => {
+                                                    field.onChange(url);
+                                                    if (isValidationActive) void trigger('proofImageUrl');
+                                                }}
                                             />
                                         )}
 
                                         {field.value && (
-                                            <CloudinaryPreview
+                                                <CloudinaryPreview
                                                 images={[{ url: field.value }]}
-                                                onRemove={() => field.onChange("")}
+                                                onRemove={() => {
+                                                    field.onChange("");
+                                                    if (isValidationActive) void trigger('proofImageUrl');
+                                                }}
                                             />
                                         )}
                                     </div>
@@ -332,8 +347,9 @@ const PaymentForm = ({ setBookingStep, total, isLoading }: PaymentFormProps) => 
 
                     <div className="mt-5 space-y-2">
                         <Button
-                            disabled={!paymentType || !paymentMethodId || !proofImageUrl || isLoading}
-                            type="submit"
+                            disabled={isLoading}
+                            type="button"
+                            onClick={() => void submitPayment()}
                             className="w-full"
                         >
                             {isLoading ? (

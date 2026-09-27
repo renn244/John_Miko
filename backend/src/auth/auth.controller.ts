@@ -7,11 +7,12 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
 import { AuthGuard } from '../lib/guards/auth.guard';
 import { AuthService } from './auth.service';
@@ -23,34 +24,96 @@ import {
 } from './dto/forgotPassword.dto';
 import { ForgotPasswordService } from './forgotPassword.service';
 import { UpdateProfileDto, UpdateProfileImageDto } from './dto/updateProfile.dto';
-import { UserModule } from 'src/user/user.module';
 import { UpdatePasswordDto } from './dto/changePassword.dto';
 import { PushTokenDto } from './dto/push-token.dto';
+import { MobileRefreshSessionDto } from './dto/refresh-session.dto';
+import { RefreshSessionOriginGuard } from 'src/lib/guards/refresh-session-origin.guard';
+import { AuthRefreshSessionService, REFRESH_COOKIE_NAME } from './auth-refresh-session.service';
+import { TurnstileService } from './turnstile.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly forgotPasswordService: ForgotPasswordService,
+    private readonly authRefreshSessions: AuthRefreshSessionService,
+    private readonly turnstileService: TurnstileService,
   ) {}
 
   @Post('SignUpGuest')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
-  async SignUpGuest(@Body() body: SignUpGuestDto) {
-    return this.authService.SignUpGuest(body);
+  async SignUpGuest(
+    @Body() body: SignUpGuestDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.turnstileService.verify(body.turnstileToken ?? '');
+    const session = await this.authService.SignUpGuest(body);
+    return this.authRefreshSessions.writeResponse(response, session, body.platform ?? 'web');
   }
 
   @Post('login')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
-  async Login(@Body() body: SignInDto) {
-    return this.authService.SignIn(
+  async Login(
+    @Body() body: SignInDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    // Native staff sign-in has no Turnstile widget yet; its existing rate limit remains in effect.
+    if (body.platform !== 'mobile') {
+      await this.turnstileService.verify(body.turnstileToken ?? '');
+    }
+    const session = await this.authService.SignIn(
       body.email,
       body.password,
       body.userRole,
       body.rememberMe,
+      body.platform ?? 'web',
     );
+
+    return this.authRefreshSessions.writeResponse(response, session, body.platform ?? 'web');
+  }
+
+  @Post('refresh')
+  @UseGuards(ThrottlerGuard, RefreshSessionOriginGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  async refreshSession(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken = request.cookies?.[REFRESH_COOKIE_NAME] as string | undefined;
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
+
+    const session = await this.authService.refreshSession(refreshToken, 'web');
+    return this.authRefreshSessions.writeResponse(response, session, 'web');
+  }
+
+  @Post('logout')
+  @UseGuards(RefreshSessionOriginGuard)
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken = request.cookies?.[REFRESH_COOKIE_NAME] as string | undefined;
+    this.authRefreshSessions.clearWebCookie(response);
+
+    if (refreshToken) await this.authService.logout(refreshToken, 'web');
+    return { message: 'Logged out successfully' };
+  }
+
+  @Post('mobile/refresh')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  async refreshMobileSession(@Body() body: MobileRefreshSessionDto) {
+    return this.authService.refreshSession(body.refreshToken, 'mobile');
+  }
+
+  @Post('mobile/logout')
+  async logoutMobile(@Body() body: MobileRefreshSessionDto) {
+    await this.authService.logout(body.refreshToken, 'mobile');
+    return { message: 'Logged out successfully' };
   }
 
   @Post('forgotPassword')
@@ -130,4 +193,5 @@ export class AuthController {
   async removePushToken(@User() user: UserSession) {
     return this.authService.removePushToken(user);
   }
+
 }

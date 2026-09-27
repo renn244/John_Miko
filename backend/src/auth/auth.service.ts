@@ -1,5 +1,4 @@
 import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Role, User } from 'src/generated/prisma/client';
 import { UserSession } from 'src/lib/decorators/User.decorator';
@@ -10,14 +9,16 @@ import { SignUpGuestDto } from './dto/auth.dto';
 import { UpdateProfileDto } from './dto/updateProfile.dto';
 import { UpdatePasswordDto } from './dto/changePassword.dto';
 import { AuthSessionCacheService } from './auth-session-cache.service';
+import { normalizeEmail } from 'src/lib/utils/normalizeEmail';
+import { AuthRefreshSessionService, type AuthClientPlatform } from './auth-refresh-session.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly userService: UserService,
-        private readonly jwtService: JwtService,
         private readonly authSessionCache: AuthSessionCacheService,
+        private readonly authRefreshSessionService: AuthRefreshSessionService,
     ) {}
 
     async SignUpGuest(body: SignUpGuestDto) {
@@ -33,10 +34,10 @@ export class AuthService {
         const hashedPassword = await bcrypt.hash(body.password, 10);
         const createdUser = await this.userService.createUserGuest({ ...body, password: hashedPassword });
     
-        return this.loginJWT(createdUser)
+        return this.authRefreshSessionService.createSession(createdUser, body.platform ?? 'web')
     }
 
-    async SignIn(email: string, password: string, userRole: Role, rememberMe = false) {
+    async SignIn(email: string, password: string, userRole: Role, rememberMe = false, platform: AuthClientPlatform = 'web') {
         const user = await this.userService.findUserByEmail(email);
 
         if(!user) {
@@ -66,17 +67,15 @@ export class AuthService {
             });
         }
 
-        return this.loginJWT(user, rememberMe);
+        return this.authRefreshSessionService.createSession(user, platform, rememberMe);
     }
 
-    async loginJWT(user: User, rememberMe = false) {
-        const payload = { email: user.email, id: user.id, role: user.role };
+    async refreshSession(refreshToken: string, platform: AuthClientPlatform) {
+        return this.authRefreshSessionService.rotateSession(refreshToken, platform);
+    }
 
-        const accessToken = await this.jwtService.signAsync(payload, {
-            expiresIn: rememberMe ? '30d' : '7d',
-        });
-
-        return { accessToken };
+    async logout(refreshToken: string, platform: AuthClientPlatform) {
+        await this.authRefreshSessionService.revokeSession(refreshToken, platform);
     }
 
     async getProfile(user: UserSession) {
@@ -123,7 +122,7 @@ export class AuthService {
             },
             data: {
                 name: body.name,
-                email: body.email,
+                email: normalizeEmail(body.email),
                 contactNo: body.contactNo
             }
         })
@@ -188,6 +187,8 @@ export class AuthService {
         if(!updatedUser) {
             throw new BadRequestException("Failed to update password, please try again.")
         }
+
+        await this.authRefreshSessionService.revokeAllForUser(user.id);
 
         return { message: "Password updated successfully" }
     }

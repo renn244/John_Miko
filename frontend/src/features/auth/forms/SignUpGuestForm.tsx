@@ -3,22 +3,25 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import LoadingSpinner from "@/components/ui/loadingSpinner";
 import PasswordInput from "@/components/ui/passwordInput";
+import TurnstileWidget from "@/features/auth/components/TurnstileWidget";
+import { accountPasswordSchema, passwordRules } from "@/features/auth/lib/passwordValidation";
 import { useSignUpGuestMutation } from "@/features/auth/hooks/auth.hook";
 import { getErrorMessages } from "@/lib/getErrorMessages";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import z from "zod";
 
 const SignUpGuestSchema = z.object({
-    email: z.string()
-        .nonempty("Email is required"),
+    email: z.string().trim()
+        .min(1, "Email is required")
+        .email("Invalid email address"),
     name: z.string()
         .nonempty("Name is required"),
     contactNo: z.string()
         .nonempty("Contact No. is required"),
-    password: z.string()
-        .nonempty("Password is required"),
-    confirmPassword: z.string()
+    password: accountPasswordSchema,
+    confirmPassword: z.string(),
+    turnstileToken: z.string().min(1, 'Please complete the security check'),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Password must match",
     path: ["confirmPassword"]
@@ -38,12 +41,14 @@ const SignUpGuestForm = () => {
             name: "",
             contactNo: "",
             password: "",
-            confirmPassword: ""
+            confirmPassword: "",
+            turnstileToken: "",
         },
         criteriaMode: "all"
     })
 
     const { mutateAsync, isPending } = useSignUpGuestMutation(setError)
+    const password = useWatch({ control, name: "password" });
 
     const onSubmit = async (data: signUpGuestSchema) => {
         await mutateAsync(data)
@@ -148,6 +153,16 @@ const SignUpGuestForm = () => {
                         <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
 
+                    {!fieldState.invalid && (
+                        <ul className="ml-4 flex list-disc flex-col gap-1 text-sm font-normal text-muted-foreground">
+                            {passwordRules
+                                .filter((rule) => !rule.test(password))
+                                .map((rule) => (
+                                    <li key={rule.label}>{rule.label}</li>
+                                ))}
+                        </ul>
+                    )}
+
                 </Field>
             )}
             />
@@ -172,6 +187,19 @@ const SignUpGuestForm = () => {
                         <FieldError errors={getErrorMessages(fieldState.error)} />
                     )}
 
+                </Field>
+            )}
+            />
+
+            <Controller
+            name="turnstileToken"
+            control={control}
+            render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="grid gap-2">
+                    <TurnstileWidget onTokenChange={field.onChange} />
+                    {fieldState.invalid && (
+                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                    )}
                 </Field>
             )}
             />

@@ -151,7 +151,7 @@ export class CatalogSearchService {
         take: 25,
       }),
       this.prisma.addOnService.findMany({
-        where: { isActive: true },
+        where: { isActive: true, deletedAt: null },
         select: {
           id: true,
           name: true,

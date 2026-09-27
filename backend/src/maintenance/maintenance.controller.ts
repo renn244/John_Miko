@@ -1,8 +1,9 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { Role } from 'src/generated/prisma/enums';
-import { DateReportQueryDto } from 'src/lib/dto/date-report.query';
 import { Roles } from 'src/lib/decorators/Roles.decorator';
 import { User, UserSession } from 'src/lib/decorators/User.decorator';
+import { DateReportQueryDto } from 'src/lib/dto/date-report.query';
 import { AuthGuard } from 'src/lib/guards/auth.guard';
 import { RolesGuard } from 'src/lib/guards/Roles.guard';
 import { CompleteMaintenanceDto, CreateMaintenanceDto, UpdateMaintenanceDto } from './dto/maintenance.dto';
@@ -15,6 +16,11 @@ export class MaintenanceController {
     constructor(
         private readonly maintenanceService: MaintenanceService
     ) {}
+
+    @Cron('0 */15 * * * *')
+    async autoCloseCompletedTickets() {
+        return this.maintenanceService.autoCloseCompletedTickets();
+    }
 
     @Post()
     @Roles(Role.ADMIN)

@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
 import { Prisma } from 'src/generated/prisma/client';
 import {
     MaintenanceExpertise,
@@ -8,9 +7,10 @@ import {
     UserStatus,
 } from 'src/generated/prisma/enums';
 import { UserSession } from 'src/lib/decorators/User.decorator';
-import { getDateRange, getSingleDayRange } from 'src/lib/utils/date.util';
+import { getSingleDayRange } from 'src/lib/utils/date.util';
 import { getPaginationArgs, getPaginationMeta } from 'src/lib/utils/paginate';
 import { cleanPrismaWhere } from 'src/lib/utils/prisma-filter';
+import { PushNotificationService } from 'src/notifications/push-notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
     CompleteMaintenanceDto,
@@ -18,9 +18,6 @@ import {
     UpdateMaintenanceDto,
 } from './dto/maintenance.dto';
 import { GetMaintenanceDto } from './query/getMaintenance.dto';
-import { PushNotificationService } from 'src/notifications/push-notification.service';
-
-const OBSERVATION_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class MaintenanceService implements OnModuleInit {
@@ -33,8 +30,9 @@ export class MaintenanceService implements OnModuleInit {
         await this.autoCloseCompletedTickets();
     }
 
-    @Cron('0 */15 * * * *')
     async autoCloseCompletedTickets(now = new Date()) {
+        const OBSERVATION_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
+
         const observationCutoff = new Date(now.getTime() - OBSERVATION_PERIOD_MS);
 
         return this.prisma.maintenance.updateMany({

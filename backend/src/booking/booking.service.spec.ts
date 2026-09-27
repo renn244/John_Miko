@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { BookingService } from './booking.service';
 
 describe('BookingService', () => {
@@ -8,7 +14,10 @@ describe('BookingService', () => {
       count: jest.fn(),
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      update: jest.fn(),
     },
+    accommodationStayOption: { findFirst: jest.fn() },
     $transaction: jest.fn(),
   } as any;
   const preOrderService = { createBulkPreOrder: jest.fn() } as any;
@@ -25,7 +34,9 @@ describe('BookingService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(Date, "now").mockReturnValue(new Date("2026-06-24T00:00:00Z").getTime());
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValue(new Date('2026-06-24T00:00:00Z').getTime());
     preOrderService.createBulkPreOrder.mockResolvedValue({ total: 450 });
     bookingServicesService.createBulk.mockResolvedValue({ total: 700 });
     service = new BookingService(
@@ -67,8 +78,8 @@ describe('BookingService', () => {
           code: 'overnight',
           label: 'Overnight',
           durationHours: 22,
-          startTime: new Date("1970-01-01T14:00:00Z"),
-          endTime: new Date("1970-01-01T12:00:00Z"),
+          startTime: new Date('1970-01-01T14:00:00Z'),
+          endTime: new Date('1970-01-01T12:00:00Z'),
         }),
       },
       booking: {
@@ -88,7 +99,9 @@ describe('BookingService', () => {
       },
     };
 
-    prisma.$transaction.mockImplementation(async (callback: (txArg: typeof tx) => Promise<unknown>) => callback(tx));
+    prisma.$transaction.mockImplementation(
+      async (callback: (txArg: typeof tx) => Promise<unknown>) => callback(tx),
+    );
 
     const result = await service.createManualBooking(
       {
@@ -99,12 +112,8 @@ describe('BookingService', () => {
         adultGuests: 2,
         seniorGuests: 1,
         kidGuests: 0,
-        preOrderItems: [
-          { menuItemId: 'menu-1', quantity: 2 },
-        ],
-        addOnServices: [
-          { addOnServiceId: 'addon-1', quantity: 1 },
-        ],
+        preOrderItems: [{ menuItemId: 'menu-1', quantity: 2 }],
+        addOnServices: [{ addOnServiceId: 'addon-1', quantity: 1 }],
         stayOptionId: 'stay-1',
         checkIn: new Date('2026-06-27'),
         paymentType: 'Full',
@@ -142,7 +151,9 @@ describe('BookingService', () => {
       }),
       tx,
     );
-    expect(paymentService.sendApprovedPaymentEmail).toHaveBeenCalledWith('pay-1');
+    expect(paymentService.sendApprovedPaymentEmail).toHaveBeenCalledWith(
+      'pay-1',
+    );
     expect(result).toEqual(
       expect.objectContaining({
         id: 'booking-1',
@@ -171,7 +182,7 @@ describe('BookingService', () => {
         },
         { id: 'admin-1', role: 'ADMIN', email: 'admin@example.com' } as any,
       ),
-  ).rejects.toBeInstanceOf(NotFoundException);
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('requires a booking date at least three days ahead', async () => {
@@ -194,35 +205,200 @@ describe('BookingService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('records a walk-in for today without applying the three-day rule', async () => {
+  it('converts the active-slot unique constraint into a conflict for online bookings', async () => {
     prisma.accommodation.findUnique.mockResolvedValue({
-      id: 'acc-1', name: 'Villa 1', type: 'Room', price: 2000, imageUrl: '', capacity: 6,
-      description: '', amenities: [], isGuestFeeWaived: false, retiredAt: null,
+      id: 'acc-1',
+      retiredAt: null,
+      isGuestFeeWaived: false,
+    });
+    prisma.$transaction.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: 'test',
+        meta: { target: 'Booking_active_slot_unique' },
+      }),
+    );
+
+    await expect(
+      service.bookAccommodation(
+        {
+          accommodationId: 'acc-1',
+          stayOptionId: 'stay-1',
+          checkIn: new Date('2026-06-27'),
+          name: 'Online Guest',
+          email: 'guest@example.com',
+          contactNo: '09123456789',
+          adultGuests: 1,
+          seniorGuests: 0,
+          kidGuests: 0,
+          preOrderItems: [],
+          addOnServices: [],
+          paymentMethodId: 'method-1',
+          proofImageUrl: 'https://example.com/proof.jpg',
+          paymentType: 'Full',
+        } as any,
+        { id: 'guest-1', role: 'GUEST' } as any,
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('converts Prisma’s model-only P2002 target into a conflict while creating a manual booking', async () => {
+    prisma.accommodation.findUnique.mockResolvedValue({
+      id: 'acc-1',
+      name: 'Villa 1',
+      capacity: 6,
+      retiredAt: null,
+      isGuestFeeWaived: false,
     });
     closureService.validateClosureDate.mockResolvedValue(false);
-    paymentService.createManualPayment.mockResolvedValue({ paymentId: 'pay-1', referenceNumber: 'REF-1' });
-    paymentService.sendApprovedPaymentEmail.mockResolvedValue(undefined);
     const tx = {
-      accommodationStayOption: { findFirst: jest.fn().mockResolvedValue({ id: 'stay-1', code: 'daystay', label: 'Day stay', durationHours: 10 }) },
+      accommodationStayOption: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'stay-1',
+          code: 'daystay',
+          label: 'Day stay',
+          durationHours: 10,
+        }),
+      },
       booking: {
         findFirst: jest.fn().mockResolvedValue(null),
-        create: jest.fn().mockImplementation(async ({ data }) => ({ id: 'booking-1', ...data })),
-        update: jest.fn().mockImplementation(async ({ where, data }) => ({ id: where.id, bookingDate: new Date('2026-06-24T00:00:00.000Z'), ...data })),
+        create: jest.fn().mockRejectedValue(
+          new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+            code: 'P2002',
+            clientVersion: 'test',
+            meta: { target: 'Booking' },
+          }),
+        ),
+      },
+    };
+    prisma.$transaction.mockImplementation(
+      async (callback: (txArg: typeof tx) => Promise<unknown>) => callback(tx),
+    );
+
+    await expect(
+      service.createManualBooking(
+        {
+          accommodationId: 'acc-1',
+          name: 'Race Test Guest',
+          email: 'race@example.invalid',
+          contactNo: '09123456789',
+          adultGuests: 1,
+          seniorGuests: 0,
+          kidGuests: 0,
+          stayOptionId: 'stay-1',
+          checkIn: new Date('2026-06-27'),
+          paymentType: 'Full',
+        },
+        { id: 'admin-1', role: 'ADMIN' } as any,
+      ),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('converts the active-slot unique constraint into a conflict when rescheduling', async () => {
+    prisma.booking.findUnique.mockResolvedValue({
+      id: 'booking-1',
+      accommodationId: 'acc-1',
+      bookingDate: new Date('2026-06-26'),
+      stayOptionLabelSnapshot: 'Day stay',
+      accommodation: { name: 'Villa 1', type: 'Room' },
+    });
+    prisma.accommodationStayOption.findFirst.mockResolvedValue({
+      id: 'stay-1',
+      code: 'daystay',
+      label: 'Day stay',
+      durationHours: 10,
+    });
+    prisma.booking.findFirst.mockResolvedValue(null);
+    prisma.booking.update.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: 'test',
+        meta: { target: 'Booking_active_slot_unique' },
+      }),
+    );
+    closureService.validateClosureDate.mockResolvedValue(false);
+
+    await expect(
+      service.rescheduleBooking('booking-1', {
+        bookingDate: new Date('2026-06-27'),
+        stayOptionId: 'stay-1',
+      } as any),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('records a walk-in for today without applying the three-day rule', async () => {
+    prisma.accommodation.findUnique.mockResolvedValue({
+      id: 'acc-1',
+      name: 'Villa 1',
+      type: 'Room',
+      price: 2000,
+      imageUrl: '',
+      capacity: 6,
+      description: '',
+      amenities: [],
+      isGuestFeeWaived: false,
+      retiredAt: null,
+    });
+    closureService.validateClosureDate.mockResolvedValue(false);
+    paymentService.createManualPayment.mockResolvedValue({
+      paymentId: 'pay-1',
+      referenceNumber: 'REF-1',
+    });
+    paymentService.sendApprovedPaymentEmail.mockResolvedValue(undefined);
+    const tx = {
+      accommodationStayOption: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'stay-1',
+          code: 'daystay',
+          label: 'Day stay',
+          durationHours: 10,
+        }),
+      },
+      booking: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockImplementation(async ({ data }) => ({
+          id: 'booking-1',
+          ...data,
+        })),
+        update: jest.fn().mockImplementation(async ({ where, data }) => ({
+          id: where.id,
+          bookingDate: new Date('2026-06-24T00:00:00.000Z'),
+          ...data,
+        })),
       },
       bookedAccommodation: { create: jest.fn() },
     };
-    prisma.$transaction.mockImplementation(async (callback: (txArg: typeof tx) => Promise<unknown>) => callback(tx));
+    prisma.$transaction.mockImplementation(
+      async (callback: (txArg: typeof tx) => Promise<unknown>) => callback(tx),
+    );
 
-    await service.createWalkInBooking({
-      accommodationId: 'acc-1', name: 'Walk-in guest', email: 'walkin@example.com', contactNo: '09123456789',
-      adultGuests: 1, seniorGuests: 0, kidGuests: 0, stayOptionId: 'stay-1',
-      checkIn: new Date('2026-06-30'),
-    }, { id: 'admin-1', role: 'ADMIN' } as any);
+    await service.createWalkInBooking(
+      {
+        accommodationId: 'acc-1',
+        name: 'Walk-in guest',
+        email: 'walkin@example.com',
+        contactNo: '09123456789',
+        adultGuests: 1,
+        seniorGuests: 0,
+        kidGuests: 0,
+        stayOptionId: 'stay-1',
+        checkIn: new Date('2026-06-30'),
+      },
+      { id: 'admin-1', role: 'ADMIN' } as any,
+    );
 
-    expect(tx.booking.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({
-      bookingDate: new Date('2026-06-24T00:00:00.000Z'), source: 'WalkIn', status: 'Confirmed',
-    }) }));
-    expect(paymentService.sendApprovedPaymentEmail).toHaveBeenCalledWith('pay-1');
+    expect(tx.booking.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          bookingDate: new Date('2026-06-24T00:00:00.000Z'),
+          source: 'WalkIn',
+          status: 'Confirmed',
+        }),
+      }),
+    );
+    expect(paymentService.sendApprovedPaymentEmail).toHaveBeenCalledWith(
+      'pay-1',
+    );
   });
 
   it('returns booking overview data from booking-owned queries', async () => {
@@ -306,7 +482,9 @@ describe('BookingService', () => {
       id: 'booking-1',
       userId: 'guest-1',
       payment: { proofImageUrl: 'https://example.com/private-proof' },
-      reports: [{ id: 'report-1', proofImages: ['https://example.com/report-proof'] }],
+      reports: [
+        { id: 'report-1', proofImages: ['https://example.com/report-proof'] },
+      ],
     };
     prisma.booking.findUnique.mockResolvedValue(booking);
 
@@ -319,12 +497,34 @@ describe('BookingService', () => {
     ).resolves.toBe(booking);
   });
   it('returns recorded refund proof only to the booking owner or admin', async () => {
-    const booking = { id: 'booking-refund', userId: 'owner', payment: { status: 'Refunded', refundReason: 'Cancelled', refundProofImageUrl: 'private-proof', refundedAt: new Date() } };
+    const booking = {
+      id: 'booking-refund',
+      userId: 'owner',
+      payment: {
+        status: 'Refunded',
+        refundReason: 'Cancelled',
+        refundProofImageUrl: 'private-proof',
+        refundedAt: new Date(),
+      },
+    };
     prisma.booking.findUnique.mockResolvedValue(booking);
-    await expect(service.getBookingById(booking.id, { id: 'owner', role: 'GUEST' } as any)).resolves.toEqual(booking);
-    await expect(service.getBookingById(booking.id, { id: 'admin', role: 'ADMIN' } as any)).resolves.toEqual(booking);
-    await expect(service.getBookingById(booking.id, { id: 'other', role: 'GUEST' } as any)).rejects.toThrow(ForbiddenException);
-    expect(prisma.booking.findUnique).toHaveBeenCalledWith(expect.objectContaining({ include: expect.objectContaining({ payment: expect.objectContaining({ select: expect.objectContaining({ refundProofImageUrl: true }) }) }) }));
+    await expect(
+      service.getBookingById(booking.id, { id: 'owner', role: 'GUEST' } as any),
+    ).resolves.toEqual(booking);
+    await expect(
+      service.getBookingById(booking.id, { id: 'admin', role: 'ADMIN' } as any),
+    ).resolves.toEqual(booking);
+    await expect(
+      service.getBookingById(booking.id, { id: 'other', role: 'GUEST' } as any),
+    ).rejects.toThrow(ForbiddenException);
+    expect(prisma.booking.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        include: expect.objectContaining({
+          payment: expect.objectContaining({
+            select: expect.objectContaining({ refundProofImageUrl: true }),
+          }),
+        }),
+      }),
+    );
   });
-
 });

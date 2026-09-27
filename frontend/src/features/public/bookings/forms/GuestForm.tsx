@@ -19,6 +19,8 @@ type GuestFormProps = {
     selectedCheckIn: Date,
     selectedCheckOut: Date,
     setBookingStep: Dispatch<SetStateAction<'form' | 'add-on' | 'review'  | 'pre-order' | 'payment'>>,
+    isValidationActive: boolean,
+    validateStep: () => Promise<boolean>,
 }
 
 const GuestForm =  ({
@@ -27,9 +29,11 @@ const GuestForm =  ({
     selectedStayCode,
     selectedCheckIn,
     selectedCheckOut,
-    setBookingStep
+    setBookingStep,
+    isValidationActive,
+    validateStep: validateCurrentStep,
 }: GuestFormProps) => {
-    const { control, watch, reset, getValues, setError, setValue, trigger } = useFormContext<multiStepBookingFormSchema>();
+    const { control, watch, setError, clearErrors, setValue, trigger } = useFormContext<multiStepBookingFormSchema>();
 
     const adultGuests = watch('adultGuests'); 
     const seniorGuests = watch('seniorGuests');
@@ -54,12 +58,12 @@ const GuestForm =  ({
     useEffect(() => {
         // set the numberof guests based on the sum of adult, senior, and kid guests
         const totalGuests = (adultGuests || 0) + (seniorGuests || 0) + (kidGuests || 0);
-        setValue('numberOfGuests', totalGuests);
+        setValue('numberOfGuests', totalGuests, { shouldValidate: isValidationActive });
 
-    }, [adultGuests, seniorGuests, kidGuests, setValue])
+    }, [adultGuests, seniorGuests, kidGuests, isValidationActive, setValue])
 
     const validateStep = async () => {
-        const isValid = await trigger(["firstName", "lastName", "email", "contactNo", "numberOfGuests"]);
+        const isValid = await validateCurrentStep();
         
         if(watch('numberOfGuests') > accommodation.capacity) {
             setError('numberOfGuests', {
@@ -68,10 +72,11 @@ const GuestForm =  ({
             });
             return;
         }
+
+        clearErrors('numberOfGuests');
         
         if(!isValid) return;
 
-        reset({ ...getValues() }, { keepValues: true });
         setBookingStep('add-on')
     }
     
@@ -95,6 +100,10 @@ const GuestForm =  ({
                                 placeholder="Juan"
                                 aria-invalid={fieldState.invalid}
                                 {...field}
+                                onChange={(event) => {
+                                    field.onChange(event);
+                                    if (isValidationActive) void trigger(field.name);
+                                }}
                                 />
 
                                 {fieldState.invalid && (
@@ -117,6 +126,10 @@ const GuestForm =  ({
                                 placeholder="Dela Cruz"
                                 aria-invalid={fieldState.invalid}
                                 {...field}
+                                onChange={(event) => {
+                                    field.onChange(event);
+                                    if (isValidationActive) void trigger(field.name);
+                                }}
                                 />
 
                                 {fieldState.invalid && (
@@ -141,6 +154,10 @@ const GuestForm =  ({
                                 placeholder="juan@example.com"
                                 aria-invalid={fieldState.invalid}
                                 {...field}
+                                onChange={(event) => {
+                                    field.onChange(event);
+                                    if (isValidationActive) void trigger(field.name);
+                                }}
                                 />
 
                                 {fieldState.invalid && (
@@ -160,9 +177,13 @@ const GuestForm =  ({
                                 </FieldLabel>
                                 <Input
                                 id={field.name}
-                                placeholder="+639613675611"
+                                placeholder="0912 345 6789"
                                 aria-invalid={fieldState.invalid}
                                 {...field}
+                                onChange={(event) => {
+                                    field.onChange(event);
+                                    if (isValidationActive) void trigger(field.name);
+                                }}
                                 />
 
                                 {fieldState.invalid && (
@@ -209,7 +230,11 @@ const GuestForm =  ({
                                         type="button"
                                         variant="outline"
                                         size="icon-sm"
-                                        onClick={() => field.onChange(Math.max(0, (field.value || 0) - 1))}
+                                        ref={field.ref}
+                                        onClick={() => {
+                                            field.onChange(Math.max(0, (field.value || 0) - 1));
+                                            if (isValidationActive) void validateCurrentStep();
+                                        }}
                                         >
                                             <Minus className="size-4" />
                                         </Button>
@@ -218,7 +243,10 @@ const GuestForm =  ({
                                         type="button"
                                         variant="outline"
                                         size="icon-sm"
-                                        onClick={() => field.onChange((field.value || 0) + 1)}
+                                        onClick={() => {
+                                            field.onChange((field.value || 0) + 1);
+                                            if (isValidationActive) void validateCurrentStep();
+                                        }}
                                         >
                                             <Plus className="size-4" />
                                         </Button>
@@ -250,7 +278,10 @@ const GuestForm =  ({
                                         type="button"
                                         variant="outline"
                                         size="icon-sm"
-                                        onClick={() => field.onChange(Math.max(0, (field.value || 0) - 1))}
+                                        onClick={() => {
+                                            field.onChange(Math.max(0, (field.value || 0) - 1));
+                                            if (isValidationActive) void validateCurrentStep();
+                                        }}
                                         >
                                             <Minus className="size-4" />
                                         </Button>
@@ -259,7 +290,10 @@ const GuestForm =  ({
                                         type="button"
                                         variant="outline"
                                         size="icon-sm"
-                                        onClick={() => field.onChange((field.value || 0) + 1)}
+                                        onClick={() => {
+                                            field.onChange((field.value || 0) + 1);
+                                            if (isValidationActive) void validateCurrentStep();
+                                        }}
                                         >
                                             <Plus className="size-4" />
                                         </Button>
@@ -291,7 +325,10 @@ const GuestForm =  ({
                                         type="button"
                                         variant="outline"
                                         size="icon-sm"
-                                        onClick={() => field.onChange(Math.max(0, (field.value || 0) - 1))}
+                                        onClick={() => {
+                                            field.onChange(Math.max(0, (field.value || 0) - 1));
+                                            if (isValidationActive) void validateCurrentStep();
+                                        }}
                                         >
                                             <Minus className="size-4" />
                                         </Button>
@@ -300,7 +337,10 @@ const GuestForm =  ({
                                         type="button"
                                         variant="outline"
                                         size="icon-sm"
-                                        onClick={() => field.onChange((field.value || 0) + 1)}
+                                        onClick={() => {
+                                            field.onChange((field.value || 0) + 1);
+                                            if (isValidationActive) void validateCurrentStep();
+                                        }}
                                         >
                                             <Plus className="size-4" />
                                         </Button>

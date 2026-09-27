@@ -4,6 +4,7 @@ export type LoginDto = {
     password: string;
     userRole: UserRole;
     rememberMe?: boolean;
+    turnstileToken: string;
 }
 
 export type LoginResponse = {
@@ -16,6 +17,7 @@ export type SignUpGuest = {
     contactNo: string;
     password: string;
     confirmPassword: string;
+    turnstileToken: string;
 }
 
 export type ForgotPasswordDto = {

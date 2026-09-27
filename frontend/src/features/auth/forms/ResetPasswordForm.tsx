@@ -2,28 +2,16 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import LoadingSpinner from "@/components/ui/loadingSpinner"
 import PasswordInput from "@/components/ui/passwordInput"
+import { accountPasswordSchema, passwordRules } from "@/features/auth/lib/passwordValidation"
 import { useResetPasswordMutation } from "@/features/auth/hooks/auth.hook"
 import { getErrorMessages } from "@/lib/getErrorMessages"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import z from "zod"
 
-const passwordRules = [
-    { test: (v: string) => v.length >= 8, label: "At least 8 characters" },
-    { test: (v: string) => /[a-z]/.test(v), label: "Lowercase letter" },
-    { test: (v: string) => /[A-Z]/.test(v), label: "Uppercase letter" },
-    { test: (v: string) => /\d/.test(v), label: "Number" },
-    { test: (v: string) => /[^A-Za-z0-9]/.test(v), label: "Special character" },
-]
-
 const ResetPasswordSchema = z.object({
     token: z.string(),
-    newPassword: z.string()
-        .min(8, "Password must be at least 8 characters")
-        .regex(/[a-z]/, "Password must contain a lowercase letter")
-        .regex(/[A-Z]/, "Password must contain an uppercase letter")
-        .regex(/\d/, "Password must contain a number")
-        .regex(/[^A-Za-z0-9]/, "Password must contain a special character"),
+    newPassword: accountPasswordSchema,
     confirmPassword: z.string()
 }).refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords must match",
