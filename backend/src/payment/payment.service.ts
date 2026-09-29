@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { Prisma } from 'src/generated/prisma/client';
 import { PaymentStatus, PaymentType } from 'src/generated/prisma/enums';
@@ -56,6 +56,7 @@ export class PaymentService {
                 bookingId,
                 methodId: body.methodId,
                 proofImageUrl: body.proofImageUrl,
+                validIdImageUrl: body.validIdImageUrl,
                 referenceNumber,
                 status: PaymentStatus.Pending,
                 accommodationAmount: accommodationFee,
@@ -515,13 +516,10 @@ export class PaymentService {
         } catch {
             this.logger.error(`Refund saved for payment ${updatedPayment.id}, but its notification email failed.`);
         }
+
         return updatedPayment;
     }
-
-    async addExtraFees() {
-        
-    }
-
+    
     private calculateAmounts(totalAmount: number, paymentType: PaymentType) {
         let amountToPay = 0;
         let amountPaid = 0;

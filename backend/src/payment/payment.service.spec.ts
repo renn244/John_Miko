@@ -75,6 +75,34 @@ describe('PaymentService', () => {
     });
   });
 
+  it('stores the submitted valid ID with an online payment', async () => {
+    prisma.payment.findUnique.mockResolvedValue(null);
+    prisma.payment.create.mockResolvedValue({
+      id: 'payment-1',
+      referenceNumber: 'JM-REFERENCE',
+    });
+
+    await service.createPayment({
+      bookingId: 'booking-1',
+      methodId: 'method-1',
+      proofImageUrl: 'https://example.com/private/payment-proof.jpg',
+      validIdImageUrl: 'https://example.com/private/valid-id.jpg',
+      accommodationFee: 1000,
+      preOrderFee: 0,
+      addOnServiceFee: 0,
+      guestFee: 0,
+      paymentType: 'Full',
+    });
+
+    expect(prisma.payment.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          validIdImageUrl: 'https://example.com/private/valid-id.jpg',
+        }),
+      }),
+    );
+  });
+
   it('adds resort-wide private closure revenue to monthly revenue analytics', async () => {
     prisma.payment.findMany.mockResolvedValue([
       {

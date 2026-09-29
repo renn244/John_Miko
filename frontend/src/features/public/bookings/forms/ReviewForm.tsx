@@ -361,7 +361,7 @@ const ReviewForm = ({
                         <div>
                             <p className="text-sm text-muted-foreground">Total due</p>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Payment method and proof are next.
+                                Payment method, proof, and valid ID are next.
                             </p>
                         </div>
                         <p className="text-2xl font-extrabold text-primary">

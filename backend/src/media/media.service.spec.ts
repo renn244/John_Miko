@@ -110,6 +110,25 @@ describe('MediaService', () => {
     expect(result.deliveryUrl).toContain('/s--');
   });
 
+  it('keeps booking valid IDs private and guest-uploadable only', () => {
+    const result = service.createUploadSignature(
+      createUser(Role.GUEST),
+      MediaPurpose.BOOKING_VALID_ID,
+    );
+
+    expect(result).toMatchObject({
+      deliveryType: 'authenticated',
+      visibility: 'private',
+    });
+    expect(result.publicId).toMatch(/^private\/booking-valid-ids\/[0-9a-f-]{36}$/);
+    expect(() =>
+      service.createUploadSignature(
+        createUser(Role.ADMIN),
+        MediaPurpose.BOOKING_VALID_ID,
+      ),
+    ).toThrow(ForbiddenException);
+  });
+
   it('keeps payment method QR codes publicly readable', () => {
     const result = service.createUploadSignature(
       createUser(Role.ADMIN),

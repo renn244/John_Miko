@@ -86,6 +86,7 @@ export const MultiStepBookingFormSchema = z.object({
     paymentType: z.enum(['Full', 'Partial'], { error: "Please choose a payment type" }),
     paymentMethodId: z.string().nonempty("Payment method is required"),
     proofImageUrl: z.url({ error: "Please upload your proof of payment" }),
+    validIdImageUrl: z.url({ error: "Please upload a valid ID" }),
 })
 
 export type multiStepBookingFormSchema = z.infer<typeof MultiStepBookingFormSchema>;
@@ -95,7 +96,7 @@ const BOOKING_STEP_FIELDS: Record<BookingStep, FieldPath<multiStepBookingFormSch
     "add-on": ["addOnServices"],
     "pre-order": ["preOrderItems"],
     review: [],
-    payment: ["paymentType", "paymentMethodId", "proofImageUrl"],
+    payment: ["paymentType", "paymentMethodId", "proofImageUrl", "validIdImageUrl"],
 };
 
 const MultiStepBookingForm = ({ 
@@ -198,7 +199,7 @@ const MultiStepBookingForm = ({
             })
 
             onSuccess?.();
-            toast.success('Payment proof submitted. We will verify shortly.');
+            toast.success('Payment proof and valid ID submitted. We will verify shortly.');
         } catch (error: unknown) {
             if(error instanceof ValidationError) {
                 handleNestError(error.response, form.setError);

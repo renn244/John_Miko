@@ -6,6 +6,7 @@ export enum MediaPurpose {
   ADD_ON_SERVICE = 'ADD_ON_SERVICE',
   PAYMENT_METHOD_QR = 'PAYMENT_METHOD_QR',
   PAYMENT_PROOF = 'PAYMENT_PROOF',
+  BOOKING_VALID_ID = 'BOOKING_VALID_ID',
   REFUND_PROOF = 'REFUND_PROOF',
   STAFF_REPORT_PROOF = 'STAFF_REPORT_PROOF',
   MAINTENANCE_ISSUE = 'MAINTENANCE_ISSUE',
@@ -54,6 +55,12 @@ export const MEDIA_POLICIES: Record<MediaPurpose, MediaPolicy> = {
     visibility: 'private',
     deliveryType: 'authenticated',
     allowedRoles: [Role.GUEST, Role.ADMIN],
+  },
+  [MediaPurpose.BOOKING_VALID_ID]: {
+    publicIdPrefix: 'private/booking-valid-ids',
+    visibility: 'private',
+    deliveryType: 'authenticated',
+    allowedRoles: [Role.GUEST],
   },
   [MediaPurpose.REFUND_PROOF]: {
     publicIdPrefix: 'private/refund-proofs',

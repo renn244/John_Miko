@@ -99,6 +99,11 @@ export class CreateBookingDto {
     @IsNotEmpty({ message: "Proof of payment is required" })
     @IsUrl()
     proofImageUrl!: string;
+
+    @IsString()
+    @IsNotEmpty({ message: "Valid ID image is required" })
+    @IsUrl()
+    validIdImageUrl!: string;
 }
 
 export class CreateManualBookingDto {

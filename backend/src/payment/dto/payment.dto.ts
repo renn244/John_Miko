@@ -14,6 +14,11 @@ export class CreatePaymentDto {
     @IsUrl()
     proofImageUrl!: string;
 
+    @IsString()
+    @IsNotEmpty()
+    @IsUrl()
+    validIdImageUrl!: string;
+
     // breakdown of the payments
     @IsInt()
     accommodationFee!: number;

@@ -130,6 +130,21 @@ const PaymentReviewCard = ({ booking }: PaymentReviewCardProps) => {
                     </div>
                 )}
 
+                {payment.validIdImageUrl && (
+                    <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Valid ID
+                        </p>
+                        <ViewPhotoDialog imageUrl={payment.validIdImageUrl}>
+                            <img
+                                src={payment.validIdImageUrl}
+                                alt="Guest valid ID"
+                                className="h-44 w-full rounded-lg border object-cover"
+                            />
+                        </ViewPhotoDialog>
+                    </div>
+                )}
+
                 {payment.rejectionNote && (
                     <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm">
                         <p className="mb-1 font-semibold text-destructive">

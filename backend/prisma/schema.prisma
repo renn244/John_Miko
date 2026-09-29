@@ -303,6 +303,7 @@ model Payment {
   status          PaymentStatus @default(Pending)
   referenceNumber String?       @unique
   proofImageUrl   String?
+  validIdImageUrl String?
   rejectionNote   String?
   refundReason    String?
   refundProofImageUrl String?
