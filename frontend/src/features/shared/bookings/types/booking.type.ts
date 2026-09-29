@@ -152,6 +152,7 @@ export type BookingWithAccommodationAndPreOrderAndPayment = {
         status: 'Pending' | 'Approved' | 'Rejected' | 'Refunded',
         referenceNumber?: string | null,
         proofImageUrl?: string | null,
+        validIdImageUrl?: string | null,
         rejectionNote?: string | null,
         refundReason?: string | null,
         refundProofImageUrl?: string | null,

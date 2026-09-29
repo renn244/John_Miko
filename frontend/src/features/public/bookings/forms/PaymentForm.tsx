@@ -311,6 +311,52 @@ const PaymentForm = ({ setBookingStep, total, isLoading, isValidationActive, sub
                         />
                     </FieldGroup>
                 </GuestCard>
+
+                <GuestCard className="p-4 md:p-5">
+                    <FieldGroup>
+                        <Controller
+                            name="validIdImageUrl"
+                            control={control}
+                            render={({ field, fieldState }) => (
+                                <Field data-invalid={fieldState.invalid}>
+                                    <FieldLabel className="gap-1 text-base font-bold">
+                                        Valid ID <span className="text-red-700">*</span>
+                                    </FieldLabel>
+
+                                    <div className="mt-3">
+                                        {!field.value && (
+                                            <CloudinaryUpload
+                                                purpose="BOOKING_VALID_ID"
+                                                onSuccess={(url) => {
+                                                    field.onChange(url);
+                                                    if (isValidationActive) void trigger('validIdImageUrl');
+                                                }}
+                                            />
+                                        )}
+
+                                        {field.value && (
+                                            <CloudinaryPreview
+                                                images={[{ url: field.value }]}
+                                                onRemove={() => {
+                                                    field.onChange("");
+                                                    if (isValidationActive) void trigger('validIdImageUrl');
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+
+                                    <FieldDescription>
+                                        Upload a clear photo of a valid government-issued ID. Only administrators can view it to verify your booking.
+                                    </FieldDescription>
+
+                                    {fieldState.invalid && (
+                                        <FieldError errors={getErrorMessages(fieldState.error)} />
+                                    )}
+                                </Field>
+                            )}
+                        />
+                    </FieldGroup>
+                </GuestCard>
             </div>
 
             <aside className="lg:sticky lg:top-4 lg:self-start">
@@ -342,7 +388,7 @@ const PaymentForm = ({ setBookingStep, total, isLoading, isValidationActive, sub
                     </div>
 
                     <p className="mt-4 text-xs leading-5 text-muted-foreground">
-                        Submit your proof after transferring the amount. Staff will verify the payment before confirming your booking.
+                        Submit your proof and valid ID after transferring the amount. Administrators will verify both before confirming your booking.
                     </p>
 
                     <div className="mt-5 space-y-2">
@@ -356,7 +402,7 @@ const PaymentForm = ({ setBookingStep, total, isLoading, isValidationActive, sub
                                 <LoadingSpinner />
                             ) : (
                                 <>
-                                    Submit Payment Proof
+                                    Submit Payment & ID
                                     <CheckCircle className="size-4" />
                                 </>
                             )}

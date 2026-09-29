@@ -235,6 +235,7 @@ describe('BookingService', () => {
           addOnServices: [],
           paymentMethodId: 'method-1',
           proofImageUrl: 'https://example.com/proof.jpg',
+          validIdImageUrl: 'https://example.com/valid-id.jpg',
           paymentType: 'Full',
         } as any,
         { id: 'guest-1', role: 'GUEST' } as any,
@@ -495,6 +496,32 @@ describe('BookingService', () => {
         email: 'admin@example.com',
       } as any),
     ).resolves.toBe(booking);
+  });
+
+  it('selects a valid ID only for an admin booking view', async () => {
+    const booking = {
+      id: 'booking-1',
+      userId: 'guest-1',
+      payment: { validIdImageUrl: 'https://example.com/private/valid-id' },
+      reports: [],
+    };
+    prisma.booking.findUnique.mockResolvedValue(booking);
+
+    await service.getBookingById('booking-1', {
+      id: 'guest-1',
+      role: 'GUEST',
+      email: 'guest@example.com',
+    } as any);
+    const guestQuery = prisma.booking.findUnique.mock.calls.at(-1)[0];
+    expect(guestQuery.include.payment.select.validIdImageUrl).toBeUndefined();
+
+    await service.getBookingById('booking-1', {
+      id: 'admin-1',
+      role: 'ADMIN',
+      email: 'admin@example.com',
+    } as any);
+    const adminQuery = prisma.booking.findUnique.mock.calls.at(-1)[0];
+    expect(adminQuery.include.payment.select.validIdImageUrl).toBe(true);
   });
   it('returns recorded refund proof only to the booking owner or admin', async () => {
     const booking = {

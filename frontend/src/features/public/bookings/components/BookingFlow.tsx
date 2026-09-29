@@ -51,6 +51,7 @@ const BookingFlow = ({ accommodation, bookingDate, bookingType }: BookingFlowPro
         paymentType: undefined,
         paymentMethodId: "",
         proofImageUrl: "",
+        validIdImageUrl: "",
     };
 
     const { form, meta, setMeta, clearDraft } = useBookingSessionDraft({

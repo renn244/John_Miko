@@ -31,6 +31,7 @@ export type PaymentOverviewRecord = {
     status: 'Pending' | 'Approved' | 'Rejected' | 'Refunded';
     referenceNumber?: string | null;
     proofImageUrl?: string | null;
+    validIdImageUrl?: string | null;
     amountPaid: number;
     amountToPaid: number;
     totalAmount: number;
@@ -71,6 +72,7 @@ export type PaymentRecord = {
     status: PaymentStatus;
     referenceNumber?: string | null;
     proofImageUrl?: string | null;
+    validIdImageUrl?: string | null;
     rejectionNote?: string | null;
     refundReason?: string | null;
     refundProofImageUrl?: string | null;

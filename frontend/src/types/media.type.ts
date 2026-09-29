@@ -4,6 +4,7 @@ export type MediaPurpose =
     | "ADD_ON_SERVICE"
     | "PAYMENT_METHOD_QR"
     | "PAYMENT_PROOF"
+    | "BOOKING_VALID_ID"
     | "REFUND_PROOF"
     | "STAFF_REPORT_PROOF"
     | "MAINTENANCE_ISSUE"

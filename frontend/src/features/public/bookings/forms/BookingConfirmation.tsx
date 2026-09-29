@@ -72,7 +72,7 @@ const BookingConfirmation = ({
                         Payment Submitted
                     </h2>
                     <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                        Your booking is pending verification. We will confirm your reservation once your payment proof has been reviewed by our team.
+                        Your booking is pending verification. We will confirm your reservation once your payment proof and valid ID have been reviewed by our team.
                     </p>
 
                     <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-muted px-4 py-2 text-sm">
